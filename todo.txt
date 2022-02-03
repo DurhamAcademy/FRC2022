@@ -1,0 +1,6 @@
+tree -> trajectory
+merge with kyberlib controls - see Drive.kt
+get high frame resolution - get camera from Shafer (I can't spell)
+standardized drivePoseEstimator - submitted issue on github (#3703)
+set max val on the controllers - made an attempted fix, doing research
+better goal recognition
