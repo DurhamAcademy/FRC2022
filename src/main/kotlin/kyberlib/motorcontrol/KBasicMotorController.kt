@@ -108,6 +108,13 @@ abstract class KBasicMotorController : Sendable, Debug {
     protected abstract fun followTarget(kmc: KBasicMotorController)
 
     /**
+     * Halts the motor
+     */
+    fun stop() {
+        safeSetVoltage(0.0)
+    }
+
+    /**
      * Internal update function
      */
     open fun update() {

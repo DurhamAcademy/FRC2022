@@ -1,9 +1,9 @@
 package kyberlib.simulation
 
-import edu.wpi.first.wpilibj.RobotBase
-import edu.wpi.first.wpilibj.Timer
+import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import kyberlib.command.Game
 import kyberlib.simulation.field.KField2d
 
 /**
@@ -14,9 +14,6 @@ class Simulation : SubsystemBase() {
         val instance: Simulation
             get() { return if(internal == null) Simulation() else internal!! }
         private var internal: Simulation? = null
-
-        val real:Boolean
-            get() = RobotBase.isReal()
     }
     init { internal = this }
 
@@ -25,18 +22,25 @@ class Simulation : SubsystemBase() {
     // stores time values
     private var prevTime = -1.0
     private val time: Double
-        get() = Timer.getFPGATimestamp()
+        get() = Game.time.toDouble()
     private val startTime = time
     val elapsedTime
         get() = time - startTime
     val dt
         get() = time - prevTime
 
+    var chassisFF: SimpleMotorFeedforward = SimpleMotorFeedforward(0.0, 0.0)
+
+    /**
+     * Takes voltage and velocity and calculates what acceleration should be
+     */
+    fun inverseFF(voltage: Double, velocity: Double): Double = ((voltage / chassisFF.ks) - chassisFF.kv * velocity) / chassisFF.ka
+
     // field to draw robot
     val field = KField2d
 
     init {
-        assert(!real) {"should not be simulating from real robot"}
+        assert(Game.sim) {"should not be simulating from real robot"}
         SmartDashboard.putData("Field", field)
     }
 

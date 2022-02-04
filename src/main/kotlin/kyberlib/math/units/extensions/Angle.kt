@@ -41,6 +41,8 @@ operator fun Rotation2d.div(other: KUnit<Second>): KUnit<Div<Radian, Second>> {
     return unit
 }
 
+operator fun Rotation2d.plus(other: Rotation2d): Angle = Angle(this.radians + other.radians)
+
 /**
  * Convert WPI Rotation2d to kyberlib's KRotaion2d
  */

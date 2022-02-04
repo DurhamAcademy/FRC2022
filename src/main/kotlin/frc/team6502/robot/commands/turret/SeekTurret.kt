@@ -1,0 +1,44 @@
+package frc.team6502.robot.commands.turret
+
+import edu.wpi.first.wpilibj.Timer
+import edu.wpi.first.wpilibj2.command.CommandBase
+import frc.team6502.robot.subsystems.Shooter
+import frc.team6502.robot.subsystems.Turret
+import kyberlib.math.units.extensions.degrees
+import kyberlib.math.units.extensions.k
+
+/**
+ * Spin turret in circle. This command should never really be necessary if we odometry good
+ */
+object SeekTurret : CommandBase() {
+    // counts how long a target has been visible
+    val acquisitionTimer = Timer()
+
+    const val SHOOTER_AQUISITION_TIME = 0.2
+
+    init {
+        addRequirements(Shooter)
+    }
+
+    override fun initialize() {
+        // flash LEDs yellow or something
+    }
+
+    override fun execute() {
+        if (Turret.target != null) { // the limelight sees something and it's valid if required
+            if(acquisitionTimer.get() <= 0.0001) acquisitionTimer.start()
+        } else {
+            // the limelight doesn't see anything
+            acquisitionTimer.stop()
+            acquisitionTimer.reset()
+
+            // spins menacingly
+            Turret.fieldRelativeAngle = (Turret.fieldRelativeAngle + 5.degrees).k
+        }
+
+        if(acquisitionTimer.get() > SHOOTER_AQUISITION_TIME) {
+            // lock onto the target
+            AimTurret.schedule()
+        }
+    }
+}

@@ -5,6 +5,7 @@ import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import com.revrobotics.ControlType
+import kyberlib.command.LogMode
 import kyberlib.motorcontrol.EncoderType
 import kyberlib.motorcontrol.KEncoderConfig
 import kyberlib.motorcontrol.KMotorController
@@ -24,8 +25,7 @@ import kyberlib.motorcontrol.KBasicMotorController
  * [canId] is the controller's ID on the CAN bus
  * [motorType] is the type of motor being driven. WARNING: If set incorrectly this can seriously damage hardware. You've been warned.
  */
-class KSparkMax(val canId: CANId, val motorType: kyberlib.motorcontrol.MotorType
-                            ) : KMotorController() {
+class KSparkMax(val canId: CANId, val motorType: kyberlib.motorcontrol.MotorType = BRUSHLESS) : KMotorController() {
 
     // ----- low-level stuff ----- //
     public override var identifier: String = CANRegistry.filterValues { it == canId }.keys.firstOrNull() ?: "can$canId"
@@ -122,7 +122,7 @@ class KSparkMax(val canId: CANId, val motorType: kyberlib.motorcontrol.MotorType
 
     override fun resetPosition(position: Angle) {
         if (!encoderConfigured) {
-            return logError("Cannot reset encoder position without configured encoder")
+            return log("Cannot reset encoder position without configured encoder", LogMode.ERROR)
         }
         _enc?.position = position.rotations
     }
