@@ -2,29 +2,31 @@ package frc.team6502.robot
 
 import edu.wpi.first.wpilibj.geometry.Pose2d
 import kyberlib.math.Interpolator
+import kyberlib.math.units.Pose2d
 import kyberlib.math.units.Translation2d
 import kyberlib.math.units.extensions.*
+import kyberlib.math.units.zeroPose
 
 /**
  * This file holds all important constants throughout the project
  */
 object Constants {
     // ------ Climb ------ //
-    val WINCH_RADIUS: Length = TODO()
-    const val WINCH_GEAR_RATIO = 0.0 // TODO
+    val WINCH_RADIUS: Length = 1.inches  // TODO
+    const val WINCH_GEAR_RATIO = 1.0 // TODO
 
     // ------ Conveyor ------ //
 
     // ------ Drivetrain ------ // todo: characterize
     // pids
-    const val DRIVE_P = 0.0
+    const val DRIVE_P = 20.7
     const val DRIVE_I = 0.0
     const val DRIVE_D = 0.0
 
     // feed forwards
-    const val DRIVE_KS = 0.0
-    const val DRIVE_KV = 0.0
-    const val DRIVE_KA = 0.0
+    const val DRIVE_KS = 0.246
+    const val DRIVE_KV = 2.59
+    const val DRIVE_KA = 0.494
 
     // drivetrain setup - todo: tune
     const val TRACK_WIDTH = 0.657299651
@@ -35,26 +37,29 @@ object Constants {
     const val INTAKE_PERCENT = 0.5
 
     // ------ Shooter ------ //
-    val LIMELIGHT_HEIGHT: Length = TODO()
-    val LIMELIGHT_ANGLE: Angle = TODO()
+    val LIMELIGHT_HEIGHT: Length = 36.inches // TODO
+    val LIMELIGHT_ANGLE: Angle = 45.degrees // TODO
 
-    val FLYWHEEL_INTERPOLATOR: Interpolator = TODO()
-    val TOPWHEEL_INTERPOLATOR: Interpolator = TODO()
-    val HOODANGLE_INTERPOLATOR: Interpolator = TODO()
+    val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf())  // TODO
+    val TOPWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf())  // TODO
+    val HOODANGLE_INTERPOLATOR: Interpolator = Interpolator(mapOf())  // TODO
 
     val SHOOTER_VELOCITY_TOLERANCE = 50.0.rpm
     val FLYWHEEL_RADIUS = 2.inches
+    const val FLYWHEEL_MOMENT_OF_INERTIA = 0.00032 // kg * m^2
 
     // ------ Turret ------ //
-    const val TURRET_GEAR_RATIO: Double = 0.0 // TODO
+    const val TURRET_GEAR_RATIO: Double = 1.0 // TODO
     const val NOT_FOUND_WAIT = 0.2
     const val LOST_WAIT = 2.0
+    const val SMART_LOSS = true
 
     val TURRET_TOLERANCE = 3.degrees // TODO - how close the heading must be to fire
-    val TURRET_DEADBAND = 0.5.degrees
+    val TURRET_DEADBAND = 0.5.degrees  // when the turret stops adjusting
 
-    // ------ GamePieces ------ //
-    val HUB_POSITION = Translation2d(162.inches, 324.inches)
+    // ------ Game Pieces ------ //
+    val HUB_POSITION = Translation2d(324.inches, 162.inches)
+    val FIELD_SIZE = Translation2d(648.inches, 324.inches)
     val UPPER_HUB_HEIGHT = 8.feet + 8.inches
-    val START_POSE: Pose2d = TODO()
+    val START_POSE: Pose2d =Pose2d(200.inches, 100.inches, (-125).degrees)
 }
