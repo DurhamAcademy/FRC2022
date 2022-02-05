@@ -1,35 +1,28 @@
 package frc.team6502.robot.subsystems
 
-import edu.wpi.first.wpilibj.Solenoid
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.team6502.robot.Constants
 import kyberlib.command.Debug
 import kyberlib.motorcontrol.rev.KSparkMax
+import kyberlib.pneumatics.KSolenoid
 
 object Intaker  : SubsystemBase(), Debug {
-    private val leftIntakeDeploy = Solenoid(0, 0)
-    private val rightIntakeDeploy = Solenoid(0, 0)
+    private val leftIntakeDeploy = KSolenoid(0, 0)
+    private val rightIntakeDeploy = KSolenoid(0, 0)
 
     var deployed
-        get() = leftIntakeDeploy.get()
+        get() = leftIntakeDeploy.extended
         set(value) {
-            leftIntakeDeploy.set(value)
-            rightIntakeDeploy.set(value)
+            leftIntakeDeploy.extended = value
+            rightIntakeDeploy.extended = value
         }
 
     val intakeMotor = KSparkMax(0)
 
-    fun activate() {
-        deployed = true
-        intakeMotor.percent = Constants.INTAKE_PERCENT // todo: test this
-    }
-
-    fun deactivate() {
-        deployed = false
-        intakeMotor.stop()
-    }
-
     // todo add ball sensors
+
+    override fun periodic() {
+        debugDashboard()
+    }
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
