@@ -5,11 +5,12 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import kyberlib.input.KAxis
 import kyberlib.input.KController
 import edu.wpi.first.wpilibj2.command.button.Trigger
+import kyberlib.command.Debug
 
 /**
  * Represents a standard Xbox Controller
  */
-class KXboxController(port: Int) : KController(port) {
+class KXboxController(port: Int) : KController(port), Debug {
     val triggerSensitivity = 0.2
 
     val leftX = KAxis { joystick.getRawAxis(0) }
@@ -53,4 +54,28 @@ class KXboxController(port: Int) : KController(port) {
             rumbleLeft = value
             rumbleRight = value
         }
+
+    override fun debugValues(): Map<String, Any?> {
+        return mapOf(
+            "leftX" to leftX,
+            "leftY" to leftY,
+
+            "rightX" to rightX,
+            "rightY" to rightY,
+
+            "left trigger" to leftTrigger,
+            "right trigger" to rightTrigger,
+
+            "left bumper" to leftBumper.get(),
+            "right bumper" to rightBumper.get(),
+
+            "A" to aButton.get(),
+            "B" to bButton.get(),
+            "X" to xButton.get(),
+            "Y" to yButton.get(),
+
+            "DPAD" to DPad,
+            "rumble" to rumble
+        )
+    }
 }

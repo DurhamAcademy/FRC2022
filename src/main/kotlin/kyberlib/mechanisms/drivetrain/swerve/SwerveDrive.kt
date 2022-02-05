@@ -42,10 +42,10 @@ class SwerveDrive(private val gyro: KGyro,
 
     override val chassisSpeeds: ChassisSpeeds
         get() =  kinematics.toChassisSpeeds(*states.toTypedArray())
-    override var heading: KRotation
+    var heading: KRotation
         get() = gyro.heading
         set(value) { gyro.heading = value }
-    override var pose: Pose2d
+    var pose: Pose2d
         get() = odometry.poseMeters
         set(value) { odometry.resetPosition(value, heading) }
 

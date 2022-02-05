@@ -42,10 +42,10 @@ class MecanumDrivetrain(vararg packages: Pair<Translation2d, KMotorController>, 
     // useful info
     private val mecanumDriveWheelSpeeds
         get() = MecanumDriveWheelSpeeds(frontLeft.linearVelocity.metersPerSecond, frontRight.linearVelocity.metersPerSecond, backLeft.linearVelocity.metersPerSecond, backRight.linearVelocity.metersPerSecond)
-    override var pose: Pose2d
+    var pose: Pose2d
         set(value) { odometry.resetPosition(value, gyro.heading) }
         get() = odometry.poseMeters
-    override var heading
+    var heading
         get() = gyro.heading
         set(value) {gyro.heading = value}
     override val chassisSpeeds: ChassisSpeeds
@@ -88,4 +88,5 @@ class MecanumDrivetrain(vararg packages: Pair<Translation2d, KMotorController>, 
             "Back Right" to backLeft,
         )
     }
+
 }

@@ -1,13 +1,16 @@
 package kyberlib.motorcontrol
 
+import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.controller.ArmFeedforward
 import edu.wpi.first.wpilibj.controller.PIDController
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile
+import kyberlib.command.Game
 import kyberlib.math.filters.Differentiator
 import kyberlib.math.units.extensions.*
+import kyberlib.simulation.Simulation
 
 typealias GearRatio = Double
 typealias BrakeMode = Boolean
@@ -151,7 +154,7 @@ abstract class KMotorController : KBasicMotorController() {
         customControl = {
             when (controlMode) {
                 ControlMode.VELOCITY -> {
-                    val ff = feedforward.calculate(linearVelocitySetpoint.metersPerSecond, linearAcceleration.metersPerSecond)
+                    val ff = feedforward.calculate(velocitySetpoint.radiansPerSecond, acceleration.radiansPerSecond)
                     val pid = PID.calculate(linearVelocityError.metersPerSecond)
                     ff + pid
                 }
@@ -248,7 +251,6 @@ abstract class KMotorController : KBasicMotorController() {
         get() {
             assert(encoderConfigured) {"configure your motor before using"}
             val vel = if (real) rawVelocity * gearRatio else simVelocity
-//            acceleration = accelerationCalculator.calculate(vel.radiansPerSecond).radiansPerSecond  // todo: acc doesnt work in sims - find workarounds
             return vel
         }
         set(value) {
@@ -273,6 +275,17 @@ abstract class KMotorController : KBasicMotorController() {
     var acceleration = 0.rpm
     val linearAcceleration
         get() = rotationToLinear(acceleration)
+
+    init {
+        val accelNotifier =
+            if (Game.real) Notifier {
+                acceleration = accelerationCalculator.calculate(velocity.radiansPerSecond).radiansPerSecond
+            } else Notifier {
+                acceleration = Simulation.instance.inverseFF(voltage, velocity.radiansPerSecond).radiansPerSecond
+            }
+
+        accelNotifier.startPeriodic(0.02)
+    }
 
     // ----- this is where you put the advanced controls ---- //
     /**
@@ -337,7 +350,7 @@ abstract class KMotorController : KBasicMotorController() {
     /**
      * Updates the voltage after changing position / velocity setpoint
      */
-    private fun updateVoltage() {
+    fun updateVoltage() {
         if (!isFollower && customControl != null)
             safeSetVoltage(customControl!!(this))
     }
@@ -443,13 +456,14 @@ abstract class KMotorController : KBasicMotorController() {
         val map = super.debugValues().toMutableMap()
         map.putAll(mapOf(
             "Angular Position (rad)" to position.radians,
-            "Angular Velocity (rad per s)" to velocity.radiansPerSecond
-//            "Angular Acceleration (rad per s per s)" to acceleration.radiansPerSecond  // temporary (here for testing)
+            "Angular Velocity (rad per s)" to velocity.radiansPerSecond,
+            "Angular Acceleration (rad per s per s)" to acceleration.radiansPerSecond  // temporary (here for testing)
         ))
         if (linearConfigured)
             map.putAll(mapOf(
                 "Linear Position (m)" to linearPosition.meters,
-                "Linear Velocity (m per s)" to linearVelocity.metersPerSecond
+                "Linear Velocity (m per s)" to linearVelocity.metersPerSecond,
+                "Linear Acceleration (m per s per s)" to linearAcceleration.metersPerSecond
             ))
 //        map["PID"] = PID
         return map.toMap()

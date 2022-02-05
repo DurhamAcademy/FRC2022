@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.trajectory.Trajectory
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator
 import edu.wpi.first.wpilibj2.command.Command
+import frc.team6502.robot.Constants
 import kyberlib.math.units.extensions.Length
 import kyberlib.math.units.extensions.feet
 import kyberlib.math.units.extensions.meters
@@ -19,8 +20,8 @@ import kyberlib.math.units.extensions.meters
 object KField2d : Field2d() {
     val obstacles = ArrayList<Obstacle>()
     val goals = ArrayList<Goal>()
-    var width: Length = 4.36.meters
-    var height: Length = 2.9.meters
+    var width: Length = Constants.FIELD_SIZE.y.meters
+    var height: Length = Constants.FIELD_SIZE.x.meters
 
     var trajectory: Trajectory? = null
         set(value) {

@@ -1,5 +1,7 @@
 package kyberlib.simulation
 
+import kyberlib.command.Game
+
 
 /**
  * Interface that allows a subsystem to hook into the simulation
@@ -12,5 +14,5 @@ interface Simulatable {
     fun simUpdate(dt: Double)
 
     val real: Boolean
-        get() = Simulation.real
+        get() = Game.real
 }

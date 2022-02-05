@@ -3,6 +3,7 @@ package kyberlib.motorcontrol
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder
 import kyberlib.command.Debug
+import kyberlib.command.Game
 import kyberlib.math.invertIf
 
 /**
@@ -33,8 +34,7 @@ abstract class KBasicMotorController : Sendable, Debug {
     /**
      * Whether the motor is connected to a real Robot
      */
-    protected val real: Boolean
-        get() = RobotBase.isReal()
+    protected val real: Boolean = Game.real
 
     // ------ low-level write methods ----- //
     /**

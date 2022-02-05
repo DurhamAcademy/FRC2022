@@ -1,5 +1,6 @@
 package kyberlib.input
 
+import edu.wpi.first.wpilibj2.command.button.Trigger
 import kyberlib.command.Debug
 
 /**
@@ -39,6 +40,8 @@ class KAxis(val raw: () -> Double) : Debug {
      */
     val value: Double
         get() = modify(raw.invoke())
+
+    fun activateAt(value: Double) = Trigger { this.value > value }
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(

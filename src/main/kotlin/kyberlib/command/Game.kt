@@ -1,10 +1,12 @@
 package kyberlib.command
 
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.RobotController
 import edu.wpi.first.wpilibj.RobotState
 
 object Game {
+    private val driverStation = DriverStation.getInstance()
     val real
         get() = RobotBase.isReal()
     val sim
@@ -31,4 +33,7 @@ object Game {
         get() = RobotController.getBatteryVoltage()
 
     val time = RobotController.getFPGATime()
+
+    val alliance = driverStation.alliance
+    val game = driverStation.gameSpecificMessage
 }
