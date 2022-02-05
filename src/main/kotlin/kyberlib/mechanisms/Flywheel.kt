@@ -2,6 +2,7 @@ package kyberlib.mechanisms
 
 import edu.wpi.first.wpilibj.controller.LinearQuadraticRegulator
 import edu.wpi.first.wpilibj.estimator.KalmanFilter
+import edu.wpi.first.wpilibj.simulation.FlywheelSim
 import edu.wpi.first.wpilibj.system.LinearSystemLoop
 import edu.wpi.first.wpilibj.system.plant.DCMotor
 import edu.wpi.first.wpilibj.system.plant.LinearSystemId
@@ -11,18 +12,22 @@ import kyberlib.command.Debug
 import kyberlib.math.units.extensions.AngularVelocity
 import kyberlib.motorcontrol.KMotorController
 import kyberlib.math.units.extensions.radiansPerSecond
+import kyberlib.math.units.extensions.rpm
+import kyberlib.simulation.Simulatable
 
 /**
  * Pre-made Flywheel Subsystem. Also a demo of StateSpace control from WPILIB. Control using velocity variable.
  * @param motor the controlling motor of the flywheel. If other motors are involves, make them follow this
  */
 class Flywheel(private val motor: KMotorController,
-               private val kFlywheelMomentOfInertia: Double = 0.00032, // kg * m^2
+               kFlywheelMomentOfInertia: Double = 0.00032, // kg * m^2
+               motorCount: Int = 2,
                private val timeDelay: Double = 0.02
-               ) : Debug {
+               ) : Debug, Simulatable {
     // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-flywheel-walkthrough.html
 
     private val kFlywheelGearing = motor.gearRatio
+    private val motors = DCMotor.getNEO(motorCount)
 
     /**
      * The plant holds a state-space model of our flywheel. This system has the following properties:
@@ -31,7 +36,7 @@ class Flywheel(private val motor: KMotorController,
      * Outputs (what we can measure): [velocity], in radians per second.
      */
     private val plant = LinearSystemId.createFlywheelSystem(
-        DCMotor.getNEO(2),
+        motors,
         kFlywheelMomentOfInertia,
         kFlywheelGearing
     )
@@ -78,5 +83,12 @@ class Flywheel(private val motor: KMotorController,
         set(value) {motor.velocity = value}
 
     override fun debugValues(): Map<String, Any?> = motor.debugValues()
+
+    val sim = FlywheelSim(plant, motors, kFlywheelGearing)
+    override fun simUpdate(dt: Double) {
+        sim.setInputVoltage(motor.voltage)
+        sim.update(dt)
+        motor.simVelocity = sim.angularVelocityRPM.rpm
+    }
 
 }

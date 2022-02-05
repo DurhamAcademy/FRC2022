@@ -3,6 +3,7 @@ package frc.team6502.robot.commands.shooter
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.team6502.robot.Constants
 import frc.team6502.robot.subsystems.Conveyor
+import frc.team6502.robot.subsystems.SHOOTER_STATUS
 import frc.team6502.robot.subsystems.Shooter
 import frc.team6502.robot.subsystems.Turret
 import kyberlib.math.units.extensions.degrees
@@ -15,8 +16,8 @@ object Shoot : CommandBase() {
     }
 
     override fun execute() {
-        if (Conveyor.hasBalls) {
-            val dis = Shooter.targetDistance.meters
+        if (Conveyor.hasBalls && !Turret.targetLost) {
+            val dis = Shooter.targetDistance!!.meters
             val targetFlywheelVelocity = Constants.FLYWHEEL_INTERPOLATOR.calculate(dis)!!.radiansPerSecond
             val targetTopWheelVelocity = Constants.TOPWHEEL_INTERPOLATOR.calculate(dis)!!.radiansPerSecond
             val targetHoodAngle = Constants.HOODANGLE_INTERPOLATOR.calculate(dis)!!.degrees
@@ -29,7 +30,8 @@ object Shoot : CommandBase() {
             if (Turret.readyToShoot && Shooter.flywheelMaster.velocityError < Constants.SHOOTER_VELOCITY_TOLERANCE) {
                 // change leds to green or something
                 Conveyor.feed()
-            }
-        }
+                Shooter.status = SHOOTER_STATUS.AUTO_SHOT
+            } else Shooter.status = SHOOTER_STATUS.SPINUP
+        } else Shooter.status = SHOOTER_STATUS.IDLE
     }
 }
