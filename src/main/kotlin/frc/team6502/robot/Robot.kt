@@ -1,33 +1,49 @@
 package frc.team6502.robot
 
-import edu.wpi.first.wpilibj.geometry.Pose2d
-import edu.wpi.first.wpilibj2.command.Command
-import frc.team6502.robot.commands.turret.ZeroTurret
+import frc.team6502.robot.commands.drive.AutoDrive
+import frc.team6502.robot.commands.drive.Drive
 import frc.team6502.robot.subsystems.Climber
+import frc.team6502.robot.subsystems.Drivetrain
+import frc.team6502.robot.subsystems.Shooter
+import frc.team6502.robot.subsystems.Turret
+import kyberlib.command.Game
 import kyberlib.command.KRobot
-import kyberlib.math.units.extensions.degrees
 import kyberlib.math.units.extensions.inches
+import kyberlib.simulation.Simulation
+import kyberlib.simulation.field.KField2d
 
 class Robot : KRobot() {
     override fun robotInit() {
         RobotContainer
-
-        RobotContainer.navigation.pose = Pose2d(0.0, 0.0, 0.degrees)  // todo: update with starting pose
+        Drivetrain
 
         Climber.leftWinch.resetPosition(0.inches)
         Climber.rightWinch.resetPosition(0.inches)
+
+        if(Game.sim) {
+            Simulation.instance.include(Drivetrain)
+            Drivetrain.setupSim()
+            Simulation.instance.include(Turret)
+            Simulation.instance.include(Shooter.flywheelControl)
+        }
     }
 
-    override fun disabledInit() {
-        // set leds to red
+    override fun teleopPeriodic() {
+//        RobotContainer.controller.debugDashboard()
+        Drive.execute()
     }
 
     override fun enabledInit() {
         // ZeroTurret.schedule(false) // don't uncomment this until the Hall sensor is added or bad things might happen
     }
 
+    override fun teleopInit() {
+        KField2d.trajectory = null
+    }
+
     override fun autonomousInit() {
-        val auto: Command = TODO()
-        auto.schedule()
+//        val auto: Command = TODO()
+//        auto.schedule()
+//        AutoDrive(Constants.HUB_POSITION).schedule()
     }
 }
