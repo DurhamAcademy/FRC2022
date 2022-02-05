@@ -53,12 +53,12 @@ class DifferentialDriveTrain(private val leftMotors: Array<KMotorController>, pr
     private val kinematics = DifferentialDriveKinematics(configs.trackWidth.meters)
 
     // useful information
-    override var pose: Pose2d
+    var pose: Pose2d
         set(value) {
             odometry.resetPosition(value, gyro.heading)
         }
         get() = odometry.poseMeters
-    override var heading
+    var heading
         get() = gyro.heading
         set(value) {gyro.heading = value}
     override val chassisSpeeds: ChassisSpeeds

@@ -83,7 +83,7 @@ interface Debug {
     /**
      * Formatting the debug values into an easy to read string
      */
-    private val debugString: String
+    val debugString: String
         get() {
             val map = debugValues()
             val stringBuilder = StringBuilder()
