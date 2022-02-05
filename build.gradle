@@ -47,9 +47,6 @@ def includeDesktopSupport = true
 repositories {
     mavenCentral()
     mavenLocal()
-    flatDir {
-        dirs './opencv/'
-    }
     maven {
         url 'https://frcmaven.wpi.edu/artifactory/release/'
     }
@@ -84,7 +81,6 @@ dependencies {
     // Add cscore-java
     compile "edu.wpi.first.cscore:cscore-java:2021.2.2"
     compile "edu.wpi.first.cameraserver:cameraserver-java:2021.2.2"
-    compile name: 'opencv-347'
 
     // Add wpiutil-java
     compile "edu.wpi.first.wpiutil:wpiutil-java:2021.2.2"
@@ -110,13 +106,6 @@ sim {
      envVar "HALSIMWS_HOST", "10.0.0.2"
 }
 
-//task copyOpenCVDll(type: Copy) {
-//    from('opencv')
-//    into('build/image/bin')
-//    include('*.dll')
-//}
-//
-//build.dependsOn(copyOpenCVDll)
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib

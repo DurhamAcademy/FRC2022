@@ -1,12 +1,15 @@
 package kyberlib.auto
 
+import edu.wpi.first.wpilibj.estimator.DifferentialDrivePoseEstimator
 import edu.wpi.first.wpilibj.geometry.Pose2d
 import edu.wpi.first.wpilibj.geometry.Translation2d
-import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds
-import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics
-import edu.wpi.first.wpilibj.kinematics.MecanumDriveKinematics
-import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics
+import edu.wpi.first.wpilibj.kinematics.*
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpiutil.math.MatBuilder
+import edu.wpi.first.wpiutil.math.numbers.N1
+import edu.wpi.first.wpiutil.math.numbers.N3
+import edu.wpi.first.wpiutil.math.numbers.N5
+import frc.team6502.robot.subsystems.Drivetrain
 import kyberlib.auto.trajectory.KTrajectory
 import kyberlib.auto.trajectory.KTrajectoryConfig
 import kyberlib.command.Debug
@@ -26,7 +29,10 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
     /**
      * A probability calculator to guess where the robot is from odometer and vision updates
      */
-    private val poseEstimator = DrivePoseEstimator(gyro.heading, startPose)
+    private val poseEstimator = DifferentialDrivePoseEstimator(gyro.heading, startPose,
+        MatBuilder(N5.instance, N1.instance).fill(0.02, 0.02, 0.01, 0.02, 0.02),
+        MatBuilder(N3.instance, N1.instance).fill(0.02, 0.01, 0.01),
+        MatBuilder(N3.instance, N1.instance).fill(0.1, 0.1, 0.01))
 
     /**
      * A object with restrictions on how the robot will move
@@ -58,8 +64,8 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
     /**
      * Update position based on estimated motion
      */
-    fun update(speeds: ChassisSpeeds) {  // estimate motion
-        poseEstimator.update(heading, speeds)
+    fun update(speeds: DifferentialDriveWheelSpeeds) {  // estimate motion
+        poseEstimator.update(heading, speeds, Drivetrain.leftMaster.linearPosition.meters, Drivetrain.rightMaster.linearPosition.meters)
     }
     /**
      * Update position based on a different position guess

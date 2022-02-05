@@ -23,9 +23,7 @@ object Drive : CommandBase() {
     override fun execute() {
         val fwd = RobotContainer.controller.leftY.value.feetPerSecond
         val turn = RobotContainer.controller.rightX.value.radiansPerSecond
-
-        println("drive execute")
-        val speeds = ChassisSpeeds(velFilter.calculate(fwd.metersPerSecond), 0.0, rotFilter.calculate(turn.radiansPerSecond))
+        val speeds = ChassisSpeeds(fwd.metersPerSecond, 0.0, turn.radiansPerSecond)
 //        val speeds = DifferentialDriveWheelSpeeds(1.0, 1.0)
         Drivetrain.drive(speeds)
 //        Drivetrain.stop()

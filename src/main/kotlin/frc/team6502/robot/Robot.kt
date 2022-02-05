@@ -27,8 +27,12 @@ class Robot : KRobot() {
         }
     }
 
+    override fun disabledInit() {
+        Drivetrain.stop()
+    }
+
     override fun teleopPeriodic() {
-//        RobotContainer.controller.debugDashboard()
+        RobotContainer.controller.debugDashboard()
 //        Drive.execute()
     }
 

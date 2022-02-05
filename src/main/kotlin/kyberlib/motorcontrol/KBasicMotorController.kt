@@ -40,9 +40,9 @@ abstract class KBasicMotorController : Sendable, Debug {
     /**
      * Sets the voltage without changing the control mode
      */
-    protected fun safeSetVoltage(voltage: Double) {
+    protected fun safeSetVoltage(v: Double) {
         val prevMode = controlMode
-        this.voltage = voltage
+        voltage = v
         controlMode = prevMode
     }
     /**
@@ -68,7 +68,7 @@ abstract class KBasicMotorController : Sendable, Debug {
     var voltage: Double
         get() = percent * vbus
         set(value) {
-            value.coerceIn(0.0 , vbus)
+            val norm = value.coerceIn(-vbus , vbus)
             percent = (value / vbus)
         }
 

@@ -154,7 +154,7 @@ abstract class KMotorController : KBasicMotorController() {
         customControl = {
             when (controlMode) {
                 ControlMode.VELOCITY -> {
-                    val ff = feedforward.calculate(velocitySetpoint.radiansPerSecond, acceleration.radiansPerSecond)
+                    val ff = feedforward.calculate(velocitySetpoint.radiansPerSecond)
                     val pid = PID.calculate(linearVelocityError.metersPerSecond)
                     ff + pid
                 }

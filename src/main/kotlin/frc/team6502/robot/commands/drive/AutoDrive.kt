@@ -21,7 +21,7 @@ import kyberlib.simulation.field.KField2d
  */
 class AutoDrive(var targetPose: Pose2d) : CommandBase() {
     companion object {
-        private var calculator = RamseteController(0.0, 0.0)  // these are the recommended values
+        private var calculator = RamseteController(2.0, 0.7)  // these are the recommended values
 
         fun updateRamsete(beta: Double, zeta: Double) {
             calculator = RamseteController(beta, zeta)

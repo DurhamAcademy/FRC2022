@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.system.plant.DCMotor
 import edu.wpi.first.wpilibj.system.plant.LinearSystemId
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -33,14 +34,14 @@ import kotlin.math.sin
 
 object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     // motors
-    private val leftMaster = KSparkMax(0, MotorType.BRUSHLESS).apply {
+    val leftMaster = KSparkMax(0, MotorType.BRUSHLESS).apply {
         identifier = "leftMaster"
         reversed = false
         currentLimit = 40
     }
-    private val rightMaster  = KSparkMax(0, MotorType.BRUSHLESS).apply {
+    val rightMaster  = KSparkMax(0, MotorType.BRUSHLESS).apply {
         identifier = "rightMaster"
-        reversed = false
+        reversed = true
         currentLimit = 40
     }
     private val leftFollower  = KSparkMax(0, MotorType.BRUSHLESS).apply {
@@ -75,9 +76,10 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     // commands
     override fun drive(speeds: ChassisSpeeds) { drive(kinematics.toWheelSpeeds(speeds)) }
 
-    fun drive(differentialDriveWheelSpeeds: DifferentialDriveWheelSpeeds) {
-        leftMaster.linearVelocity = differentialDriveWheelSpeeds.leftMetersPerSecond.metersPerSecond
-        rightMaster.linearVelocity = differentialDriveWheelSpeeds.rightMetersPerSecond.metersPerSecond
+    fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) {
+        println("driving: ${wheelSpeeds.leftMetersPerSecond}, ${wheelSpeeds.rightMetersPerSecond}")
+        leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
+        rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
     }
     fun stop() {
         leftMaster.stop()
@@ -85,7 +87,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     }
 
     override fun periodic() {
-        RobotContainer.navigation.update(chassisSpeeds)
+        RobotContainer.navigation.update(wheelSpeeds)
         debugDashboard()
     }
 
@@ -93,9 +95,9 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
         KField2d.robotPose = RobotContainer.navigation.pose
     }
 
-
     // setup
     init {
+        println("drive setup")
         defaultCommand = Drive
 
         // setup controls for drive motors
@@ -115,9 +117,8 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
                 addFeedforward(feedforward)
             }
         }
-
+        Navigator.instance!!.applyMovementRestrictions(7.metersPerSecond, 5.metersPerSecond)
         Navigator.instance!!.applyKinematics(kinematics)
-        KTrajectory.generalConfig = KTrajectoryConfig(1.metersPerSecond, 1.metersPerSecond)
     }
 
 
@@ -131,8 +132,9 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
             kinematics.trackWidthMeters,  // The track width
             leftMaster.radius!!.meters,  // wheel radius
             // The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
-            VecBuilder.fill(0.001, 0.001, 0.001, 0.1, 0.1, 0.005, 0.005)
+            VecBuilder.fill(0.000, 0.000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000)
         )
+        println("gear Ratio: ${leftMaster.gearRatio}, trackwidth: ${kinematics.trackWidthMeters}, radius: ${leftMaster.radius}")
     }
 
     private fun roundLows(v: Double): Double = if (v.absoluteValue < 0.2) 0.0 else v
@@ -141,6 +143,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
         // update the sim with new inputs
         val leftVolt = leftMaster.voltage
         val rightVolt = rightMaster.voltage
+        if (leftVolt == 0.0 && rightVolt == 0.0) return
         driveSim.setInputs(roundLows(leftVolt), roundLows(rightVolt))
         driveSim.update(dt)
 
@@ -149,7 +152,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
         leftMaster.simLinearVelocity = driveSim.leftVelocityMetersPerSecond.metersPerSecond
         rightMaster.simLinearPosition = driveSim.rightPositionMeters.meters
         rightMaster.simLinearVelocity = driveSim.rightVelocityMetersPerSecond.metersPerSecond
-        Navigator.instance!!.heading = (driveSim.heading - Constants.START_POSE.rotation).k
+        Navigator.instance!!.heading = driveSim.heading.k
     }
 
     override fun debugValues(): Map<String, Any?> {
@@ -157,7 +160,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
             "pose" to RobotContainer.navigation.pose.debugValues,
             "speed" to chassisSpeeds.debugValues,
             "leftMaster" to leftMaster,
-            "rightMaster" to rightMaster,
+            "rightMaster" to rightMaster
         )
     }
 
