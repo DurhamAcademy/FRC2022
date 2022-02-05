@@ -155,7 +155,7 @@ abstract class KMotorController : KBasicMotorController() {
             when (controlMode) {
                 ControlMode.VELOCITY -> {
                     val ff = feedforward.calculate(velocitySetpoint.radiansPerSecond)
-                    val pid = PID.calculate(linearVelocityError.metersPerSecond)
+                    val pid = PID.calculate(velocityError.radiansPerSecond)
                     ff + pid
                 }
                 ControlMode.POSITION -> {

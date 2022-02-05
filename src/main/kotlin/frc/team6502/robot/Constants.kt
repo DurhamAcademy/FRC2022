@@ -6,6 +6,7 @@ import kyberlib.math.units.Pose2d
 import kyberlib.math.units.Translation2d
 import kyberlib.math.units.extensions.*
 import kyberlib.math.units.zeroPose
+import kyberlib.simulation.field.KField2d
 
 /**
  * This file holds all important constants throughout the project
@@ -49,7 +50,7 @@ object Constants {
     const val FLYWHEEL_MOMENT_OF_INERTIA = 0.00032 // kg * m^2
 
     // ------ Turret ------ //
-    const val TURRET_GEAR_RATIO: Double = 1.0 // TODO
+    const val TURRET_GEAR_RATIO: Double = 1.0/73.0 // TODO
     const val NOT_FOUND_WAIT = 0.2
     const val LOST_WAIT = 2.0
     const val SMART_LOSS = true
@@ -61,5 +62,5 @@ object Constants {
     val HUB_POSITION = Translation2d(324.inches, 162.inches)
     val FIELD_SIZE = Translation2d(648.inches, 324.inches)
     val UPPER_HUB_HEIGHT = 8.feet + 8.inches
-    val START_POSE: Pose2d =Pose2d(200.inches, 162.inches, 0.degrees)
+    val START_POSE: Pose2d =Pose2d(200.inches, 100.inches, 45.degrees)
 }

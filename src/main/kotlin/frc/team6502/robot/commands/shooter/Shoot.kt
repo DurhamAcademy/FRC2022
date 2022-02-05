@@ -17,6 +17,7 @@ object Shoot : CommandBase() {
 
     override fun execute() {
         if (Conveyor.hasBalls && !Turret.targetLost) {
+            println("shooter zoom")
             val dis = Shooter.targetDistance!!.meters
             val targetFlywheelVelocity = Constants.FLYWHEEL_INTERPOLATOR.calculate(dis)!!.radiansPerSecond
             val targetTopWheelVelocity = Constants.TOPWHEEL_INTERPOLATOR.calculate(dis)!!.radiansPerSecond

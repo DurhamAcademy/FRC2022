@@ -5,12 +5,12 @@ import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.Servo
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team6502.robot.Constants
+import frc.team6502.robot.RobotContainer
+import frc.team6502.robot.commands.shooter.Shoot
 import frc.team6502.robot.subsystems.Turret.targetLost
 import kyberlib.command.Debug
-import kyberlib.math.units.extensions.Angle
-import kyberlib.math.units.extensions.Length
-import kyberlib.math.units.extensions.degrees
-import kyberlib.math.units.extensions.inches
+import kyberlib.command.Game
+import kyberlib.math.units.extensions.*
 import kyberlib.mechanisms.Flywheel
 import kyberlib.motorcontrol.rev.KSparkMax
 
@@ -43,16 +43,17 @@ object Shooter : SubsystemBase(), Debug {
         }
 
     private val distanceFilter = LinearFilter.movingAverage(8)
-    val targetDistance: Length? = if (targetLost) null else distanceFilter.calculate(
-        (
-                (Constants.UPPER_HUB_HEIGHT - Constants.LIMELIGHT_HEIGHT) /
-                (Constants.LIMELIGHT_ANGLE + Turret.latestResult!!.bestTarget.pitch.degrees).tan
-        ).inches
-    ).inches
+    val targetDistance: Length? = if (Game.sim) RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+                                else if (targetLost) null
+                                else distanceFilter.calculate(((Constants.UPPER_HUB_HEIGHT - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch).tan).inches).inches
 
     val topShooter = KSparkMax(0).apply {
         kP = 10.0
         kD = 2.0
+    }
+
+    init {
+        defaultCommand = Shoot
     }
 
     override fun periodic() {

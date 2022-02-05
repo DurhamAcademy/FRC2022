@@ -69,7 +69,7 @@ abstract class KBasicMotorController : Sendable, Debug {
         get() = percent * vbus
         set(value) {
             val norm = value.coerceIn(-vbus , vbus)
-            percent = (value / vbus)
+            percent = (norm / vbus)
         }
 
     /**

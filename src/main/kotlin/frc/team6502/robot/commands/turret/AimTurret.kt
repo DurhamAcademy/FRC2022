@@ -23,7 +23,7 @@ object AimTurret : CommandBase() {
     val lostTimer = Timer()  // timer after how long not finding it at the expected location
 
     // todo tune this
-    val offsetCorrector = ProfiledPIDController(30.0, 2.0, 5.0, TrapezoidProfile.Constraints(1.0, 1.0))
+    private val offsetCorrector = ProfiledPIDController(0.300, 0.0, 0.0, TrapezoidProfile.Constraints(2.0, 1.0))
 
     override fun initialize() {
         notFoundTimer.reset()
@@ -35,7 +35,7 @@ object AimTurret : CommandBase() {
     override fun execute() {
         // spin stablization
         val chassisRotation = Drivetrain.chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond
-
+        val chassisVolts = Turret.feedforward.calculate(chassisRotation.radiansPerSecond)
         var visionRotation = 0.radiansPerSecond
         if (!Turret.targetLost) {
             notFoundTimer.reset()
@@ -48,10 +48,11 @@ object AimTurret : CommandBase() {
 //            val robotSpeed = Drivetrain.chassisSpeeds.vxMetersPerSecond.metersPerSecond
 //            val perpSpeed = robotSpeed * sin(towardsHub.radians)
 
-            val goalOrientation = Turret.visionOffset!!
-            visionRotation = if (goalOrientation.value < Constants.TURRET_DEADBAND.value) 0.rpm
+            val goalOrientation = Turret.clampSafePosition(Turret.visionOffset!! + Turret.turret.position) - Turret.visionOffset!!
+            visionRotation = if (goalOrientation.degrees < Constants.TURRET_DEADBAND.value) 0.rpm
                             else offsetCorrector.calculate(goalOrientation.radians).radiansPerSecond
-        } else {
+        }
+        else {
             notFoundTimer.start()
             if (notFoundTimer.hasElapsed(Constants.NOT_FOUND_WAIT)) {
                 Turret.status = TURRET_STATUS.NOT_FOUND
@@ -61,9 +62,12 @@ object AimTurret : CommandBase() {
             }
         }
 
-//        val turretVelocity = chassisRotation * -1.0 + visionRotation
-//        val targetAngle = Turret.clampSafePosition(Turret.turret.position + goalOrientation) - Turret.turret.position
-        Turret.turret.velocity = chassisRotation * -1.0 + visionRotation
+        val targetVelocity = chassisRotation * -1.0 - visionRotation
+//        val targetAngle = Turret.clampSafePosition(Turret.turret.position + Turret.visionOffset!!) - Turret.turret.position
+//        Turret.turret.velocity = targetVelocity
+//        Turret.fieldRelativeAngle = 0.degrees
+        val desiredVolts = -chassisVolts + offsetCorrector.calculate(-Turret.visionOffset!!.degrees)
+        Turret.turret.voltage = desiredVolts
         // TODO: FIX - WARNING!!! this is testing only, safe angles are not enabled and something will have a seizure
     }
 

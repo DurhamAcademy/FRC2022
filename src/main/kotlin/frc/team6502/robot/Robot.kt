@@ -16,14 +16,14 @@ class Robot : KRobot() {
     override fun robotInit() {
         RobotContainer
 
-        Climber.leftWinch.resetPosition(0.inches)
-        Climber.rightWinch.resetPosition(0.inches)
+//        Climber.leftWinch.resetPosition(0.degrees)
+//        Climber.rightWinch.resetPosition(0.degrees)
 
         if(Game.sim) {
             Simulation.instance.include(Drivetrain)
             Drivetrain.setupSim()
             Simulation.instance.include(Turret)
-            Simulation.instance.include(Shooter.flywheelControl)
+//            Simulation.instance.include(Shooter.flywheelControl)
         }
     }
 

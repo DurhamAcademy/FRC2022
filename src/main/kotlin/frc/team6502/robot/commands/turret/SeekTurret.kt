@@ -12,6 +12,9 @@ import kyberlib.math.units.extensions.k
  * Spin turret in circle. This command should never really be necessary if we odometry good
  */
 object SeekTurret : CommandBase() {
+    init {
+        addRequirements(Turret)
+    }
     // counts how long a target has been visible
     val acquisitionTimer = Timer()
 
@@ -27,7 +30,7 @@ object SeekTurret : CommandBase() {
     }
 
     override fun execute() {
-        if (Turret.target != null) { // the limelight sees something and it's valid if required
+        if (!Turret.targetLost) { // the limelight sees something and it's valid if required
             if(acquisitionTimer.get() <= 0.0001) acquisitionTimer.start()
         } else {
             // the limelight doesn't see anything

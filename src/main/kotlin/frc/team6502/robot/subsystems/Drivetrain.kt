@@ -77,7 +77,6 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     override fun drive(speeds: ChassisSpeeds) { drive(kinematics.toWheelSpeeds(speeds)) }
 
     fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) {
-        println("driving: ${wheelSpeeds.leftMetersPerSecond}, ${wheelSpeeds.rightMetersPerSecond}")
         leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
         rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
     }
@@ -97,7 +96,6 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
 
     // setup
     init {
-        println("drive setup")
         defaultCommand = Drive
 
         // setup controls for drive motors
@@ -124,7 +122,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
 
     // ignore this, it is sim and debug support
     private lateinit var driveSim: DifferentialDrivetrainSim
-    fun setupSim(KvAngular: Double = 5.5, KaAngular: Double = 0.5) {
+    fun setupSim(KvAngular: Double = 8.5, KaAngular: Double = 0.5) {
         driveSim = DifferentialDrivetrainSim( // Create a linear system from our characterization gains.
             LinearSystemId.identifyDrivetrainSystem(Constants.DRIVE_KV, Constants.DRIVE_KA, KvAngular, KaAngular),
             DCMotor.getNEO(2),  // 2 NEO motors on each side of the drivetrain.
@@ -134,7 +132,6 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
             // The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
             VecBuilder.fill(0.000, 0.000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000)
         )
-        println("gear Ratio: ${leftMaster.gearRatio}, trackwidth: ${kinematics.trackWidthMeters}, radius: ${leftMaster.radius}")
     }
 
     private fun roundLows(v: Double): Double = if (v.absoluteValue < 0.2) 0.0 else v

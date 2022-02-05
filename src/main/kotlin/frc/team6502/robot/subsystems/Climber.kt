@@ -17,14 +17,14 @@ object Climber : SubsystemBase(), Debug {
     private val rightArmLift = KSolenoid(0, 0)
 
     val leftWinch = KSparkMax(0).apply {
+        radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
-        radius = Constants.WINCH_RADIUS
     }
     val rightWinch = KSparkMax(0).apply {
+        radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
-        radius = Constants.WINCH_RADIUS
     }
 
     var armsLifted
