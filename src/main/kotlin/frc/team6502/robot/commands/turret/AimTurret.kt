@@ -7,10 +7,9 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.team6502.robot.Constants
 import frc.team6502.robot.RobotContainer
 import frc.team6502.robot.subsystems.Drivetrain
+import frc.team6502.robot.subsystems.TURRET_STATUS
 import frc.team6502.robot.subsystems.Turret
-import kyberlib.math.units.extensions.k
-import kyberlib.math.units.extensions.metersPerSecond
-import kyberlib.math.units.extensions.radiansPerSecond
+import kyberlib.math.units.extensions.*
 import kyberlib.math.units.towards
 import kotlin.math.sin
 
@@ -44,17 +43,18 @@ object AimTurret : CommandBase() {
             lostTimer.reset()
             lostTimer.stop()
 
-            // perp zoom correction
+            // perp zoom correction todo: add perp control later
 //            val towardsHub = Turret.turret.position + Turret.visionOffset
 //            val robotSpeed = Drivetrain.chassisSpeeds.vxMetersPerSecond.metersPerSecond
 //            val perpSpeed = robotSpeed * sin(towardsHub.radians)
 
-            // todo: add perp control later
-            val goalOrientation = Turret.visionOffset
-            visionRotation = offsetCorrector.calculate(goalOrientation!!.radians).radiansPerSecond
+            val goalOrientation = Turret.visionOffset!!
+            visionRotation = if (goalOrientation.value < Constants.TURRET_DEADBAND.value) 0.rpm
+                            else offsetCorrector.calculate(goalOrientation.radians).radiansPerSecond
         } else {
             notFoundTimer.start()
-            if (notFoundTimer.hasElapsed(.5)) {
+            if (notFoundTimer.hasElapsed(Constants.NOT_FOUND_WAIT)) {
+                Turret.status = TURRET_STATUS.NOT_FOUND
                 lostTimer.start()
 
                 Turret.fieldRelativeAngle = RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k
@@ -67,11 +67,5 @@ object AimTurret : CommandBase() {
         // TODO: FIX - WARNING!!! this is testing only, safe angles are not enabled and something will have a seizure
     }
 
-    override fun end(interrupted: Boolean) {
-        if (interrupted) {
-            // flash the LEDs something
-        }
-    }
-
-    override fun isFinished(): Boolean = lostTimer.hasElapsed(2.0)
+    override fun isFinished(): Boolean = lostTimer.hasElapsed(Constants.LOST_WAIT) || (lostTimer.hasElapsed(0.001) && !Constants.SMART_LOSS)
 }

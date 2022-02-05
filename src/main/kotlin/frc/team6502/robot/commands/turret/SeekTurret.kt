@@ -3,6 +3,7 @@ package frc.team6502.robot.commands.turret
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.team6502.robot.subsystems.Shooter
+import frc.team6502.robot.subsystems.TURRET_STATUS
 import frc.team6502.robot.subsystems.Turret
 import kyberlib.math.units.extensions.degrees
 import kyberlib.math.units.extensions.k
@@ -22,6 +23,7 @@ object SeekTurret : CommandBase() {
 
     override fun initialize() {
         // flash LEDs yellow or something
+        Turret.status = TURRET_STATUS.LOST
     }
 
     override fun execute() {
@@ -40,5 +42,9 @@ object SeekTurret : CommandBase() {
             // lock onto the target
             AimTurret.schedule()
         }
+    }
+
+    override fun end(interrupted: Boolean) {
+        if (!interrupted) Turret.status = TURRET_STATUS.ADJUSTING
     }
 }

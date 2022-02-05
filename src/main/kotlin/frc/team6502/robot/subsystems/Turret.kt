@@ -1,21 +1,39 @@
 package frc.team6502.robot.subsystems
 
+import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward
+import edu.wpi.first.wpilibj.geometry.Pose2d
 import edu.wpi.first.wpilibj.geometry.Rotation2d
+import edu.wpi.first.wpilibj.simulation.FlywheelSim
+import edu.wpi.first.wpilibj.simulation.LinearSystemSim
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team6502.robot.Constants
 import frc.team6502.robot.RobotContainer
 import kyberlib.command.Debug
-import kyberlib.math.units.extensions.Angle
-import kyberlib.math.units.extensions.degrees
-import kyberlib.math.units.extensions.k
+import kyberlib.command.Game
+import kyberlib.math.units.extensions.*
+import kyberlib.math.units.towards
 import kyberlib.motorcontrol.rev.KSparkMax
+import kyberlib.simulation.Simulatable
+import kyberlib.simulation.field.KField2d
+import org.photonvision.targeting.PhotonPipelineResult
+import org.photonvision.targeting.PhotonTrackedTarget
 
-object Turret : SubsystemBase(), Debug {
+
+enum class TURRET_STATUS {
+    LOCKED, ADJUSTING, NOT_FOUND, LOST
+}
+
+
+object Turret : SubsystemBase(), Debug, Simulatable {
+    var status = TURRET_STATUS.LOST
+
+    private val feedforward = SimpleMotorFeedforward(0.0, 1.0, 0.5)
     val turret = KSparkMax(0).apply {
-        // todo tune and add ratios
-        kP = 30.0
-        kD = 5.0
-
+        // todo: tune
+        kP = 3.0
+        kD = 1.0
+        addFeedforward(feedforward)
         gearRatio = Constants.TURRET_GEAR_RATIO
     }
 
@@ -32,17 +50,27 @@ object Turret : SubsystemBase(), Debug {
         turret.resetPosition()
     }
 
-    val latestResult
+    val latestResult: PhotonPipelineResult?
         get() = RobotContainer.limelight.latestResult
-    val targetLost
-        get() = latestResult == null
-    val target
-        get() = if(latestResult != null && latestResult.hasTargets()) latestResult.bestTarget else null
+    val targetLost: Boolean
+        get() = latestResult == null || !latestResult!!.hasTargets()
+    val target: PhotonTrackedTarget?
+        get() = if(!targetLost) latestResult!!.bestTarget else null
 
     val visionOffset: Angle?
-        get() = target?.yaw?.degrees
+        get() = if (Game.real) target?.yaw?.degrees
+                else (RobotContainer.navigation.position.towards(Constants.HUB_POSITION) - fieldRelativeAngle).k
 
-    var readyToShoot = false
+    val readyToShoot
+        get() = visionOffset != null && visionOffset!!.value < Constants.TURRET_TOLERANCE.value
+
+    override fun periodic() {
+        debugDashboard()
+    }
+
+    override fun simulationPeriodic() {
+        KField2d.getObject("turret").pose = Pose2d(RobotContainer.navigation.position, fieldRelativeAngle)
+    }
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
@@ -50,5 +78,10 @@ object Turret : SubsystemBase(), Debug {
             "turret error" to visionOffset,
             "target detected" to targetLost
         )
+    }
+
+    override fun simUpdate(dt: Double) {
+        val velocity = (turret.voltage - feedforward.ks) / feedforward.kv
+        turret.simPosition = (turret.simPosition + (velocity * dt).radians).k
     }
 }
