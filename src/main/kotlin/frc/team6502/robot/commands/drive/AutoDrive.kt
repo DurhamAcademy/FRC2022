@@ -11,6 +11,7 @@ import kyberlib.auto.Navigator
 import kyberlib.auto.pathing.Pathfinder
 import kyberlib.auto.trajectory.KTrajectory
 import kyberlib.math.units.extensions.degrees
+import kyberlib.math.units.string
 import kyberlib.simulation.field.KField2d
 
 
@@ -20,7 +21,7 @@ import kyberlib.simulation.field.KField2d
  */
 class AutoDrive(var targetPose: Pose2d) : CommandBase() {
     companion object {
-        private var calculator = RamseteController(2.0, 0.7)  // these are the recommended values
+        private var calculator = RamseteController(0.0, 0.0)  // these are the recommended values
 
         fun updateRamsete(beta: Double, zeta: Double) {
             calculator = RamseteController(beta, zeta)
@@ -55,6 +56,7 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
 
     override fun execute() {
         val targetSpeed = calculator.calculate(Navigator.instance!!.pose, trajectory.sample(timer.get()))
+        println("pose: ${Navigator.instance!!.pose.string}, expected: ${trajectory.sample(timer.get()).poseMeters.string}")
         Drivetrain.drive(targetSpeed)
 //        trajectory = PathPlanner.updateTrajectory(trajectory) - this should be necesary until moving obstabcles
     }

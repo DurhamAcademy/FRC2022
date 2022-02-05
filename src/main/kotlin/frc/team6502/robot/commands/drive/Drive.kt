@@ -26,8 +26,13 @@ object Drive : CommandBase() {
 
         println("drive execute")
         val speeds = ChassisSpeeds(velFilter.calculate(fwd.metersPerSecond), 0.0, rotFilter.calculate(turn.radiansPerSecond))
-//        val speeds = DifferentialDriveWheelSpeeds(5.0, 5.0)
+//        val speeds = DifferentialDriveWheelSpeeds(1.0, 1.0)
         Drivetrain.drive(speeds)
+//        Drivetrain.stop()
+    }
+
+    override fun end(interrupted: Boolean) {
+        Drivetrain.stop()
     }
 
     override fun isFinished() = false

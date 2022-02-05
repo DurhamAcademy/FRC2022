@@ -52,8 +52,7 @@ class Simulation : SubsystemBase() {
             prevTime = time
             return
         }
-        val dt = 0.02//time - prevTime
-        println("time: $time")
+        val dt = time - prevTime
         for (sim in sims) {
             sim.simUpdate(dt)
         }

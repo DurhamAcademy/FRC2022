@@ -15,7 +15,6 @@ import kyberlib.simulation.field.KField2d
 class Robot : KRobot() {
     override fun robotInit() {
         RobotContainer
-        Drivetrain
 
         Climber.leftWinch.resetPosition(0.inches)
         Climber.rightWinch.resetPosition(0.inches)
@@ -30,7 +29,7 @@ class Robot : KRobot() {
 
     override fun teleopPeriodic() {
 //        RobotContainer.controller.debugDashboard()
-        Drive.execute()
+//        Drive.execute()
     }
 
     override fun enabledInit() {
@@ -42,8 +41,6 @@ class Robot : KRobot() {
     }
 
     override fun autonomousInit() {
-//        val auto: Command = TODO()
-//        auto.schedule()
-//        AutoDrive(Constants.HUB_POSITION).schedule()
+        AutoDrive(Constants.HUB_POSITION).schedule()
     }
 }

@@ -13,6 +13,8 @@ import frc.team6502.robot.Constants
 import frc.team6502.robot.RobotContainer
 import frc.team6502.robot.commands.drive.Drive
 import kyberlib.auto.Navigator
+import kyberlib.auto.trajectory.KTrajectory
+import kyberlib.auto.trajectory.KTrajectoryConfig
 import kyberlib.command.Game
 import kyberlib.math.units.debugValues
 import kyberlib.math.units.extensions.k
@@ -38,7 +40,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     }
     private val rightMaster  = KSparkMax(0, MotorType.BRUSHLESS).apply {
         identifier = "rightMaster"
-        reversed = true
+        reversed = false
         currentLimit = 40
     }
     private val leftFollower  = KSparkMax(0, MotorType.BRUSHLESS).apply {
@@ -52,30 +54,6 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
         follow(rightMaster)
     }
     private val motors = arrayOf(leftMaster, rightMaster)
-
-    // setup
-    init {
-        println("drive setup")
-        defaultCommand = Drive
-
-        // setup controls for drive motors
-        val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
-        if(Game.sim) Simulation.instance.chassisFF = feedforward
-        for (motor in motors) {
-            motor.apply {
-                brakeMode = true
-                gearRatio = Constants.DRIVE_GEAR_RATIO
-                radius = Constants.WHEEL_RADIUS
-                currentLimit = 40
-
-                kP = Constants.DRIVE_P
-                kI = Constants.DRIVE_I
-                kD = Constants.DRIVE_D
-
-                addFeedforward(feedforward)
-            }
-        }
-    }
 
     // values
     val kinematics = DifferentialDriveKinematics(Constants.TRACK_WIDTH)
@@ -116,6 +94,33 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     }
 
 
+    // setup
+    init {
+        defaultCommand = Drive
+
+        // setup controls for drive motors
+        val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
+        if(Game.sim) Simulation.instance.chassisFF = feedforward
+        for (motor in motors) {
+            motor.apply {
+                brakeMode = true
+                gearRatio = Constants.DRIVE_GEAR_RATIO
+                radius = Constants.WHEEL_RADIUS
+                currentLimit = 40
+
+                kP = Constants.DRIVE_P
+                kI = Constants.DRIVE_I
+                kD = Constants.DRIVE_D
+
+                addFeedforward(feedforward)
+            }
+        }
+
+        Navigator.instance!!.applyKinematics(kinematics)
+        KTrajectory.generalConfig = KTrajectoryConfig(1.metersPerSecond, 1.metersPerSecond)
+    }
+
+
     // ignore this, it is sim and debug support
     private lateinit var driveSim: DifferentialDrivetrainSim
     fun setupSim(KvAngular: Double = 5.5, KaAngular: Double = 0.5) {
@@ -128,7 +133,6 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
             // The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
             VecBuilder.fill(0.001, 0.001, 0.001, 0.1, 0.1, 0.005, 0.005)
         )
-        println("gear Ratio: ${leftMaster.gearRatio}, trackwidth: ${kinematics.trackWidthMeters}, radius: ${leftMaster.radius}")
     }
 
     private fun roundLows(v: Double): Double = if (v.absoluteValue < 0.2) 0.0 else v
@@ -137,9 +141,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
         // update the sim with new inputs
         val leftVolt = leftMaster.voltage
         val rightVolt = rightMaster.voltage
-        println("volts: $leftVolt, $rightVolt")
         driveSim.setInputs(roundLows(leftVolt), roundLows(rightVolt))
-        println("dt: $dt")
         driveSim.update(dt)
 
         // update the motors with what they should be
@@ -147,8 +149,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
         leftMaster.simLinearVelocity = driveSim.leftVelocityMetersPerSecond.metersPerSecond
         rightMaster.simLinearPosition = driveSim.rightPositionMeters.meters
         rightMaster.simLinearVelocity = driveSim.rightVelocityMetersPerSecond.metersPerSecond
-        println("vels: ${driveSim.leftVelocityMetersPerSecond}, ${driveSim.rightVelocityMetersPerSecond}")
-        Navigator.instance!!.heading = driveSim.heading.k
+        Navigator.instance!!.heading = (driveSim.heading - Constants.START_POSE.rotation).k
     }
 
     override fun debugValues(): Map<String, Any?> {

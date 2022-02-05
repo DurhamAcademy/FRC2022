@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.RobotState
 
 object Game {
     private val driverStation = DriverStation.getInstance()
+    
     val real
         get() = RobotBase.isReal()
     val sim
@@ -32,8 +33,9 @@ object Game {
     val batteryVoltage
         get() = RobotController.getBatteryVoltage()
 
-    val time = RobotController.getFPGATime()
+    val time
+        get() = RobotController.getFPGATime() / 1000000.0
 
-    val alliance = driverStation.alliance
-    val game = driverStation.gameSpecificMessage
+    val alliance: DriverStation.Alliance = driverStation.alliance
+    val game: String = driverStation.gameSpecificMessage
 }
