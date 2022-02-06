@@ -1,5 +1,6 @@
 package frc.team6502.robot.subsystems
 
+import edu.wpi.first.wpilibj.controller.ProfiledPIDController
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward
 import edu.wpi.first.wpilibj.geometry.Pose2d
 import edu.wpi.first.wpilibj.geometry.Rotation2d
@@ -7,6 +8,7 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim
 import edu.wpi.first.wpilibj.simulation.LinearSystemSim
 import edu.wpi.first.wpilibj.simulation.SimDeviceSim
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team6502.robot.Constants
 import frc.team6502.robot.RobotContainer
@@ -14,13 +16,19 @@ import frc.team6502.robot.commands.drive.Drive
 import frc.team6502.robot.commands.turret.SeekTurret
 import kyberlib.command.Debug
 import kyberlib.command.Game
+import kyberlib.math.invertIf
+import kyberlib.math.units.KUnit
+import kyberlib.math.units.Radian
 import kyberlib.math.units.extensions.*
 import kyberlib.math.units.towards
+import kyberlib.motorcontrol.ControlMode
+import kyberlib.motorcontrol.KMotorController
 import kyberlib.motorcontrol.rev.KSparkMax
 import kyberlib.simulation.Simulatable
 import kyberlib.simulation.field.KField2d
 import org.photonvision.targeting.PhotonPipelineResult
 import org.photonvision.targeting.PhotonTrackedTarget
+import kotlin.math.absoluteValue
 import kotlin.math.atan
 
 
@@ -35,18 +43,29 @@ object Turret : SubsystemBase(), Debug, Simulatable {
     val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
     val turret = KSparkMax(0).apply {
         // todo: tune
-        kP = 3.0
-        kD = 1.0
-//        kI = 10.0
-//        kD = 1.0
-        addFeedforward(feedforward)
+        kP = .3
+        kD = .1
+//        addFeedforward(feedforward)
         gearRatio = Constants.TURRET_GEAR_RATIO
+
+        val offsetCorrector = ProfiledPIDController(3.00, 0.0, 0.0, TrapezoidProfile.Constraints(4.0, 2.0))
+        customControl = {
+            val chassisComp = Drivetrain.chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond
+            it.position = clampSafePosition(it.positionSetpoint)
+            val offsetCorrection = offsetCorrector.calculate(it.positionError.radians).radiansPerSecond
+//            println("position: ${it.position}, setpoint: ${it.positionSetpoint}")
+//            println("error: ${it.positionError}, correction: $offsetCorrection ")
+            val targetVelocity = offsetCorrection - chassisComp
+            val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(targetVelocity.radiansPerSecond)
+            voltage
+        }
     }
+
 
     var fieldRelativeAngle: Angle
         get() = (turret.position + RobotContainer.navigation.heading).k
         set(value) {
-            turret.position = clampSafePosition(value - RobotContainer.navigation.heading)
+            turret.position = value - RobotContainer.navigation.heading
         }
 
     init {
@@ -54,7 +73,11 @@ object Turret : SubsystemBase(), Debug, Simulatable {
     }
 
     // todo: check range
-    fun clampSafePosition(angle: Rotation2d): Angle = angle.k.normalized
+    fun clampSafePosition(angle: Rotation2d): Angle {
+        val norm = angle.k.normalized
+        val final = if(norm < 180.degrees) norm else (norm - 360.degrees).k
+        return final
+    }
 
     fun zeroTurret() {
         turret.resetPosition()
@@ -93,7 +116,7 @@ object Turret : SubsystemBase(), Debug, Simulatable {
         )
     }
 
-    fun guessVelocity(v: Double): AngularVelocity = ((v - feedforward.ks) / feedforward.kv).radiansPerSecond
+    fun guessVelocity(v: Double): AngularVelocity = ((v.absoluteValue - feedforward.ks) / feedforward.kv).coerceAtLeast(0.0).invertIf { v < 0.0 }.radiansPerSecond
 
     override fun simUpdate(dt: Double) {
         turret.simVelocity = guessVelocity(turret.voltage)

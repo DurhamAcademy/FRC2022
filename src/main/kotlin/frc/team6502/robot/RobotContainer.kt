@@ -121,6 +121,7 @@ object RobotContainer {
             {Shooter.status == SHOOTER_STATUS.FORCE_SHOT}
 
     }
+
     init {
         // initialize subsystems here:
         Climber

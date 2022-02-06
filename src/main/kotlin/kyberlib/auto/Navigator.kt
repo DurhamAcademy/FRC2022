@@ -24,7 +24,10 @@ import kyberlib.simulation.field.KField2d
  */
 class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
     companion object { var instance: Navigator? = null }
-    init { instance = this }
+    init {
+        instance = this
+        gyro.heading = startPose.rotation.k
+    }
 
     /**
      * A probability calculator to guess where the robot is from odometer and vision updates

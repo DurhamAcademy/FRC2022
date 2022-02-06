@@ -3,6 +3,8 @@ package kyberlib.command
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.Sendable
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import kyberlib.math.units.KUnit
+import kyberlib.math.units.extensions.Angle
 
 /**
  * Types of ways to print to the output (driverstation)
@@ -64,6 +66,8 @@ interface Debug {
                 is Debug -> sendMapToDashboard((info.value as Debug).debugValues(), path)
                 is Map<*, *> -> sendMapToDashboard(info.value as Map<String, Any?>, path)
                 is Sendable -> SmartDashboard.putData(path, info.value as Sendable)
+//                is Angle -> SmartDashboard.putNumber(path, (info.value as Angle).degrees)
+//                is KUnit<*> -> SmartDashboard.putNumber(path, info.value as Double)
                 else -> SmartDashboard.putString(path, info.value.toString())
             }
         }

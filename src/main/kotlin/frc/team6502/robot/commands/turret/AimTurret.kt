@@ -33,10 +33,6 @@ object AimTurret : CommandBase() {
     }
 
     override fun execute() {
-        // spin stablization
-        val chassisRotation = Drivetrain.chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond
-        val chassisVolts = Turret.feedforward.calculate(chassisRotation.radiansPerSecond)
-        var visionRotation = 0.radiansPerSecond
         if (!Turret.targetLost) {
             notFoundTimer.reset()
             notFoundTimer.stop()
@@ -48,9 +44,8 @@ object AimTurret : CommandBase() {
 //            val robotSpeed = Drivetrain.chassisSpeeds.vxMetersPerSecond.metersPerSecond
 //            val perpSpeed = robotSpeed * sin(towardsHub.radians)
 
-            val goalOrientation = Turret.clampSafePosition(Turret.visionOffset!! + Turret.turret.position) - Turret.visionOffset!!
-            visionRotation = if (goalOrientation.degrees < Constants.TURRET_DEADBAND.value) 0.rpm
-                            else offsetCorrector.calculate(goalOrientation.radians).radiansPerSecond
+            val goalOrientation = Turret.visionOffset!!
+            Turret.fieldRelativeAngle = Turret.fieldRelativeAngle + goalOrientation
         }
         else {
             notFoundTimer.start()
@@ -61,14 +56,6 @@ object AimTurret : CommandBase() {
                 Turret.fieldRelativeAngle = RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k
             }
         }
-
-        val targetVelocity = chassisRotation * -1.0 - visionRotation
-//        val targetAngle = Turret.clampSafePosition(Turret.turret.position + Turret.visionOffset!!) - Turret.turret.position
-//        Turret.turret.velocity = targetVelocity
-//        Turret.fieldRelativeAngle = 0.degrees
-        val desiredVolts = -chassisVolts + offsetCorrector.calculate(-Turret.visionOffset!!.degrees)
-        Turret.turret.voltage = desiredVolts
-        // TODO: FIX - WARNING!!! this is testing only, safe angles are not enabled and something will have a seizure
     }
 
     override fun isFinished(): Boolean = lostTimer.hasElapsed(Constants.LOST_WAIT) || (lostTimer.hasElapsed(0.001) && !Constants.SMART_LOSS)

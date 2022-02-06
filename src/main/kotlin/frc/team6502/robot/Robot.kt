@@ -1,14 +1,13 @@
 package frc.team6502.robot
 
 import frc.team6502.robot.commands.drive.AutoDrive
-import frc.team6502.robot.commands.drive.Drive
 import frc.team6502.robot.subsystems.Climber
 import frc.team6502.robot.subsystems.Drivetrain
 import frc.team6502.robot.subsystems.Shooter
 import frc.team6502.robot.subsystems.Turret
 import kyberlib.command.Game
 import kyberlib.command.KRobot
-import kyberlib.math.units.extensions.inches
+import kyberlib.math.units.extensions.degrees
 import kyberlib.simulation.Simulation
 import kyberlib.simulation.field.KField2d
 
@@ -16,14 +15,14 @@ class Robot : KRobot() {
     override fun robotInit() {
         RobotContainer
 
-//        Climber.leftWinch.resetPosition(0.degrees)
-//        Climber.rightWinch.resetPosition(0.degrees)
+        Climber.leftWinch.resetPosition(0.degrees)
+        Climber.rightWinch.resetPosition(0.degrees)
 
         if(Game.sim) {
             Simulation.instance.include(Drivetrain)
             Drivetrain.setupSim()
             Simulation.instance.include(Turret)
-//            Simulation.instance.include(Shooter.flywheelControl)
+            Simulation.instance.include(Shooter.flywheelControl)
         }
     }
 
@@ -32,7 +31,7 @@ class Robot : KRobot() {
     }
 
     override fun teleopPeriodic() {
-        RobotContainer.controller.debugDashboard()
+//        RobotContainer.controller.debugDashboard()
 //        Drive.execute()
     }
 
