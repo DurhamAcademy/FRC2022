@@ -6,6 +6,9 @@ import frc.team6502.robot.subsystems.SHOOTER_STATUS
 import frc.team6502.robot.subsystems.Shooter
 import frc.team6502.robot.subsystems.Turret
 
+/**
+ * Bypass the turret restrictions and forces the robot to shoot
+ */
 object ForceShoot : CommandBase() {
     init {
         addRequirements(Conveyor, Turret, Shooter)
@@ -18,6 +21,7 @@ object ForceShoot : CommandBase() {
     override fun execute() {
         Shooter.flywheelMaster.percent = 0.5
         Shooter.topShooter.percent = 0.5
+        Conveyor.feed()
     }
 
 }

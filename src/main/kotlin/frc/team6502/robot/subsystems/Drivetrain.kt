@@ -1,6 +1,7 @@
 package frc.team6502.robot.subsystems
 
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward
+import edu.wpi.first.wpilibj.geometry.Pose2d
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds
@@ -13,11 +14,14 @@ import edu.wpi.first.wpiutil.math.VecBuilder
 import frc.team6502.robot.Constants
 import frc.team6502.robot.RobotContainer
 import frc.team6502.robot.commands.drive.Drive
+import frc.team6502.robot.commands.shooter.Shoot
 import kyberlib.auto.Navigator
 import kyberlib.auto.trajectory.KTrajectory
 import kyberlib.auto.trajectory.KTrajectoryConfig
 import kyberlib.command.Game
+import kyberlib.math.units.Translation2d
 import kyberlib.math.units.debugValues
+import kyberlib.math.units.extensions.feet
 import kyberlib.math.units.extensions.k
 import kyberlib.math.units.extensions.meters
 import kyberlib.math.units.extensions.metersPerSecond
@@ -32,6 +36,9 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 
+/**
+ * Mechanism that controls how the robot drives
+ */
 object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     // motors
     val leftMaster = KSparkMax(0, MotorType.BRUSHLESS).apply {
@@ -57,14 +64,14 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     private val motors = arrayOf(leftMaster, rightMaster)
 
     // values
-    val kinematics = DifferentialDriveKinematics(Constants.TRACK_WIDTH)
-    override var chassisSpeeds: ChassisSpeeds
+    val kinematics = DifferentialDriveKinematics(Constants.TRACK_WIDTH)  // calculator to make drivetrain move is the desired directions
+    override var chassisSpeeds: ChassisSpeeds  // variable representing the direction we want the robot to move
         get() = kinematics.toChassisSpeeds(wheelSpeeds)
         set(value) { drive(value) }
-    var wheelSpeeds: DifferentialDriveWheelSpeeds
+    var wheelSpeeds: DifferentialDriveWheelSpeeds  // variable representing the speed of each side of the drivetrain
         get() = DifferentialDriveWheelSpeeds(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond)
         set(value) { drive(value) }
-    val fieldRelativeSpeeds: ChassisSpeeds
+    val fieldRelativeSpeeds: ChassisSpeeds  // robot speeds from the perspective of the driver
         get() {
             val pose = Navigator.instance!!.pose
             val robotRelativeSpeeds = chassisSpeeds
@@ -74,19 +81,39 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
         }
 
     // commands
+    /**
+     * Drive the robot at the provided speeds
+     */
     override fun drive(speeds: ChassisSpeeds) { drive(kinematics.toWheelSpeeds(speeds)) }
 
+    /**
+     * Drive the robot at the provided speeds
+     */
     fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) {
         leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
         rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
     }
+
     fun stop() {
         leftMaster.stop()
         rightMaster.stop()
     }
 
+    /**
+     * Update navigation
+     */
     override fun periodic() {
         RobotContainer.navigation.update(wheelSpeeds)
+        if(!Turret.targetLost)  {  // todo: test
+            val distance = Shooter.targetDistance!! + 2.feet  // two feet is the radius of the hub
+            val angle = Turret.visionOffset!! + Turret.fieldRelativeAngle
+            val transform = Translation2d(distance, 0.meters).rotateBy(angle)
+            val newPosition = Constants.HUB_POSITION.minus(transform)
+            val time = Game.time - RobotContainer.limelight.latestResult!!.latencyMillis * 1000  // todo: wrong units
+            RobotContainer.navigation.update(Pose2d(newPosition, RobotContainer.navigation.heading), time)
+
+        }
+
         debugDashboard()
     }
 
@@ -94,7 +121,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
         KField2d.robotPose = RobotContainer.navigation.pose
     }
 
-    // setup
+    // setup motors
     init {
         defaultCommand = Drive
 

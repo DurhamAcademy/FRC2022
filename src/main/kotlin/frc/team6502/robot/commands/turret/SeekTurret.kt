@@ -18,19 +18,23 @@ object SeekTurret : CommandBase() {
     // counts how long a target has been visible
     val acquisitionTimer = Timer()
 
+    // todo move to Constants
     const val SHOOTER_AQUISITION_TIME = 0.2
 
     init {
         addRequirements(Shooter)
     }
 
+    /**
+     * Update status to indicated turret is lost
+     */
     override fun initialize() {
-        // flash LEDs yellow or something
         Turret.status = TURRET_STATUS.LOST
     }
 
     override fun execute() {
         if (!Turret.targetLost) { // the limelight sees something and it's valid if required
+            // start timer if it isn't on yet
             if(acquisitionTimer.get() <= 0.0001) acquisitionTimer.start()
         } else {
             // the limelight doesn't see anything
@@ -41,6 +45,7 @@ object SeekTurret : CommandBase() {
             Turret.fieldRelativeAngle = (Turret.fieldRelativeAngle + 5.degrees).k
         }
 
+        // if you are sure you see the target
         if(acquisitionTimer.get() > SHOOTER_AQUISITION_TIME) {
             // lock onto the target
             AimTurret.schedule()

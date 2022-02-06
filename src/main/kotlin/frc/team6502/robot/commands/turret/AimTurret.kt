@@ -13,8 +13,10 @@ import kyberlib.math.units.extensions.*
 import kyberlib.math.units.towards
 import kotlin.math.sin
 
+/**
+ * Keeps the turret aimed at the target
+ */
 object AimTurret : CommandBase() {
-
     init {
         addRequirements(Turret)
     }
@@ -22,10 +24,11 @@ object AimTurret : CommandBase() {
     val notFoundTimer = Timer()  // timer counting how long without vision target seen
     val lostTimer = Timer()  // timer after how long not finding it at the expected location
 
-    // todo tune this
-    private val offsetCorrector = ProfiledPIDController(0.300, 0.0, 0.0, TrapezoidProfile.Constraints(2.0, 1.0))
-
     override fun initialize() {
+        found()
+    }
+
+    private fun found() {
         notFoundTimer.reset()
         notFoundTimer.stop()
         lostTimer.reset()
@@ -33,13 +36,11 @@ object AimTurret : CommandBase() {
     }
 
     override fun execute() {
+        // if the limelight is a target
         if (!Turret.targetLost) {
-            notFoundTimer.reset()
-            notFoundTimer.stop()
-            lostTimer.reset()
-            lostTimer.stop()
+            found()
 
-            // perp zoom correction todo: add perp control later
+            // perp zoom correction todo: add later
 //            val towardsHub = Turret.turret.position + Turret.visionOffset
 //            val robotSpeed = Drivetrain.chassisSpeeds.vxMetersPerSecond.metersPerSecond
 //            val perpSpeed = robotSpeed * sin(towardsHub.radians)
@@ -49,14 +50,19 @@ object AimTurret : CommandBase() {
         }
         else {
             notFoundTimer.start()
+            // wait for awhile to make sure the target is lost
             if (notFoundTimer.hasElapsed(Constants.NOT_FOUND_WAIT)) {
                 Turret.status = TURRET_STATUS.NOT_FOUND
                 lostTimer.start()
 
+                // look towards where the hub should be
                 Turret.fieldRelativeAngle = RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k
             }
         }
     }
 
+    /**
+     * If you don't find the target after awhile go back to seek turret (looking everywhere).
+     */
     override fun isFinished(): Boolean = lostTimer.hasElapsed(Constants.LOST_WAIT) || (lostTimer.hasElapsed(0.001) && !Constants.SMART_LOSS)
 }

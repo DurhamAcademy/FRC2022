@@ -6,6 +6,9 @@ import frc.team6502.robot.subsystems.Turret
 import kyberlib.command.Debug
 import kyberlib.command.DebugLevel
 
+/**
+ * Called at the beginning of the match to get the absolute encoding of the turret
+ */
 object ZeroTurret: CommandBase() {
     init {
         addRequirements(Turret)

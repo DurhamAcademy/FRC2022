@@ -32,36 +32,42 @@ import kotlin.math.absoluteValue
 import kotlin.math.atan
 
 
+/**
+ * Status of what the turret is doing
+ */
 enum class TURRET_STATUS {
     LOCKED, ADJUSTING, NOT_FOUND, LOST
 }
 
 
+/**
+ * Controls the turret
+ */
 object Turret : SubsystemBase(), Debug, Simulatable {
     var status = TURRET_STATUS.LOST
 
-    val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
+    // characterization of the turret
+    private val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
+    // actual turret motors
     val turret = KSparkMax(0).apply {
         // todo: tune
         kP = .3
         kD = .1
-//        addFeedforward(feedforward)
         gearRatio = Constants.TURRET_GEAR_RATIO
 
+        // fancy control
         val offsetCorrector = ProfiledPIDController(3.00, 0.0, 0.0, TrapezoidProfile.Constraints(4.0, 2.0))
         customControl = {
             val chassisComp = Drivetrain.chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond
             it.position = clampSafePosition(it.positionSetpoint)
             val offsetCorrection = offsetCorrector.calculate(it.positionError.radians).radiansPerSecond
-//            println("position: ${it.position}, setpoint: ${it.positionSetpoint}")
-//            println("error: ${it.positionError}, correction: $offsetCorrection ")
             val targetVelocity = offsetCorrection - chassisComp
             val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(targetVelocity.radiansPerSecond)
             voltage
         }
     }
 
-
+    // angle of the turret from top view
     var fieldRelativeAngle: Angle
         get() = (turret.position + RobotContainer.navigation.heading).k
         set(value) {
@@ -72,20 +78,25 @@ object Turret : SubsystemBase(), Debug, Simulatable {
         defaultCommand = SeekTurret
     }
 
-    // todo: check range
+    /**
+     * Makes an angle safe for the electronics to not get tangled
+     */
     fun clampSafePosition(angle: Rotation2d): Angle {
         val norm = angle.k.normalized
         val final = if(norm < 180.degrees) norm else (norm - 360.degrees).k
         return final
     }
 
+    /**
+     * Allows the turret to know its position relative to everything else
+     */
     fun zeroTurret() {
         turret.resetPosition()
     }
 
     private val latestResult: PhotonPipelineResult?
         get() = RobotContainer.limelight.latestResult
-    val targetLost: Boolean
+    val targetLost: Boolean  // todo: change to targetVisible
         get() = Game.real && (latestResult == null || !latestResult!!.hasTargets())
     private val target: PhotonTrackedTarget?
         get() = if(!targetLost) latestResult!!.bestTarget else null
@@ -97,7 +108,7 @@ object Turret : SubsystemBase(), Debug, Simulatable {
         get() = target?.pitch?.degrees
 
     val readyToShoot
-        get() = visionOffset != null && visionOffset!!.value < Constants.TURRET_TOLERANCE.value
+        get() = turret.positionError < Constants.TURRET_TOLERANCE
 
     override fun periodic() {
         debugDashboard()
@@ -116,10 +127,13 @@ object Turret : SubsystemBase(), Debug, Simulatable {
         )
     }
 
+    /**
+     * Guess to velocity of the turret from a given voltage
+     */
     fun guessVelocity(v: Double): AngularVelocity = ((v.absoluteValue - feedforward.ks) / feedforward.kv).coerceAtLeast(0.0).invertIf { v < 0.0 }.radiansPerSecond
 
     override fun simUpdate(dt: Double) {
-        turret.simVelocity = guessVelocity(turret.voltage)
+        turret.simVelocity = guessVelocity(turret.voltage)  // todo: this can be done better
         turret.simPosition = (turret.simPosition + (turret.velocity * dt.seconds)).k
     }
 }

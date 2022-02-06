@@ -10,6 +10,9 @@ import kyberlib.math.units.extensions.feetPerSecond
 import kyberlib.math.units.extensions.metersPerSecond
 import kyberlib.math.units.extensions.radiansPerSecond
 
+/**
+ * The default drive commands. Arcade drive based on xbox controller inputs
+ */
 object Drive : CommandBase() {
 
     private val velFilter = SlewRateLimiter(10.0) // mps
@@ -19,14 +22,14 @@ object Drive : CommandBase() {
         addRequirements(Drivetrain)
     }
 
-    // TODO implement proper cheesy drive
+    /**
+     * Get xbox inputs and drive corresponding values
+     */
     override fun execute() {
         val fwd = RobotContainer.controller.leftY.value.feetPerSecond
         val turn = RobotContainer.controller.rightX.value.radiansPerSecond
-        val speeds = ChassisSpeeds(fwd.metersPerSecond, 0.0, turn.radiansPerSecond)
-//        val speeds = DifferentialDriveWheelSpeeds(1.0, 1.0)
+        val speeds = ChassisSpeeds(velFilter.calculate(fwd.metersPerSecond), 0.0, rotFilter.calculate(turn.radiansPerSecond))
         Drivetrain.drive(speeds)
-//        Drivetrain.stop()
     }
 
     override fun end(interrupted: Boolean) {

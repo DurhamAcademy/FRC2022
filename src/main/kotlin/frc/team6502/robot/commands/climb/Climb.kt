@@ -10,13 +10,16 @@ import kyberlib.math.units.extensions.radiansPerSecond
 import kotlin.math.absoluteValue
 
 
+/**
+ * Command that uses joysticks to control the climber extension.
+ */
 object Climb : CommandBase() {
     init {
         addRequirements(Climber, Drivetrain, Turret, Shooter)
     }
 
-    val swing = Differentiator()
-    const val dampeningConstant = 0.1  // random number outta my ass
+    private val swing = Differentiator()
+    private const val dampeningConstant = 0.1  // random number outta my ass
     /**
      * Fun reaction wheel stuff. Optional, but cool if done
      */
@@ -27,16 +30,23 @@ object Climb : CommandBase() {
         Shooter.flywheelMaster.voltage = dTheta.value * dampeningConstant
     }
 
+    /**
+     * Prepare the climber to climb.
+     */
     override fun initialize() {
-        // change led colors to reflect new mode
         Turret.fieldRelativeAngle = 0.degrees
         Climber.armsLifted = true
         Climber.status = CLIMBER_STATUS.ACTIVE
     }
 
+    /**
+     * Set the winch percentage based on left/right joysticks
+     */
     override fun execute() {
         Climber.leftWinch.percent = RobotContainer.controller.leftY.value / RobotContainer.controller.leftY.maxVal
         Climber.rightWinch.percent = RobotContainer.controller.rightY.value / RobotContainer.controller.rightY.maxVal
+
+        // set the status of the robot based on what the winches are doing
         if (Climber.leftWinch.percent.absoluteValue < 0.1) Climber.status = CLIMBER_STATUS.ACTIVE
         else if (Climber.leftWinch.percent < 0.0) Climber.status = CLIMBER_STATUS.FALLING
         else if (Climber.leftWinch.percent.absoluteValue > 0.0) Climber.status = CLIMBER_STATUS.RISING

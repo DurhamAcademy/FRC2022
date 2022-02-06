@@ -10,9 +10,9 @@ import edu.wpi.first.wpiutil.math.VecBuilder
 import edu.wpi.first.wpiutil.math.numbers.N1
 import kyberlib.command.Debug
 import kyberlib.math.units.extensions.AngularVelocity
-import kyberlib.motorcontrol.KMotorController
 import kyberlib.math.units.extensions.radiansPerSecond
 import kyberlib.math.units.extensions.rpm
+import kyberlib.motorcontrol.KMotorController
 import kyberlib.simulation.Simulatable
 
 /**
@@ -75,7 +75,7 @@ class Flywheel(private val motor: KMotorController,
             loop.predict(timeDelay)  // math
             val nextVoltage = loop.getU(0)  // input
             nextVoltage
-        }  // todo: this wont update frequently enough, add notifier
+        }
     }
 
     var velocity: AngularVelocity
@@ -84,11 +84,13 @@ class Flywheel(private val motor: KMotorController,
 
     override fun debugValues(): Map<String, Any?> = motor.debugValues()
 
-    val sim = FlywheelSim(plant, motors, kFlywheelGearing)
+    private val sim = FlywheelSim(plant, motors, kFlywheelGearing)
     override fun simUpdate(dt: Double) {
+        println("fly voltage = ${motor.voltage}")
         sim.setInputVoltage(motor.voltage)
         sim.update(dt)
         motor.simVelocity = sim.angularVelocityRPM.rpm
+        println("vel: ${motor.simVelocity}")
     }
 
 }

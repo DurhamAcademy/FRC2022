@@ -4,6 +4,9 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.team6502.robot.Constants
 import frc.team6502.robot.subsystems.Intaker
 
+/**
+ * Deploys and activates the intake
+ */
 object Intake : CommandBase() {
     init {
         addRequirements(Intaker)

@@ -351,7 +351,7 @@ abstract class KMotorController : KBasicMotorController() {
      * Updates the voltage after changing position / velocity setpoint
      */
     fun updateVoltage() {
-        if (!isFollower && customControl != null)
+        if (!isFollower && customControl != null && controlMode == ControlMode.VOLTAGE)
             safeSetVoltage(customControl!!(this))
     }
 

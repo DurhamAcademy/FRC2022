@@ -45,6 +45,9 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
     lateinit var trajectory: Trajectory
     private val timer = Timer()
 
+    /**
+     * Prepares the trajectory that the robot will follow
+     */
     override fun initialize() {
         if (!this::trajectory.isInitialized)
             trajectory = if (simple) KTrajectory("simpleTraj", listOf(Navigator.instance!!.pose, targetPose))
@@ -54,9 +57,12 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
         timer.start()
     }
 
+    /**
+     * Follow the generated trajectory
+     */
     override fun execute() {
         val targetSpeed = calculator.calculate(Navigator.instance!!.pose, trajectory.sample(timer.get()))
-        println("pose: ${Navigator.instance!!.pose.string}, expected: ${trajectory.sample(timer.get()).poseMeters.string}")
+//        println("pose: ${Navigator.instance!!.pose.string}, expected: ${trajectory.sample(timer.get()).poseMeters.string}")
         Drivetrain.drive(targetSpeed)
 //        trajectory = PathPlanner.updateTrajectory(trajectory) - this should be necesary until moving obstabcles
     }
