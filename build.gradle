@@ -1,11 +1,14 @@
 import edu.wpi.first.gradlerio.GradleRIOPlugin
 
+
 plugins {
     id "org.jetbrains.kotlin.jvm" version "1.4.31"
     id "org.jetbrains.kotlin.plugin.serialization" version "1.4.31"
     id "java"
     id "edu.wpi.first.GradleRIO" version "2021.3.1"
 }
+
+def VERSION = "2022.3.1"
 
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -72,32 +75,32 @@ dependencies {
 
 
     // Websocket extensions require additional configuration.
-//     simulation wpi.deps.sim.ws_server(wpi.platforms.desktop, false)
-//     simulation wpi.deps.sim.ws_client(wpi.platforms.desktop, false)
+     simulation wpi.deps.sim.ws_server(wpi.platforms.desktop, false)
+     simulation wpi.deps.sim.ws_client(wpi.platforms.desktop, false)
 
     // Add ntcore-java
-    compile "edu.wpi.first.ntcore:ntcore-java:2021.2.2"
+    compile "edu.wpi.first.ntcore:ntcore-java:$VERSION"
 
     // Add cscore-java
-    compile "edu.wpi.first.cscore:cscore-java:2021.2.2"
-    compile "edu.wpi.first.cameraserver:cameraserver-java:2021.2.2"
+    compile "edu.wpi.first.cscore:cscore-java:$VERSION"
+    compile "edu.wpi.first.cameraserver:cameraserver-java:$VERSION"
 
     // Add wpiutil-java
-    compile "edu.wpi.first.wpiutil:wpiutil-java:2021.2.2"
+    compile "edu.wpi.first.wpiutil:wpiutil-java:$VERSION"
 
     // Add ntcore-jni for runtime. We are adding all supported platforms
     // so that our application will work on all supported platforms.
-    runtime "edu.wpi.first.ntcore:ntcore-jni:2021.2.2:windowsx86"
-    runtime "edu.wpi.first.ntcore:ntcore-jni:2021.2.2:windowsx86-64"
-    runtime "edu.wpi.first.ntcore:ntcore-jni:2021.2.2:linuxx86-64"
-    runtime "edu.wpi.first.ntcore:ntcore-jni:2021.2.2:linuxraspbian"
-    runtime "edu.wpi.first.ntcore:ntcore-jni:2021.2.2:osxx86-64"
-
-    runtime "edu.wpi.first.cscore:cscore-jni:2021.2.2:windowsx86"
-    runtime "edu.wpi.first.cscore:cscore-jni:2021.2.2:windowsx86-64"
-    runtime "edu.wpi.first.cscore:cscore-jni:2021.2.2:linuxx86-64"
-    runtime "edu.wpi.first.cscore:cscore-jni:2021.2.2:linuxraspbian"
-    runtime "edu.wpi.first.cscore:cscore-jni:2021.2.2:osxx86-64"
+    runtime "edu.wpi.first.ntcore:ntcore-jni:$VERSION:windowsx86"
+    runtime "edu.wpi.first.ntcore:ntcore-jni:$VERSION:windowsx86-64"
+    runtime "edu.wpi.first.ntcore:ntcore-jni:$VERSION:linuxx86-64"
+    runtime "edu.wpi.first.ntcore:ntcore-jni:$VERSION:linuxraspbian"
+    runtime "edu.wpi.first.ntcore:ntcore-jni:$VERSION:osxx86-64"
+//
+    runtime "edu.wpi.first.cscore:cscore-jni:$VERSION:windowsx86"
+    runtime "edu.wpi.first.cscore:cscore-jni:$VERSION:windowsx86-64"
+    runtime "edu.wpi.first.cscore:cscore-jni:$VERSION:linuxx86-64"
+    runtime "edu.wpi.first.cscore:cscore-jni:$VERSION:linuxraspbian"
+    runtime "edu.wpi.first.cscore:cscore-jni:$VERSION:osxx86-64"
 }
 
 // Simulation configuration (e.g. environment variables).
