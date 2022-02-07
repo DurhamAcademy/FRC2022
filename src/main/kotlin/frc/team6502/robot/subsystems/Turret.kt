@@ -49,7 +49,7 @@ object Turret : SubsystemBase(), Debug, Simulatable {
     // characterization of the turret
     private val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
     // actual turret motors
-    val turret = KSparkMax(22).apply {
+    val turret = KSparkMax(0).apply {
         // todo: tune
         kP = .3
         kD = .1
@@ -62,7 +62,7 @@ object Turret : SubsystemBase(), Debug, Simulatable {
             it.position = clampSafePosition(it.positionSetpoint)
             val offsetCorrection = offsetCorrector.calculate(it.positionError.radians).radiansPerSecond
             val targetVelocity = offsetCorrection - chassisComp
-            val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) * 0.0 + it.PID.calculate(targetVelocity.radiansPerSecond)
+            val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(targetVelocity.radiansPerSecond)
             voltage
         }
     }

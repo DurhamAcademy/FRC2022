@@ -55,7 +55,7 @@ object Constants {
     const val LOST_WAIT = 2.0
     const val SMART_LOSS = true
 
-    val TURRET_TOLERANCE = 3.degrees // how close the heading must be to fire
+    val TURRET_TOLERANCE = 3.degrees // TODO - how close the heading must be to fire
     val TURRET_DEADBAND = 0.5.degrees  // when the turret stops adjusting
 
     // ------ Game Pieces ------ //

@@ -6,9 +6,7 @@ import frc.team6502.robot.Constants
 import kyberlib.command.Debug
 import kyberlib.math.units.extensions.inches
 import kyberlib.motorcontrol.KMotorController
-import kyberlib.motorcontrol.KSimulatedESC
 import kyberlib.motorcontrol.rev.KSparkMax
-import kyberlib.pneumatics.FakeSolenoid
 import kyberlib.pneumatics.KSolenoid
 import kyberlib.simulation.Simulatable
 import kotlin.math.absoluteValue
@@ -27,17 +25,17 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     var status = CLIMBER_STATUS.IDLE
 
     // pneumatics that lift the climb arms
-    private val leftArmLift = FakeSolenoid(0, 0)
-    private val rightArmLift = FakeSolenoid(0, 0)
+    private val leftArmLift = KSolenoid(0, 0)
+    private val rightArmLift = KSolenoid(0, 0)
 
     // winches that pull the robot up
-    val leftWinch = KSimulatedESC("sim").apply {
+    val leftWinch = KSparkMax(0).apply {
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
         customControl = { bangBang(it) }
         }
-    val rightWinch = KSimulatedESC("sim").apply {
+    val rightWinch = KSparkMax(0).apply {
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO

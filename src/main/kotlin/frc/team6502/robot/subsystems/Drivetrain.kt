@@ -41,22 +41,22 @@ import kotlin.math.sin
  */
 object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     // motors
-    val leftMaster = KSparkMax(10, MotorType.BRUSHLESS).apply {
+    val leftMaster = KSparkMax(0, MotorType.BRUSHLESS).apply {
         identifier = "leftMaster"
         reversed = false
         currentLimit = 40
     }
-    val rightMaster  = KSparkMax(12, MotorType.BRUSHLESS).apply {
+    val rightMaster  = KSparkMax(0, MotorType.BRUSHLESS).apply {
         identifier = "rightMaster"
         reversed = true
         currentLimit = 40
     }
-    private val leftFollower  = KSparkMax(11, MotorType.BRUSHLESS).apply {
+    private val leftFollower  = KSparkMax(0, MotorType.BRUSHLESS).apply {
         identifier = "leftFollow"
         currentLimit = 40
         follow(leftMaster)
     }
-    private val rightFollower = KSparkMax(13, MotorType.BRUSHLESS).apply {
+    private val rightFollower = KSparkMax(0, MotorType.BRUSHLESS).apply {
         identifier = "rightFollow"
         currentLimit = 40
         follow(rightMaster)
