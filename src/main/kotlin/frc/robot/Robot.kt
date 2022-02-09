@@ -33,8 +33,6 @@ class Robot : KRobot() {
     }
 
     override fun teleopPeriodic() {
-       RobotContainer.controller.debugDashboard()
-    //    Drive.execute()
     }
 
     override fun enabledInit() {
