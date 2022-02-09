@@ -1,6 +1,7 @@
 package frc.robot
 
 import frc.robot.commands.drive.AutoDrive
+import frc.robot.commands.drive.Drive
 import frc.robot.subsystems.Climber
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Shooter
@@ -32,8 +33,8 @@ class Robot : KRobot() {
     }
 
     override fun teleopPeriodic() {
-//        RobotContainer.controller.debugDashboard()
-//        Drive.execute()
+    //    RobotContainer.controller.debugDashboard()
+       Drive.execute()
     }
 
     override fun enabledInit() {

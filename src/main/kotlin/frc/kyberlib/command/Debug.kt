@@ -30,7 +30,7 @@ enum class DebugLevel {
 interface Debug {
     companion object {
         var debugging = true
-        var loggingLevel = DebugLevel.NORMAL
+        var loggingLevel = DebugLevel.LowPriority
 
         fun log(identifier:String, text: String, mode: LogMode = LogMode.PRINT, level: DebugLevel = DebugLevel.NORMAL, stacktrace: Boolean = false) {
             if (level < loggingLevel) return
@@ -80,8 +80,10 @@ interface Debug {
      * @param logMode the way the message should appear
      * @see LogMode
      */
-    fun log(message: String = debugString, logMode: LogMode = LogMode.PRINT) {
-        Companion.log(identifier, message, logMode, priority, stacktrace = false)
+    fun log(message: String = debugString, logMode: LogMode = LogMode.PRINT, level: DebugLevel = priority) {
+        val isError = logMode == LogMode.ERROR
+        Companion.log(identifier, message, logMode, level, stacktrace = isError)
+        if (isError) throw AssertionError("Check the log for assertion")
     }
 
     /**

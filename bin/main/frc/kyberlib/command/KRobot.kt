@@ -20,48 +20,58 @@ open class KRobot(private val period: Double = 0.02) {
         override fun robotInit() {
             HAL.report(FRCNetComm.tResourceType.kResourceType_Language, FRCNetComm.tInstances.kLanguage_Kotlin)
             if (Game.real) LiveWindow.disableAllTelemetry()
+            Debug.log("Robot", "robotInit", level=DebugLevel.LowPriority)
             this@KRobot.robotInit()
         }
 
         override fun robotPeriodic() {
             CommandScheduler.getInstance().run()
+            Debug.log("Robot", "robot periodic", level=DebugLevel.LowPriority)
             this@KRobot.robotPeriodic()
         }
 
         override fun disabledInit() {
             enabled = false
+            Debug.log("Robot", "disabled", level=DebugLevel.LowPriority)
             this@KRobot.disabledInit()
         }
 
         override fun disabledPeriodic() {
+            Debug.log("Robot", "disabled periodic", level=DebugLevel.LowPriority)
             this@KRobot.disabledPeriodic()
         }
 
         override fun autonomousInit() {
             if (!enabled) enabledInit()
             enabled = true
+            Debug.log("Robot", "auto init", level=DebugLevel.LowPriority)
             this@KRobot.autonomousInit()
         }
 
         override fun autonomousPeriodic() {
+            Debug.log("Robot", "auto periodic", level=DebugLevel.LowPriority)
             this@KRobot.autonomousPeriodic()
         }
 
         override fun teleopInit() {
             if (!enabled) enabledInit()
             enabled = true
+            Debug.log("Robot", "teleop init", level=DebugLevel.LowPriority)
             this@KRobot.teleopInit()
         }
 
         override fun teleopPeriodic() {
+            Debug.log("Robot", "teleop periodic", level=DebugLevel.LowPriority)
             this@KRobot.teleopPeriodic()
         }
 
         override fun simulationInit() {
+            Debug.log("Robot", "sim init", level=DebugLevel.LowPriority)
             this@KRobot.simulationInit()
         }
 
         override fun simulationPeriodic() {
+            Debug.log("Robot", "sim periodic", level=DebugLevel.LowPriority)
             this@KRobot.simulationPeriodic()
         }
 

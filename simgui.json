@@ -32,7 +32,7 @@
         "Robot": {
           "arrows": false
         },
-        "image": "/Users/22staples/Desktop/Screen Shot 2022-02-08 at 9.26.47 PM.png",
+        "image": "/Users/22staples/FRC2022/Rapid React Field.png",
         "traj": {
           "arrowSize": 0,
           "arrows": false,
@@ -52,13 +52,9 @@
   "NetworkTables": {
     "SmartDashboard": {
       "Drivetrain": {
-        "open": true,
-        "speed": {
-          "open": true
-        }
+        "open": true
       },
       "Turret": {
-        "open": true,
         "turret": {
           "open": true
         }

@@ -11,6 +11,8 @@ import frc.robot.subsystems.TURRET_STATUS
 import frc.robot.subsystems.Turret
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.towards
+import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugLevel
 import kotlin.math.sin
 
 /**
@@ -36,6 +38,7 @@ object AimTurret : CommandBase() {
     }
 
     override fun execute() {
+        Debug.log("Aim", "execute", level=DebugLevel.LowPriority)
         // if the limelight is a target
         if (!Turret.targetLost) {
             found()

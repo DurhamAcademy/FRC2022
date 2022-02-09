@@ -13,6 +13,8 @@ import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.string
 import frc.kyberlib.simulation.field.KField2d
+import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.Debug
 
 
 
@@ -63,7 +65,9 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
      * Follow the generated trajectory
      */
     override fun execute() {
-        val targetSpeed = calculator.calculate(Navigator.instance!!.pose, trajectory.sample(timer.get()))
+        val targetPose = trajectory.sample(timer.get())
+        val targetSpeed = calculator.calculate(Navigator.instance!!.pose, targetPose)
+        Debug.log("AutoDrive", "going to $targetPose, @ targetSpeed m/s", level=DebugLevel.LowPriority)
 //        println("pose: ${Navigator.instance!!.pose.string}, expected: ${trajectory.sample(timer.get()).poseMeters.string}")
         Drivetrain.drive(targetSpeed)
 //        trajectory = PathPlanner.updateTrajectory(trajectory) - this should be necesary until moving obstabcles

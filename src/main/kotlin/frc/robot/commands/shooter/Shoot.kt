@@ -9,6 +9,8 @@ import frc.robot.subsystems.Turret
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.math.units.extensions.radiansPerSecond
+import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugLevel
 
 
 /**
@@ -20,6 +22,7 @@ object Shoot : CommandBase() {
     }
 
     override fun execute() {
+        Debug.log("Shoot", "execute", level=DebugLevel.LowPriority)
         // check if shooter should spin up
         if (Conveyor.good && !Turret.targetLost && false) {  // todo: setup test interpolator
             val dis = Shooter.targetDistance!!.meters

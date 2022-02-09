@@ -9,6 +9,8 @@ import frc.robot.subsystems.Drivetrain
 import frc.kyberlib.math.units.extensions.feetPerSecond
 import frc.kyberlib.math.units.extensions.metersPerSecond
 import frc.kyberlib.math.units.extensions.radiansPerSecond
+import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugLevel
 
 /**
  * The default drive commands. Arcade drive based on xbox controller inputs
@@ -29,6 +31,7 @@ object Drive : CommandBase() {
         val fwd = RobotContainer.controller.leftY.value.feetPerSecond
         val turn = RobotContainer.controller.rightX.value.radiansPerSecond
         val speeds = ChassisSpeeds(velFilter.calculate(fwd.metersPerSecond), 0.0, rotFilter.calculate(turn.radiansPerSecond))
+        Debug.log("Default Drive", "fwd: $fwd, turn: $turn", level=DebugLevel.LowPriority)
         Drivetrain.drive(speeds)
     }
 

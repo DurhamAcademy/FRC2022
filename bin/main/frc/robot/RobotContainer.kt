@@ -49,7 +49,7 @@ object RobotContainer {
 //        aButton.toggleWhenActive(Climb)
 //        bButton.whileActiveOnce(ToggleArmLift())
     }
-    
+
     val navigation = Navigator(gyro, Constants.START_POSE)
 
     val leds = KLEDStrip(0, 103).apply {
@@ -128,7 +128,6 @@ object RobotContainer {
         Intaker
         Shooter
         Turret
-
     }
 
 }

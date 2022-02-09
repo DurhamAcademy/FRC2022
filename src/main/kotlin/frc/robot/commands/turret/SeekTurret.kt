@@ -7,6 +7,8 @@ import frc.robot.subsystems.TURRET_STATUS
 import frc.robot.subsystems.Turret
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.k
+import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugLevel
 
 /**
  * Spin turret in circle. This command should never really be necessary if we odometry good
@@ -33,6 +35,7 @@ object SeekTurret : CommandBase() {
     }
 
     override fun execute() {
+        Debug.log("Seek", "execute", level=DebugLevel.LowPriority)
         if (!Turret.targetLost) { // the limelight sees something and it's valid if required
             // start timer if it isn't on yet
             if(acquisitionTimer.get() <= 0.0001) acquisitionTimer.start()

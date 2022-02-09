@@ -1,8 +1,8 @@
 {
   "MainWindow": {
     "GLOBAL": {
-      "height": "1080",
-      "maximized": "0",
+      "height": "1035",
+      "maximized": "1",
       "style": "0",
       "userScale": "2",
       "width": "1920",
@@ -73,7 +73,7 @@
     },
     "###Timing": {
       "Collapsed": "1",
-      "Pos": "20,128",
+      "Pos": "6,125",
       "Size": "98,103"
     },
     "Debug##Default": {
