@@ -21,7 +21,7 @@ object Shoot : CommandBase() {
 
     override fun execute() {
         // check if shooter should spin up
-        if (Conveyor.good && !Turret.targetLost) {
+        if (Conveyor.good && !Turret.targetLost && false) {  // todo: setup test interpolator
             val dis = Shooter.targetDistance!!.meters
 
             // calculate values given the current distance from the hub

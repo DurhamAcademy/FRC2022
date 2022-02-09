@@ -29,7 +29,7 @@ class Simulation : SubsystemBase() {
     val dt
         get() = time - prevTime
 
-    var chassisFF: SimpleMotorFeedforward = SimpleMotorFeedforward(0.0, 0.0)
+    var chassisFF = SimpleMotorFeedforward(0.0, 0.0)
 
     /**
      * Takes voltage and velocity and calculates what acceleration should be
