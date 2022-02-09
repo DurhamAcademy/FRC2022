@@ -7,12 +7,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.commands.shooter.Shoot
-import frc.robot.subsystems.Turret.targetLost
+import frc.robot.subsystems.Turret.targetVisible
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.mechanisms.Flywheel
 import frc.kyberlib.motorcontrol.rev.KSparkMax
+import frc.kyberlib.motorcontrol.KServo
+import frc.kyberlib.simulation.Simulatable
 
 
 /**
@@ -26,14 +28,14 @@ enum class SHOOTER_STATUS {
 /**
  * Encapsulates all the things relevant to shooting the ball
  */
-object Shooter : SubsystemBase(), Debug {
+object Shooter : SubsystemBase(), Debug, Simulatable {
     var status = SHOOTER_STATUS.IDLE
 
     // main motor attached to the flywheel
     val flywheelMaster = KSparkMax(0).apply {
         identifier = "flywheel"
         radius = Constants.FLYWHEEL_RADIUS
-        Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.002)  // todo: test this
+        Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.002)  // TODO: test this
     }
     val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 4)
     // additional motors that copy the main
@@ -42,20 +44,21 @@ object Shooter : SubsystemBase(), Debug {
     private val flywheel4 = KSparkMax(0).apply { follow(flywheelMaster) }
 
     // Servo that sets the hood angle
-    private val hood = Servo(1)
+    private val hood = KServo(1)
 
-    // todo: figure out this will work - it won't figure it out
+    // TODO: figure out this will work - it won't figure it out
     var hoodAngle: Angle
-        get() = hood.get().degrees
+        get() = hood.position
         set(value) {
-            hood.set(value.degrees)
+            hood.position = value
         }
 
     // how far from the hub the robot is (based on limelight)
     private val distanceFilter = LinearFilter.movingAverage(8)
-    val targetDistance: Length? = if (Game.sim) RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
-                                else if (targetLost) null
-                                else distanceFilter.calculate(((Constants.UPPER_HUB_HEIGHT - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
+    val targetDistance: Length? 
+        get() = if (Game.sim) RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+                else if (!targetVisible) null
+                else distanceFilter.calculate(((Constants.UPPER_HUB_HEIGHT - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
 
     // motor controlling top roller speed
     val topShooter = KSparkMax(0).apply {
@@ -68,13 +71,23 @@ object Shooter : SubsystemBase(), Debug {
     }
 
     override fun periodic() {
+        log("periodic")
         debugDashboard()
     }
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
             "flywheel" to flywheelMaster,
-            "top Shooter" to topShooter
+            "top Shooter" to topShooter,
+            "hood" to hood,
+            "distance" to targetDistance
         )
+    }
+
+    override fun simUpdate(dt: Double) {
+        flywheelControl.simUpdate(dt)
+        // flywheelMaster.simVelocity = flywheelMaster.velocitySetpoint
+        hood.simPosition = hood.positionSetpoint
+        topShooter.simVelocity = topShooter.velocitySetpoint
     }
 }

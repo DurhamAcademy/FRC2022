@@ -4,7 +4,7 @@ import frc.kyberlib.input.AxisButton
 import frc.kyberlib.input.KAxis
 import frc.kyberlib.input.KController
 
-// todo: label these better
+// TODO: label these better
 /**
  * Wrapper for a Taranis controller using TAER on channels 1-4
  */

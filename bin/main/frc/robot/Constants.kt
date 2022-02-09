@@ -18,7 +18,7 @@ object Constants {
 
     // ------ Conveyor ------ //
 
-    // ------ Drivetrain ------ // todo: characterize
+    // ------ Drivetrain ------ // TODO: characterize
     // pids
     const val DRIVE_P = 0.7
     const val DRIVE_I = 0.0
@@ -29,10 +29,12 @@ object Constants {
     const val DRIVE_KV = 2.59
     const val DRIVE_KA = 0.494
 
-    // drivetrain setup - todo: tune
+    // drivetrain setup - TODO: tune
     const val TRACK_WIDTH = 0.657299651
-    val WHEEL_RADIUS = 2.inches  // todo: measure
+    val WHEEL_RADIUS = 2.inches  // TODO: measure
     const val DRIVE_GEAR_RATIO = (10.0 / 50.0) * (50.0 / 62.0)
+
+    const val NAVIGATION_CORRECTION = false
 
     // ------ Intake ------ //
     const val INTAKE_PERCENT = 0.5
@@ -41,9 +43,21 @@ object Constants {
     val LIMELIGHT_HEIGHT: Length = 36.inches // TODO
     val LIMELIGHT_ANGLE: Angle = 45.degrees // TODO
 
-    val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf())  // TODO
-    val TOPWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf())  // TODO
-    val HOODANGLE_INTERPOLATOR: Interpolator = Interpolator(mapOf())  // TODO
+    val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf(
+        100.inches.meters to 3.0,
+        200.inches.meters to 5.0,
+        300.inches.meters to 7.0
+    ))  // TODO
+    val TOPWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf(
+        100.inches.meters to 1.0,
+        200.inches.meters to 2.0,
+        300.inches.meters to 3.0
+    ))  // TODO
+    val HOODANGLE_INTERPOLATOR: Interpolator = Interpolator(mapOf(
+        100.inches.meters to 80.0,
+        200.inches.meters to 60.0,
+        300.inches.meters to 4.0
+    ))  // TODO
 
     val SHOOTER_VELOCITY_TOLERANCE = 50.0.rpm
     val FLYWHEEL_RADIUS = 2.inches

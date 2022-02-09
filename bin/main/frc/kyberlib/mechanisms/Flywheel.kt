@@ -86,11 +86,11 @@ class Flywheel(private val motor: KMotorController,
 
     private val sim = FlywheelSim(plant, motors, kFlywheelGearing)
     override fun simUpdate(dt: Double) {
-        println("fly voltage = ${motor.voltage}")
+        Debug.log("Flywheel", "fly voltage = ${motor.voltage}")
         sim.setInputVoltage(motor.voltage)
         sim.update(dt)
         motor.simVelocity = sim.angularVelocityRPM.rpm
-        println("vel: ${motor.simVelocity}")
+        Debug.log("Flywheel", "vel: ${motor.simVelocity}")
     }
 
 }

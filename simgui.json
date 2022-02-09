@@ -22,6 +22,7 @@
       "/LiveWindow/Ungrouped/PIDController[12]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[13]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[14]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[15]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
@@ -64,13 +65,21 @@
         "leftMaster": {
           "open": true
         },
-        "open": true,
         "rightMaster": {
           "open": true
         },
         "speed": {
           "open": true
         }
+      },
+      "Field": {
+        "open": true
+      },
+      "Shooter": {
+        "hood": {
+          "open": true
+        },
+        "open": true
       },
       "Turret": {
         "turret": {
@@ -84,7 +93,7 @@
     "Plot <0>": {
       "plots": [
         {
-          "height": 303,
+          "height": -29,
           "series": [
             {
               "color": [
@@ -134,7 +143,7 @@
           ]
         },
         {
-          "height": 303,
+          "height": -29,
           "series": [
             {
               "color": [
@@ -230,6 +239,51 @@
                 1.0
               ],
               "id": "NT:/SmartDashboard//Turret/turret/Angular Velocity (rad per s)"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Turret/turret/error"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <2>": {
+      "plots": [
+        {
+          "height": 445,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Shooter/flywheel/Angular Velocity (rad per s)"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Shooter/top Shooter/Angular Velocity (rad per s)"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Shooter/hood/Angular Position (rad)"
             }
           ]
         }

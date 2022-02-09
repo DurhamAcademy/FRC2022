@@ -88,8 +88,8 @@ class Node {
     }
 }
 
-// todo: make more general graph
-// todo: spline based planning
+// TODO: make more general graph
+// TODO: spline based planning
 /**
  * A tree class to represent to points and connections of the RRT pathfinder
  * @author TateStaples

@@ -1,5 +1,8 @@
 package frc.kyberlib.math
 
+import frc.kyberlib.command.Debug
+import frc.kyberlib.command.LogMode
+
 /**
  * Linear Interpolator that will use a series of points to approximate a value
  */
@@ -15,8 +18,11 @@ class Interpolator(private val data: Map<Double, Double>) {
         val nextHighest = getNext(x)
         val nextLowest = getPrevious(x)
 
-        if(nextHighest == null || nextLowest == null) return null
-        if(nextHighest.value == nextLowest.value) return nextLowest.value
+        if(nextHighest == null || nextLowest == null) {
+            Debug.log("Interpolator", "Caclculated value: $x is outside of range", LogMode.WARN)
+            return if (nextHighest == null) nextLowest!!.value else nextHighest.value
+        }
+        else if(nextHighest.value == nextLowest.value) return nextLowest.value
 
         val alpha = (x - nextLowest.key) / (nextHighest.key - nextLowest.key)
 

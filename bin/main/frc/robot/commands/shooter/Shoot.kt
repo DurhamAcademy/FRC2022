@@ -24,7 +24,7 @@ object Shoot : CommandBase() {
     override fun execute() {
         Debug.log("Shoot", "execute", level=DebugLevel.LowPriority)
         // check if shooter should spin up
-        if (Conveyor.good && !Turret.targetLost && false) {  // todo: setup test interpolator
+        if (true || Conveyor.good && Turret.targetVisible) {
             val dis = Shooter.targetDistance!!.meters
 
             // calculate values given the current distance from the hub
@@ -37,14 +37,19 @@ object Shoot : CommandBase() {
             Shooter.topShooter.velocity = targetTopWheelVelocity
             Shooter.hoodAngle = targetHoodAngle
 
-            // todo: bad if this stutters
+            // TODO: bad if this stutters
             // if the turret is on target
             if (Turret.readyToShoot && Shooter.flywheelMaster.velocityError < Constants.SHOOTER_VELOCITY_TOLERANCE) {
                 // change leds to green or something
                 Conveyor.feed()
                 Shooter.status = SHOOTER_STATUS.AUTO_SHOT
             } else Shooter.status = SHOOTER_STATUS.SPINUP
-        } else Shooter.status = SHOOTER_STATUS.IDLE
+        } else {
+            Debug.log("Shoot", "idle", level=DebugLevel.LowPriority)
+            Shooter.flywheelMaster.stop()
+            Shooter.topShooter.stop()
+            Shooter.status = SHOOTER_STATUS.IDLE
+        }
     }
 
     override fun isFinished(): Boolean = false

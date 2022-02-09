@@ -20,7 +20,7 @@ object SeekTurret : CommandBase() {
     // counts how long a target has been visible
     val acquisitionTimer = Timer()
 
-    // todo move to Constants
+    // TODO move to Constants
     const val SHOOTER_AQUISITION_TIME = 0.2
 
     init {
@@ -36,7 +36,7 @@ object SeekTurret : CommandBase() {
 
     override fun execute() {
         Debug.log("Seek", "execute", level=DebugLevel.LowPriority)
-        if (!Turret.targetLost) { // the limelight sees something and it's valid if required
+        if (Turret.targetVisible) { // the limelight sees something and it's valid if required
             // start timer if it isn't on yet
             if(acquisitionTimer.get() <= 0.0001) acquisitionTimer.start()
         } else {

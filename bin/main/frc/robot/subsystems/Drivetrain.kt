@@ -104,20 +104,20 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
-        debugDashboard()
         RobotContainer.navigation.update(wheelSpeeds)
-        if(!Turret.targetLost && false)  {  // todo: test
+        if(Turret.targetVisible && Constants.NAVIGATION_CORRECTION)  {  // TODO: test
             val distance = Shooter.targetDistance!! + 2.feet  // two feet is the radius of the hub
             val angle = Turret.visionOffset!! + Turret.fieldRelativeAngle
             val transform = Translation2d(distance, 0.meters).rotateBy(angle)
             val newPosition = Constants.HUB_POSITION.minus(transform)
-            val time = Game.time - RobotContainer.limelight.latestResult!!.latencyMillis * 1000  // todo: wrong units
+            val time = Game.time - RobotContainer.limelight.latestResult!!.latencyMillis * 1000  // TODO: wrong units
             RobotContainer.navigation.update(Pose2d(newPosition, RobotContainer.navigation.heading), time)
 
         }
     }
 
     override fun simulationPeriodic() {
+        debugDashboard()
         KField2d.robotPose = RobotContainer.navigation.pose
     }
 
@@ -157,7 +157,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
             kinematics.trackWidthMeters,  // The track width
             leftMaster.radius!!.meters,  // wheel radius
             // The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
-            VecBuilder.fill(0.000, 0.000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000) // todo: add noise back
+            VecBuilder.fill(0.000, 0.000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000) // TODO: add noise back
         )
     }
 

@@ -24,7 +24,7 @@ class Robot : KRobot() {
             Drivetrain.setupSim()
             Simulation.instance.include(Turret)
             // Simulation.instance.include(Climber)
-//            Simulation.instance.include(Shooter.flywheelControl)
+           Simulation.instance.include(Shooter)
         }
     }
 

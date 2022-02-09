@@ -11,7 +11,7 @@ import frc.kyberlib.pneumatics.KSolenoid
  */
 object Intaker  : SubsystemBase(), Debug {
     // deployment solenoids
-    private val leftIntakeDeploy = KSolenoid(PneumaticsModuleType.REVPH, 0)  // todo: check if these configs are right
+    private val leftIntakeDeploy = KSolenoid(PneumaticsModuleType.REVPH, 0)  // TODO: check if these configs are right
     private val rightIntakeDeploy = KSolenoid(PneumaticsModuleType.REVPH, 0)
 
     // public get/set for deploy status
@@ -25,7 +25,7 @@ object Intaker  : SubsystemBase(), Debug {
     // motor controlling the intake speed
     val intakeMotor = KSparkMax(0)
 
-    // todo add ball sensors
+    // TODO add ball sensors
 
     override fun periodic() {
         debugDashboard()

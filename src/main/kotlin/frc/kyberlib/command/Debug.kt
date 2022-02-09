@@ -30,7 +30,7 @@ enum class DebugLevel {
 interface Debug {
     companion object {
         var debugging = true
-        var loggingLevel = DebugLevel.NORMAL
+        var loggingLevel = DebugLevel.LowPriority
 
         fun log(identifier:String, text: String, mode: LogMode = LogMode.PRINT, level: DebugLevel = DebugLevel.NORMAL, stacktrace: Boolean = false) {
             if (level < loggingLevel) return
@@ -47,7 +47,7 @@ interface Debug {
      * Debugs all the values into a group in the SmartDashboard
      */
     fun debugDashboard(previousPath: String = "", id: String = identifier) {
-        if (!debugging || loggingLevel < priority) return
+        if (!debugging || loggingLevel > priority) return
         val map = debugValues()
         sendMapToDashboard(map, "$previousPath/$id")
     }

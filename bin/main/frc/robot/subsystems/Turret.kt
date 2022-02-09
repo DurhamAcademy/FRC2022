@@ -53,8 +53,8 @@ object Turret : SubsystemBase(), Debug, Simulatable {
     private val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
     // actual turret motors
     val turret = KSparkMax(0).apply {
-        // todo: tune
-        kP = 0.0
+        // TODO: tune
+        kP = 0.1
         kD = .000
         gearRatio = Constants.TURRET_GEAR_RATIO
 
@@ -103,10 +103,10 @@ object Turret : SubsystemBase(), Debug, Simulatable {
 
     private val latestResult: PhotonPipelineResult?
         get() = RobotContainer.limelight.latestResult
-    val targetLost: Boolean  // todo: change to targetVisible
-        get() = Game.real && (latestResult == null || !latestResult!!.hasTargets())
+    val targetVisible: Boolean 
+        get() = Game.sim || (latestResult != null && latestResult!!.hasTargets())
     private val target: PhotonTrackedTarget?
-        get() = if(!targetLost) latestResult!!.bestTarget else null
+        get() = if(targetVisible) latestResult!!.bestTarget else null
 
     val visionOffset: Angle?
         get() = if (Game.real) target?.yaw?.degrees
@@ -130,7 +130,7 @@ object Turret : SubsystemBase(), Debug, Simulatable {
             "turret" to turret,
             "turret error" to visionOffset?.radians,
             "field Heading" to fieldRelativeAngle.radians,
-            "target detected" to targetLost
+            "target detected" to targetVisible
         )
     }
 
@@ -139,7 +139,7 @@ object Turret : SubsystemBase(), Debug, Simulatable {
      */
     fun guessVelocity(v: Double): AngularVelocity = ((v.absoluteValue - feedforward.ks) / feedforward.kv).coerceAtLeast(0.0).invertIf { v < 0.0 }.radiansPerSecond
 
-    override fun simUpdate(dt: Double) {  // todo: add momentum and shit
+    override fun simUpdate(dt: Double) {  // TODO: add momentum and shit
         turret.simUpdate(feedforward, dt)
     }
 }

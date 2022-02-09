@@ -40,10 +40,10 @@ object AimTurret : CommandBase() {
     override fun execute() {
         Debug.log("Aim", "execute", level=DebugLevel.LowPriority)
         // if the limelight is a target
-        if (!Turret.targetLost) {
+        if (Turret.targetVisible) {
             found()
 
-            // perp zoom correction todo: add later
+            // perp zoom correction TODO: add later
 //            val towardsHub = Turret.turret.position + Turret.visionOffset
 //            val robotSpeed = Drivetrain.chassisSpeeds.vxMetersPerSecond.metersPerSecond
 //            val perpSpeed = robotSpeed * sin(towardsHub.radians)
