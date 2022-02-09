@@ -1,11 +1,11 @@
 package frc.kyberlib.mechanisms.drivetrain
 
-import edu.wpi.first.wpilibj.geometry.Pose2d
-import edu.wpi.first.wpilibj.geometry.Translation2d
-import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds
-import edu.wpi.first.wpilibj.kinematics.MecanumDriveKinematics
-import edu.wpi.first.wpilibj.kinematics.MecanumDriveOdometry
-import edu.wpi.first.wpilibj.kinematics.MecanumDriveWheelSpeeds
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.kinematics.MecanumDriveKinematics
+import edu.wpi.first.math.kinematics.MecanumDriveOdometry
+import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.math.units.debugValues
@@ -67,7 +67,7 @@ class MecanumDrivetrain(vararg packages: Pair<Translation2d, KMotorController>, 
 
     fun drive(speeds: MecanumDriveWheelSpeeds) {
         if (maxVelocity.value > 0)
-            speeds.normalize(maxVelocity.metersPerSecond)
+            speeds.desaturate(maxVelocity.metersPerSecond)
         frontLeft.linearVelocity = speeds.frontLeftMetersPerSecond.metersPerSecond
         frontRight.linearVelocity = speeds.frontRightMetersPerSecond.metersPerSecond
         backLeft.linearVelocity = speeds.rearLeftMetersPerSecond.metersPerSecond

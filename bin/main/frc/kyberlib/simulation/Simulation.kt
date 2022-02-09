@@ -1,6 +1,6 @@
 package frc.kyberlib.simulation
 
-import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Game

@@ -2,11 +2,11 @@ package frc.kyberlib.motorcontrol
 
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj.controller.ArmFeedforward
-import edu.wpi.first.wpilibj.controller.PIDController
-import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward
-import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder
-import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile
+import edu.wpi.first.math.controller.ArmFeedforward
+import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.networktables.NTSendableBuilder
+import edu.wpi.first.math.trajectory.TrapezoidProfile
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.units.extensions.*
@@ -123,13 +123,13 @@ abstract class KMotorController : KBasicMotorController() {
      */
     var maxVelocity: AngularVelocity
         get() = constraints.maxVelocity.radiansPerSecond
-        set(value) { constraints.maxVelocity = value.radiansPerSecond }
+        set(value) { constraints = TrapezoidProfile.Constraints(value.radiansPerSecond, constraints.maxVelocity) }
     /**
      * The max angular acceleation the motor can have
      */
     var maxAcceleration: AngularVelocity
         get() = constraints.maxAcceleration.radiansPerSecond
-        set(value) { constraints.maxAcceleration = value.radiansPerSecond }
+        set(value) { constraints = TrapezoidProfile.Constraints(constraints.maxVelocity, value.radiansPerSecond) }
     /**
      * The max linear velocity the motor can have
      */
@@ -143,7 +143,7 @@ abstract class KMotorController : KBasicMotorController() {
         get() = rotationToLinear(maxAcceleration)
         set(value) { maxAcceleration = linearToRotation(value) }
 
-    private val constraints = TrapezoidProfile.Constraints(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
+    private var constraints = TrapezoidProfile.Constraints(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
     var PID = PIDController(0.0, 0.0, 0.0)  // what does the profile do?
 
     /**
@@ -443,7 +443,7 @@ abstract class KMotorController : KBasicMotorController() {
         get() = rotationToLinear(simPosition)
         set(value) { simPosition = linearToRotation(value) }
 
-    override fun initSendable(builder: SendableBuilder) {
+    override fun initSendable(builder: NTSendableBuilder) {
         super.initSendable(builder)
         builder.addDoubleProperty("Angular Position (rad)", {linearPosition.meters}, { linearPosition = it.meters })
         builder.addDoubleProperty("Angular Velocity (rad per s)", {linearVelocity.metersPerSecond}, { linearVelocity = it.metersPerSecond })

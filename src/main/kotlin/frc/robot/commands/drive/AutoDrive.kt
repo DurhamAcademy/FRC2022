@@ -3,6 +3,9 @@ package frc.robot.commands.drive
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.CommandBase
 import edu.wpi.first.math.controller.RamseteController
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.trajectory.Trajectory
 import frc.robot.subsystems.Drivetrain
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.pathing.Pathfinder
@@ -12,16 +15,18 @@ import frc.kyberlib.math.units.string
 import frc.kyberlib.simulation.field.KField2d
 
 
+
 /**
  * Automatically path and drive to a pose when called
  * @param targetPose the pose to drive to
  */
-class AutoDrive(var targetPose: ) : CommandBase() {
+class AutoDrive(var targetPose: Pose2d) : CommandBase() {
     companion object {
         private var calculator = RamseteController(2.0, 0.7)  // these are the recommended values
 
         fun updateRamsete(beta: Double, zeta: Double) {
-            calculator = RamseteController(beta, zeta)
+            val t = Trajectory()
+            calculator = RamseteController(beta, zeta) 
         }
     }
     val simple = true

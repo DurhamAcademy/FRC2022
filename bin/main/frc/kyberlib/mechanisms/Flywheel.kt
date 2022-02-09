@@ -1,13 +1,13 @@
 package frc.kyberlib.mechanisms
 
-import edu.wpi.first.wpilibj.controller.LinearQuadraticRegulator
-import edu.wpi.first.wpilibj.estimator.KalmanFilter
+import edu.wpi.first.math.controller.LinearQuadraticRegulator
+import edu.wpi.first.math.estimator.KalmanFilter
 import edu.wpi.first.wpilibj.simulation.FlywheelSim
-import edu.wpi.first.wpilibj.system.LinearSystemLoop
-import edu.wpi.first.wpilibj.system.plant.DCMotor
-import edu.wpi.first.wpilibj.system.plant.LinearSystemId
-import edu.wpi.first.wpiutil.math.VecBuilder
-import edu.wpi.first.wpiutil.math.numbers.N1
+import edu.wpi.first.math.system.LinearSystemLoop
+import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.math.system.plant.LinearSystemId
+import edu.wpi.first.math.VecBuilder
+import edu.wpi.first.math.numbers.N1
 import frc.kyberlib.command.Debug
 import frc.kyberlib.math.units.extensions.AngularVelocity
 import frc.kyberlib.math.units.extensions.radiansPerSecond

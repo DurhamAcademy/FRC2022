@@ -1,11 +1,10 @@
 package frc.kyberlib.math.units.extensions
 
-import edu.wpi.first.wpilibj.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Rotation2d
 import frc.kyberlib.math.units.*
 import kotlin.math.PI
 
 typealias Angle = KRotation
-
 
 /**
  * KUnit for the rotation of an object.

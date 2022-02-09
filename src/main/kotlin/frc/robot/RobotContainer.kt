@@ -49,7 +49,7 @@ object RobotContainer {
 //        aButton.toggleWhenActive(Climb)
 //        bButton.whileActiveOnce(ToggleArmLift())
     }
-
+    
     val navigation = Navigator(gyro, Constants.START_POSE)
 
     val leds = KLEDStrip(0, 103).apply {
@@ -75,14 +75,12 @@ object RobotContainer {
         val allianceColor = when(Game.alliance){
             DriverStation.Alliance.Blue -> Color.BLUE
             DriverStation.Alliance.Red -> Color.RED
-            DriverStation.Alliance.Invalid -> Color.BLUE
-            null -> Color.BLUE
+            else -> Color.BLUE
         }
         val enemyColor = when(Game.alliance){
             DriverStation.Alliance.Blue -> Color.RED
             DriverStation.Alliance.Red -> Color.BLUE
-            DriverStation.Alliance.Invalid -> Color.RED
-            null -> Color.RED
+            else -> Color.RED
         }
         val conveyorStart = 0
         val conveyorLength = 50

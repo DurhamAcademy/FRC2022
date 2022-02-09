@@ -1,6 +1,6 @@
 package frc.robot.subsystems
 
-import edu.wpi.first.wpilibj.LinearFilter
+import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.Servo
 import edu.wpi.first.wpilibj2.command.SubsystemBase

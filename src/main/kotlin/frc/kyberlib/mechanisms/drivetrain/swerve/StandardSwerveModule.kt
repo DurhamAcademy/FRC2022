@@ -1,7 +1,7 @@
 package frc.kyberlib.mechanisms.drivetrain.swerve
 
-import edu.wpi.first.wpilibj.geometry.Rotation2d
-import edu.wpi.first.wpilibj.geometry.Translation2d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.math.units.extensions.k
 

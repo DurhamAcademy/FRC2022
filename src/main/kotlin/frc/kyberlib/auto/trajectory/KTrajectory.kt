@@ -1,11 +1,11 @@
 package frc.kyberlib.auto.trajectory
 
-import edu.wpi.first.wpilibj.geometry.Pose2d
-import edu.wpi.first.wpilibj.geometry.Rotation2d
-import edu.wpi.first.wpilibj.geometry.Translation2d
-import edu.wpi.first.wpilibj.trajectory.Trajectory
-import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator
-import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.trajectory.Trajectory
+import edu.wpi.first.math.trajectory.TrajectoryGenerator
+import edu.wpi.first.math.trajectory.TrajectoryUtil
 import frc.kyberlib.KyberlibConfig
 import frc.kyberlib.command.Debug
 import java.io.File

@@ -1,13 +1,14 @@
 package frc.kyberlib.pneumatics
 
 import edu.wpi.first.wpilibj.Solenoid
+import edu.wpi.first.wpilibj.PneumaticsModuleType
 
 /**
  *  A_____B______C
  * ||     |      ||______|
  * |______________|      |
  */
-class KTripleSolenoid(val module: Int, val portA: Int, val portB: Int, val portC: Int) {
+class KTripleSolenoid(val module: PneumaticsModuleType, val portA: Int, val portB: Int, val portC: Int) {
 
     private val solenoidA = Solenoid(module, portA)
     private val solenoidB = Solenoid(module, portB)

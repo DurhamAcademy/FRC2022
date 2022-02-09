@@ -1,6 +1,6 @@
 package frc.robot
 
-import edu.wpi.first.wpilibj.geometry.Pose2d
+import edu.wpi.first.math.geometry.Pose2d
 import frc.kyberlib.math.Interpolator
 import frc.kyberlib.math.units.Pose2d
 import frc.kyberlib.math.units.Translation2d

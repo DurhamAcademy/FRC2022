@@ -1,9 +1,9 @@
 package frc.kyberlib.simulation.field
 
-import edu.wpi.first.wpilibj.geometry.Translation2d
+import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
-import edu.wpi.first.wpilibj.trajectory.Trajectory
-import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator
+import edu.wpi.first.math.trajectory.Trajectory
+import edu.wpi.first.math.trajectory.TrajectoryGenerator
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.Constants
 import frc.kyberlib.math.units.extensions.Length

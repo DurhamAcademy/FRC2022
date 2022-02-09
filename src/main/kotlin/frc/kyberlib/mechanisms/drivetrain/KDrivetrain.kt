@@ -1,6 +1,6 @@
 package frc.kyberlib.mechanisms.drivetrain
 
-import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import frc.kyberlib.command.Debug
 
 /**

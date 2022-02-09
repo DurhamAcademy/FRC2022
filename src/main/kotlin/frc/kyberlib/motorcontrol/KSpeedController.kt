@@ -1,13 +1,14 @@
 package frc.kyberlib.motorcontrol
 
-import edu.wpi.first.wpilibj.SpeedController
+import edu.wpi.first.wpilibj.motorcontrol.MotorController
 
 /**
  * Wraps a WPI SpeedController to use the KBasicMotorController API
  */
-class KSpeedController(private val m_speedController: SpeedController) : KBasicMotorController() {
+class KSpeedController(private val m_speedController: MotorController) : KBasicMotorController() {
     private companion object{
         var id = 1
+
     }
 
     private val myId = id

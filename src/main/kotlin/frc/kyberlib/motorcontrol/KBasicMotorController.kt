@@ -1,7 +1,8 @@
 package frc.kyberlib.motorcontrol
 
 import edu.wpi.first.wpilibj.*
-import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder
+import edu.wpi.first.networktables.NTSendable
+import edu.wpi.first.networktables.NTSendableBuilder
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.invertIf
@@ -9,7 +10,7 @@ import frc.kyberlib.math.invertIf
 /**
  * A basic motor controller. No closed-loop control
  */
-abstract class KBasicMotorController : Sendable, Debug {
+abstract class KBasicMotorController : NTSendable, Debug {
     var controlMode = ControlMode.NULL
     // ------ configs ----- //
     /**
@@ -132,9 +133,9 @@ abstract class KBasicMotorController : Sendable, Debug {
     }
 
     /**
-     * Converts motor in sendable graphics widget
+     * Converts motor in NTSendable graphics widget
      */
-    override fun initSendable(builder: SendableBuilder) {
+    override fun initSendable(builder: NTSendableBuilder) {
         builder.setSmartDashboardType("Encoder")
         builder.addDoubleProperty("Voltage", this::voltage) { this.voltage = it }
         builder.addBooleanProperty("brake mode", this::brakeMode, this::brakeMode::set)

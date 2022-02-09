@@ -1,6 +1,6 @@
 package frc.kyberlib.auto.pathing
 
-import edu.wpi.first.wpilibj.geometry.Translation2d
+import edu.wpi.first.math.geometry.Translation2d
 import frc.kyberlib.simulation.field.KField2d
 import java.util.function.Predicate
 

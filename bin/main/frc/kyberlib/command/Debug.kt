@@ -1,8 +1,8 @@
 package frc.kyberlib.command
 
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.Sendable
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.networktables.NTSendable
 import frc.kyberlib.math.units.KUnit
 import frc.kyberlib.math.units.extensions.Angle
 
@@ -65,7 +65,7 @@ interface Debug {
                 is Double -> SmartDashboard.putNumber(path, info.value as Double)
                 is Debug -> sendMapToDashboard((info.value as Debug).debugValues(), path)
                 is Map<*, *> -> sendMapToDashboard(info.value as Map<String, Any?>, path)
-                is Sendable -> SmartDashboard.putData(path, info.value as Sendable)
+                is NTSendable -> SmartDashboard.putData(path, info.value as NTSendable)
 //                is Angle -> SmartDashboard.putNumber(path, (info.value as Angle).degrees)
 //                is KUnit<*> -> SmartDashboard.putNumber(path, info.value as Double)
                 else -> SmartDashboard.putString(path, info.value.toString())
@@ -112,7 +112,7 @@ interface Debug {
         get() = DebugLevel.NORMAL
     /**
      * Function that retrieves the values that need to be debugged
-     * @return map of string (name) to value. Numbers, Booleans, and Sendables are displayed as such
+     * @return map of string (name) to value. Numbers, Booleans, and NTSendables are displayed as such
      */
     fun debugValues(): Map<String, Any?>
 }

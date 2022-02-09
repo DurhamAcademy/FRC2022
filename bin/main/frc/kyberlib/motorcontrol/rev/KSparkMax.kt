@@ -1,10 +1,10 @@
 package frc.kyberlib.motorcontrol.rev
 
-import com.revrobotics.CANEncoder
-import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
-import com.revrobotics.ControlType
+import com.revrobotics.SparkMaxPIDController
+import com.revrobotics.SparkMaxRelativeEncoder
+import com.revrobotics.RelativeEncoder
 import frc.kyberlib.command.LogMode
 import frc.kyberlib.motorcontrol.EncoderType
 import frc.kyberlib.motorcontrol.KEncoderConfig
@@ -34,7 +34,7 @@ class KSparkMax(val canId: CANId, val motorType: frc.kyberlib.motorcontrol.Motor
         BRUSHLESS -> MotorType.kBrushless
         BRUSHED -> MotorType.kBrushed
     }) else null
-    private var _enc: CANEncoder? = null
+    private var _enc: RelativeEncoder? = null
     private val _pid = _spark?.pidController
 
     init {
@@ -65,13 +65,13 @@ class KSparkMax(val canId: CANId, val motorType: frc.kyberlib.motorcontrol.Motor
     override var rawVelocity: AngularVelocity
         get() = _enc!!.velocity.rpm
         set(value) {
-            _pid!!.setReference(value.rpm, ControlType.kVelocity, 0, 0.0, CANPIDController.ArbFFUnits.kVoltage)
+            _pid!!.setReference(value.rpm, CANSparkMax.ControlType.kVelocity, 0, 0.0, SparkMaxPIDController.ArbFFUnits.kVoltage)
         }
 
     override var rawPosition: Angle
         get() = _enc!!.position.rotations
         set(value) {
-            _pid!!.setReference(value.rotations, ControlType.kPosition, 0, 0.0, CANPIDController.ArbFFUnits.kVoltage)
+            _pid!!.setReference(value.rotations, CANSparkMax.ControlType.kPosition, 0, 0.0, SparkMaxPIDController.ArbFFUnits.kVoltage)
         }
 
     override var currentLimit: Int = -1
@@ -90,7 +90,7 @@ class KSparkMax(val canId: CANId, val motorType: frc.kyberlib.motorcontrol.Motor
                 true
             }
             config.type == EncoderType.QUADRATURE && motorType == BRUSHED -> {
-                _enc = _spark?.getEncoder(com.revrobotics.EncoderType.kQuadrature, config.cpr)
+                _enc = _spark?.getEncoder(SparkMaxRelativeEncoder.Type.kQuadrature, config.cpr)
                 _enc?.inverted = config.reversed
                 true
             }

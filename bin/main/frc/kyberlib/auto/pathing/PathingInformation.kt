@@ -1,7 +1,7 @@
 package frc.kyberlib.auto.pathing
 
-import edu.wpi.first.wpilibj.geometry.Rotation2d
-import edu.wpi.first.wpilibj.geometry.Translation2d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
 import frc.kyberlib.command.Debug
 import kotlin.math.cos
 import kotlin.math.sin

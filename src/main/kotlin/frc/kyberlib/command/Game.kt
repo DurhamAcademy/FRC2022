@@ -6,8 +6,6 @@ import edu.wpi.first.wpilibj.RobotController
 import edu.wpi.first.wpilibj.RobotState
 
 object Game {
-    private val driverStation = DriverStation.getInstance()
-    
     val real
         get() = RobotBase.isReal()
     val sim
@@ -20,7 +18,7 @@ object Game {
     val AUTO
         get() = RobotState.isAutonomous()
     val OPERATED
-        get() = RobotState.isOperatorControl()
+        get() = RobotState.isAutonomous()
     val TEST
         get() = RobotState.isTest()
     val STOPPED
@@ -36,6 +34,6 @@ object Game {
     val time
         get() = RobotController.getFPGATime() / 1000000.0
 
-    val alliance: DriverStation.Alliance = driverStation.alliance
-    val game: String = driverStation.gameSpecificMessage
+    val alliance: DriverStation.Alliance = DriverStation.getAlliance()
+    val game: String = DriverStation.getGameSpecificMessage()
 }

@@ -2,7 +2,7 @@ package frc.kyberlib.auto.pathing
 
 
 import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj.geometry.Translation2d
+import edu.wpi.first.math.geometry.Translation2d
 import frc.kyberlib.odd
 import java.util.*
 import kotlin.collections.ArrayList
