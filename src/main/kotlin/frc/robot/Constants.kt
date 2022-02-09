@@ -20,7 +20,7 @@ object Constants {
 
     // ------ Drivetrain ------ // todo: characterize
     // pids
-    const val DRIVE_P = 20.7
+    const val DRIVE_P = 0.7
     const val DRIVE_I = 0.0
     const val DRIVE_D = 0.0
 
@@ -55,8 +55,8 @@ object Constants {
     const val LOST_WAIT = 2.0
     const val SMART_LOSS = true
 
-    val TURRET_TOLERANCE = 3.degrees // TODO - how close the heading must be to fire
-    val TURRET_DEADBAND = 0.5.degrees  // when the turret stops adjusting
+    val TURRET_TOLERANCE = 5.degrees // TODO - how close the heading must be to fire
+    val TURRET_DEADBAND = 3.degrees  // when the turret stops adjusting
 
     // ------ Game Pieces ------ //
     val HUB_POSITION = Translation2d(324.inches, 162.inches)

@@ -14,6 +14,7 @@ import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.commands.drive.Drive
 import frc.robot.commands.turret.SeekTurret
+import frc.robot.subsystems.Turret
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.invertIf
@@ -28,8 +29,10 @@ import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.field.KField2d
 import org.photonvision.targeting.PhotonPipelineResult
 import org.photonvision.targeting.PhotonTrackedTarget
+import frc.kyberlib.math.zeroIf
 import kotlin.math.absoluteValue
 import kotlin.math.atan
+import kotlin.math.log
 
 
 /**
@@ -51,18 +54,22 @@ object Turret : SubsystemBase(), Debug, Simulatable {
     // actual turret motors
     val turret = KSparkMax(0).apply {
         // todo: tune
-        kP = .3
-        kD = .1
+        kP = 0.0
+        kD = .000
         gearRatio = Constants.TURRET_GEAR_RATIO
 
         // fancy control
-        val offsetCorrector = ProfiledPIDController(3.00, 0.0, 0.0, TrapezoidProfile.Constraints(4.0, 2.0))
+        val offsetCorrector = ProfiledPIDController(30.00, 0.0, 5.0, TrapezoidProfile.Constraints(12.0, 4.0)).apply { 
+            setTolerance(Constants.TURRET_DEADBAND.radians)
+            setIntegratorRange(-1.0, 1.0)
+         }
         customControl = {
             val chassisComp = Drivetrain.chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond
-            it.position = clampSafePosition(it.positionSetpoint)
-            val offsetCorrection = offsetCorrector.calculate(it.positionError.radians).radiansPerSecond
+            val setpoint = clampSafePosition(it.positionSetpoint)
+            val offsetCorrection = offsetCorrector.calculate((it.position - setpoint).radians).radiansPerSecond
             val targetVelocity = offsetCorrection - chassisComp
-            val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(targetVelocity.radiansPerSecond)
+            val velocityError = it.velocity - targetVelocity
+            val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(velocityError.radiansPerSecond)
             voltage
         }
     }
@@ -132,8 +139,7 @@ object Turret : SubsystemBase(), Debug, Simulatable {
      */
     fun guessVelocity(v: Double): AngularVelocity = ((v.absoluteValue - feedforward.ks) / feedforward.kv).coerceAtLeast(0.0).invertIf { v < 0.0 }.radiansPerSecond
 
-    override fun simUpdate(dt: Double) {
-        turret.simVelocity = guessVelocity(turret.voltage)  // todo: this can be done better
-        turret.simPosition = (turret.simPosition + (turret.velocity * dt.seconds)).k
+    override fun simUpdate(dt: Double) {  // todo: add momentum and shit
+        turret.simUpdate(feedforward, dt)
     }
 }

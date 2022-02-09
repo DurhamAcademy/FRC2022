@@ -23,7 +23,7 @@ class Robot : KRobot() {
             Simulation.instance.include(Drivetrain)
             Drivetrain.setupSim()
             Simulation.instance.include(Turret)
-            Simulation.instance.include(Climber)
+            // Simulation.instance.include(Climber)
 //            Simulation.instance.include(Shooter.flywheelControl)
         }
     }
@@ -33,8 +33,8 @@ class Robot : KRobot() {
     }
 
     override fun teleopPeriodic() {
-    //    RobotContainer.controller.debugDashboard()
-       Drive.execute()
+       RobotContainer.controller.debugDashboard()
+    //    Drive.execute()
     }
 
     override fun enabledInit() {

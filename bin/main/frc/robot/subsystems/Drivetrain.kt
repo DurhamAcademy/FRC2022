@@ -31,6 +31,7 @@ import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
 import frc.kyberlib.simulation.field.KField2d
+import frc.kyberlib.math.zeroIf
 import kotlin.math.absoluteValue
 import kotlin.math.cos
 import kotlin.math.sin
@@ -103,8 +104,9 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
+        debugDashboard()
         RobotContainer.navigation.update(wheelSpeeds)
-        if(!Turret.targetLost)  {  // todo: test
+        if(!Turret.targetLost && false)  {  // todo: test
             val distance = Shooter.targetDistance!! + 2.feet  // two feet is the radius of the hub
             val angle = Turret.visionOffset!! + Turret.fieldRelativeAngle
             val transform = Translation2d(distance, 0.meters).rotateBy(angle)
@@ -113,8 +115,6 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
             RobotContainer.navigation.update(Pose2d(newPosition, RobotContainer.navigation.heading), time)
 
         }
-
-        debugDashboard()
     }
 
     override fun simulationPeriodic() {
@@ -142,7 +142,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
                 addFeedforward(feedforward)
             }
         }
-        Navigator.instance!!.applyMovementRestrictions(7.metersPerSecond, 5.metersPerSecond)
+        Navigator.instance!!.applyMovementRestrictions(7.metersPerSecond, 2.metersPerSecond)
         Navigator.instance!!.applyKinematics(kinematics)
     }
 
@@ -157,7 +157,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
             kinematics.trackWidthMeters,  // The track width
             leftMaster.radius!!.meters,  // wheel radius
             // The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
-            VecBuilder.fill(0.000, 0.000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000)
+            VecBuilder.fill(0.000, 0.000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000) // todo: add noise back
         )
     }
 
@@ -165,10 +165,10 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
 
     override fun simUpdate(dt: Double) {
         // update the sim with new inputs
-        val leftVolt = leftMaster.voltage
-        val rightVolt = rightMaster.voltage
+        val leftVolt = leftMaster.voltage.zeroIf{it: Double -> it.absoluteValue < Constants.DRIVE_KS}
+        val rightVolt = rightMaster.voltage.zeroIf{it: Double -> it.absoluteValue < Constants.DRIVE_KS}
         if (leftVolt == 0.0 && rightVolt == 0.0) return
-        driveSim.setInputs(roundLows(leftVolt), roundLows(rightVolt))
+        driveSim.setInputs(leftVolt, rightVolt)
         driveSim.update(dt)
 
         // update the motors with what they should be

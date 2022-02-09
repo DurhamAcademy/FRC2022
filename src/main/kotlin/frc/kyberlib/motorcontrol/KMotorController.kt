@@ -11,6 +11,9 @@ import frc.kyberlib.command.Game
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.simulation.Simulation
+import kotlin.math.absoluteValue
+import frc.kyberlib.math.invertIf
+import frc.kyberlib.math.sign
 
 typealias GearRatio = Double
 typealias BrakeMode = Boolean
@@ -44,7 +47,6 @@ data class KEncoderConfig(val cpr: Int, val type: EncoderType, val reversed: Boo
  * A more advanced motor control with feedback control.
  */
 abstract class KMotorController : KBasicMotorController() {
-    // find a way to simulate brake mode
     // ----- configs ----- //
     /**
      * The multiplier to attach to the raw velocity. *This is not the recommended way to do this.* Try using gearRatio instead
@@ -162,7 +164,6 @@ abstract class KMotorController : KBasicMotorController() {
                     val pid = PID.calculate(it.positionError.radians)
                     pid
                 }
-                ControlMode.VOLTAGE -> voltage
                 else -> 0.0
             }
         }
@@ -177,12 +178,12 @@ abstract class KMotorController : KBasicMotorController() {
         customControl = {
             when (controlMode) {
                 ControlMode.POSITION -> {
-                    val ff = feedforward.calculate(position.radians, velocity.radiansPerSecond, acceleration.radiansPerSecond)
+                    val ff = feedforward.calculate(position.radians, velocity.radiansPerSecond)
                     val pid = PID.calculate(positionError.radians)
                     ff + pid
                 }
                 ControlMode.VELOCITY -> {
-                    val ff = feedforward.calculate(position.radians, velocity.radiansPerSecond, acceleration.radiansPerSecond)
+                    val ff = feedforward.calculate(position.radians, velocity.radiansPerSecond)
                     val pid = PID.calculate(velocityError.radiansPerSecond)
                     ff + pid
                 }
@@ -284,7 +285,7 @@ abstract class KMotorController : KBasicMotorController() {
                 acceleration = Simulation.instance.inverseFF(voltage, velocity.radiansPerSecond).radiansPerSecond
             }
 
-        accelNotifier.startPeriodic(0.02)
+        // accelNotifier.startPeriodic(0.02)
     }
 
     // ----- this is where you put the advanced controls ---- //
@@ -351,7 +352,7 @@ abstract class KMotorController : KBasicMotorController() {
      * Updates the voltage after changing position / velocity setpoint
      */
     fun updateVoltage() {
-        if (!isFollower && customControl != null && controlMode == ControlMode.VOLTAGE)
+        if (!isFollower && customControl != null && controlMode != ControlMode.VOLTAGE)
             safeSetVoltage(customControl!!(this))
     }
 
@@ -457,16 +458,66 @@ abstract class KMotorController : KBasicMotorController() {
         map.putAll(mapOf(
             "Angular Position (rad)" to position.radians,
             "Angular Velocity (rad per s)" to velocity.radiansPerSecond,
-            "Angular Acceleration (rad per s per s)" to acceleration.radiansPerSecond  // temporary (here for testing)
+            // "Angular Acceleration (rad per s per s)" to acceleration.radiansPerSecond  // temporary (here for testing)
         ))
         if (linearConfigured)
             map.putAll(mapOf(
                 "Linear Position (m)" to linearPosition.meters,
                 "Linear Velocity (m per s)" to linearVelocity.metersPerSecond,
-                "Linear Acceleration (m per s per s)" to linearAcceleration.metersPerSecond
+                // "Linear Acceleration (m per s per s)" to linearAcceleration.metersPerSecond
             ))
+        if (controlMode == ControlMode.POSITION) {
+            if (linearConfigured)
+                map.putAll(mapOf(
+                    "setpoint" to linearPositionSetpoint.meters,
+                    "error" to linearPositionError.meters
+                ))
+            else
+                map.putAll(mapOf(
+                        "setpoint" to positionSetpoint.radians,
+                        "error" to positionError.radians
+                    ))
+        }
+        else {
+            if (linearConfigured)
+                map.putAll(mapOf(
+                    "setpoint" to linearVelocitySetpoint.metersPerSecond,
+                    "error" to linearVelocityError.metersPerSecond
+                ))
+            else
+                map.putAll(mapOf(
+                        "setpoint" to velocitySetpoint.radiansPerSecond,
+                        "error" to velocityError.radiansPerSecond
+                    ))
+        }
 //        map["PID"] = PID
         return map.toMap()
+    }
+
+    fun simUpdate(feedforward: SimpleMotorFeedforward, dt: Double) {
+        val v = voltage
+        if(v.absoluteValue < feedforward.ks) 
+            simVelocity = 0.radiansPerSecond
+        else {
+            val applicableVolt = (v.absoluteValue - feedforward.ks).invertIf { v < 0.0 }
+            val vel = velocity.radiansPerSecond
+            // if negative volt is greater than acc vel, if positive volt if less than ac
+            val accVolt = applicableVolt - feedforward.kv * vel
+            val acceleration = accVolt / feedforward.ka
+            if (brakeMode) {
+                val velMaintananceVolt = feedforward.ks + feedforward.kv * velocity.radiansPerSecond.absoluteValue
+                if (velMaintananceVolt.sign != velocity.radiansPerSecond.sign)
+                    simVelocity = 0.radiansPerSecond
+                else if (velMaintananceVolt < v.absoluteValue)
+                    simVelocity = (applicableVolt.toDouble() / feedforward.kv).radiansPerSecond
+                else
+                    simVelocity = velocity + acceleration.radiansPerSecond * dt
+            }
+            else {
+                simVelocity = velocity + acceleration.radiansPerSecond * dt
+            }
+        }
+        simPosition = simPosition + velocity * dt.seconds
     }
 
     companion object LinearUnconfigured : Exception("You must set the wheel radius before using linear values")

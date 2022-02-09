@@ -19,3 +19,15 @@ infix fun Double.epsilonEquals(value: Double): Boolean {
 fun Double.round(decimals: Int): Double {
     return BigDecimal(this).setScale(decimals, RoundingMode.HALF_EVEN).toDouble()
 }
+
+fun Double.zeroIf(condition: (it: Double) -> Boolean) = if (condition(this)) 0.0 else this 
+
+
+val Int.even: Boolean
+    get() = this.rem(2) == 0
+
+val Int.odd: Boolean
+    get() = !even
+
+val Number.sign
+    get() = this.toDouble() / this.toDouble().absoluteValue
