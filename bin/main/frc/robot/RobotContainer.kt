@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.RobotBase
 import frc.robot.commands.Intake
 import frc.robot.commands.climb.Climb
 import frc.robot.commands.climb.ToggleArmLift
-import frc.robot.commands.shooter.Flush
+import frc.robot.commands.conveyor.Flush
 import frc.robot.subsystems.*
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Game
@@ -93,7 +93,7 @@ object RobotContainer {
         this += KLEDRegion(AnimationSolid(enemyColor), conveyorStart, conveyorLength)
             {Conveyor.status == CONVEYOR_STATUS.BAD}
         this += KLEDRegion(AnimationPulse(allianceColor, 2), conveyorStart, conveyorLength)
-            {Conveyor.status == CONVEYOR_STATUS.FEEDING}
+            {Conveyor.feeder.percent > 0.01}
 
         // intake
         val intakeStart = 0

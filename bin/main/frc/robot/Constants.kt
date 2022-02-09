@@ -61,7 +61,7 @@ object Constants {
 
     val SHOOTER_VELOCITY_TOLERANCE = 50.0.rpm
     val FLYWHEEL_RADIUS = 2.inches
-    const val FLYWHEEL_MOMENT_OF_INERTIA = 0.00032 // kg * m^2
+    const val FLYWHEEL_MOMENT_OF_INERTIA = 0.00032 // kg * m^2 TODO: find action
 
     // ------ Turret ------ //
     const val TURRET_GEAR_RATIO: Double = 1.0/73.0 // TODO
@@ -69,12 +69,12 @@ object Constants {
     const val LOST_WAIT = 2.0
     const val SMART_LOSS = true
 
-    val TURRET_TOLERANCE = 5.degrees // TODO - how close the heading must be to fire
+    val TURRET_TOLERANCE = 5.degrees // TODO: how close the heading must be to fire
     val TURRET_DEADBAND = 3.degrees  // when the turret stops adjusting
 
     // ------ Game Pieces ------ //
     val HUB_POSITION = Translation2d(324.inches, 162.inches)
     val FIELD_SIZE = Translation2d(648.inches, 324.inches)
     val UPPER_HUB_HEIGHT = 8.feet + 8.inches
-    val START_POSE: Pose2d =Pose2d(200.inches, 100.inches, 45.degrees)
+    val START_POSE: Pose2d = Pose2d(200.inches, 100.inches, 45.degrees) // TODO: find actual
 }

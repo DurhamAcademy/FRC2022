@@ -25,6 +25,7 @@ import frc.kyberlib.math.units.extensions.feet
 import frc.kyberlib.math.units.extensions.k
 import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.math.units.extensions.metersPerSecond
+import frc.kyberlib.math.units.extensions.feetPerSecond
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
 import frc.kyberlib.motorcontrol.MotorType
 import frc.kyberlib.motorcontrol.rev.KSparkMax
@@ -142,7 +143,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
                 addFeedforward(feedforward)
             }
         }
-        Navigator.instance!!.applyMovementRestrictions(7.metersPerSecond, 2.metersPerSecond)
+        Navigator.instance!!.applyMovementRestrictions(5.39.feetPerSecond, 2.metersPerSecond)
         Navigator.instance!!.applyKinematics(kinematics)
     }
 

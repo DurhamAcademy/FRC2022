@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.Constants
 import frc.robot.subsystems.Conveyor
 import frc.robot.subsystems.SHOOTER_STATUS
+import frc.robot.subsystems.CONVEYOR_STATUS
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.Turret
 import frc.kyberlib.math.units.extensions.degrees
@@ -21,11 +22,14 @@ object Shoot : CommandBase() {
         addRequirements(Conveyor, Shooter)
     }
 
+    var prevDistance = 1.0
+
     override fun execute() {
         Debug.log("Shoot", "execute", level=DebugLevel.LowPriority)
         // check if shooter should spin up
-        if (true || Conveyor.good && Turret.targetVisible) {
-            val dis = Shooter.targetDistance!!.meters
+        if (Conveyor.good && (Turret.targetVisible || Conveyor.status == CONVEYOR_STATUS.FEEDING)) {
+            val dis = if (Turret.targetVisible) Shooter.targetDistance!!.meters else prevDistance
+            prevDistance = dis
 
             // calculate values given the current distance from the hub
             val targetFlywheelVelocity = Constants.FLYWHEEL_INTERPOLATOR.calculate(dis)!!.radiansPerSecond
@@ -37,14 +41,14 @@ object Shoot : CommandBase() {
             Shooter.topShooter.velocity = targetTopWheelVelocity
             Shooter.hoodAngle = targetHoodAngle
 
-            // TODO: bad if this stutters
             // if the turret is on target
             if (Turret.readyToShoot && Shooter.flywheelMaster.velocityError < Constants.SHOOTER_VELOCITY_TOLERANCE) {
-                // change leds to green or something
                 Conveyor.feed()
                 Shooter.status = SHOOTER_STATUS.AUTO_SHOT
-            } else Shooter.status = SHOOTER_STATUS.SPINUP
-        } else {
+            } 
+            else Shooter.status = SHOOTER_STATUS.SPINUP
+        } 
+        else {
             Debug.log("Shoot", "idle", level=DebugLevel.LowPriority)
             Shooter.flywheelMaster.stop()
             Shooter.topShooter.stop()
