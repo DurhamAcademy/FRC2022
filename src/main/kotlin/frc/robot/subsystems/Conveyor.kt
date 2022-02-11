@@ -2,8 +2,6 @@ package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.motorcontrol.rev.KSparkMax
-import frc.robot.commands.conveyor.Feed
-import frc.robot.commands.conveyor.Agitate
 import frc.kyberlib.command.Debug
 
 /**
@@ -24,21 +22,10 @@ object Conveyor : SubsystemBase(), Debug {
     val feeder = KSparkMax(0)
 
     init {
-        defaultCommand = Agitate
     }
 
     val good
-        get() = when(status) {
-            CONVEYOR_STATUS.FULL_GOOD -> true
-            CONVEYOR_STATUS.SINGLE_GOOD -> true
-            CONVEYOR_STATUS.FEEDING -> true
-            else -> false
-        }
-
-    fun feed() {
-        if (status != CONVEYOR_STATUS.FEEDING)
-            Feed.schedule()
-    }
+        get() = true
 
     override fun periodic() {
         debugDashboard()
