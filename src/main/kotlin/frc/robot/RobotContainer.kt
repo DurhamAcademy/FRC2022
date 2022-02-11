@@ -28,6 +28,8 @@ object RobotContainer {
     val limelight = PhotonCamera("gloworm")
     val turretLimit = DigitalInput(0)
 
+    val navigation = Navigator(gyro, Constants.START_POSE)
+
     val controller = KXboxController(0).apply {
         // steering
         rightX.apply {
@@ -46,11 +48,9 @@ object RobotContainer {
 //        leftTrigger.activateAt(0.5).whileActiveOnce(Intake)
 //        leftBumper.whileActiveOnce(Flush)
 //
-//        aButton.toggleWhenActive(Climb)
-//        bButton.whileActiveOnce(ToggleArmLift())
+        aButton.toggleWhenActive(Climb)
+        bButton.whileActiveOnce(ToggleArmLift())
     }
-
-    val navigation = Navigator(gyro, Constants.START_POSE)
 
     val leds = KLEDStrip(0, 103).apply {
         val length = 103

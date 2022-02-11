@@ -4,12 +4,15 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Game
+import frc.kyberlib.math.units.extensions.Time
+import frc.kyberlib.math.units.extensions.seconds
 import frc.kyberlib.simulation.field.KField2d
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Simulation that will run a loop to update simulatable objects
  */
-class Simulation : SubsystemBase() {
+class Simulation : SubsystemBase() {  // TODO: figure out the hardware tab
     companion object {
         val instance: Simulation
             get() { return if(internal == null) Simulation() else internal!! }
@@ -20,9 +23,9 @@ class Simulation : SubsystemBase() {
     private val sims = ArrayList<Simulatable>()
 
     // stores time values
-    private var prevTime = -1.0
-    private val time: Double
-        get() = Game.time.toDouble()
+    private var prevTime = Game.time
+    private val time: Time
+        get() = Game.time
     private val startTime = time
     val elapsedTime
         get() = time - startTime
@@ -48,10 +51,6 @@ class Simulation : SubsystemBase() {
      * Update all the attached simulatables
      */
     override fun periodic() {
-        if (prevTime < 0) {
-            prevTime = time
-            return
-        }
         val dt = time - prevTime
         for (sim in sims) {
             sim.simUpdate(dt)

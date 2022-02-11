@@ -15,7 +15,7 @@ object Feed : CommandBase() {
         addRequirements(Conveyor)
     }
     
-    val timer = Timer()
+    private val timer = Timer()
 
     override fun initialize() {
         Conveyor.status = CONVEYOR_STATUS.FEEDING

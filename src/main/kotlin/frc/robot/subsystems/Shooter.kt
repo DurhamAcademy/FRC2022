@@ -35,7 +35,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     val flywheelMaster = KSparkMax(0).apply {
         identifier = "flywheel"
         radius = Constants.FLYWHEEL_RADIUS
-        Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.002)  // TODO: test this
+        Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.002)
     }
     val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 4)
     // additional motors that copy the main
@@ -46,7 +46,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     // Servo that sets the hood angle
     private val hood = KServo(1)
 
-    // TODO: figure out this will work - it won't figure it out
+    // FIXME: KServo is completely bs
     var hoodAngle: Angle
         get() = hood.position
         set(value) {
@@ -71,7 +71,6 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     override fun periodic() {
-        log("periodic")
         debugDashboard()
     }
 
@@ -84,7 +83,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         )
     }
 
-    override fun simUpdate(dt: Double) {
+    override fun simUpdate(dt: Time) {
         flywheelControl.simUpdate(dt)
         // flywheelMaster.simVelocity = flywheelMaster.velocitySetpoint
         hood.simPosition = hood.positionSetpoint

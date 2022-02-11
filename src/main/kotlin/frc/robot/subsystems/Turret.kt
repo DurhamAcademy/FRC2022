@@ -53,9 +53,8 @@ object Turret : SubsystemBase(), Debug, Simulatable {
     private val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
     // actual turret motors
     val turret = KSparkMax(0).apply {
-        // TODO: tune
         kP = 0.1
-        kD = .000
+        kD = .0
         gearRatio = Constants.TURRET_GEAR_RATIO
 
         // fancy control
@@ -139,7 +138,7 @@ object Turret : SubsystemBase(), Debug, Simulatable {
      */
     fun guessVelocity(v: Double): AngularVelocity = ((v.absoluteValue - feedforward.ks) / feedforward.kv).coerceAtLeast(0.0).invertIf { v < 0.0 }.radiansPerSecond
 
-    override fun simUpdate(dt: Double) {  // TODO: add momentum and shit
+    override fun simUpdate(dt: Time) {
         turret.simUpdate(feedforward, dt)
     }
 }
