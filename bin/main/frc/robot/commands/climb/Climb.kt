@@ -37,6 +37,8 @@ object Climb : CommandBase() {
         Turret.fieldRelativeAngle = 0.degrees
         Climber.armsLifted = true
         Climber.status = CLIMBER_STATUS.ACTIVE
+
+        Climber.staticMaster.position = 90.degrees
     }
 
     /**

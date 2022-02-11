@@ -25,6 +25,8 @@
       "/LiveWindow/Ungrouped/PIDController[15]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[16]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[17]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[18]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[19]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
@@ -35,9 +37,15 @@
       "/LiveWindow/Ungrouped/PIDController[8]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[9]": "PIDController",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
-      "/SmartDashboard/Field": "Field2d"
+      "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/climb sim": "Mechanism2d"
     },
     "windows": {
+      "/LiveWindow/Ungrouped/DigitalInput[0]": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Field": {
         "Robot": {
           "arrows": false
@@ -58,11 +66,30 @@
         "window": {
           "visible": true
         }
+      },
+      "/SmartDashboard/climb sim": {
+        "window": {
+          "visible": true
+        }
       }
     }
   },
   "NetworkTables": {
+    "LiveWindow": {
+      "Climber": {
+        "open": true
+      },
+      "Turret": {
+        "open": true
+      }
+    },
     "SmartDashboard": {
+      "Climber": {
+        "Left Arm": {
+          "open": true
+        },
+        "open": true
+      },
       "Drivetrain": {
         "leftMaster": {
           "open": true
@@ -73,9 +100,6 @@
         "speed": {
           "open": true
         }
-      },
-      "Field": {
-        "open": true
       },
       "Intaker": {
         "intake": {
@@ -92,7 +116,10 @@
           "open": true
         }
       },
-      "open": true
+      "open": true,
+      "solenoid3": {
+        "open": true
+      }
     }
   },
   "Plot": {
@@ -131,7 +158,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Drivetrain/pose/x (m)"
+              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/Linear Velocity (m per s)"
             },
             {
               "color": [
@@ -140,7 +167,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Drivetrain/pose/y (m)"
+              "id": "NT:/SmartDashboard//Drivetrain/rightMaster/Linear Velocity (m per s)"
             },
             {
               "color": [
@@ -149,7 +176,34 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Drivetrain/pose/theta (rad)"
+              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/error"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Drivetrain/rightMaster/error"
+            },
+            {
+              "color": [
+                0.5058823823928833,
+                0.44705885648727417,
+                0.7019608020782471,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/Voltage"
+            },
+            {
+              "color": [
+                0.5764706134796143,
+                0.4705882668495178,
+                0.3764706254005432,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Drivetrain/rightMaster/Voltage"
             }
           ]
         }
@@ -161,7 +215,7 @@
     "Plot <1>": {
       "plots": [
         {
-          "height": 228,
+          "height": -29,
           "name": "Aim",
           "series": [
             {
@@ -185,7 +239,7 @@
           ]
         },
         {
-          "height": 228,
+          "height": -29,
           "name": "Movement",
           "series": [
             {

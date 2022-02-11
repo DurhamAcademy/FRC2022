@@ -3,6 +3,7 @@ package frc.robot.subsystems
 import edu.wpi.first.wpilibj.PneumaticsModuleType
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismObject2d
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.Constants
 import frc.kyberlib.command.Debug
@@ -29,6 +30,9 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     // pneumatics that lift the climb arms
     private val leftArmLift = KSolenoid(PneumaticsModuleType.REVPH, 0)
     private val rightArmLift = KSolenoid(PneumaticsModuleType.REVPH, 0)
+
+    val leftExtendable = KSparkMax(0)
+    private val rightExtendable = KSparkMax(0).apply { follow(leftExtendable) }
 
     // winches that pull the robot up
     val leftWinch = KSparkMax(0).apply {
@@ -69,7 +73,18 @@ object Climber : SubsystemBase(), Debug, Simulatable {
      * In progress simulation of the climb
      */
     private val sim = Mechanism2d(10.0, 10.0)
+    private val root = sim.getRoot("climb pivot", 1.0, 1.0)
+    private val armSupport = root.append(MechanismLigament2d("elevator", 15.5.inches.value, 90.0));
+    private val extendable = armSupport.append(MechanismLigament2d("extenable", 35.inches.value + leftWinch.position.value, 22.5))
+    private val static = armSupport.append(MechanismLigament2d("static", 31.inches.value, 0.0))
+
+    init {
+        SmartDashboard.addData("climb sim", sim)
+    }
+    
     override fun simUpdate(dt: Double) {
+        extendable.length = 35.inches.value + leftWinch.position.value
+        extendable.angle = 
         // MechanismObject2d.
         // sim.setLigamentAngle("extendable", if(armsLifted) 90.0f else 10.0f)
         // sim.setLigamentLength("extenable", 30f + leftWinch.linearPosition.inches.toFloat())

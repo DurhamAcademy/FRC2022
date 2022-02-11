@@ -6,8 +6,8 @@
       "style": "0",
       "userScale": "2",
       "width": "1440",
-      "xpos": "1",
-      "ypos": "45"
+      "xpos": "0",
+      "ypos": "0"
     }
   },
   "Window": {
@@ -16,10 +16,20 @@
       "Pos": "60,60",
       "Size": "148,86"
     },
+    "###/LiveWindow/Ungrouped/DigitalInput[0]": {
+      "Collapsed": "1",
+      "Pos": "102,76",
+      "Size": "127,48"
+    },
     "###/SmartDashboard/Field": {
       "Collapsed": "0",
       "Pos": "842,15",
       "Size": "599,338"
+    },
+    "###/SmartDashboard/climb sim": {
+      "Collapsed": "0",
+      "Pos": "321,115",
+      "Size": "364,370"
     },
     "###Addressable LEDs": {
       "Collapsed": "0",
@@ -48,7 +58,7 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "2,254",
+      "Pos": "5,162",
       "Size": "304,590"
     },
     "###Other Devices": {
@@ -64,10 +74,10 @@
     "###Plot <0>": {
       "Collapsed": "1",
       "Pos": "320,67",
-      "Size": "532,696"
+      "Size": "532,767"
     },
     "###Plot <1>": {
-      "Collapsed": "0",
+      "Collapsed": "1",
       "Pos": "865,346",
       "Size": "562,546"
     },
@@ -89,7 +99,7 @@
     "###Timing": {
       "Collapsed": "1",
       "Pos": "6,125",
-      "Size": "98,103"
+      "Size": "98,120"
     },
     "Debug##Default": {
       "Collapsed": "0",
