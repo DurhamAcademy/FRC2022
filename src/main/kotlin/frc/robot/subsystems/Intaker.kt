@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj.PneumaticsModuleType
 import edu.wpi.first.wpilibj.Solenoid
 import frc.kyberlib.command.Debug
+import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 
 /**
@@ -23,7 +24,7 @@ object Intaker  : SubsystemBase(), Debug {
         }
 
     // motor controlling the intake speed
-    val intakeMotor = KSparkMax(0)
+    val intakeMotor = KSimulatedESC(0)
 
     // TODO add ball sensors
 

@@ -14,6 +14,7 @@ import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.mechanisms.Flywheel
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.motorcontrol.KServo
+import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.simulation.Simulatable
 
 
@@ -32,19 +33,19 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     var status = SHOOTER_STATUS.IDLE
 
     // main motor attached to the flywheel
-    val flywheelMaster = KSparkMax(0).apply {
+    val flywheelMaster = KSimulatedESC(0).apply {
         identifier = "flywheel"
         radius = Constants.FLYWHEEL_RADIUS
         Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.002)
     }
     val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 4)
     // additional motors that copy the main
-    private val flywheel2 = KSparkMax(0).apply { follow(flywheelMaster) }
-    private val flywheel3 = KSparkMax(0).apply { follow(flywheelMaster) }
-    private val flywheel4 = KSparkMax(0).apply { follow(flywheelMaster) }
+    private val flywheel2 = KSimulatedESC(0).apply { follow(flywheelMaster) }
+    private val flywheel3 = KSimulatedESC(0).apply { follow(flywheelMaster) }
+    private val flywheel4 = KSimulatedESC(0).apply { follow(flywheelMaster) }
 
     // Servo that sets the hood angle
-    private val hood = KServo(1)
+    private val hood = KSimulatedESC(1)
 
     // FIXME: KServo is completely bs
     var hoodAngle: Angle
@@ -61,7 +62,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
                 else distanceFilter.calculate(((Constants.UPPER_HUB_HEIGHT - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
 
     // motor controlling top roller speed
-    val topShooter = KSparkMax(0).apply {
+    val topShooter = KSimulatedESC(0).apply {
         kP = 10.0
         kD = 2.0
     }

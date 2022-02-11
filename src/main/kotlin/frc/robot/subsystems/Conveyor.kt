@@ -27,6 +27,10 @@ object Conveyor : SubsystemBase(), Debug {
     val good
         get() = true
 
+    fun feed() {
+        status = CONVEYOR_STATUS.FEEDING
+    }
+
     override fun periodic() {
         debugDashboard()
     }

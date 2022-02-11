@@ -14,7 +14,7 @@
     "###/LiveWindow/Climber": {
       "Collapsed": "0",
       "Pos": "60,60",
-      "Size": "148,86"
+      "Size": "261,86"
     },
     "###/LiveWindow/Ungrouped/DigitalInput[0]": {
       "Collapsed": "1",
@@ -28,8 +28,8 @@
     },
     "###/SmartDashboard/climb sim": {
       "Collapsed": "0",
-      "Pos": "321,115",
-      "Size": "364,370"
+      "Pos": "321,109",
+      "Size": "331,561"
     },
     "###Addressable LEDs": {
       "Collapsed": "0",
@@ -99,7 +99,7 @@
     "###Timing": {
       "Collapsed": "1",
       "Pos": "6,125",
-      "Size": "98,120"
+      "Size": "98,103"
     },
     "Debug##Default": {
       "Collapsed": "0",

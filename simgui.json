@@ -79,9 +79,7 @@
       "Climber": {
         "open": true
       },
-      "Turret": {
-        "open": true
-      }
+      "open": true
     },
     "SmartDashboard": {
       "Climber": {

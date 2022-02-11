@@ -17,6 +17,7 @@ import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.inches
 import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.motorcontrol.KMotorController
+import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.Simulatable
 import kotlin.math.absoluteValue
@@ -39,7 +40,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     private val rightArmLift = Solenoid(PneumaticsModuleType.CTREPCM, 1)
 
     private val armFF = ArmFeedforward(3.0, 2.0, 5.0, 8.0)
-    val leftExtendable = KSparkMax(0).apply {
+    val leftExtendable = KSimulatedESC(0).apply {
         identifier = "leftArm"
         brakeMode = true
         kP = 0.1
@@ -48,7 +49,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         maxPosition = 90.degrees
         resetPosition(22.5.degrees)
     }
-    val rightExtendable = KSparkMax(0).apply {
+    val rightExtendable = KSimulatedESC(0).apply {
         identifier = "rightArm"
         brakeMode = true
         kP = 0.1
@@ -60,7 +61,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
 
     // winches that pull the robot up
     private val winchFF = SimpleMotorFeedforward(1.0, 10.0, 1.0)
-    val leftWinch = KSparkMax(0).apply {
+    val leftWinch = KSimulatedESC(0).apply {
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
@@ -68,7 +69,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
         }
-    val rightWinch = KSparkMax(0).apply {
+    val rightWinch = KSimulatedESC(0).apply {
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
@@ -78,12 +79,31 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     }
 
     // public variable to get/set whether the arms are lifted
-    var armsLifted
+    var staticsLifted
         get() = leftArmLift.get()
         set(value) {
             leftArmLift.set(value)
             rightArmLift.set(value)
         }
+    var extendableAngle
+        get() = leftExtendable.position
+        set(value) {
+            leftExtendable.position = value
+            rightExtendable.position = value
+        }
+    var extension
+        get() = leftWinch.linearPosition
+        set(value) {
+            leftWinch.linearPosition = value
+            rightWinch.linearPosition = value
+        }
+
+    fun updateMotors() {
+        leftWinch.updateVoltage()
+        leftExtendable.updateVoltage()
+        rightWinch.updateVoltage()
+        rightExtendable
+    }
 
     /**
      * Bang bang control used winch position control.
@@ -114,7 +134,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     override fun simUpdate(dt: Time) {
         extendable.length = (35.inches.value + leftWinch.position.value)
         extendable.angle = leftExtendable.position.degrees
-        static.angle = if(armsLifted) 90.0 else 0.0
+        static.angle = if(staticsLifted) 90.0 else 0.0
 
         leftExtendable.simUpdate(armFF, dt)
         rightExtendable.simUpdate(armFF, dt)
@@ -138,7 +158,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
             "Left Arm" to leftExtendable,
             "Right Winch" to rightWinch,
             "Right Arm" to rightExtendable,
-            "Statics Raised" to armsLifted
+            "Statics Raised" to staticsLifted
         )
     }
 }

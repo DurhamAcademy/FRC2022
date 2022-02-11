@@ -4,35 +4,22 @@ import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.wpilibj.simulation.FlywheelSim
-import edu.wpi.first.wpilibj.simulation.LinearSystemSim
-import edu.wpi.first.wpilibj.simulation.SimDeviceSim
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.Constants
-import frc.robot.RobotContainer
-import frc.robot.commands.drive.Drive
-import frc.robot.commands.turret.SeekTurret
-import frc.robot.subsystems.Turret
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.invertIf
-import frc.kyberlib.math.units.KUnit
-import frc.kyberlib.math.units.Radian
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.towards
-import frc.kyberlib.motorcontrol.ControlMode
-import frc.kyberlib.motorcontrol.KMotorController
-import frc.kyberlib.motorcontrol.rev.KSparkMax
+import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.field.KField2d
+import frc.robot.Constants
+import frc.robot.RobotContainer
+import frc.robot.commands.turret.SeekTurret
 import org.photonvision.targeting.PhotonPipelineResult
 import org.photonvision.targeting.PhotonTrackedTarget
-import frc.kyberlib.math.zeroIf
 import kotlin.math.absoluteValue
-import kotlin.math.atan
-import kotlin.math.log
 
 
 /**
@@ -52,7 +39,7 @@ object Turret : SubsystemBase(), Debug, Simulatable {
     // characterization of the turret
     private val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
     // actual turret motors
-    val turret = KSparkMax(0).apply {
+    val turret = KSimulatedESC(0).apply {
         kP = 0.1
         kD = .0
         gearRatio = Constants.TURRET_GEAR_RATIO
