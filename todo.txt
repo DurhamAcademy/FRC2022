@@ -1,0 +1,10 @@
+In Sim:
+Full Auto Climb?
+Refractor some variables
+Auto Paths?
+Make sure things are isolatable
+documentation of kyberlib
+
+With robot:
+Tune feedforwards
+Auto paths

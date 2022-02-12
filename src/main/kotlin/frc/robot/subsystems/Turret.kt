@@ -34,6 +34,9 @@ enum class TURRET_STATUS {
  * Controls the turret
  */
 object Turret : SubsystemBase(), Debug, Simulatable {
+    init {
+        println("Turret")
+    }
     var status = TURRET_STATUS.LOST
 
     // characterization of the turret

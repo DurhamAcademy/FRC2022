@@ -30,6 +30,9 @@ enum class SHOOTER_STATUS {
  * Encapsulates all the things relevant to shooting the ball
  */
 object Shooter : SubsystemBase(), Debug, Simulatable {
+    init {
+        println("Intake")
+    }
     var status = SHOOTER_STATUS.IDLE
 
     // main motor attached to the flywheel

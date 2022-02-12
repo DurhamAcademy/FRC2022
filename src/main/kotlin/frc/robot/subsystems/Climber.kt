@@ -33,6 +33,9 @@ enum class CLIMBER_STATUS {
  * Mechanism representing the actuators for climbing
  */
 object Climber : SubsystemBase(), Debug, Simulatable {
+    init {
+        println("Climber")
+    }
     var status = CLIMBER_STATUS.IDLE
 
     // pneumatics that lift the climb arms
@@ -43,7 +46,8 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     val leftExtendable = KSimulatedESC(0).apply {
         identifier = "leftArm"
         brakeMode = true
-        kP = 0.1
+        kP = 5.0
+        kD = 1.0
         addFeedforward(armFF)
         minPosition = 0.degrees
         maxPosition = 90.degrees
@@ -52,7 +56,8 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     val rightExtendable = KSimulatedESC(0).apply {
         identifier = "rightArm"
         brakeMode = true
-        kP = 0.1
+        kP = 5.0
+        kD = 1.0
         addFeedforward(armFF)
         minPosition = 0.degrees
         maxPosition = 90.degrees
@@ -60,7 +65,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     }
 
     // winches that pull the robot up
-    private val winchFF = SimpleMotorFeedforward(1.0, 10.0, 1.0)
+    private val winchFF = SimpleMotorFeedforward(1.0, 10.0, 5.0)
     val leftWinch = KSimulatedESC(0).apply {
         radius = Constants.WINCH_RADIUS
         brakeMode = true

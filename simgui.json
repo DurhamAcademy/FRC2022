@@ -86,6 +86,9 @@
         "Left Arm": {
           "open": true
         },
+        "Left Winch": {
+          "open": true
+        },
         "open": true
       },
       "Drivetrain": {

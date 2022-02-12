@@ -3,6 +3,7 @@ package frc.robot.subsystems
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.command.Debug
+import frc.kyberlib.motorcontrol.KSimulatedESC
 
 /**
  * State of the hopper. Used for LEDs and other dependencies
@@ -16,13 +17,13 @@ public enum class CONVEYOR_STATUS {
  * Waiting for design to be finalized before code is added
  */
 object Conveyor : SubsystemBase(), Debug {
+    init {
+        println("Conveyor")
+    }
     var status = CONVEYOR_STATUS.FULL_GOOD
     
-    val indexer = KSparkMax(0)
+    val indexer = KSimulatedESC(0)
     val feeder = KSparkMax(0)
-
-    init {
-    }
 
     val good
         get() = true

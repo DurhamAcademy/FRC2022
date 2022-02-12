@@ -38,7 +38,7 @@ object Climb : CommandBase() {
     override fun initialize() {
         Debug.log("Climb Command", "init", level = DebugLevel.LowPriority)
         Turret.turret.position = 0.degrees
-        Climber.armsLifted = true
+        Climber.staticsLifted = true
         Climber.status = CLIMBER_STATUS.ACTIVE
 
         Climber.leftExtendable.position = 90.degrees
@@ -51,7 +51,6 @@ object Climb : CommandBase() {
     override fun execute() {
         Debug.log("Climb Command", "execute", level = DebugLevel.LowPriority)
         Turret.turret.updateVoltage()
-//        Climber.leftExtendable.updateVoltage()
 
         Climber.leftWinch.percent = RobotContainer.controller.leftY.value / RobotContainer.controller.leftY.maxVal
         Climber.leftExtendable.percent = RobotContainer.controller.leftX.value / RobotContainer.controller.leftX.maxVal

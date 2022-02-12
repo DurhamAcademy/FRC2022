@@ -1,8 +1,6 @@
 package frc.robot.commands.climb
 
 import edu.wpi.first.wpilibj2.command.InstantCommand
-import frc.kyberlib.command.Debug
-import frc.kyberlib.command.LogMode
 import frc.robot.subsystems.Climber
 
 /**
@@ -10,6 +8,6 @@ import frc.robot.subsystems.Climber
  */
 class ToggleArmLift : InstantCommand() {
     override fun execute() {
-        Climber.armsLifted = !Climber.armsLifted
+        Climber.staticsLifted = !Climber.staticsLifted
     }
 }

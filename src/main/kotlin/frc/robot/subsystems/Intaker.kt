@@ -11,6 +11,9 @@ import frc.kyberlib.motorcontrol.rev.KSparkMax
  * Controls the intake mechanism of the robot
  */
 object Intaker  : SubsystemBase(), Debug {
+    init {
+        println("Intake")
+    }
     // deployment solenoids
     private val leftIntakeDeploy = Solenoid(PneumaticsModuleType.CTREPCM, 2)
     private val rightIntakeDeploy = Solenoid(PneumaticsModuleType.CTREPCM, 3)
