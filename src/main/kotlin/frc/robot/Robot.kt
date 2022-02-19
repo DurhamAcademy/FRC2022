@@ -38,6 +38,6 @@ class Robot : KRobot() {
     }
 
     override fun autonomousInit() {
-        AutoDrive(Constants.HUB_POSITION).schedule()
+//        AutoDrive(Constants.HUB_POSITION).schedule()
     }
 }

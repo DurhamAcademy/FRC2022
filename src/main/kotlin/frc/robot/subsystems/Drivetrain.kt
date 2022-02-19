@@ -40,24 +40,26 @@ import kotlin.math.sin
  */
 object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     // motors
-    val leftMaster = KSparkMax(0, MotorType.BRUSHLESS).apply {
+    val leftMaster = KSparkMax(10, MotorType.BRUSHLESS).apply {
         identifier = "leftMaster"
         reversed = false
         currentLimit = 40
     }
-    val rightMaster  = KSparkMax(0, MotorType.BRUSHLESS).apply {
+    val rightMaster  = KSparkMax(12, MotorType.BRUSHLESS).apply {
         identifier = "rightMaster"
         reversed = true
         currentLimit = 40
     }
-    private val leftFollower  = KSparkMax(0, MotorType.BRUSHLESS).apply {
+    private val leftFollower  = KSparkMax(11, MotorType.BRUSHLESS).apply {
         identifier = "leftFollow"
+        reversed = false
         currentLimit = 40
         follow(leftMaster)
     }
-    private val rightFollower = KSparkMax(0, MotorType.BRUSHLESS).apply {
+    private val rightFollower = KSparkMax(13, MotorType.BRUSHLESS).apply {
         identifier = "rightFollow"
         currentLimit = 40
+        reversed = false
         follow(rightMaster)
     }
     private val motors = arrayOf(leftMaster, rightMaster)
@@ -102,6 +104,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
+        debugValues()
         RobotContainer.navigation.update(wheelSpeeds)
         if(Turret.targetVisible && Constants.NAVIGATION_CORRECTION)  {  // TODO: test
             val distance = Shooter.targetDistance!! + 2.feet  // two feet is the radius of the hub
@@ -134,9 +137,9 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
                 radius = Constants.WHEEL_RADIUS
                 currentLimit = 40
 
-                kP = Constants.DRIVE_P
-                kI = Constants.DRIVE_I
-                kD = Constants.DRIVE_D
+//                kP = Constants.DRIVE_P
+//                kI = Constants.DRIVE_I
+//                kD = Constants.DRIVE_D
 
                 addFeedforward(feedforward)
             }

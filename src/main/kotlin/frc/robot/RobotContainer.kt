@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.DigitalInput
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
+import frc.robot.commands.Intake
 import frc.robot.subsystems.Drivetrain
 import org.photonvision.PhotonCamera
 import kotlin.math.PI
@@ -22,19 +23,19 @@ object RobotContainer {
     val controller = KXboxController(0).apply {
         // steering
         rightX.apply {
-            maxVal = -5 * PI
-            expo = 73.0
+            maxVal = -1.0 //-5 * PI
+            expo = 1.0//73.0
             deadband = 0.1
         }
 
         // throttle
         leftY.apply {
-            maxVal = -12.0
-            expo = 20.0
+            maxVal = -1.0//-12.0
+            expo = 1.0//20.0
             deadband = 0.2
         }
 
-//        leftTrigger.activateAt(0.5).whileActiveOnce(Intake)
+        leftTrigger.activateAt(0.5).whileActiveOnce(Intake)
 //        leftBumper.whileActiveOnce(Flush)
 //
 //        yButton.toggleWhenActive(fullAutoClimb)
