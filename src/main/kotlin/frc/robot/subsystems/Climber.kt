@@ -43,7 +43,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     private val rightArmLift = Solenoid(PneumaticsModuleType.CTREPCM, 1)
 
     private val armFF = ArmFeedforward(3.0, 2.0, 5.0, 8.0)
-    val leftExtendable = KSimulatedESC(0).apply {
+    val leftExtendable = KSimulatedESC(40).apply {
         identifier = "leftArm"
         brakeMode = true
         kP = 5.0
@@ -53,7 +53,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         maxPosition = 90.degrees
         resetPosition(22.5.degrees)
     }
-    val rightExtendable = KSimulatedESC(0).apply {
+    val rightExtendable = KSimulatedESC(41).apply {
         identifier = "rightArm"
         brakeMode = true
         kP = 5.0
@@ -66,7 +66,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
 
     // winches that pull the robot up
     private val winchFF = SimpleMotorFeedforward(1.0, 10.0, 5.0)
-    val leftWinch = KSimulatedESC(0).apply {
+    val leftWinch = KSimulatedESC(42).apply {
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
@@ -74,7 +74,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
         }
-    val rightWinch = KSimulatedESC(0).apply {
+    val rightWinch = KSimulatedESC(43).apply {
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
