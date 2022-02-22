@@ -2,22 +2,15 @@ package frc.kyberlib.motorcontrol.rev
 
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
+import com.revrobotics.RelativeEncoder
 import com.revrobotics.SparkMaxPIDController
 import com.revrobotics.SparkMaxRelativeEncoder
-import com.revrobotics.RelativeEncoder
 import frc.kyberlib.command.LogMode
-import frc.kyberlib.motorcontrol.EncoderType
-import frc.kyberlib.motorcontrol.KEncoderConfig
-import frc.kyberlib.motorcontrol.KMotorController
+import frc.kyberlib.math.filters.Differentiator
+import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.motorcontrol.*
 import frc.kyberlib.motorcontrol.MotorType.BRUSHED
 import frc.kyberlib.motorcontrol.MotorType.BRUSHLESS
-import frc.kyberlib.math.units.extensions.Angle
-import frc.kyberlib.math.units.extensions.AngularVelocity
-import frc.kyberlib.math.units.extensions.rotations
-import frc.kyberlib.math.units.extensions.rpm
-import frc.kyberlib.motorcontrol.CANId
-import frc.kyberlib.motorcontrol.CANRegistry
-import frc.kyberlib.motorcontrol.KBasicMotorController
 
 
 /**
@@ -58,12 +51,13 @@ class KSparkMax(val canId: CANId, val motorType: frc.kyberlib.motorcontrol.Motor
         get() = _spark!!.appliedOutput
         set(value) {_spark!!.set(value)}
 
-    override var rawReversed: Boolean
+    override var rawReversed: Boolean  // todo: check if raw brake things
         get() = _spark!!.inverted
         set(value) { _spark?.inverted = value }
 
+    private val velCalc = Differentiator()
     override var rawVelocity: AngularVelocity
-        get() = _enc!!.velocity.rpm
+        get() = velCalc.calculate(rawPosition.radians).radiansPerSecond//_enc!!.velocity.rpm
         set(value) {
             _pid!!.setReference(value.rpm, CANSparkMax.ControlType.kVelocity, 0, 0.0, SparkMaxPIDController.ArbFFUnits.kVoltage)
         }
@@ -73,6 +67,12 @@ class KSparkMax(val canId: CANId, val motorType: frc.kyberlib.motorcontrol.Motor
         set(value) {
             _pid!!.setReference(value.rotations, CANSparkMax.ControlType.kPosition, 0, 0.0, SparkMaxPIDController.ArbFFUnits.kVoltage)
         }
+
+    override fun stop() {
+        if (real)
+            _spark!!.stopMotor()
+        else simVelocity = 0.rpm
+    }
 
     override var currentLimit: Int = -1
         set(value) {
@@ -116,13 +116,13 @@ class KSparkMax(val canId: CANId, val motorType: frc.kyberlib.motorcontrol.Motor
             _spark?.follow(kmc._spark, reversed)
         } else {
             kmc.followers.add(this)
-            kmc.notifier.startPeriodic(0.005)
+            kmc.notifier.startPeriodic(followPeriodic.seconds)
         }
     }
 
     override fun resetPosition(position: Angle) {
         if (!encoderConfigured) {
-            return log("Cannot reset encoder position without configured encoder", LogMode.ERROR)
+            return log("Cannot reset encoder angle without configured encoder", LogMode.ERROR)
         }
         _enc?.position = position.rotations
     }
