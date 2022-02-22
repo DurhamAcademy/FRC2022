@@ -6,11 +6,13 @@ import edu.wpi.first.networktables.NTSendableBuilder
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.invertIf
+import frc.kyberlib.math.units.extensions.seconds
 
 /**
  * A basic motor controller. No closed-loop control
  */
 abstract class KBasicMotorController : NTSendable, Debug {
+    protected val followPeriodic = 0.005.seconds
     var controlMode = ControlMode.NULL
     // ------ configs ----- //
     /**
@@ -22,8 +24,8 @@ abstract class KBasicMotorController : NTSendable, Debug {
      * Determines if the motor should run in the opposite direction
      */
     var reversed: Boolean = false
-        get() = if (real) rawReversed else field
-        set(value) {if (real) rawReversed else field = value}
+        get() = if (real && false) rawReversed else field
+        set(value) {if (real && false) rawReversed else field = value}
 
     abstract var rawReversed: Boolean
 
@@ -50,7 +52,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
      * What percent output is currently being applied?
      */
     var percent: Double = 0.0
-        get() = if (real) rawPercent.invertIf { reversed } else field
+        get() = if (real) rawPercent.invertIf { reversed } else field  // todo: does this compound with raw reversal
         set(value) {
             val adjusted = value
             controlMode = ControlMode.VOLTAGE
@@ -111,7 +113,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
     /**
      * Halts the motor
      */
-    fun stop() {
+    open fun stop() {
         safeSetVoltage(0.0)
     }
 

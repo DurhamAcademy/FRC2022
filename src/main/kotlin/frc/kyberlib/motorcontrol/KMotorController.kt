@@ -586,5 +586,8 @@ abstract class KMotorController : KBasicMotorController() {
         simPosition += velocity * dt
     }
 
+    // TODO: more types of sims
+    // TODO: figure out state-space linkage
+
     companion object LinearUnconfigured : Exception("You must set the wheel radius before using linear values")
 }

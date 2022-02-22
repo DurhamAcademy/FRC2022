@@ -1,19 +1,19 @@
 package frc.kyberlib.motorcontrol
 
+import edu.wpi.first.math.controller.ArmFeedforward
+import edu.wpi.first.math.controller.ProfiledPIDController
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.trajectory.TrapezoidProfile
+import edu.wpi.first.networktables.NTSendableBuilder
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.math.controller.ArmFeedforward
-import edu.wpi.first.math.controller.PIDController
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
-import edu.wpi.first.networktables.NTSendableBuilder
-import edu.wpi.first.math.trajectory.TrapezoidProfile
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.filters.Differentiator
+import frc.kyberlib.math.invertIf
+import frc.kyberlib.math.sign
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.simulation.Simulation
 import kotlin.math.absoluteValue
-import frc.kyberlib.math.invertIf
-import frc.kyberlib.math.sign
 
 typealias GearRatio = Double
 typealias BrakeMode = Boolean
@@ -132,6 +132,15 @@ abstract class KMotorController : KBasicMotorController() {
     var maxAcceleration: AngularVelocity
         get() = constraints.maxAcceleration.radiansPerSecond
         set(value) { constraints = TrapezoidProfile.Constraints(constraints.maxVelocity, value.radiansPerSecond) }
+
+    var maxPosition: Angle? = null
+    var maxLinearPosition: Length?
+        get() = maxPosition?.let { rotationToLinear(it) }
+        set(value) {maxPosition = if (value == null) value else linearToRotation(value)}
+    var minPosition: Angle? = null
+    var minLinearPosition: Length?
+        get() = minPosition?.let { rotationToLinear(it) }
+        set(value) {minPosition = if (value == null) value else linearToRotation(value)}
     /**
      * The max linear velocity the motor can have
      */
@@ -146,7 +155,11 @@ abstract class KMotorController : KBasicMotorController() {
         set(value) { maxAcceleration = linearToRotation(value) }
 
     private var constraints = TrapezoidProfile.Constraints(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
-    var PID = PIDController(0.0, 0.0, 0.0)  // what does the profile do?
+        set(value) {
+            field = value
+            PID.setConstraints(value)
+        }
+    var PID = ProfiledPIDController(0.0, 0.0, 0.0, constraints)  // what does the profile do?
 
     /**
      * Builtin control that will combine feedforward with the PID.
@@ -156,7 +169,8 @@ abstract class KMotorController : KBasicMotorController() {
         customControl = {
             when (controlMode) {
                 ControlMode.VELOCITY -> {
-                    val ff = feedforward.calculate(velocitySetpoint.radiansPerSecond)
+//                    val ff = feedforward.calculate(velocity.radiansPerSecond, -velocityError.radiansPerSecond / KRobot.period / feedforward.ka / 1.0)
+                    val ff = feedforward.calculate(velocitySetpoint.radiansPerSecond)  // todo: check if better
                     val pid = PID.calculate(velocityError.radiansPerSecond)
                     ff + pid
                 }
@@ -197,7 +211,7 @@ abstract class KMotorController : KBasicMotorController() {
     /**
      * Follows a trapezoidal motion profile and then reverts when done
      */
-    fun followProfile(profile: TrapezoidProfile) {
+    fun followProfile(profile: TrapezoidProfile) {  // todo: follow this better
         val timer = Timer()
         val prevControl = customControl
         timer.start()
@@ -225,6 +239,10 @@ abstract class KMotorController : KBasicMotorController() {
             else -> 0.0
         }
     }
+    /**
+     * Locks recursive calls to customControl from inside of customControl
+     */
+    private var customControlLock = false
 
     // ----- main getter/setter methods ----- //
     /**
@@ -241,6 +259,7 @@ abstract class KMotorController : KBasicMotorController() {
             positionSetpoint = value
         }
 
+    // todo: documentation
     /**
      * Linear Position that the
      */
@@ -272,6 +291,7 @@ abstract class KMotorController : KBasicMotorController() {
     val linearVelocityError
         get() = linearVelocity - linearVelocitySetpoint
 
+    // todo: make optional
     private var accelerationCalculator = Differentiator()
     var acceleration = 0.rpm
     val linearAcceleration
@@ -294,9 +314,12 @@ abstract class KMotorController : KBasicMotorController() {
      */
     var positionSetpoint: Angle = 0.rotations
         private set(value) {
-            field = value
-            if(!closedLoopConfigured && real) rawPosition = value
-            else updateVoltage()
+            var clamped = value
+            if (minPosition != null) clamped = value.value.coerceAtLeast(minPosition!!.value).radians
+            if (maxPosition != null) clamped = value.value.coerceAtMost(maxPosition!!.value).radians
+            field = clamped
+            if(!closedLoopConfigured && real) rawPosition = clamped
+            else if (!customControlLock) updateVoltage()
         }
 
     /**
@@ -306,7 +329,7 @@ abstract class KMotorController : KBasicMotorController() {
         private set(value) {
             field = value
             if (!closedLoopConfigured && real) rawVelocity = value
-            else updateVoltage()
+            else if (!customControlLock) updateVoltage()
         }
 
     /**
@@ -352,8 +375,11 @@ abstract class KMotorController : KBasicMotorController() {
      * Updates the voltage after changing position / velocity setpoint
      */
     fun updateVoltage() {
-        if (!isFollower && customControl != null && controlMode != ControlMode.VOLTAGE)
+        if (!isFollower && customControl != null && controlMode != ControlMode.VOLTAGE) {
+            customControlLock = true  // todo: mitigate customControl crashes
             safeSetVoltage(customControl!!(this))
+            customControlLock = false
+        }
     }
 
     // ----- meta information ----- //
@@ -494,7 +520,7 @@ abstract class KMotorController : KBasicMotorController() {
         return map.toMap()
     }
 
-    fun simUpdate(feedforward: SimpleMotorFeedforward, dt: Double) {
+    fun simUpdate(feedforward: SimpleMotorFeedforward, dt: Time) {
         val v = voltage
         if(v.absoluteValue < feedforward.ks) 
             simVelocity = 0.radiansPerSecond
@@ -506,18 +532,57 @@ abstract class KMotorController : KBasicMotorController() {
             val acceleration = accVolt / feedforward.ka
             if (brakeMode) {
                 val velMaintananceVolt = feedforward.ks + feedforward.kv * velocity.radiansPerSecond.absoluteValue
-                if (velMaintananceVolt.sign != velocity.radiansPerSecond.sign)
+                if (velMaintananceVolt.sign != velocity.radiansPerSecond.sign && vel != 0.0)
                     simVelocity = 0.radiansPerSecond
                 else if (velMaintananceVolt < v.absoluteValue)
-                    simVelocity = (applicableVolt.toDouble() / feedforward.kv).radiansPerSecond
+                    simVelocity = (applicableVolt / feedforward.kv).radiansPerSecond
                 else
-                    simVelocity = velocity + acceleration.radiansPerSecond * dt
+                    simVelocity = velocity + acceleration.radiansPerSecond * dt.seconds
             }
             else {
-                simVelocity = velocity + acceleration.radiansPerSecond * dt
+                simVelocity = velocity + acceleration.radiansPerSecond * dt.seconds
             }
         }
-        simPosition = simPosition + velocity * dt.seconds
+        simPosition += velocity * dt
+    }
+
+    fun simUpdate(feedforward: ArmFeedforward, dt: Time) {
+        // this kinda assume meter long arm for torque conversions - whelp
+        val v = voltage
+        val staticVoltage = feedforward.ks + feedforward.kcos * position.cos
+        if(v.absoluteValue < staticVoltage) {
+            if (brakeMode) {
+                simVelocity = 0.radiansPerSecond
+            }
+            else {
+                val gravity = 9.81.metersPerSecond
+                val acc = gravity.value * position.cos
+                simVelocity -= (acc * dt.seconds).radiansPerSecond
+            }
+        }
+        else {
+            val applicableVolt = (v.absoluteValue - staticVoltage).invertIf { v < 0.0 }
+            val vel = velocity.radiansPerSecond
+            // if negative volt is greater than acc vel, if positive volt if less than ac
+            val accVolt = applicableVolt - feedforward.kv * vel
+            val acceleration = accVolt / feedforward.ka
+            if (brakeMode) {
+                val velMaintananceVolt = feedforward.ks + feedforward.kv * velocity.radiansPerSecond.absoluteValue
+                if (velMaintananceVolt.sign != velocity.radiansPerSecond.sign && vel != 0.0) {
+                    simVelocity = 0.radiansPerSecond
+                }
+                else if (velMaintananceVolt < v.absoluteValue) {
+                    simVelocity = (applicableVolt / feedforward.kv).radiansPerSecond
+                }
+                else {
+                    simVelocity += acceleration.radiansPerSecond * dt.seconds
+                }
+            }
+            else {
+                simVelocity += acceleration.radiansPerSecond * dt.seconds
+            }
+        }
+        simPosition += velocity * dt
     }
 
     companion object LinearUnconfigured : Exception("You must set the wheel radius before using linear values")
