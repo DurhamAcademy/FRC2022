@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.DigitalInput
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
-import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.*
 import org.photonvision.PhotonCamera
 import kotlin.math.PI
 
@@ -112,12 +112,12 @@ object RobotContainer {
 
     init {
         // initialize subsystems here:
-//        Climber
-//        Conveyor
+        Climber
+        Conveyor
         Drivetrain
-//        Intaker
-//        Shooter
-//        Turret
+        Intaker
+        Shooter
+        Turret
     }
 
 }
