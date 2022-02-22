@@ -42,7 +42,7 @@ object Turret : SubsystemBase(), Debug, Simulatable {
     // characterization of the turret
     private val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
     // actual turret motors
-    val turret = KSimulatedESC(0).apply {
+    val turret = KSimulatedESC(30).apply {
         kP = 0.1
         kD = .0
         gearRatio = Constants.TURRET_GEAR_RATIO

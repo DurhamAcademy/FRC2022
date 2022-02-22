@@ -36,16 +36,14 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     var status = SHOOTER_STATUS.IDLE
 
     // main motor attached to the flywheel
-    val flywheelMaster = KSimulatedESC(0).apply {
+    val flywheelMaster = KSimulatedESC(31).apply {
         identifier = "flywheel"
         radius = Constants.FLYWHEEL_RADIUS
         Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.002)
     }
     val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 4)
     // additional motors that copy the main
-    private val flywheel2 = KSimulatedESC(0).apply { follow(flywheelMaster) }
-    private val flywheel3 = KSimulatedESC(0).apply { follow(flywheelMaster) }
-    private val flywheel4 = KSimulatedESC(0).apply { follow(flywheelMaster) }
+    private val flywheel2 = KSimulatedESC(32).apply { follow(flywheelMaster) }
 
     // Servo that sets the hood angle
     private val hood = KSimulatedESC(1)
@@ -65,9 +63,12 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
                 else distanceFilter.calculate(((Constants.UPPER_HUB_HEIGHT - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
 
     // motor controlling top roller speed
-    val topShooter = KSimulatedESC(0).apply {
+    val topShooter = KSimulatedESC(33).apply {
         kP = 10.0
         kD = 2.0
+    }
+    private val topFollower = KSimulatedESC(34).apply {
+        follow(topShooter)
     }
 
     init {
