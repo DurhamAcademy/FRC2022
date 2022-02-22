@@ -2,24 +2,28 @@ package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj.PneumaticsModuleType
+import edu.wpi.first.wpilibj.Solenoid
 import frc.kyberlib.command.Debug
+import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
-import frc.kyberlib.pneumatics.KSolenoid
 
 /**
  * Controls the intake mechanism of the robot
  */
 object Intaker  : SubsystemBase(), Debug {
+    init {
+        println("Intake")
+    }
     // deployment solenoids
-    private val leftIntakeDeploy = KSolenoid(PneumaticsModuleType.REVPH, 0)  // TODO: check if these configs are right
-    private val rightIntakeDeploy = KSolenoid(PneumaticsModuleType.REVPH, 0)
+    private val leftIntakeDeploy = Solenoid(PneumaticsModuleType.CTREPCM, 2)
+    private val rightIntakeDeploy = Solenoid(PneumaticsModuleType.CTREPCM, 3)
 
     // public get/set for deploy status
     var deployed
-        get() = leftIntakeDeploy.extended
+        get() = leftIntakeDeploy.get()
         set(value) {
-            leftIntakeDeploy.extended = value
-            rightIntakeDeploy.extended = value
+            leftIntakeDeploy.set(value)
+            rightIntakeDeploy.set(value)
         }
 
     // motor controlling the intake speed
