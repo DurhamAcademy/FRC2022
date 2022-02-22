@@ -21,15 +21,15 @@ open class KRobot() {
     private inner class KRobotInternal : TimedRobot(period) {
 
         override fun robotInit() {
+            Debug.log("Robot", "robot init", level=DebugLevel.LowPriority)
             HAL.report(FRCNetComm.tResourceType.kResourceType_Language, FRCNetComm.tInstances.kLanguage_Kotlin)
             if (Game.real) LiveWindow.disableAllTelemetry()
-            Debug.log("Robot", "robotInit", level=DebugLevel.LowPriority)
             this@KRobot.robotInit()
         }
 
         override fun robotPeriodic() {
-            CommandScheduler.getInstance().run()
             Debug.log("Robot", "robot periodic", level=DebugLevel.LowPriority)
+            CommandScheduler.getInstance().run()
             this@KRobot.robotPeriodic()
         }
 

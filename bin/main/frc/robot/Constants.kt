@@ -69,12 +69,21 @@ object Constants {
     const val LOST_WAIT = 2.0
     const val SMART_LOSS = true
 
-    val TURRET_TOLERANCE = 5.degrees // TODO: how close the heading must be to fire
-    val TURRET_DEADBAND = 3.degrees  // when the turret stops adjusting
+    const val SHOOTER_AQUISITION_TIME = 0.2
+    val TURRET_TOLERANCE = 3.degrees // how close the heading must be to fire
+    val TURRET_DEADBAND = 2.degrees  // when the turret stops adjusting
 
     // ------ Game Pieces ------ //
     val HUB_POSITION = Translation2d(324.inches, 162.inches)
     val FIELD_SIZE = Translation2d(648.inches, 324.inches)
     val UPPER_HUB_HEIGHT = 8.feet + 8.inches
     val START_POSE: Pose2d = Pose2d(200.inches, 100.inches, 45.degrees) // TODO: find actual
+
+    val LOW_RUNG_HEIGHT = 4.feet + .75.inches
+    val MID_RUNG_HEIGHT = 5.feet + .25.inches
+    val LOW2MID = 3.feet + 6.inches
+    val HIGH_RUNG_HEIGHT = 6.feet + 3.inches
+    val MID2HIGH = 2.feet
+    val TRAVERSAL_RUNG_HEIGHT = 7.feet + 7.inches
+    val HIGH2TRAVERSE = 2.feet
 }

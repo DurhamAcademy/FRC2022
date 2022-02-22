@@ -1,19 +1,15 @@
 package frc.robot.commands.turret
 
 import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.math.controller.ProfiledPIDController
-import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj2.command.CommandBase
-import frc.robot.Constants
-import frc.robot.RobotContainer
-import frc.robot.subsystems.Drivetrain
-import frc.robot.subsystems.TURRET_STATUS
-import frc.robot.subsystems.Turret
-import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.math.units.towards
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
-import kotlin.math.sin
+import frc.kyberlib.math.units.extensions.k
+import frc.kyberlib.math.units.towards
+import frc.robot.Constants
+import frc.robot.RobotContainer
+import frc.robot.subsystems.TURRET_STATUS
+import frc.robot.subsystems.Turret
 
 /**
  * Keeps the turret aimed at the target
@@ -44,9 +40,9 @@ object AimTurret : CommandBase() {
             found()
 
             // perp zoom correction TODO: add later
-//            val towardsHub = Turret.turret.position + Turret.visionOffset
-//            val robotSpeed = Drivetrain.chassisSpeeds.vxMetersPerSecond.metersPerSecond
-//            val perpSpeed = robotSpeed * sin(towardsHub.radians)
+            val towardsHub = Turret.turret.position + Turret.visionOffset
+            val robotSpeed = Drivetrain.chassisSpeeds.vxMetersPerSecond.metersPerSecond
+            val perpSpeed = robotSpeed * towardsHub.sin
 
             val goalOrientation = Turret.visionOffset!!
             Turret.fieldRelativeAngle = Turret.fieldRelativeAngle + goalOrientation
@@ -62,6 +58,10 @@ object AimTurret : CommandBase() {
                 Turret.fieldRelativeAngle = RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k
             }
         }
+    }
+
+    override fun end(interrupted: Boolean) {
+        Turret.turret.stop()
     }
 
     /**
