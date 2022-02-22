@@ -8,7 +8,7 @@ import frc.kyberlib.math.units.extensions.rpm
 /**
  * Raw simulated motor.
  */
-class KSimulatedESC(name: String) : KMotorController() {  // potentially remove this and make abstra
+class KSimulatedESC(name: Any) : KMotorController() {  // potentially remove this and make abstra
     override var rawPosition: Angle = 0.degrees
 
     override var rawVelocity: AngularVelocity = 0.rpm
@@ -16,7 +16,7 @@ class KSimulatedESC(name: String) : KMotorController() {  // potentially remove 
 
     override fun configureEncoder(config: KEncoderConfig) = true
 
-    override var identifier = name
+    override var identifier = name.toString()
 
     override var brakeMode: BrakeMode = false
 
