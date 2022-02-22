@@ -9,9 +9,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.numbers.N1
 import frc.kyberlib.command.Debug
-import frc.kyberlib.math.units.extensions.AngularVelocity
-import frc.kyberlib.math.units.extensions.radiansPerSecond
-import frc.kyberlib.math.units.extensions.rpm
+import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.simulation.Simulatable
 
@@ -85,12 +83,12 @@ class Flywheel(private val motor: KMotorController,
     override fun debugValues(): Map<String, Any?> = motor.debugValues()
 
     private val sim = FlywheelSim(plant, motors, kFlywheelGearing)
-    override fun simUpdate(dt: Double) {
-        Debug.log("Flywheel", "fly voltage = ${motor.voltage}")
+    override fun simUpdate(dt: Time) {
+//        Debug.log("Flywheel", "fly voltage = ${motor.voltage}")
         sim.setInputVoltage(motor.voltage)
-        sim.update(dt)
+        sim.update(dt.seconds)
         motor.simVelocity = sim.angularVelocityRPM.rpm
-        Debug.log("Flywheel", "vel: ${motor.simVelocity}")
+//        Debug.log("Flywheel", "vel: ${motor.simVelocity}")
     }
 
 }
