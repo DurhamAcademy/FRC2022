@@ -9,6 +9,7 @@ import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.k
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
+import frc.robot.Constants
 
 /**
  * Spin turret in circle. This command should never really be necessary if we odometry good
@@ -19,9 +20,6 @@ object SeekTurret : CommandBase() {
     }
     // counts how long a target has been visible
     val acquisitionTimer = Timer()
-
-    // TODO move to Constants
-    const val SHOOTER_AQUISITION_TIME = 0.2
 
     init {
         addRequirements(Shooter)
@@ -49,7 +47,7 @@ object SeekTurret : CommandBase() {
         }
 
         // if you are sure you see the target
-        if(acquisitionTimer.get() > SHOOTER_AQUISITION_TIME) {
+        if(acquisitionTimer.get() > Constants.SHOOTER_AQUISITION_TIME) {
             // lock onto the target
             AimTurret.schedule()
         }
@@ -57,5 +55,6 @@ object SeekTurret : CommandBase() {
 
     override fun end(interrupted: Boolean) {
         if (!interrupted) Turret.status = TURRET_STATUS.ADJUSTING
+        Turret.turret.stop()
     }
 }
