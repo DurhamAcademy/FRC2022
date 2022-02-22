@@ -76,10 +76,9 @@
   },
   "NetworkTables": {
     "LiveWindow": {
-      "Climber": {
+      "Drivetrain": {
         "open": true
-      },
-      "open": true
+      }
     },
     "SmartDashboard": {
       "Climber": {
@@ -88,11 +87,11 @@
         },
         "Left Winch": {
           "open": true
-        },
-        "open": true
+        }
       },
       "Drivetrain": {
-        "leftMaster": {
+        "open": true,
+        "pose": {
           "open": true
         },
         "rightMaster": {
