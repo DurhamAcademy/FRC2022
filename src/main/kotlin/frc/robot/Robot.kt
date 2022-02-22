@@ -1,18 +1,16 @@
 package frc.robot
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
+import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.simulation.Simulation
 import frc.kyberlib.simulation.field.KField2d
-import frc.robot.commands.auto.Autoificate
 import frc.robot.commands.drive.AutoDrive
 import frc.robot.commands.turret.ZeroTurret
-import frc.robot.subsystems.Climber
-import frc.robot.subsystems.Drivetrain
-import frc.robot.subsystems.Shooter
-import frc.robot.subsystems.Turret
+import frc.robot.subsystems.*
 
 class Robot : KRobot() {
     private var autoCommand : Command? = null
@@ -33,23 +31,23 @@ class Robot : KRobot() {
 
     override fun disabledInit() {
         Drivetrain.stop()
-        autoCommand?.cancel()
-    }
-
-    override fun teleopPeriodic() {
     }
 
     override fun enabledInit() {
-        // ZeroTurret.schedule(false) // don't uncomment this until the Hall sensor is added or bad things might happen
-    }
-
-    override fun teleopInit() {
-        KField2d.trajectory = null
-        autoCommand?.cancel()
+         ZeroTurret.schedule(false) // don't uncomment this until the Hall sensor is added or bad things might happen
     }
 
     override fun autonomousInit() {
-        ZeroTurret.schedule()
-        Autoificate().schedule()
+        Intaker.deployed = true
+        Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
+        val traj = KTrajectory.load("4Ball")
+        val auto = AutoDrive(traj)
+        auto.schedule()
+        autoCommand = auto
+    }
+
+    override fun autonomousExit() {
+        KField2d.trajectory = null
+        autoCommand?.cancel()
     }
 }

@@ -77,7 +77,7 @@ object Constants {
     val HUB_POSITION = Translation2d(324.inches, 162.inches)
     val FIELD_SIZE = Translation2d(648.inches, 324.inches)
     val UPPER_HUB_HEIGHT = 8.feet + 8.inches
-    val START_POSE: Pose2d = Pose2d(200.inches, 100.inches, 45.degrees) // TODO: find actual
+    val START_POSE: Pose2d = Pose2d(8.5.meters, 1.9.meters, (-90).degrees)
 
     val LOW_RUNG_HEIGHT = 4.feet + .75.inches
     val MID_RUNG_HEIGHT = 5.feet + .25.inches

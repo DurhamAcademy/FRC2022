@@ -76,7 +76,7 @@
   },
   "NetworkTables": {
     "LiveWindow": {
-      "Drivetrain": {
+      "Turret": {
         "open": true
       }
     },
@@ -90,7 +90,6 @@
         }
       },
       "Drivetrain": {
-        "open": true,
         "pose": {
           "open": true
         },
@@ -104,7 +103,8 @@
       "Intaker": {
         "intake": {
           "open": true
-        }
+        },
+        "open": true
       },
       "Shooter": {
         "hood": {
@@ -279,7 +279,7 @@
     "Plot <2>": {
       "plots": [
         {
-          "height": -37,
+          "height": 445,
           "series": [
             {
               "color": [

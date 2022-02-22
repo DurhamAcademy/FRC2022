@@ -44,6 +44,11 @@ open class KRobot() {
             this@KRobot.disabledPeriodic()
         }
 
+        override fun disabledExit() {
+            Debug.log("Robot", "disabled periodic", level=DebugLevel.LowPriority)
+            this@KRobot.disabledExit()
+        }
+
         override fun autonomousInit() {
             if (!enabled) enabledInit()
             enabled = true
@@ -54,6 +59,11 @@ open class KRobot() {
         override fun autonomousPeriodic() {
             Debug.log("Robot", "auto periodic", level=DebugLevel.LowPriority)
             this@KRobot.autonomousPeriodic()
+        }
+
+        override fun autonomousExit() {
+            Debug.log("Robot", "auto exit", level=DebugLevel.LowPriority)
+            this@KRobot.autonomousExit()
         }
 
         override fun teleopInit() {
@@ -68,6 +78,11 @@ open class KRobot() {
             this@KRobot.teleopPeriodic()
         }
 
+        override fun teleopExit() {
+            Debug.log("Robot", "teleop exit", level=DebugLevel.LowPriority)
+            this@KRobot.teleopExit()
+        }
+
         override fun simulationInit() {
             Debug.log("Robot", "sim init", level=DebugLevel.LowPriority)
             this@KRobot.simulationInit()
@@ -79,7 +94,18 @@ open class KRobot() {
         }
 
         override fun testInit() {
-//            LiveWindow.setEnabled(false)
+            Debug.log("Robot", "test init", level=DebugLevel.LowPriority)
+            this@KRobot.testInit()
+        }
+
+        override fun testPeriodic() {
+            Debug.log("Robot", "test periodic", level=DebugLevel.LowPriority)
+            this@KRobot.testPeriodic()
+        }
+
+        override fun testExit() {
+            Debug.log("Robot", "test exit", level=DebugLevel.LowPriority)
+            this@KRobot.testExit()
         }
     }
 
@@ -109,6 +135,8 @@ open class KRobot() {
      */
     open fun disabledPeriodic() {}
 
+    open fun disabledExit() {}
+
     /**
      * Ran once when robot enters auto or teleop, but not both
      */
@@ -124,6 +152,8 @@ open class KRobot() {
      */
     open fun autonomousPeriodic() {}
 
+    open fun autonomousExit() {}
+
     /**
      * Ran once when the robot enters teleoperated mode
      */
@@ -134,6 +164,8 @@ open class KRobot() {
      */
     open fun teleopPeriodic() {}
 
+    open fun teleopExit() {}
+
     /**
      * Run on the start of simulated robot
      */
@@ -143,6 +175,10 @@ open class KRobot() {
      * Run continuously while Simulating the robot
      */
     open fun simulationPeriodic() {}
+
+    open fun testInit() {}
+    open fun testPeriodic() {}
+    open fun testExit() {}
 
     /**
      * Runs the underlying WPILib startup methods. Run this in Main.kt
