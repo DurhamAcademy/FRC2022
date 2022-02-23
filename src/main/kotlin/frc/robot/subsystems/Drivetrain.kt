@@ -12,11 +12,10 @@ import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Game
-import frc.kyberlib.math.units.Prefixes
-import frc.kyberlib.math.units.Translation2d
-import frc.kyberlib.math.units.debugValues
+import frc.kyberlib.math.PolarPose
+import frc.kyberlib.math.polar
+import frc.kyberlib.math.units.*
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.math.units.towards
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
 import frc.kyberlib.motorcontrol.BrushType
 import frc.kyberlib.motorcontrol.rev.KSparkMax
@@ -69,16 +68,20 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     var wheelSpeeds: DifferentialDriveWheelSpeeds  // variable representing the speed of each side of the drivetrain
         get() = DifferentialDriveWheelSpeeds(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond)
         set(value) { drive(value) }
-    val fieldRelativeSpeeds: ChassisSpeeds  // robot speeds from the perspective of the driver
-        get() {
-            val pose = Navigator.instance!!.pose
-            val robotRelativeSpeeds = chassisSpeeds
-            val vx = chassisSpeeds.vxMetersPerSecond * cos(pose.rotation.radians)
-            val vy = chassisSpeeds.vxMetersPerSecond * sin(pose.rotation.radians)
-            return ChassisSpeeds(vx, vy, robotRelativeSpeeds.omegaRadiansPerSecond)
+    var pose
+        get() = RobotContainer.navigation.pose
+        set(value) {
+            val latency = RobotContainer.limelight.latestResult!!.latencyMillis.milli.seconds
+            val detectionTime = Game.time - latency
+            RobotContainer.navigation.update(value, detectionTime)
         }
-    val polarCoordinates
-        get() = edu.wpi.first.math.geometry.Translation2d(Shooter.targetDistance!!.meters, Constants.HUB_POSITION.towards(RobotContainer.navigation.position))
+    var polarCoordinates
+        get() = RobotContainer.navigation.pose.polar(Constants.HUB_POSITION)
+        set(value) {
+            pose = Pose2d(value.cartesian(Constants.HUB_POSITION).translation, RobotContainer.navigation.heading)
+        }
+    val polarSpeeds
+        get() = chassisSpeeds.polar(RobotContainer.navigation.pose.polar(Constants.HUB_POSITION))
 
     // commands
     /**
@@ -106,14 +109,9 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
         debugValues()
         RobotContainer.navigation.update(wheelSpeeds)
         if(Turret.targetVisible && Constants.NAVIGATION_CORRECTION)  {  // TODO: test
-            val distance = Shooter.targetDistance!! + 2.feet  // two feet is the radius of the hub
-            val angle = Turret.visionOffset!! + Turret.fieldRelativeAngle
-            val transform = Translation2d(distance, 0.meters).rotateBy(angle)
-            val newPosition = Constants.HUB_POSITION.minus(transform)
-            val resultDelay = (RobotContainer.limelight.latestResult!!.latencyMillis / Prefixes.milli).seconds
-            val time = (Game.time - resultDelay).seconds * Prefixes.milli
-            RobotContainer.navigation.update(Pose2d(newPosition, RobotContainer.navigation.heading), time)
-
+            val distance = Shooter.targetDistance!!
+            val angle = Turret.visionOffset!! + Turret.fieldRelativeAngle + 180.degrees
+            polarCoordinates = PolarPose(distance, angle, Turret.visionOffset!!)
         }
     }
 

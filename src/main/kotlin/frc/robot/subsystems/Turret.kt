@@ -9,18 +9,19 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
-import frc.kyberlib.math.invertIf
-import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.extensions.Angle
+import frc.kyberlib.math.units.extensions.degrees
+import frc.kyberlib.math.units.extensions.k
+import frc.kyberlib.math.units.extensions.radiansPerSecond
 import frc.kyberlib.math.units.towards
 import frc.kyberlib.motorcontrol.KSimulatedESC
-import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.commands.turret.SeekTurret
 import org.photonvision.targeting.PhotonPipelineResult
 import org.photonvision.targeting.PhotonTrackedTarget
-import kotlin.math.absoluteValue
+import kotlin.math.atan
 
 
 /**
@@ -55,10 +56,12 @@ object Turret : SubsystemBase(), Debug {
             setIntegratorRange(-1.0, 1.0)
          }
         customControl = {
+            val polarSpeeds = Drivetrain.polarSpeeds
+            val movementComp = polarSpeeds.dTheta
             val chassisComp = Drivetrain.chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond
             val setpoint = clampSafePosition(it.positionSetpoint)
             val offsetCorrection = offsetCorrector.calculate((it.position - setpoint).radians).radiansPerSecond
-            val targetVelocity = offsetCorrection - chassisComp
+            val targetVelocity = offsetCorrection - chassisComp - movementComp
             val velocityError = it.velocity - targetVelocity
             val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(velocityError.radiansPerSecond)
             voltage

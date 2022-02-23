@@ -58,12 +58,12 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
             hood.position = value
         }
 
-    // how far from the hub the robot is (based on limelight)
+    // how far from the center of the hub the robot is (based on limelight)
     private val distanceFilter = LinearFilter.movingAverage(8)
     val targetDistance: Length? 
         get() = if (Game.sim) RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
                 else if (!targetVisible) null
-                else distanceFilter.calculate(((Constants.UPPER_HUB_HEIGHT - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
+                else 2.feet + distanceFilter.calculate(((Constants.UPPER_HUB_HEIGHT - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
 
     // motor controlling top roller speed
     val topShooter = KSimulatedESC(33).apply {

@@ -5,7 +5,7 @@ import frc.kyberlib.math.units.LengthConversions.feetToMeters
 import frc.kyberlib.math.units.LengthConversions.inchesToFeet
 import frc.kyberlib.math.units.LengthConversions.milesToFeet
 import frc.kyberlib.math.units.Meter
-import frc.kyberlib.math.units.Prefixes
+import frc.kyberlib.math.units.centi
 
 
 /**
@@ -22,14 +22,14 @@ internal fun Distance(value: Double): Length {
 
 // Number -> length
 val Number.meters get() = Distance(this.toDouble())
-val Number.centimeters get() = Distance(this.toDouble() * Prefixes.centi)
+val Number.centimeters get() = Distance(this.centi)
 val Number.miles get() = Distance(this.toDouble() * milesToFeet * feetToMeters)
 val Number.feet get() = Distance(this.toDouble() * feetToMeters)
 val Number.inches get() = Distance(this.toDouble() * inchesToFeet * feetToMeters)
 
 // length -> Number
 val Length.meters get() = value
-val Length.centimeters get() = value / Prefixes.centi
+val Length.centimeters get() = value / 1.centi
 val Length.miles get() = value / feetToMeters / milesToFeet
 val Length.feet get() = value / feetToMeters
 val Length.inches get() = value / (inchesToFeet * feetToMeters)

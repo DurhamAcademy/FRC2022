@@ -88,7 +88,6 @@
         "leftMaster": {
           "open": true
         },
-        "open": true,
         "pose": {
           "open": true
         },
@@ -116,6 +115,7 @@
         }
       },
       "Turret": {
+        "open": true,
         "turret": {
           "open": true
         }
@@ -130,7 +130,7 @@
     "Plot <0>": {
       "plots": [
         {
-          "height": 274,
+          "height": -29,
           "series": [
             {
               "color": [
@@ -171,7 +171,7 @@
           ]
         },
         {
-          "height": 274,
+          "height": -29,
           "series": [
             {
               "color": [
@@ -219,7 +219,7 @@
     "Plot <1>": {
       "plots": [
         {
-          "height": -29,
+          "height": 302,
           "name": "Aim",
           "series": [
             {
@@ -243,7 +243,7 @@
           ]
         },
         {
-          "height": -29,
+          "height": 302,
           "name": "Movement",
           "series": [
             {
