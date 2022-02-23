@@ -1,18 +1,28 @@
 package frc.kyberlib.motorcontrol
 
-import edu.wpi.first.math.controller.ArmFeedforward
-import edu.wpi.first.math.controller.ProfiledPIDController
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.VecBuilder
+import edu.wpi.first.math.controller.*
+import edu.wpi.first.math.estimator.KalmanFilter
+import edu.wpi.first.math.numbers.N1
+import edu.wpi.first.math.numbers.N2
+import edu.wpi.first.math.system.LinearSystem
+import edu.wpi.first.math.system.LinearSystemLoop
+import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.math.system.plant.LinearSystemId
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.networktables.NTSendableBuilder
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.Timer
+import edu.wpi.first.wpilibj.simulation.LinearSystemSim
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.sign
 import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
+import java.util.function.Supplier
 import kotlin.math.absoluteValue
 
 typealias GearRatio = Double
@@ -28,7 +38,7 @@ enum class EncoderType {
 /**
  * Defines types of motors that can be used
  */
-enum class MotorType {
+enum class BrushType {
     BRUSHLESS, BRUSHED
 }
 
@@ -39,7 +49,6 @@ enum class ControlMode {
     VELOCITY, POSITION, VOLTAGE, NULL
 }
 
-// todo: replace position with angularPosition etc.
 /**
  * Stores data about an encoder. [reversed] means the encoder reading goes + when the motor is applied - voltage.
  */
@@ -47,26 +56,9 @@ data class KEncoderConfig(val cpr: Int, val type: EncoderType, val reversed: Boo
 /**
  * A more advanced motor control with feedback control.
  */
-abstract class KMotorController : KBasicMotorController() {
+abstract class KMotorController : KBasicMotorController(), Simulatable {
+    open var motorType: DCMotor? = null
     // ----- configs ----- //
-    /**
-     * The multiplier to attach to the raw velocity. *This is not the recommended way to do this.* Try using gearRatio instead
-     */
-    var velocityConversionFactor = 1.0
-        set(value) {
-            field = value
-            writeMultipler(velocityConversionFactor, positionConversionFactor)
-        }
-
-    /**
-     * The multiplier to attach to the raw position. *This is not the recommended way to do this.* Try using gearRatio instead
-     */
-    var positionConversionFactor = 1.0
-        set(value) {
-            field = value
-            writeMultipler(velocityConversionFactor, positionConversionFactor)
-        }
-
     /**
      * Defines the relationship between rotation and linear motion for the motor.
      */
@@ -78,7 +70,6 @@ abstract class KMotorController : KBasicMotorController() {
     var gearRatio: GearRatio = 1.0
         set(value) {
             field = value
-//            writeMultipler(gearRatio.rpm.rotationsPerSecond, gearRatio)
         }
 
     /**
@@ -96,30 +87,21 @@ abstract class KMotorController : KBasicMotorController() {
      */
     var kP: Double
         get() = PID.p
-        set(value) {
-            PID.p = value
-            writePid(kP, kI, kD)
-        }
+        set(value) { PID.p = value }
 
     /**
      * Integral gain of the customControl controller.
      */
     var kI: Double
         get() = PID.i
-        set(value) {
-            PID.i = value
-            writePid(kP, kI, kD)
-        }
+        set(value) { PID.i = value }
 
     /**
      * Derivative gain of the customControl controller.
      */
     var kD: Double
         get() = PID.d
-        set(value) {
-            PID.d = value
-            writePid(kP, kI, kD)
-        }
+        set(value) { PID.d = value }
 
     /**
      * The max angular velocity the motor can have
@@ -261,9 +243,6 @@ abstract class KMotorController : KBasicMotorController() {
         }
 
     // todo: documentation
-    /**
-     * Linear Position that the
-     */
     var linearPosition: Length
         get() = rotationToLinear(position)
         set(value) { position = linearToRotation(value) }
@@ -297,17 +276,6 @@ abstract class KMotorController : KBasicMotorController() {
     var acceleration = 0.rpm
     val linearAcceleration
         get() = rotationToLinear(acceleration)
-
-    init {
-        val accelNotifier =
-            if (Game.real) Notifier {
-                acceleration = accelerationCalculator.calculate(velocity.radiansPerSecond).radiansPerSecond
-            } else Notifier {
-                acceleration = Simulation.instance.inverseFF(voltage, velocity.radiansPerSecond).radiansPerSecond
-            }
-
-        // accelNotifier.startPeriodic(0.02)
-    }
 
     // ----- this is where you put the advanced controls ---- //
     /**
@@ -391,6 +359,9 @@ abstract class KMotorController : KBasicMotorController() {
     private val linearConfigured
         get() = radius != null
 
+    private val motorConfigured
+        get() = motorType != null
+
     /**
      * Does the motor controller have an encoder configured?
      * Allows for closed-loop control methods to be used
@@ -440,16 +411,6 @@ abstract class KMotorController : KBasicMotorController() {
     abstract var currentLimit: Int
 
     /**
-     * Write pid values to native motor
-     */
-    protected abstract fun writePid(p: Double, i: Double, d: Double)
-
-    /**
-     * Set the conversion multipliers of to native motor
-     */
-    protected abstract fun writeMultipler(mv: Double, mp: Double)
-
-    /**
      * Configures the respective ESC encoder settings when a new encoder configuration is set
      */
     protected abstract fun configureEncoder(config: KEncoderConfig): Boolean
@@ -459,17 +420,18 @@ abstract class KMotorController : KBasicMotorController() {
             assert(!real) {"This value should only be set from a simulation"}
             field = value
         }
-    var simLinearVelocity: LinearVelocity
-        get() = rotationToLinear(simVelocity)
-        set(value) { simVelocity = linearToRotation(value) }
     var simPosition: Angle = 0.degrees
         set(value) {
             assert(!real) {"This value should only be set from a simulation"}
             field = value
         }
-    var simLinearPosition: Length
+    var simLinearVelocity
+        get() = rotationToLinear(simVelocity)
+        set(value) {simVelocity = linearToRotation(value)}
+    var simLinearPosition
         get() = rotationToLinear(simPosition)
-        set(value) { simPosition = linearToRotation(value) }
+        set(value) {simPosition = linearToRotation(value)}
+
 
     override fun initSendable(builder: NTSendableBuilder) {
         super.initSendable(builder)
@@ -521,63 +483,48 @@ abstract class KMotorController : KBasicMotorController() {
         return map.toMap()
     }
 
-    fun simUpdate(feedforward: SimpleMotorFeedforward, dt: Time) {
-        val v = voltage
-        if(v.absoluteValue < feedforward.ks) 
+    fun setupSim(feedforward: SimpleMotorFeedforward) {
+        simKS = {feedforward.ks}
+        simKV = feedforward.kv
+        simKA = feedforward.ka
+        Simulation.instance.include(this)
+    }
+    fun setupSim(feedforward: ArmFeedforward) {
+        simKS = { feedforward.ks + feedforward.kcos * position.cos }
+        simKV = feedforward.kv
+        simKA = feedforward.ka
+        if(!brakeMode) log("Use brakeMode", logMode = LogMode.WARN)
+        Simulation.instance.include(this)
+    }
+    fun setupSim(feedforward: ElevatorFeedforward) {
+        simKS = { feedforward.ks * voltage.sign + feedforward.kg }
+        simKV = feedforward.kv
+        simKA = feedforward.ka
+        if(!brakeMode) log("Use brakeMode", logMode = LogMode.WARN)
+        Simulation.instance.include(this)
+    }
+    private lateinit var simKS: () -> Double
+    private var simKV = 0.0
+    private var simKA = 0.0
+    override fun simUpdate(dt: Time) {
+        if(!this::simKS.isInitialized) return
+        if(voltage.absoluteValue < simKS()) {
             simVelocity = 0.radiansPerSecond
+            // kinda assuming brakeMode
+        }
         else {
-            val applicableVolt = (v.absoluteValue - feedforward.ks).invertIf { v < 0.0 }
+            val applicableVolt = (voltage.absoluteValue - simKS()).invertIf { voltage < 0.0 }
             val vel = velocity.radiansPerSecond
-            // if negative volt is greater than acc vel, if positive volt if less than ac
-            val accVolt = applicableVolt - feedforward.kv * vel
-            val acceleration = accVolt / feedforward.ka
+            val accVolt = applicableVolt - simKV * vel
+            val acceleration = accVolt / simKA
             if (brakeMode) {
-                val velMaintananceVolt = feedforward.ks + feedforward.kv * velocity.radiansPerSecond.absoluteValue
+                val velMaintananceVolt = simKS() + simKV * velocity.radiansPerSecond.absoluteValue
                 if (velMaintananceVolt.sign != velocity.radiansPerSecond.sign && vel != 0.0)
                     simVelocity = 0.radiansPerSecond
-                else if (velMaintananceVolt < v.absoluteValue)
-                    simVelocity = (applicableVolt / feedforward.kv).radiansPerSecond
+                else if (velMaintananceVolt < voltage.absoluteValue)
+                    simVelocity = (applicableVolt / simKV).radiansPerSecond
                 else
-                    simVelocity = velocity + acceleration.radiansPerSecond * dt.seconds
-            }
-            else {
-                simVelocity = velocity + acceleration.radiansPerSecond * dt.seconds
-            }
-        }
-        simPosition += velocity * dt
-    }
-
-    fun simUpdate(feedforward: ArmFeedforward, dt: Time) {
-        // this kinda assume meter long arm for torque conversions - whelp
-        val v = voltage
-        val staticVoltage = feedforward.ks + feedforward.kcos * position.cos
-        if(v.absoluteValue < staticVoltage) {
-            if (brakeMode) {
-                simVelocity = 0.radiansPerSecond
-            }
-            else {
-                val gravity = 9.81.metersPerSecond
-                val acc = gravity.value * position.cos
-                simVelocity -= (acc * dt.seconds).radiansPerSecond
-            }
-        }
-        else {
-            val applicableVolt = (v.absoluteValue - staticVoltage).invertIf { v < 0.0 }
-            val vel = velocity.radiansPerSecond
-            // if negative volt is greater than acc vel, if positive volt if less than ac
-            val accVolt = applicableVolt - feedforward.kv * vel
-            val acceleration = accVolt / feedforward.ka
-            if (brakeMode) {
-                val velMaintananceVolt = feedforward.ks + feedforward.kv * velocity.radiansPerSecond.absoluteValue
-                if (velMaintananceVolt.sign != velocity.radiansPerSecond.sign && vel != 0.0) {
-                    simVelocity = 0.radiansPerSecond
-                }
-                else if (velMaintananceVolt < v.absoluteValue) {
-                    simVelocity = (applicableVolt / feedforward.kv).radiansPerSecond
-                }
-                else {
                     simVelocity += acceleration.radiansPerSecond * dt.seconds
-                }
             }
             else {
                 simVelocity += acceleration.radiansPerSecond * dt.seconds
@@ -586,8 +533,51 @@ abstract class KMotorController : KBasicMotorController() {
         simPosition += velocity * dt
     }
 
-    // TODO: more types of sims
-    // TODO: figure out state-space linkage
+    // LinearSystem<# States, #Outpust, #inputs>
+    fun velocitySystem(ff: SimpleMotorFeedforward): LinearSystem<N1, N1, N1> {
+        if(!motorConfigured) throw MotorUnconfigured
+        return LinearSystemId.identifyVelocitySystem(ff.kv, ff.ka)
+    }
+    fun positionSystem(ff: SimpleMotorFeedforward): LinearSystem<N2, N1, N1> {
+        if(!motorConfigured) throw MotorUnconfigured
+        return LinearSystemId.identifyPositionSystem(ff.kv, ff.ka)
+    }
+    fun dcSystem(momentOfInertia: Double): LinearSystem<N2, N1, N2> {
+        if(!motorConfigured) throw MotorUnconfigured
+        return LinearSystemId.createDCMotorSystem(motorType, momentOfInertia, gearRatio)
+    }
+    fun flywheelSystem(momentOfInertia: Double): LinearSystem<N1, N1, N1> {
+        if(!motorConfigured) throw MotorUnconfigured
+        return LinearSystemId.createFlywheelSystem(motorType, momentOfInertia, gearRatio)
+    }
+    fun elevatorSystem(mass: Double): LinearSystem<N2, N1, N1> {
+        if(!motorConfigured) throw MotorUnconfigured
+        return LinearSystemId.createElevatorSystem(motorType, mass, radius!!.meters, gearRatio)
+    }
+    fun armSystem(momentOfInertia: Double): LinearSystem<N2, N1, N1> {
+        if(!motorConfigured) throw MotorUnconfigured
+        return LinearSystemId.createSingleJointedArmSystem(motorType, momentOfInertia, gearRatio)
+    }
+    fun drivetrainSystem(ff: SimpleMotorFeedforward, kvAngular: Double, kaAngular: Double, trackWidth: Length = 2.meters): LinearSystem<N2, N2, N2> {
+        if(!motorConfigured) throw MotorUnconfigured
+        return LinearSystemId.identifyDrivetrainSystem(ff.kv, ff.ka, kvAngular, kaAngular, trackWidth.meters)
+    }
+    fun customSystem() {}  // todo: allow for generation based on formula
 
-    companion object LinearUnconfigured : Exception("You must set the wheel radius before using linear values")
+    // FIXME: this assume velocity control
+   fun stateSpaceControl(loop: LinearSystemLoop<N1, N1, N1>, timeDelay: Time=0.02.seconds) {
+       customControl = {
+           loop.nextR = VecBuilder.fill(it.velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
+           loop.correct(VecBuilder.fill(it.velocity.radiansPerSecond))  // update with empirical
+           loop.predict(timeDelay.seconds)  // math
+           val nextVoltage = loop.getU(0)  // input
+           nextVoltage
+       }
+       if(timeDelay != 0.02.seconds) {
+           Notifier{ updateVoltage() }.startPeriodic(timeDelay.seconds)
+       }
+   }
 }
+
+object LinearUnconfigured : Exception("You must set the wheel radius before using linear values")
+object MotorUnconfigured : Exception("You must set motor type before using linear sytems")

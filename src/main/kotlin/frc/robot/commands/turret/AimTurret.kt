@@ -38,6 +38,7 @@ object AimTurret : CommandBase() {
         // if the limelight is a target
         if (Turret.targetVisible) {
             found()
+            // todo: see if you can make this state space
 
             // perp zoom correction TODO: add later
 //            val towardsHub = Turret.turret.position + Turret.visionOffset

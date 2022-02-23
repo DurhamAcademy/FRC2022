@@ -4,6 +4,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
@@ -33,7 +34,7 @@ enum class TURRET_STATUS {
 /**
  * Controls the turret
  */
-object Turret : SubsystemBase(), Debug, Simulatable {
+object Turret : SubsystemBase(), Debug {
     init {
         println("Turret")
     }
@@ -46,6 +47,7 @@ object Turret : SubsystemBase(), Debug, Simulatable {
         kP = 0.1
         kD = .0
         gearRatio = Constants.TURRET_GEAR_RATIO
+        motorType = DCMotor.getNeo550(1)
 
         // fancy control
         val offsetCorrector = ProfiledPIDController(30.00, 0.0, 5.0, TrapezoidProfile.Constraints(12.0, 4.0)).apply { 
@@ -61,6 +63,8 @@ object Turret : SubsystemBase(), Debug, Simulatable {
             val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(velocityError.radiansPerSecond)
             voltage
         }
+
+        if(Game.sim) setupSim(feedforward)
     }
 
     // angle of the turret from top view
@@ -121,14 +125,5 @@ object Turret : SubsystemBase(), Debug, Simulatable {
             "field Heading" to fieldRelativeAngle.radians,
             "target detected" to targetVisible
         )
-    }
-
-    /**
-     * Guess to velocity of the turret from a given voltage
-     */
-    fun guessVelocity(v: Double): AngularVelocity = ((v.absoluteValue - feedforward.ks) / feedforward.kv).coerceAtLeast(0.0).invertIf { v < 0.0 }.radiansPerSecond
-
-    override fun simUpdate(dt: Time) {
-        turret.simUpdate(feedforward, dt)
     }
 }

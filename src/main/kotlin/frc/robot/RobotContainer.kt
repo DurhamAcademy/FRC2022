@@ -5,7 +5,9 @@ import frc.kyberlib.auto.Navigator
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.commands.Intake
-import frc.robot.subsystems.Drivetrain
+import frc.robot.commands.climb.Climb
+import frc.robot.commands.climb.ToggleArmLift
+import frc.robot.subsystems.*
 import org.photonvision.PhotonCamera
 import kotlin.math.PI
 
@@ -39,8 +41,8 @@ object RobotContainer {
 //        leftBumper.whileActiveOnce(Flush)
 //
 //        yButton.toggleWhenActive(fullAutoClimb)
-//        aButton.toggleWhenActive(Climb)
-//        bButton.whileActiveOnce(ToggleArmLift())
+        aButton.toggleWhenActive(Climb)
+        bButton.whileActiveOnce(ToggleArmLift())
     }
 
 //    val leds = KLEDStrip(0, 103).apply {
@@ -113,12 +115,12 @@ object RobotContainer {
 
     init {
         // initialize subsystems here:
-//        Climber
-//        Conveyor
+        Climber
+        Conveyor
         Drivetrain
-//        Intaker
-//        Shooter
-//        Turret
+        Intaker
+        Shooter
+        Turret
     }
 
 }

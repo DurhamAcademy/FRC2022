@@ -2,6 +2,7 @@ package frc.robot.subsystems
 
 import edu.wpi.first.math.controller.ArmFeedforward
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.PneumaticsModuleType
 import edu.wpi.first.wpilibj.Solenoid
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
@@ -20,6 +21,7 @@ import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.Simulatable
+import frc.kyberlib.simulation.Simulation
 import kotlin.math.absoluteValue
 
 /**
@@ -73,6 +75,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         customControl = { bangBang(it) }
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
+        motorType = DCMotor.getNeo550(1)
         }
     val rightWinch = KSimulatedESC(43).apply {
         radius = Constants.WINCH_RADIUS
@@ -81,6 +84,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         customControl = { bangBang(it) }
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
+        motorType = DCMotor.getNeo550(1)
     }
 
     // public variable to get/set whether the arms are lifted
@@ -132,25 +136,15 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     private val static = staticPivot.append(MechanismLigament2d("static", 31.inches.value, 0.0, 1.0, Color8Bit(255, 255, 0)))
 
     init {
-        if (Game.sim)
+        if (Game.sim) {
             SmartDashboard.putData("climb sim", sim)
+            Simulation.instance.include(this)
+        }
     }
-    
     override fun simUpdate(dt: Time) {
         extendable.length = (35.inches.value + leftWinch.position.value)
         extendable.angle = leftExtendable.position.degrees
         static.angle = if(staticsLifted) 90.0 else 0.0
-
-        leftExtendable.simUpdate(armFF, dt)
-        rightExtendable.simUpdate(armFF, dt)
-        leftExtendable.simPosition = leftExtendable.position.degrees.coerceIn(leftExtendable.minPosition!!.degrees, leftExtendable.maxPosition!!.degrees).degrees
-        rightExtendable.simPosition = rightExtendable.position.degrees.coerceIn(rightExtendable.minPosition!!.degrees, rightExtendable.maxPosition!!.degrees).degrees
-
-        leftWinch.simUpdate(winchFF, dt)
-        rightWinch.simUpdate(winchFF, dt)
-        leftWinch.simLinearPosition = leftWinch.position.value.coerceIn(leftWinch.minLinearPosition!!.value, leftWinch.maxLinearPosition!!.value).meters
-        rightWinch.simLinearPosition = rightWinch.position.value.coerceIn(rightWinch.minLinearPosition!!.value, rightWinch.maxLinearPosition!!.value).meters
-
     }
 
     override fun periodic() {

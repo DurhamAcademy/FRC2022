@@ -6,7 +6,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.system.plant.LinearSystemId
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -14,17 +13,14 @@ import edu.wpi.first.math.VecBuilder
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.commands.drive.Drive
-import frc.robot.commands.shooter.Shoot
 import frc.kyberlib.auto.Navigator
-import frc.kyberlib.auto.trajectory.KTrajectory
-import frc.kyberlib.auto.trajectory.KTrajectoryConfig
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.Prefixes
 import frc.kyberlib.math.units.Translation2d
 import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
-import frc.kyberlib.motorcontrol.MotorType
+import frc.kyberlib.motorcontrol.BrushType
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
@@ -40,23 +36,25 @@ import kotlin.math.sin
  */
 object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     // motors
-    val leftMaster = KSparkMax(10, MotorType.BRUSHLESS).apply {
+    val leftMaster = KSparkMax(10, BrushType.BRUSHLESS).apply {
         identifier = "leftMaster"
         reversed = false
         currentLimit = 40
+        motorType = DCMotor.getNEO(2)
     }
-    val rightMaster  = KSparkMax(12, MotorType.BRUSHLESS).apply {
+    val rightMaster  = KSparkMax(12, BrushType.BRUSHLESS).apply {
         identifier = "rightMaster"
         reversed = true
         currentLimit = 40
+        motorType = DCMotor.getNEO(2)
     }
-    private val leftFollower  = KSparkMax(11, MotorType.BRUSHLESS).apply {
+    private val leftFollower  = KSparkMax(11, BrushType.BRUSHLESS).apply {
         identifier = "leftFollow"
         reversed = false
         currentLimit = 40
         follow(leftMaster)
     }
-    private val rightFollower = KSparkMax(13, MotorType.BRUSHLESS).apply {
+    private val rightFollower = KSparkMax(13, BrushType.BRUSHLESS).apply {
         identifier = "rightFollow"
         currentLimit = 40
         reversed = false
@@ -129,7 +127,6 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
 
         // setup controls for drive motors
         val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
-        if(Game.sim) Simulation.instance.chassisFF = feedforward
         for (motor in motors) {
             motor.apply {
                 brakeMode = true
@@ -137,9 +134,9 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
                 radius = Constants.WHEEL_RADIUS
                 currentLimit = 40
 
-//                kP = Constants.DRIVE_P
-//                kI = Constants.DRIVE_I
-//                kD = Constants.DRIVE_D
+                kP = Constants.DRIVE_P
+                kI = Constants.DRIVE_I
+                kD = Constants.DRIVE_D
 
                 addFeedforward(feedforward)
             }
@@ -159,14 +156,19 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
             kinematics.trackWidthMeters,  // The track width
             leftMaster.radius!!.meters,  // wheel radius
             // The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
-            VecBuilder.fill(0.000, 0.000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000)
+            VecBuilder.fill(0.000, 0.000, 0.00, 0.00, 0.00, 0.00, 0.00)
         )
+        driveSim.pose = RobotContainer.navigation.pose
+        Simulation.instance.include(this)
     }
 
+    init {
+        if(Game.sim) setupSim()
+    }
     override fun simUpdate(dt: Time) {
         // update the sim with new inputs
-        val leftVolt = leftMaster.voltage.zeroIf{it: Double -> it.absoluteValue < Constants.DRIVE_KS}
-        val rightVolt = rightMaster.voltage.zeroIf{it: Double -> it.absoluteValue < Constants.DRIVE_KS}
+        val leftVolt = leftMaster.voltage.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
+        val rightVolt = rightMaster.voltage.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
         if (leftVolt == 0.0 && rightVolt == 0.0) return
         driveSim.setInputs(leftVolt, rightVolt)
         driveSim.update(dt.seconds)

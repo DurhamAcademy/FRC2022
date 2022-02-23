@@ -22,7 +22,7 @@ enum class LogMode {
  * Allows for control of information levels.
  */
 enum class DebugLevel {
-    LowPriority, NORMAL, HighPriority, MaxPriority
+    LowPriority, NORMAL, HighPriority, MaxPriority  // todo: find a better naming scheme
 }
 /**
  * Inheritable class that grants multiple types of debugging

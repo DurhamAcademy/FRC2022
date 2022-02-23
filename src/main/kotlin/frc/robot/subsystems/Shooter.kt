@@ -1,6 +1,7 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.math.filter.LinearFilter
+import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.Servo
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -16,6 +17,7 @@ import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.motorcontrol.KServo
 import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.simulation.Simulatable
+import frc.kyberlib.simulation.Simulation
 
 
 /**
@@ -39,6 +41,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     val flywheelMaster = KSimulatedESC(31).apply {
         identifier = "flywheel"
         radius = Constants.FLYWHEEL_RADIUS
+        motorType = DCMotor.getNEO(2)
         Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.002)
     }
     val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 4)
@@ -66,6 +69,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     val topShooter = KSimulatedESC(33).apply {
         kP = 10.0
         kD = 2.0
+        motorType = DCMotor.getNeo550(2)
     }
     private val topFollower = KSimulatedESC(34).apply {
         follow(topShooter)
@@ -73,6 +77,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     init {
         defaultCommand = Shoot
+        if(Game.sim) Simulation.instance.include(this)
     }
 
     override fun periodic() {
@@ -90,7 +95,6 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     override fun simUpdate(dt: Time) {
         flywheelControl.simUpdate(dt)
-        // flywheelMaster.simVelocity = flywheelMaster.velocitySetpoint
         hood.simPosition = hood.positionSetpoint
         topShooter.simVelocity = topShooter.velocitySetpoint
     }

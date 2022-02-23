@@ -14,7 +14,7 @@ import frc.kyberlib.simulation.field.KField2d
 object Constants {
     // ------ Climb ------ //
     val WINCH_RADIUS: Length = 1.inches  // TODO
-    const val WINCH_GEAR_RATIO = 1.0 // TODO
+    const val WINCH_GEAR_RATIO = 1.0 / 250.0
 
     // ------ Conveyor ------ //
 

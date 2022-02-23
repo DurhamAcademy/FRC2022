@@ -22,7 +22,7 @@ object Conveyor : SubsystemBase(), Debug {
     }
     var status = CONVEYOR_STATUS.FULL_GOOD
     
-    val indexer = KSimulatedESC(21)
+    val indexer = KSimulatedESC(21).apply {  }
     val feeder = KSimulatedESC(22)
 
     val good
