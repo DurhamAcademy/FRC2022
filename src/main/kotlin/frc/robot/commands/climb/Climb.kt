@@ -8,6 +8,7 @@ import frc.robot.RobotContainer
 import frc.robot.subsystems.*
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.units.extensions.degrees
+import frc.kyberlib.math.units.extensions.inches
 import frc.kyberlib.math.units.extensions.radiansPerSecond
 import kotlin.math.absoluteValue
 
@@ -26,10 +27,12 @@ object Climb : CommandBase() {
      * Fun reaction wheel stuff. Optional, but cool if done
      */
     fun stabalize() {
+        if (Climber.leftWinch.linearPosition < 5.inches) return
         val dTheta = swing.calculate(RobotContainer.gyro.pitch.radians).radiansPerSecond * -1.0
 
         Drivetrain.drive(DifferentialDriveWheelSpeeds( dTheta.value * dampeningConstant, dTheta.value * dampeningConstant))
         Shooter.flywheelMaster.torque = dTheta.value * dampeningConstant
+
     }
 
     /**

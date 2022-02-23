@@ -48,12 +48,16 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     val leftExtendable = KSimulatedESC(40).apply {
         identifier = "leftArm"
         brakeMode = true
-        kP = 5.0
-        kD = 1.0
-        addFeedforward(armFF)
+//        kP = 0.1
+//        kD = 5.0
+//        kI = 0.2
+//        addFeedforward(armFF)
+        customControl = { bangBang(it) }
         minPosition = 0.degrees
         maxPosition = 90.degrees
         resetPosition(22.5.degrees)
+        if(Game.sim) setupSim(armFF)
+        voltage = 0.0
     }
     val rightExtendable = KSimulatedESC(41).apply {
         identifier = "rightArm"
@@ -76,6 +80,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
         motorType = DCMotor.getNeo550(1)
+        if(Game.sim) setupSim(winchFF)
         }
     val rightWinch = KSimulatedESC(43).apply {
         radius = Constants.WINCH_RADIUS
@@ -111,7 +116,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         leftWinch.updateVoltage()
         leftExtendable.updateVoltage()
         rightWinch.updateVoltage()
-        rightExtendable
+        rightExtendable.updateVoltage()
     }
 
     /**
@@ -121,9 +126,9 @@ object Climber : SubsystemBase(), Debug, Simulatable {
      * @return voltage represented as double
      */
     fun bangBang(motor: KMotorController): Double {
-        if(motor.linearPositionError.inches.absoluteValue < 2.0) return 0.0
-        else if (motor.linearPositionError < 0.inches) return 10.0
-        else return -0.0
+        return if(motor.positionError.degrees.absoluteValue < 2.0) 0.0
+        else if (motor.positionError.value < 0.0) 10.0
+        else -10.0
     }
 
     /**
