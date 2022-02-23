@@ -29,7 +29,7 @@ object Climb : CommandBase() {
         val dTheta = swing.calculate(RobotContainer.gyro.pitch.radians).radiansPerSecond * -1.0
 
         Drivetrain.drive(DifferentialDriveWheelSpeeds( dTheta.value * dampeningConstant, dTheta.value * dampeningConstant))
-        Shooter.flywheelMaster.voltage = dTheta.value * dampeningConstant
+        Shooter.flywheelMaster.torque = dTheta.value * dampeningConstant
     }
 
     /**

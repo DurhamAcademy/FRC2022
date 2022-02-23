@@ -19,13 +19,11 @@ import frc.kyberlib.simulation.Simulatable
  */
 class Flywheel(private val motor: KMotorController,
                kFlywheelMomentOfInertia: Double = 0.00032, // kg * m^2
-               motorCount: Int = 2,
-               private val timeDelay: Double = 0.02
+               timeDelay: Double = 0.02
                ) : Debug, Simulatable {
     // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-flywheel-walkthrough.html
 
     private val kFlywheelGearing = motor.gearRatio
-    private val motors = DCMotor.getNEO(motorCount)
 
     /**
      * The plant holds a state-space model of our flywheel. This system has the following properties:
@@ -33,19 +31,14 @@ class Flywheel(private val motor: KMotorController,
      * Inputs (what we can "put in"): [voltage], in volts.
      * Outputs (what we can measure): [velocity], in radians per second.
      */
-    private val plant = LinearSystemId.createFlywheelSystem(
-        motors,
-        kFlywheelMomentOfInertia,
-        kFlywheelGearing
-    )
+    private val plant = motor.flywheelSystem(kFlywheelMomentOfInertia)
 
     private val observer: KalmanFilter<N1, N1, N1> = KalmanFilter(
         N1.instance, N1.instance,
         plant,
         VecBuilder.fill(3.0),  // How accurate we think our model is
         VecBuilder.fill(0.01),  // How accurate we think our encoder
-        // data is
-        0.020
+        timeDelay
     )
 
     /**
@@ -67,13 +60,7 @@ class Flywheel(private val motor: KMotorController,
 
 
     init {
-        motor.customControl = {
-            loop.nextR = VecBuilder.fill(it.velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
-            loop.correct(VecBuilder.fill(it.velocity.radiansPerSecond))  // update with empirical
-            loop.predict(timeDelay)  // math
-            val nextVoltage = loop.getU(0)  // input
-            nextVoltage
-        }
+        motor.stateSpaceControl(loop, timeDelay.seconds)
     }
 
     var velocity: AngularVelocity
@@ -82,13 +69,11 @@ class Flywheel(private val motor: KMotorController,
 
     override fun debugValues(): Map<String, Any?> = motor.debugValues()
 
-    private val sim = FlywheelSim(plant, motors, kFlywheelGearing)
+    private val sim = FlywheelSim(plant, motor.motorType!!, kFlywheelGearing)
     override fun simUpdate(dt: Time) {
-//        Debug.log("Flywheel", "fly voltage = ${motor.voltage}")
         sim.setInputVoltage(motor.voltage)
         sim.update(dt.seconds)
         motor.simVelocity = sim.angularVelocityRPM.rpm
-//        Debug.log("Flywheel", "vel: ${motor.simVelocity}")
     }
 
 }

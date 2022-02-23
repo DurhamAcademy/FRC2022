@@ -1,5 +1,6 @@
 package frc.kyberlib.motorcontrol
 
+import edu.wpi.first.math.Num
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.*
 import edu.wpi.first.math.estimator.KalmanFilter
@@ -564,19 +565,38 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     }
     fun customSystem() {}  // todo: allow for generation based on formula
 
-    // FIXME: this assume velocity control
-   fun stateSpaceControl(loop: LinearSystemLoop<N1, N1, N1>, timeDelay: Time=0.02.seconds) {
-       customControl = {
-           loop.nextR = VecBuilder.fill(it.velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
-           loop.correct(VecBuilder.fill(it.velocity.radiansPerSecond))  // update with empirical
-           loop.predict(timeDelay.seconds)  // math
-           val nextVoltage = loop.getU(0)  // input
-           nextVoltage
-       }
-       if(timeDelay != 0.02.seconds) {
-           Notifier{ updateVoltage() }.startPeriodic(timeDelay.seconds)
-       }
-   }
+    var torque: Double
+        get() {
+            if(!motorConfigured) throw MotorUnconfigured
+            return motorType!!.KtNMPerAmp * motorType!!.getCurrent(velocity.radiansPerSecond, voltage)
+        }
+        set(value) {
+            if(!motorConfigured) throw MotorUnconfigured
+            voltage = motorType!!.rOhms / (value/motorType!!.KtNMPerAmp + 1.0/motorType!!.KvRadPerSecPerVolt / motorType!!.rOhms * velocity.radiansPerSecond)
+        }
+
+
+    fun stateSpaceControl(loop: LinearSystemLoop<N1, N1, N1>, timeDelay: Time=0.02.seconds) {
+        customControl = {
+            when(controlMode) {
+                ControlMode.VELOCITY -> {
+                    loop.nextR = VecBuilder.fill(it.velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
+                    loop.correct(VecBuilder.fill(it.velocity.radiansPerSecond))  // update with empirical
+                }
+                ControlMode.POSITION -> {
+                    loop.nextR = VecBuilder.fill(it.positionSetpoint.radians)  // r = reference (setpoint)
+                    loop.correct(VecBuilder.fill(it.position.radians))  // update with empirical
+                }
+                else -> log("invalid control type found", logMode = LogMode.ERROR)
+            }
+            loop.predict(timeDelay.seconds)  // math
+            val nextVoltage = loop.getU(0)  // input
+            nextVoltage
+        }
+        if(timeDelay != 0.02.seconds) {
+            Notifier{ updateVoltage() }.startPeriodic(timeDelay.seconds)
+        }
+    }
 }
 
 object LinearUnconfigured : Exception("You must set the wheel radius before using linear values")
