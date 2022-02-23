@@ -44,7 +44,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         motorType = DCMotor.getNEO(2)
         Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.002)
     }
-    val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 4)
+    val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 0.02)
     // additional motors that copy the main
     private val flywheel2 = KSimulatedESC(32).apply { follow(flywheelMaster) }
 
