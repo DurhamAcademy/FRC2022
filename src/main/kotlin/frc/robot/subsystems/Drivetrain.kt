@@ -1,32 +1,31 @@
 package frc.robot.subsystems
 
+import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
-import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.system.plant.LinearSystemId
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import edu.wpi.first.math.VecBuilder
-import frc.robot.Constants
-import frc.robot.RobotContainer
-import frc.robot.commands.drive.Drive
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.Prefixes
 import frc.kyberlib.math.units.Translation2d
 import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.towards
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
 import frc.kyberlib.motorcontrol.BrushType
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
 import frc.kyberlib.simulation.field.KField2d
-import frc.kyberlib.math.zeroIf
-import kotlin.math.absoluteValue
+import frc.robot.Constants
+import frc.robot.RobotContainer
+import frc.robot.commands.drive.Drive
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -78,6 +77,8 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
             val vy = chassisSpeeds.vxMetersPerSecond * sin(pose.rotation.radians)
             return ChassisSpeeds(vx, vy, robotRelativeSpeeds.omegaRadiansPerSecond)
         }
+    val polarCoordinates
+        get() = edu.wpi.first.math.geometry.Translation2d(Shooter.targetDistance!!.meters, Constants.HUB_POSITION.towards(RobotContainer.navigation.position))
 
     // commands
     /**
@@ -145,7 +146,6 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
         Navigator.instance!!.applyKinematics(kinematics)
     }
 
-
     // ignore this, it is sim and debug support
     private lateinit var driveSim: DifferentialDrivetrainSim
     fun setupSim(KvAngular: Double = 8.5, KaAngular: Double = 0.5) {
@@ -155,8 +155,8 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
             leftMaster.gearRatio,  // gearing reduction
             kinematics.trackWidthMeters,  // The track width
             leftMaster.radius!!.meters,  // wheel radius
-            // The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
-            VecBuilder.fill(0.000, 0.000, 0.00, 0.00, 0.00, 0.00, 0.00)
+//             The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
+            VecBuilder.fill(0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001)
         )
         driveSim.pose = RobotContainer.navigation.pose
         Simulation.instance.include(this)
@@ -167,18 +167,20 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     }
     override fun simUpdate(dt: Time) {
         // update the sim with new inputs
-        val leftVolt = leftMaster.voltage.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
-        val rightVolt = rightMaster.voltage.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
+        val leftVolt = leftMaster.voltage//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
+        val rightVolt = rightMaster.voltage//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
         if (leftVolt == 0.0 && rightVolt == 0.0) return
         driveSim.setInputs(leftVolt, rightVolt)
         driveSim.update(dt.seconds)
-
-        // update the motors with what they should be
+//
+//         update the motors with what they should be
         leftMaster.simLinearPosition = driveSim.leftPositionMeters.meters
         leftMaster.simLinearVelocity = driveSim.leftVelocityMetersPerSecond.metersPerSecond
         rightMaster.simLinearPosition = driveSim.rightPositionMeters.meters
         rightMaster.simLinearVelocity = driveSim.rightVelocityMetersPerSecond.metersPerSecond
+//        log("setpoint: $wheelSpeeds, sim: ${DifferentialDriveWheelSpeeds(driveSim.leftVelocityMetersPerSecond, driveSim.rightVelocityMetersPerSecond)}")
         Navigator.instance!!.heading = driveSim.heading.k
+//        Navigator.instance!!.heading += chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond * dt
     }
 
     override fun debugValues(): Map<String, Any?> {
