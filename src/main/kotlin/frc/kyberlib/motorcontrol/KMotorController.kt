@@ -1,6 +1,5 @@
 package frc.kyberlib.motorcontrol
 
-import edu.wpi.first.math.Num
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.*
 import edu.wpi.first.math.estimator.KalmanFilter
@@ -15,15 +14,14 @@ import edu.wpi.first.networktables.NTSendableBuilder
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.simulation.LinearSystemSim
+import frc.kyberlib.command.DebugLevel
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.LogMode
-import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.sign
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
-import java.util.function.Supplier
 import kotlin.math.absoluteValue
 
 typealias GearRatio = Double
@@ -82,28 +80,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             else System.err.println("Invalid encoder configuration")
         }
 
-    // ----- advanced tuning ----- //
-    /**
-     * Proportional gain of the customControl controller.
-     */
-    var kP: Double
-        get() = PID.p
-        set(value) { PID.p = value }
-
-    /**
-     * Integral gain of the customControl controller.
-     */
-    var kI: Double
-        get() = PID.i
-        set(value) { PID.i = value }
-
-    /**
-     * Derivative gain of the customControl controller.
-     */
-    var kD: Double
-        get() = PID.d
-        set(value) { PID.d = value }
-
+    // ----- constraints ---- //
     /**
      * The max angular velocity the motor can have
      */
@@ -143,6 +120,29 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             field = value
             PID.setConstraints(value)
         }
+
+    // ----- control schemes ---- //
+    /**
+     * Proportional gain of the customControl controller.
+     */
+    var kP: Double
+        get() = PID.p
+        set(value) { PID.p = value }
+
+    /**
+     * Integral gain of the customControl controller.
+     */
+    var kI: Double
+        get() = PID.i
+        set(value) { PID.i = value }
+
+    /**
+     * Derivative gain of the customControl controller.
+     */
+    var kD: Double
+        get() = PID.d
+        set(value) { PID.d = value }
+
     var PID = ProfiledPIDController(0.0, 0.0, 0.0, constraints)  // what does the profile do?
 
     /**
@@ -172,7 +172,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * @exception WhyFuckingLinear you should not have linear controlled arm.
      */
     fun addFeedforward(feedforward: ArmFeedforward) {
-        assert(!linearConfigured) {"you shouldn't be using armFF for linear motors"}
         customControl = {
             when (controlMode) {
                 ControlMode.POSITION -> {
@@ -184,7 +183,24 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
                     val pid = PID.calculate(velocityError.radiansPerSecond)
                     ff + pid
                 }
-                ControlMode.VOLTAGE -> voltage
+                else -> 0.0
+            }
+        }
+    }
+
+    fun addFeedforward(feedforward: ElevatorFeedforward) {
+        if (!linearConfigured) log("elevator requires linear option", logMode = LogMode.ERROR, level = DebugLevel.MaxPriority)
+        customControl = {
+            when (controlMode) {
+                ControlMode.POSITION -> {
+                    val ff = feedforward.calculate(linearPosition.meters, PID.calculate(linearPositionError.meters))
+                    ff
+                }
+                ControlMode.VELOCITY -> {
+                    val ff = feedforward.calculate(linearPosition.meters, linearVelocity.metersPerSecond)
+                    val pid = PID.calculate(linearVelocityError.metersPerSecond)
+                    ff + pid
+                }
                 else -> 0.0
             }
 
@@ -201,6 +217,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         customControl = {
             val state = profile.calculate(timer.get())
             position = state.position.radians
+            velocity = state.velocity.radiansPerSecond
             if (profile.isFinished(timer.get())) {
                 timer.stop()
                 customControl = prevControl
@@ -227,7 +244,8 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      */
     private var customControlLock = false
 
-    // ----- main getter/setter methods ----- //
+    // ----- motor state information ----- //
+    // todo: documentation
     /**
      * Angle that the motor is at / should be at
      */
@@ -242,7 +260,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             positionSetpoint = value
         }
 
-    // todo: documentation
     var linearPosition: Length
         get() = rotationToLinear(position)
         set(value) { position = linearToRotation(value) }
@@ -262,6 +279,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         get() = rotationToLinear(velocity)
         set(value) { velocity = linearToRotation(value) }
 
+    // ----- error ---- //
     val positionError
         get() = position - positionSetpoint
     val linearPositionError
@@ -271,13 +289,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     val linearVelocityError
         get() = linearVelocity - linearVelocitySetpoint
 
-    // todo: make optional
-    private var accelerationCalculator = Differentiator()
-    var acceleration = 0.rpm
-    val linearAcceleration
-        get() = rotationToLinear(acceleration)
-
-    // ----- this is where you put the advanced controls ---- //
+    // ----- setpoints ---- //
     /**
      * Sets the angle to which the motor should go
      */
@@ -376,7 +388,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     private val closedLoopConfigured
         get() = encoderConfigured && customControl != null
 
-    // ----- low level getters and setters (customized to each encoder type) ----- //
+    // ----- natives ----- //
     /**
      * Resets motor to a certain positions
      * Does *not* move to angle, just changes the variable
@@ -414,24 +426,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Configures the respective ESC encoder settings when a new encoder configuration is set
      */
     protected abstract fun configureEncoder(config: KEncoderConfig): Boolean
-
-    var simVelocity: AngularVelocity = 0.rpm
-        set(value) {
-            assert(!real) {"This value should only be set from a simulation"}
-            field = value
-        }
-    var simPosition: Angle = 0.degrees
-        set(value) {
-            assert(!real) {"This value should only be set from a simulation"}
-            field = value
-        }
-    var simLinearVelocity
-        get() = rotationToLinear(simVelocity)
-        set(value) {simVelocity = linearToRotation(value)}
-    var simLinearPosition
-        get() = rotationToLinear(simPosition)
-        set(value) {simPosition = linearToRotation(value)}
-
 
     override fun initSendable(builder: NTSendableBuilder) {
         super.initSendable(builder)
@@ -483,46 +477,55 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         return map.toMap()
     }
 
+
+    // ----- sim ---- //
+    var simVelocity: AngularVelocity = 0.rpm
+        set(value) {
+            assert(!real) {"This value should only be set from a simulation"}
+            field = value
+        }
+    var simPosition: Angle = 0.degrees
+        set(value) {
+            assert(!real) {"This value should only be set from a simulation"}
+            field = value
+        }
+    var simLinearVelocity
+        get() = rotationToLinear(simVelocity)
+        set(value) {simVelocity = linearToRotation(value)}
+    var simLinearPosition
+        get() = rotationToLinear(simPosition)
+        set(value) {simPosition = linearToRotation(value)}
+
     fun setupSim(feedforward: SimpleMotorFeedforward) {
-        simKS = {feedforward.ks}
-        simKV = feedforward.kv
-        simKA = feedforward.ka
         Simulation.instance.include(this)
+        simUpdater = { dt: Time -> feedforwardUpdate(feedforward.ks, feedforward.kv, feedforward.ka, dt) }
     }
     fun setupSim(feedforward: ArmFeedforward) {
-        simKS = { feedforward.ks + feedforward.kcos * position.cos }
-        simKV = feedforward.kv
-        simKA = feedforward.ka
         if(!brakeMode) log("Use brakeMode", logMode = LogMode.WARN)
         Simulation.instance.include(this)
+        simUpdater = { dt: Time -> feedforwardUpdate(feedforward.ks + feedforward.kcos * position.cos, feedforward.kv, feedforward.ka, dt) }
     }
     fun setupSim(feedforward: ElevatorFeedforward) {
-        simKS = { feedforward.ks * voltage.sign + feedforward.kg }
-        simKV = feedforward.kv
-        simKA = feedforward.ka
         if(!brakeMode) log("Use brakeMode", logMode = LogMode.WARN)
         Simulation.instance.include(this)
+        simUpdater = {dt: Time -> feedforwardUpdate(feedforward.ks * voltage.sign + feedforward.kg, feedforward.kv, feedforward.ka, dt) }
     }
-    private lateinit var simKS: () -> Double
-    private var simKV = 0.0
-    private var simKA = 0.0
-    override fun simUpdate(dt: Time) {
-        if(!this::simKS.isInitialized) return
-        if(voltage.absoluteValue < simKS()) {
+    fun feedforwardUpdate(staticVolt: Double, kV: Double, kA: Double, dt: Time) {
+        if(voltage.absoluteValue < staticVolt) {
             simVelocity = 0.radiansPerSecond
             // kinda assuming brakeMode
         }
         else {
-            val applicableVolt = (voltage.absoluteValue - simKS()).invertIf { voltage < 0.0 }
+            val applicableVolt = (voltage.absoluteValue - staticVolt).invertIf { voltage < 0.0 }
             val vel = velocity.radiansPerSecond
-            val accVolt = applicableVolt - simKV * vel
-            val acceleration = accVolt / simKA
+            val accVolt = applicableVolt - kV * vel
+            val acceleration = accVolt / kA
             if (brakeMode) {
-                val velMaintananceVolt = simKS() + simKV * velocity.radiansPerSecond.absoluteValue
+                val velMaintananceVolt = staticVolt + kV * velocity.radiansPerSecond.absoluteValue
                 if (velMaintananceVolt.sign != velocity.radiansPerSecond.sign && vel != 0.0)
                     simVelocity = 0.radiansPerSecond
                 else if (velMaintananceVolt < voltage.absoluteValue)
-                    simVelocity = (applicableVolt / simKV).radiansPerSecond
+                    simVelocity = (applicableVolt / kV).radiansPerSecond
                 else
                     simVelocity += acceleration.radiansPerSecond * dt.seconds
             }
@@ -532,7 +535,43 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         }
         simPosition += velocity * dt
     }
+    fun setupSim(system: LinearSystem<N1, N1, N1>) {
+        val sim = LinearSystemSim(system)
+        Simulation.instance.include(this)
+        simUpdater = { dt: Time ->
+            sim.setInput(voltage)
+            sim.update(dt.seconds)
+            simVelocity = sim.getOutput(0).radiansPerSecond
+        }
+    }
+    @JvmName("setupPositionSim")
+    fun setupSim(system: LinearSystem<N2, N1, N1>) {
+        val sim = LinearSystemSim(system)
+        Simulation.instance.include(this)
+        simUpdater = { dt: Time ->
+            sim.setInput(voltage)
+            sim.update(dt.seconds)
+            simPosition = sim.getOutput(0).radians
+        }
+    }
+    @JvmName("setupDualSim")
+    fun setupSim(system: LinearSystem<N2, N1, N2>) {
+        val sim = LinearSystemSim(system)
+        Simulation.instance.include(this)
+        simUpdater = { dt: Time ->
+            sim.setInput(voltage)
+            sim.update(dt.seconds)
+            simPosition = sim.getOutput(0).radians
+            simVelocity = sim.getOutput(1).radiansPerSecond
+        }
+    }
 
+    lateinit var simUpdater: (Time) -> Unit
+    override fun simUpdate(dt: Time) {
+        if(this::simUpdater.isInitialized) simUpdater(dt)
+    }
+
+    // ----- state-space ---- //
     // LinearSystem<# States, #Outpust, #inputs>
     fun velocitySystem(ff: SimpleMotorFeedforward): LinearSystem<N1, N1, N1> {
         if(!motorConfigured) throw MotorUnconfigured
@@ -574,20 +613,11 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             voltage = motorType!!.rOhms / (value/motorType!!.KtNMPerAmp + 1.0/motorType!!.KvRadPerSecPerVolt / motorType!!.rOhms * velocity.radiansPerSecond)
         }
 
-
+    // velocity system
     fun stateSpaceControl(loop: LinearSystemLoop<N1, N1, N1>, timeDelay: Time=0.02.seconds) {
         customControl = {
-            when(controlMode) {
-                ControlMode.VELOCITY -> {
-                    loop.nextR = VecBuilder.fill(it.velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
-                    loop.correct(VecBuilder.fill(it.velocity.radiansPerSecond))  // update with empirical
-                }
-                ControlMode.POSITION -> {
-                    loop.nextR = VecBuilder.fill(it.positionSetpoint.radians)  // r = reference (setpoint)
-                    loop.correct(VecBuilder.fill(it.position.radians))  // update with empirical
-                }
-                else -> log("invalid control type found", logMode = LogMode.ERROR)
-            }
+            loop.nextR = VecBuilder.fill(it.velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
+            loop.correct(VecBuilder.fill(it.velocity.radiansPerSecond))  // update with empirical
             loop.predict(timeDelay.seconds)  // math
             val nextVoltage = loop.getU(0)  // input
             nextVoltage
@@ -595,6 +625,96 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         if(timeDelay != 0.02.seconds) {
             Notifier{ updateVoltage() }.startPeriodic(timeDelay.seconds)
         }
+    }
+    @JvmName("positionStateSpaceControl")
+    fun stateSpaceControl(loop: LinearSystemLoop<N2, N1, N1>, timeDelay: Time=0.02.seconds) {
+        customControl = {
+            loop.nextR = VecBuilder.fill(positionSetpoint.radians, velocitySetpoint.radiansPerSecond)
+            loop.correct(VecBuilder.fill(position.radians))
+            loop.predict(timeDelay.seconds)  // math
+            val nextVoltage = loop.getU(0)  // input
+            nextVoltage
+        }
+        if(timeDelay != 0.02.seconds) {
+            Notifier{ updateVoltage() }.startPeriodic(timeDelay.seconds)
+        }
+    }
+    @JvmName("dualStateSpaceControl")
+    fun stateSpaceControl(loop: LinearSystemLoop<N2, N1, N2>, timeDelay: Time=0.02.seconds) {
+        customControl = {
+            loop.nextR = VecBuilder.fill(positionSetpoint.value, velocitySetpoint.value)
+            loop.correct(VecBuilder.fill(position.value, velocity.value))
+            loop.predict(timeDelay.seconds)  // math
+            val nextVoltage = loop.getU(0)  // input
+            nextVoltage
+        }
+        if(timeDelay != 0.02.seconds) {
+            Notifier{ updateVoltage() }.startPeriodic(timeDelay.seconds)
+        }
+    }
+    // velocity system
+    fun stateSpaceControl(plant: LinearSystem<N1, N1, N1>,
+                          modelAccuracy: Double, measurementAccuracy: Double,
+                          errorCost: Double,
+                          inputCost: Double=12.0,
+                          timeDelay: Time=0.02.seconds) {
+        val observer: KalmanFilter<N1, N1, N1> = KalmanFilter(
+            N1.instance, N1.instance,
+            plant,
+            VecBuilder.fill(modelAccuracy),  // How accurate we think our model is
+            VecBuilder.fill(measurementAccuracy),  // How accurate we think our encoder
+            timeDelay.seconds
+        )
+        val optimizer = LinearQuadraticRegulator(
+            plant,
+            VecBuilder.fill(errorCost),  // q-elms. Velocity error tolerance, in radians per second.
+            VecBuilder.fill(inputCost),  // r-elms. 12 cause max battery voltage
+            timeDelay.seconds  // estimated loop time. 0.020 for TimedRobot, but lower if using notifiers.
+        )
+        stateSpaceControl(LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds))
+    }
+    @JvmName("positionStateSpaceControl")
+    // position systems
+    fun stateSpaceControl(plant: LinearSystem<N2, N1, N1>,
+                          modelAccuracy: Double, measurementAccuracy: Double,
+                          positionErrorCost: Double, velocityErrorCost: Double,
+                          inputCost: Double=12.0,
+                          timeDelay: Time=0.02.seconds) {
+        val observer: KalmanFilter<N2, N1, N1> = KalmanFilter(
+            N2.instance, N1.instance,
+            plant,
+            VecBuilder.fill(modelAccuracy, modelAccuracy),  // How accurate we think our model is
+            VecBuilder.fill(measurementAccuracy),  // How accurate we think our encoder
+            timeDelay.seconds
+        )
+        val optimizer = LinearQuadraticRegulator(
+            plant,
+            VecBuilder.fill(positionErrorCost, velocityErrorCost),  // q-elms. Velocity error tolerance, in radians per second.
+            VecBuilder.fill(inputCost),  // r-elms. 12 cause max battery voltage
+            timeDelay.seconds  // estimated loop time. 0.020 for TimedRobot, but lower if using notifiers.
+        )
+        stateSpaceControl(LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds))
+    }
+    @JvmName("dualStateSpaceControl")
+    fun stateSpaceControl(plant: LinearSystem<N2, N1, N2>,
+                          modelAccuracy: Double, measurementAccuracy: Double,
+                          positionErrorCost: Double, velocityErrorCost: Double,
+                          inputCost: Double=12.0,
+                          timeDelay: Time=0.02.seconds) {
+        val observer: KalmanFilter<N2, N1, N2> = KalmanFilter(
+            N2.instance, N2.instance,
+            plant,
+            VecBuilder.fill(modelAccuracy, modelAccuracy),  // How accurate we think our model is
+            VecBuilder.fill(measurementAccuracy, measurementAccuracy),  // How accurate we think our encoder
+            timeDelay.seconds
+        )
+        val optimizer = LinearQuadraticRegulator(
+            plant,
+            VecBuilder.fill(positionErrorCost, velocityErrorCost),  // q-elms. Velocity error tolerance, in radians per second.
+            VecBuilder.fill(inputCost),  // r-elms. 12 cause max battery voltage
+            timeDelay.seconds  // estimated loop time. 0.020 for TimedRobot, but lower if using notifiers.
+        )
+        stateSpaceControl(LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds))
     }
 }
 
