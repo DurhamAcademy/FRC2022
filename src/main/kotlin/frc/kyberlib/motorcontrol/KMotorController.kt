@@ -176,9 +176,8 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         customControl = {
             when (controlMode) {
                 ControlMode.POSITION -> {
-                    val ff = feedforward.calculate(position.radians, velocity.radiansPerSecond)
-                    val pid = PID.calculate(positionError.radians)
-                    ff + pid
+                    val ff = feedforward.calculate(position.radians, PID.calculate(positionError.radians))
+                    ff
                 }
                 ControlMode.VELOCITY -> {
                     val ff = feedforward.calculate(position.radians, velocity.radiansPerSecond)
@@ -446,26 +445,26 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     override fun debugValues(): Map<String, Any?> {
         val map = super.debugValues().toMutableMap()
         map.putAll(mapOf(
-            "Angular Position (rad)" to position.radians,
-            "Angular Velocity (rad per s)" to velocity.radiansPerSecond,
+            "Angular Position" to position,
+            "Angular Velocity" to velocity,
             // "Angular Acceleration (rad per s per s)" to acceleration.radiansPerSecond  // temporary (here for testing)
         ))
         if (linearConfigured)
             map.putAll(mapOf(
-                "Linear Position (m)" to linearPosition.meters,
-                "Linear Velocity (m per s)" to linearVelocity.metersPerSecond,
+                "Linear Position" to linearPosition,
+                "Linear Velocity" to linearVelocity,
                 // "Linear Acceleration (m per s per s)" to linearAcceleration.metersPerSecond
             ))
         if (controlMode == ControlMode.POSITION) {
             if (linearConfigured)
                 map.putAll(mapOf(
-                    "setpoint" to linearPositionSetpoint.meters,
-                    "error" to linearPositionError.meters
+                    "setpoint" to linearPositionSetpoint,
+                    "error" to linearPositionError
                 ))
             else
                 map.putAll(mapOf(
-                        "setpoint" to positionSetpoint.radians,
-                        "error" to positionError.radians
+                        "setpoint" to positionSetpoint,
+                        "error" to positionError
                     ))
         }
         else {
