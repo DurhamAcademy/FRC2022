@@ -11,18 +11,16 @@ import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.system.plant.LinearSystemId
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.math.VecBuilder
+import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.Game
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.sensors.gyros.KGyro
 import frc.kyberlib.simulation.Simulatable
-
-/**
- * Stores important information for the motion of a DifferentialDrive Robot
- */
-data class DifferentialDriveConfigs(val wheelRadius: Length, val trackWidth: Length)
+import frc.kyberlib.simulation.Simulation
 
 /**
  * Pre-made DifferentialDrive Robot.
@@ -31,36 +29,17 @@ data class DifferentialDriveConfigs(val wheelRadius: Length, val trackWidth: Len
  * @param configs information about the physical desciption of this drivetrain
  * @param gyro KGyro to provide heading information
  */
-class DifferentialDriveTrain(private val leftMotors: Array<KMotorController>, private val rightMotors: Array<KMotorController>,
-                             private val configs: DifferentialDriveConfigs, val gyro: KGyro) : SubsystemBase(), Simulatable,
+abstract class DifferentialDriveTrain: SubsystemBase(), Simulatable,
     KDrivetrain, Debug {
-    constructor(leftMotor: KMotorController, rightMotor: KMotorController,
-                configs: DifferentialDriveConfigs, gyro: KGyro) : this(arrayOf(leftMotor), arrayOf(rightMotor), configs, gyro)
 
-    private val motors = leftMotors.plus(rightMotors)
-    private val leftMaster = leftMotors[0]
-    private val rightMaster = rightMotors[0]
-
-    init {
-        for (info in leftMotors.withIndex()) if (info.index > 0) info.value.follow(leftMaster)
-        for (info in rightMotors.withIndex()) if (info.index > 0) info.value.follow(rightMaster)
-        for (motor in motors)
-            motor.radius = configs.wheelRadius
-    }
+    abstract val leftMaster: KMotorController
+    abstract val rightMaster: KMotorController
+    abstract val trackWidth: Length
 
     // control values
     private val odometry = DifferentialDriveOdometry(0.degrees)
-    private val kinematics = DifferentialDriveKinematics(configs.trackWidth.meters)
+    private val kinematics = DifferentialDriveKinematics(trackWidth.meters)
 
-    // useful information
-    var pose: Pose2d
-        set(value) {
-            odometry.resetPosition(value, gyro.heading)
-        }
-        get() = odometry.poseMeters
-    var heading
-        get() = gyro.heading
-        set(value) {gyro.heading = value}
     override val chassisSpeeds: ChassisSpeeds
         get() = kinematics.toChassisSpeeds(DifferentialDriveWheelSpeeds(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond))
 
@@ -75,7 +54,7 @@ class DifferentialDriveTrain(private val leftMotors: Array<KMotorController>, pr
     }
 
     override fun periodic() {
-        odometry.update(gyro.heading, leftMaster.linearPosition.meters, rightMaster.linearPosition.meters)
+        odometry.update(Navigator.instance!!.heading, leftMaster.linearPosition.meters, rightMaster.linearPosition.meters)
     }
 
     private lateinit var driveSim: DifferentialDrivetrainSim
@@ -89,6 +68,7 @@ class DifferentialDriveTrain(private val leftMotors: Array<KMotorController>, pr
             // The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
             VecBuilder.fill(0.001, 0.001, 0.001, 0.1, 0.1, 0.005, 0.005)
         )
+        Simulation.instance.include(this)
     }
 
     override fun simUpdate(dt: Time) {
@@ -101,18 +81,15 @@ class DifferentialDriveTrain(private val leftMotors: Array<KMotorController>, pr
         leftMaster.simLinearVelocity = driveSim.leftVelocityMetersPerSecond.metersPerSecond
         rightMaster.simLinearPosition = driveSim.rightPositionMeters.meters
         rightMaster.simLinearVelocity = driveSim.rightVelocityMetersPerSecond.metersPerSecond
-        gyro.heading = driveSim.heading.k
+        Navigator.instance!!.heading = driveSim.heading.k
     }
 
     override fun debugValues(): Map<String, Any?> {
-        val map = mutableMapOf(
-            "pose" to pose.debugValues,
+        return mapOf(
+            "pose" to Navigator.instance!!.pose.debugValues,
             "speed" to chassisSpeeds.debugValues,
             "leftMaster" to leftMaster,
             "rightMaster" to rightMaster
         )
-        leftMotors.forEachIndexed { index, motor -> if (index != 0) map["leftFollow$index"] = motor }
-        rightMotors.forEachIndexed { index, motor -> if (index != 0) map["rightFollow$index"] = motor }
-        return map.toMap()
     }
 }
