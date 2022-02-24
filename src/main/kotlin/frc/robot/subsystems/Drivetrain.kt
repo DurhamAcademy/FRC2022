@@ -14,8 +14,9 @@ import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.PolarPose
 import frc.kyberlib.math.polar
-import frc.kyberlib.math.units.*
+import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.milli
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
 import frc.kyberlib.motorcontrol.BrushType
 import frc.kyberlib.motorcontrol.rev.KSparkMax
@@ -25,8 +26,6 @@ import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.commands.drive.Drive
-import kotlin.math.cos
-import kotlin.math.sin
 
 
 /**
@@ -83,7 +82,6 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     val polarSpeeds
         get() = chassisSpeeds.polar(RobotContainer.navigation.pose.polar(Constants.HUB_POSITION))
 
-    // commands
     /**
      * Drive the robot at the provided speeds
      */

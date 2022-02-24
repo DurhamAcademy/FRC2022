@@ -245,7 +245,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     private var customControlLock = false
 
     // ----- motor state information ----- //
-    // todo: documentation
     /**
      * Angle that the motor is at / should be at
      */
@@ -260,10 +259,16 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             positionSetpoint = value
         }
 
+    /**
+     * Distance the motor has traveled
+     */
     var linearPosition: Length
         get() = rotationToLinear(position)
         set(value) { position = linearToRotation(value) }
 
+    /**
+     * Spin rate of motor system
+     */
     var velocity: AngularVelocity
         get() {
             assert(encoderConfigured) {"configure your motor before using"}
@@ -275,6 +280,9 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             velocitySetpoint = value
         }
 
+    /**
+     * Linear velocity of the motor system
+     */
     var linearVelocity: LinearVelocity
         get() = rotationToLinear(velocity)
         set(value) { velocity = linearToRotation(value) }
@@ -614,6 +622,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         }
 
     // velocity system
+    @JvmName("velocityStateSpaceControl")
     fun stateSpaceControl(loop: LinearSystemLoop<N1, N1, N1>, timeDelay: Time=0.02.seconds) {
         customControl = {
             loop.nextR = VecBuilder.fill(it.velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
@@ -652,12 +661,18 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             Notifier{ updateVoltage() }.startPeriodic(timeDelay.seconds)
         }
     }
-    // velocity system
-    fun stateSpaceControl(plant: LinearSystem<N1, N1, N1>,
+    @JvmName("velocityStateSpaceControl")
+    fun stateSpaceControl(plant: LinearSystem<N1, N1, N1>, modelAccuracy: Double, measurementAccuracy: Double, errorCost: Double, inputCost: Double=12.0, timeDelay: Time=0.02.seconds) { stateSpaceControl(systemLoop(plant, modelAccuracy, measurementAccuracy, errorCost, inputCost, timeDelay)) }
+    @JvmName("positionStateSpaceControl")
+    fun stateSpaceControl(plant: LinearSystem<N2, N1, N1>, modelAccuracy: Double, measurementAccuracy: Double, positionErrorCost: Double, velocityErrorCost: Double, inputCost: Double=12.0, timeDelay: Time=0.02.seconds) { stateSpaceControl(systemLoop(plant, modelAccuracy, measurementAccuracy, positionErrorCost, velocityErrorCost, inputCost, timeDelay)) }
+    @JvmName("dualStateSpaceControl")
+    fun stateSpaceControl(plant: LinearSystem<N2, N1, N2>, modelAccuracy: Double, measurementAccuracy: Double, positionErrorCost: Double, velocityErrorCost: Double, inputCost: Double=12.0, timeDelay: Time=0.02.seconds) { stateSpaceControl(systemLoop(plant, modelAccuracy, measurementAccuracy, positionErrorCost, velocityErrorCost, inputCost, timeDelay)) }
+    @JvmName("velocitySystemLoop")
+    fun systemLoop(plant: LinearSystem<N1, N1, N1>,
                           modelAccuracy: Double, measurementAccuracy: Double,
                           errorCost: Double,
                           inputCost: Double=12.0,
-                          timeDelay: Time=0.02.seconds) {
+                          timeDelay: Time=0.02.seconds): LinearSystemLoop<N1, N1, N1> {
         val observer: KalmanFilter<N1, N1, N1> = KalmanFilter(
             N1.instance, N1.instance,
             plant,
@@ -671,15 +686,15 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             VecBuilder.fill(inputCost),  // r-elms. 12 cause max battery voltage
             timeDelay.seconds  // estimated loop time. 0.020 for TimedRobot, but lower if using notifiers.
         )
-        stateSpaceControl(LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds))
+        return LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds)
     }
-    @JvmName("positionStateSpaceControl")
+    @JvmName("positionSystemLoop")
     // position systems
-    fun stateSpaceControl(plant: LinearSystem<N2, N1, N1>,
+    fun systemLoop(plant: LinearSystem<N2, N1, N1>,
                           modelAccuracy: Double, measurementAccuracy: Double,
                           positionErrorCost: Double, velocityErrorCost: Double,
                           inputCost: Double=12.0,
-                          timeDelay: Time=0.02.seconds) {
+                          timeDelay: Time=0.02.seconds): LinearSystemLoop<N2, N1, N1> {
         val observer: KalmanFilter<N2, N1, N1> = KalmanFilter(
             N2.instance, N1.instance,
             plant,
@@ -693,14 +708,14 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             VecBuilder.fill(inputCost),  // r-elms. 12 cause max battery voltage
             timeDelay.seconds  // estimated loop time. 0.020 for TimedRobot, but lower if using notifiers.
         )
-        stateSpaceControl(LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds))
+        return LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds)
     }
-    @JvmName("dualStateSpaceControl")
-    fun stateSpaceControl(plant: LinearSystem<N2, N1, N2>,
+    @JvmName("dualSystemLoop")
+    fun systemLoop(plant: LinearSystem<N2, N1, N2>,
                           modelAccuracy: Double, measurementAccuracy: Double,
                           positionErrorCost: Double, velocityErrorCost: Double,
                           inputCost: Double=12.0,
-                          timeDelay: Time=0.02.seconds) {
+                          timeDelay: Time=0.02.seconds): LinearSystemLoop<N2, N1, N2> {
         val observer: KalmanFilter<N2, N1, N2> = KalmanFilter(
             N2.instance, N2.instance,
             plant,
@@ -714,7 +729,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             VecBuilder.fill(inputCost),  // r-elms. 12 cause max battery voltage
             timeDelay.seconds  // estimated loop time. 0.020 for TimedRobot, but lower if using notifiers.
         )
-        stateSpaceControl(LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds))
+        return LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds)
     }
 }
 
