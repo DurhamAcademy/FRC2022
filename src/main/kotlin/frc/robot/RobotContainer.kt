@@ -7,6 +7,7 @@ import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.commands.Intake
 import frc.robot.commands.climb.Climb
 import frc.robot.commands.climb.ToggleArmLift
+import frc.robot.commands.climb.auto.fullAutoClimb
 import frc.robot.subsystems.*
 import org.photonvision.PhotonCamera
 import kotlin.math.PI
@@ -25,22 +26,22 @@ object RobotContainer {
     val controller = KXboxController(0).apply {
         // steering
         rightX.apply {
-            maxVal = -1.0 //-5 * PI
-            expo = 1.0//73.0
+            maxVal = -5 * PI
+            expo = 73.0
             deadband = 0.1
         }
 
         // throttle
         leftY.apply {
-            maxVal = -1.0//-12.0
-            expo = 1.0//20.0
+            maxVal = -12.0
+            expo = 20.0
             deadband = 0.2
         }
 
         leftTrigger.activateAt(0.5).whileActiveOnce(Intake)
 //        leftBumper.whileActiveOnce(Flush)
 //
-//        yButton.toggleWhenActive(fullAutoClimb)
+        yButton.toggleWhenActive(fullAutoClimb)
         aButton.toggleWhenActive(Climb)
         bButton.whileActiveOnce(ToggleArmLift())
     }
