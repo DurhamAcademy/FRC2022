@@ -5,9 +5,11 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
 import frc.kyberlib.math.units.extensions.k
+import frc.kyberlib.math.units.extensions.toTangentialVelocity
 import frc.kyberlib.math.units.towards
 import frc.robot.Constants
 import frc.robot.RobotContainer
+import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.TURRET_STATUS
 import frc.robot.subsystems.Turret
 
@@ -19,8 +21,8 @@ object AimTurret : CommandBase() {
         addRequirements(Turret)
     }
 
-    val notFoundTimer = Timer()  // timer counting how long without vision target seen
-    val lostTimer = Timer()  // timer after how long not finding it at the expected location
+    private val notFoundTimer = Timer()  // timer counting how long without vision target seen
+    private val lostTimer = Timer()  // timer after how long not finding it at the expected location
 
     override fun initialize() {
         found()
@@ -41,9 +43,7 @@ object AimTurret : CommandBase() {
             // todo: see if you can make this state space
 
             // perp zoom correction TODO: add later
-//            val towardsHub = Turret.turret.position + Turret.visionOffset
-//            val robotSpeed = Drivetrain.chassisSpeeds.vxMetersPerSecond.metersPerSecond
-//            val perpSpeed = robotSpeed * sin(towardsHub.radians)
+            val perpSpeed = Drivetrain.polarSpeeds.dTheta.toTangentialVelocity(Drivetrain.polarCoordinates.r)
 
             val goalOrientation = Turret.visionOffset!!
             Turret.fieldRelativeAngle = Turret.fieldRelativeAngle + goalOrientation
