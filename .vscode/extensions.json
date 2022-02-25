@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "brenek.kotlin-for-frc",
+        "fwcd.kotlin",
+        "mathiasfrohlich.kotlin",
+        "naco-siren.gradle-language"
+    ],
+    "unwantedRecommendations": [
+        "kiteco.kite"
+    ]
+}
