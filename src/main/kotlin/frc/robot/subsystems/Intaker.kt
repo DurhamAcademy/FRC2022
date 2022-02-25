@@ -33,7 +33,6 @@ object Intaker  : SubsystemBase(), Debug {
     // motor controlling the intake speed
     val intakeMotor = KSparkMax(20).apply {
         kP = 1.0
-        radius = 1.inches
         motorType = DCMotor.getNeo550(1)
     }
 

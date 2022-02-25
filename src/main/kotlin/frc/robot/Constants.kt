@@ -2,6 +2,7 @@ package frc.robot
 
 import edu.wpi.first.math.geometry.Pose2d
 import frc.kyberlib.math.Interpolator
+import frc.kyberlib.math.units.MassConversions
 import frc.kyberlib.math.units.Pose2d
 import frc.kyberlib.math.units.Translation2d
 import frc.kyberlib.math.units.extensions.*
@@ -61,7 +62,7 @@ object Constants {
 
     val SHOOTER_VELOCITY_TOLERANCE = 50.0.rpm
     val FLYWHEEL_RADIUS = 2.inches
-    const val FLYWHEEL_MOMENT_OF_INERTIA = 0.00032 // kg * m^2 TODO: find action
+    const val FLYWHEEL_MOMENT_OF_INERTIA = 0.00064 // kg * m^2
 
     // ------ Turret ------ //
     const val TURRET_GEAR_RATIO: Double = 1.0/73.0 // TODO
@@ -86,4 +87,8 @@ object Constants {
     val MID2HIGH = 2.feet
     val TRAVERSAL_RUNG_HEIGHT = 7.feet + 7.inches
     val HIGH2TRAVERSE = 2.feet
+
+    val ROBOT_WEIGHT = 120.0 * MassConversions.poundsToGrams * 1000.0
+    const val CLIMB_MOMENT_OF_INERTIA = 0.10571
+    const val TOP_ROLLER_MOMENT_OF_INERTIA = 0.00001
 }

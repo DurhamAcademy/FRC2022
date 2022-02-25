@@ -14,6 +14,7 @@ import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.k
 import frc.kyberlib.math.units.extensions.radiansPerSecond
 import frc.kyberlib.math.units.towards
+import frc.kyberlib.motorcontrol.KMotorController.StateSpace.systemLoop
 import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
@@ -21,7 +22,6 @@ import frc.robot.RobotContainer
 import frc.robot.commands.turret.SeekTurret
 import org.photonvision.targeting.PhotonPipelineResult
 import org.photonvision.targeting.PhotonTrackedTarget
-import kotlin.math.atan
 
 
 /**
@@ -37,7 +37,7 @@ enum class TURRET_STATUS {
  */
 object Turret : SubsystemBase(), Debug {
     init {
-        println("Turret")
+        log("init")
     }
     var status = TURRET_STATUS.LOST
 
@@ -49,6 +49,7 @@ object Turret : SubsystemBase(), Debug {
         kD = .0
         gearRatio = Constants.TURRET_GEAR_RATIO
         motorType = DCMotor.getNeo550(1)
+        val loop = systemLoop(positionSystem(feedforward), 3.0, 0.01, 3.degrees.radians, 10.0)
 
         // fancy control
         val offsetCorrector = ProfiledPIDController(30.00, 0.0, 5.0, TrapezoidProfile.Constraints(12.0, 4.0)).apply { 

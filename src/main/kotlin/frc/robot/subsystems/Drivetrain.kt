@@ -1,17 +1,22 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.math.VecBuilder
+import edu.wpi.first.math.controller.LinearQuadraticRegulator
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.estimator.KalmanFilter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
+import edu.wpi.first.math.numbers.N2
+import edu.wpi.first.math.system.LinearSystemLoop
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.system.plant.LinearSystemId
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.KRobot
 import frc.kyberlib.math.PolarPose
 import frc.kyberlib.math.polar
 import frc.kyberlib.math.units.debugValues
@@ -82,15 +87,65 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     val polarSpeeds
         get() = chassisSpeeds.polar(RobotContainer.navigation.pose.polar(Constants.HUB_POSITION))
 
-    /**
-     * Drive the robot at the provided speeds
-     */
-    override fun drive(speeds: ChassisSpeeds) { drive(kinematics.toWheelSpeeds(speeds)) }
+
+    // setup motors
+    private val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
+    init {
+        defaultCommand = Drive
+
+        // setup controls for drive motors
+        for (motor in motors) {
+            motor.apply {
+                brakeMode = true
+                gearRatio = Constants.DRIVE_GEAR_RATIO
+                radius = Constants.WHEEL_RADIUS
+                currentLimit = 40
+
+                kP = Constants.DRIVE_P
+                kI = Constants.DRIVE_I
+                kD = Constants.DRIVE_D
+
+                addFeedforward(feedforward)
+            }
+        }
+        Navigator.instance!!.applyMovementRestrictions(5.39.feetPerSecond, 2.metersPerSecond)
+        Navigator.instance!!.applyKinematics(kinematics)
+    }
 
     /**
      * Drive the robot at the provided speeds
      */
+    override fun drive(speeds: ChassisSpeeds) { drive(kinematics.toWheelSpeeds(speeds)) }
+//    val driveSystem = leftMaster.drivetrainSystem(feedforward, 8.0, 0.7, Constants.TRACK_WIDTH.meters)
+//    val loop = LinearSystemLoop(
+//        driveSystem,
+//        LinearQuadraticRegulator(
+//            driveSystem,
+//            VecBuilder.fill(0.0, 0.0),
+//            VecBuilder.fill(Game.batteryVoltage, Game.batteryVoltage),
+//            KRobot.period
+//        ),
+//        KalmanFilter(
+//            N2.instance, N2.instance,
+//            driveSystem,
+//            VecBuilder.fill(3.0, 3.0),
+//            VecBuilder.fill(.01, 0.01),
+//            KRobot.period
+//        ),
+//        Game.batteryVoltage,
+//        KRobot.period
+//    )
+    /**
+     * Drive the robot at the provided speeds
+     */
     fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) {
+//        loop.nextR = VecBuilder.fill(leftMaster.velocitySetpoint.radiansPerSecond, rightMaster.velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
+//        loop.correct(VecBuilder.fill(leftMaster.velocity.radiansPerSecond, rightMaster.velocity.radiansPerSecond))  // update with empirical
+//        loop.predict(KRobot.period)  // math
+//        val leftVoltage = loop.getU(0)  // input
+//        val rightVoltage = loop.getU(1)
+//        leftMaster.voltage = leftVoltage
+//        rightMaster.voltage = rightVoltage
         leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
         rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
     }
@@ -116,30 +171,6 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     override fun simulationPeriodic() {
         debugDashboard()
         KField2d.robotPose = RobotContainer.navigation.pose
-    }
-
-    // setup motors
-    init {
-        defaultCommand = Drive
-
-        // setup controls for drive motors
-        val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
-        for (motor in motors) {
-            motor.apply {
-                brakeMode = true
-                gearRatio = Constants.DRIVE_GEAR_RATIO
-                radius = Constants.WHEEL_RADIUS
-                currentLimit = 40
-
-                kP = Constants.DRIVE_P
-                kI = Constants.DRIVE_I
-                kD = Constants.DRIVE_D
-
-                addFeedforward(feedforward)
-            }
-        }
-        Navigator.instance!!.applyMovementRestrictions(5.39.feetPerSecond, 2.metersPerSecond)
-        Navigator.instance!!.applyKinematics(kinematics)
     }
 
     // ignore this, it is sim and debug support
