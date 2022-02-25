@@ -55,9 +55,9 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
         get() = _spark!!.inverted
         set(value) { _spark?.inverted = value }
 
-    private val velCalc = Differentiator()
+//    private val velCalc = Differentiator()
     override var rawVelocity: AngularVelocity
-        get() = velCalc.calculate(rawPosition.radians).radiansPerSecond//_enc!!.velocity.rpm
+        get() = _enc!!.velocity.rpm//velCalc.calculate(rawPosition.radians).radiansPerSecond//_enc!!.velocity.rpm
         set(value) {
             _pid!!.setReference(value.rpm, CANSparkMax.ControlType.kVelocity, 0, 0.0, SparkMaxPIDController.ArbFFUnits.kVoltage)
         }

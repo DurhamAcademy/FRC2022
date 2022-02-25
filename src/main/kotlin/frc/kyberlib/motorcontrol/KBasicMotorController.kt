@@ -54,7 +54,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
     var percent: Double = 0.0
         get() = if (real) rawPercent.invertIf { reversed } else field  // todo: does this compound with raw reversal
         set(value) {
-            val adjusted = value
+            val adjusted = value.invertIf { reversed }
             controlMode = ControlMode.VOLTAGE
             if (real) rawPercent = adjusted else field = adjusted
         }

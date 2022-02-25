@@ -252,7 +252,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         get() {
             if (!real) return simPosition
             assert(encoderConfigured)
-            return (rawPosition.value * gearRatio).radians
+            return (rawPosition * gearRatio.invertIf { reversed }).k
         }
         set(value) {
             controlMode = ControlMode.POSITION
@@ -272,7 +272,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     var velocity: AngularVelocity
         get() {
             assert(encoderConfigured) {"configure your motor before using"}
-            val vel = if (real) rawVelocity * gearRatio else simVelocity
+            val vel = if (real) rawVelocity * gearRatio.invertIf { reversed } else simVelocity
             return vel
         }
         set(value) {

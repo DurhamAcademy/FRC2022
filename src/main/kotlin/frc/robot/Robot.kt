@@ -25,7 +25,7 @@ class Robot : KRobot() {
     }
 
     override fun enabledInit() {
-         ZeroTurret.schedule(false) // don't uncomment this until the Hall sensor is added or bad things might happen
+//         ZeroTurret.schedule(false) // don't uncomment this until the Hall sensor is added or bad things might happen
     }
 
     override fun autonomousInit() {

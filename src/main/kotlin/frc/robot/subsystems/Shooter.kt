@@ -11,6 +11,7 @@ import frc.robot.commands.shooter.Shoot
 import frc.robot.subsystems.Turret.targetVisible
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.mechanisms.Flywheel
 import frc.kyberlib.motorcontrol.rev.KSparkMax
@@ -42,7 +43,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         identifier = "flywheel"
         radius = Constants.FLYWHEEL_RADIUS
         motorType = DCMotor.getNEO(2)
-        Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.002)
+//        Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.002)
     }
     val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 0.02)
     // additional motors that copy the main
@@ -76,7 +77,8 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     init {
-        defaultCommand = Shoot
+//        defaultCommand = Shoot
+        log("default command off", LogMode.WARN)
         if(Game.sim) Simulation.instance.include(this)
     }
 

@@ -94,10 +94,10 @@ object Climber : SubsystemBase(), Debug, Simulatable {
 
     // public variable to get/set whether the arms are lifted
     var staticsLifted
-        get() = leftArmLift.get()
+        get() = false//leftArmLift.get()
         set(value) {
-            leftArmLift.set(value)
-            rightArmLift.set(value)
+//            leftArmLift.set(value)
+//            rightArmLift.set(value)
         }
     var extendableAngle
         get() = leftExtendable.position

@@ -24,10 +24,10 @@ object Intaker  : SubsystemBase(), Debug {
 
     // public get/set for deploy status
     var deployed
-        get() = leftIntakeDeploy.get()
+        get() = true//leftIntakeDeploy.get()
         set(value) {
-            leftIntakeDeploy.set(value)
-            rightIntakeDeploy.set(value)
+//            leftIntakeDeploy.set(value)
+//            rightIntakeDeploy.set(value)
         }
 
     // motor controlling the intake speed

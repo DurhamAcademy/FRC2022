@@ -9,12 +9,14 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.Angle
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.k
 import frc.kyberlib.math.units.extensions.radiansPerSecond
 import frc.kyberlib.math.units.towards
 import frc.kyberlib.motorcontrol.KSimulatedESC
+import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
 import frc.robot.RobotContainer
@@ -44,7 +46,7 @@ object Turret : SubsystemBase(), Debug {
     // characterization of the turret
     private val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
     // actual turret motors
-    val turret = KSimulatedESC(30).apply {
+    val turret = KSparkMax(30).apply {
         kP = 0.1
         kD = .0
         gearRatio = Constants.TURRET_GEAR_RATIO
@@ -78,7 +80,8 @@ object Turret : SubsystemBase(), Debug {
         }
 
     init {
-        defaultCommand = SeekTurret
+//        defaultCommand = SeekTurret
+        log("SeekTurret as default is off until built", logMode = LogMode.WARN)
     }
 
     /**

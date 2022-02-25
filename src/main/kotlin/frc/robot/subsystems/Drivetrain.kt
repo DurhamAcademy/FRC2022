@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.PolarPose
+import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.polar
 import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
@@ -104,7 +105,7 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
-        debugValues()
+        debugDashboard()
         RobotContainer.navigation.update(wheelSpeeds)
         if(Turret.targetVisible && Constants.NAVIGATION_CORRECTION)  {  // TODO: test
             val distance = Shooter.targetDistance!!
@@ -163,8 +164,8 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     }
     override fun simUpdate(dt: Time) {
         // update the sim with new inputs
-        val leftVolt = leftMaster.voltage//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
-        val rightVolt = rightMaster.voltage//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
+        val leftVolt = leftMaster.voltage.invertIf { leftMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
+        val rightVolt = rightMaster.voltage.invertIf { rightMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
         if (leftVolt == 0.0 && rightVolt == 0.0) return
         driveSim.setInputs(leftVolt, rightVolt)
         driveSim.update(dt.seconds)
