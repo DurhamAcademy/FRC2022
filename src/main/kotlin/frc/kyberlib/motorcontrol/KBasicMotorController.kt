@@ -5,6 +5,7 @@ import edu.wpi.first.networktables.NTSendable
 import edu.wpi.first.networktables.NTSendableBuilder
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.seconds
 
@@ -12,6 +13,9 @@ import frc.kyberlib.math.units.extensions.seconds
  * A basic motor controller. No closed-loop control
  */
 abstract class KBasicMotorController : NTSendable, Debug {
+    init {
+        KSubsystem.active!!.addMotor(this)
+    }
     protected val followPeriodic = 0.005.seconds
     var controlMode = ControlMode.NULL
     // ------ configs ----- //
@@ -133,6 +137,8 @@ abstract class KBasicMotorController : NTSendable, Debug {
              follower.update()
         }
     }
+
+    abstract fun checkError(): Boolean
 
     /**
      * Converts motor in NTSendable graphics widget
