@@ -4,10 +4,9 @@ import edu.wpi.first.wpilibj.DigitalInput
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
-import frc.robot.commands.Intake
+import frc.robot.commands.intake.Intake
 import frc.robot.subsystems.Drivetrain
 import org.photonvision.PhotonCamera
-import kotlin.math.PI
 
 /**
  * Contains all Robot subsystems and sensors
@@ -36,6 +35,7 @@ object RobotContainer {
         }
 
         leftTrigger.activateAt(0.5).whileActiveOnce(Intake)
+        leftDPad.whenActive(Intake)
 //        leftBumper.whileActiveOnce(Flush)
 //
 //        yButton.toggleWhenActive(fullAutoClimb)

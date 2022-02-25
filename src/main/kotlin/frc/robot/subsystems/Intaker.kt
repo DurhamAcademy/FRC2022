@@ -28,7 +28,6 @@ object Intaker  : SubsystemBase(), Debug {
 //            leftIntakeDeploy.set(value)
 //            rightIntakeDeploy.set(value)
         }
-
     // motor controlling the intake speed
     val intakeMotor = KSparkMax(20).apply {
         kP = 1.0
@@ -40,7 +39,7 @@ object Intaker  : SubsystemBase(), Debug {
 //        intakeMotor.velocity = 1.radiansPerSecond
     }
 
-    // TODO add ball sensors
+    //TODO: add ball sensors
 
     override fun periodic() {
         debugDashboard()

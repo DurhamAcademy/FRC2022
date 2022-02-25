@@ -1,11 +1,14 @@
-package frc.robot.commands
+package frc.robot.commands.intake
 
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.Constants
-import frc.robot.subsystems.Intaker
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
-import frc.kyberlib.math.units.extensions.radiansPerSecond
+import frc.robot.RobotContainer
+
+//hi
+import frc.robot.subsystems.Intaker
+import frc.robot.subsystems.Conveyor
 
 /**
  * Deploys and activates the intake
@@ -13,12 +16,18 @@ import frc.kyberlib.math.units.extensions.radiansPerSecond
 object Intake : CommandBase() {
     init {
         addRequirements(Intaker)
+        addRequirements(Conveyor)
     }
 
     override fun initialize() {
         Debug.log("Intake", "start", level=DebugLevel.LowPriority)
 //        Intaker.deployed = true
         Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
+    }
+
+    override fun execute() {
+        Conveyor.idle()
+        Intaker.deployed = true
     }
 
     override fun end(interrupted: Boolean) {
