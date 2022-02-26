@@ -20,7 +20,6 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
 
     constructor(name: String, startPose2d: Pose2d, waypoints: Collection<Translation2d>, endPose2d: Pose2d, config: KTrajectoryConfig? = null) : this(name, generateTrajectory(startPose2d, waypoints.toMutableList(), endPose2d, config))
 
-
     companion object {
         var generalConfig: KTrajectoryConfig? = null
 
@@ -35,6 +34,8 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
 //            val config = KTrajectoryConfig.load(configFile)
             return KTrajectory(name, wpiTrajectory)
         }
+
+        val savedTrajectories = File(KyberlibConfig.TRAJECTORY_PATH).list()?.filter { it.endsWith(".wpilib.json") }?.map { it.removeSuffix(".wpilib.json") }
 
         private fun generateTrajectory(startPose2d: Pose2d, waypoints: MutableList<Translation2d>, newConfig: KTrajectoryConfig?): Trajectory {
             val config = putConfig(newConfig)
