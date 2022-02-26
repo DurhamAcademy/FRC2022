@@ -1,7 +1,12 @@
 package frc.robot
 
 import edu.wpi.first.wpilibj.DigitalInput
+import edu.wpi.first.wpilibj.Filesystem
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import frc.kyberlib.auto.Navigator
+import frc.kyberlib.auto.trajectory.KTrajectory
+import frc.kyberlib.command.Debug
+import frc.kyberlib.command.KRobot
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.commands.intake.Intake
@@ -13,6 +18,7 @@ import frc.robot.commands.shooter.Shoot
 import frc.robot.commands.turret.LockTurret
 import frc.robot.controls.ControlSchema2022
 import frc.robot.controls.DefaultControls
+import frc.robot.controls.RocketLeague
 import frc.robot.subsystems.*
 import org.photonvision.PhotonCamera
 
@@ -29,7 +35,11 @@ object RobotContainer {
 
     val controller = KXboxController(0)
 
-    val controlScheme: ControlSchema2022 = DefaultControls.apply {
+    private val schemaChooser = SendableChooser<ControlSchema2022>().apply {
+        setDefaultOption("Default", DefaultControls)
+        addOption("RocketLeague", RocketLeague)
+    }
+    val controlScheme = schemaChooser.selected!!.apply {
         INTAKE.whileActiveOnce(Intake)
         SHOOT.whileActiveOnce(Shoot)  //  todo: edit to make manual
         FORCE_SHOT.whileActiveOnce(ForceShoot)
@@ -38,6 +48,17 @@ object RobotContainer {
         LOCK_TURRET.toggleWhenActive(LockTurret)
         CLIMB_MODE.toggleWhenActive(Climb)
         EMOTE.whileActiveOnce(Emote)
+    }
+
+    val autoChooser = SendableChooser<KTrajectory>().apply {
+        val options = KTrajectory.savedTrajectories
+        if (options == null) {
+            Debug.log("Auto Chooser", "no auto paths found")
+        } else {
+            for (path in KTrajectory.savedTrajectories)
+                addOption(path, KTrajectory.load(path))
+        }
+
     }
 
 //    val leds = KLEDStrip(0, 103).apply {
