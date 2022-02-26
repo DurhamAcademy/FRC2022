@@ -1,17 +1,12 @@
 In Sim:
-Full Auto Climb?
-Refractor some variables
-Make sure things are isolatable
-documentation of kyberlib
+Make sure things are isolatable (specifically autoDrive)
 emergency mode
 detect CAN issues
-control schemas
-mario kart (idk if possible)
 
 With robot:
 Tune feedforwards
 Auto paths
-inversion issue
+inversion issue (resolved?)
 
 Anyone can do:
 1. mess with auto paths
@@ -23,5 +18,6 @@ find the save button (it's something like build path)
 move output into code (Pathweaver/output to src/main.deploy
 switch the name of the auto path in Robot.kt
 
-2. Conveyor Code
+2. Conveyor Code (Everetts messing with this)
+3. documentation of kyberlib (good project to try to understand whats happening)
 3. Try auto climb
