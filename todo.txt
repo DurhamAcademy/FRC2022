@@ -1,12 +1,14 @@
 In Sim:
 Make sure things are isolatable (specifically autoDrive)
-emergency mode
+emergency mode (low priority)
 detect CAN issues
+chache important values
+test auto with new tune files
+lower loop time
 
 With robot:
 Tune feedforwards
 Auto paths
-inversion issue (resolved?)
 
 Anyone can do:
 1. mess with auto paths

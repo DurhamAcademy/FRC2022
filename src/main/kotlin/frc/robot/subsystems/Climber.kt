@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.units.extensions.Time
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.inches
@@ -32,10 +33,7 @@ enum class CLIMBER_STATUS {
 /**
  * Mechanism representing the actuators for climbing
  */
-object Climber : SubsystemBase(), Debug, Simulatable {
-    init {
-        println("Climber")
-    }
+object Climber : KSubsystem(), Simulatable {
     var status = CLIMBER_STATUS.IDLE
 
     // pneumatics that lift the climb arms

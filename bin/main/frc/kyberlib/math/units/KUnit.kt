@@ -93,6 +93,8 @@ class KUnit<T>(val value: Double) : Comparable<KUnit<T>> {
         this.units = string.toString()
     }
 
+    operator fun unaryMinus(): KUnit<T> = KUnit(-value)
+
     /**
      * Asserts shared units with another KUnit
      */
