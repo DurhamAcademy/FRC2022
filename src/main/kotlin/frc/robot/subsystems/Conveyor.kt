@@ -3,13 +3,16 @@ package frc.robot.subsystems
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.command.Debug
+import frc.kyberlib.math.units.extensions.rotationsPerSecond
+import frc.kyberlib.math.units.extensions.rpm
 import frc.kyberlib.motorcontrol.KSimulatedESC
+import frc.kyberlib.motorcontrol.MotorType
 
 /**
  * State of the hopper. Used for LEDs and other dependencies
  */
 public enum class CONVEYOR_STATUS {
-    EMPTY, SINGLE_GOOD, FULL_GOOD, BAD, FEEDING
+    EMPTY, SINGLE_GOOD, FULL_GOOD, BAD, FEEDING, IDLE
 }
 
 /**
@@ -20,16 +23,36 @@ object Conveyor : SubsystemBase(), Debug {
     init {
         log("init")
     }
-    var status = CONVEYOR_STATUS.FULL_GOOD
-    
-    val indexer = KSparkMax(21).apply {  }
-    val feeder = KSparkMax(22)
 
-    val good
+    //FIXME: - change id
+    val ConveyorMotor = KSparkMax(10, MotorType.BRUSHLESS).apply {
+        identifier = "conveyor"
+        reversed = false
+        currentLimit = 40 //FIXME: - is this correct?
+        gearRatio = 1/5.0
+    }
+    var status = CONVEYOR_STATUS.FULL_GOOD // FIXME: NO! bad named variable
+
+    val indexer = KSimulatedESC(21)
+    val feeder = KSimulatedESC(22)
+
+    val good // FIXME: NO! why pelase stop
         get() = true
 
     fun feed() {
         status = CONVEYOR_STATUS.FEEDING
+        ConveyorMotor.velocity = 6.rotationsPerSecond
+    }
+
+    fun idle() {
+        status = CONVEYOR_STATUS.IDLE
+        ConveyorMotor.velocity = 1.rotationsPerSecond
+        ConveyorMotor.maxAcceleration = 0.1.rotationsPerSecond
+    }
+
+    fun off() {
+        ConveyorMotor.brakeMode= true
+        ConveyorMotor.velocity = 0.rpm
     }
 
     override fun periodic() {
@@ -38,7 +61,7 @@ object Conveyor : SubsystemBase(), Debug {
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
-            "indexer" to indexer, 
+            "indexer" to indexer,
             "feeder" to feeder,
             "status" to status.name
         )

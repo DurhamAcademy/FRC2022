@@ -30,13 +30,11 @@ object Intaker  : SubsystemBase(), Debug {
             leftIntakeDeploy.extended = value
             rightIntakeDeploy.extended = value
         }
-
     // motor controlling the intake speed
     val intakeMotor = KSparkMax(20).apply {
         kP = 1.0
         motorType = DCMotor.getNeo550(1)
     }
-
 
     override fun periodic() {
         debugDashboard()

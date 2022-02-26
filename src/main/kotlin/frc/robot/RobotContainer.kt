@@ -4,8 +4,9 @@ import edu.wpi.first.wpilibj.DigitalInput
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
-import frc.robot.commands.Emote
 import frc.robot.commands.intake.Intake
+import frc.robot.subsystems.Drivetrain
+import frc.robot.commands.Emote
 import frc.robot.commands.climb.Climb
 import frc.robot.commands.shooter.ForceShoot
 import frc.robot.commands.shooter.Shoot
