@@ -13,12 +13,13 @@ import java.io.File
 /**
  * Wrapper class of standard trajectory that allows for more generation options, saving / loading, and hashing
  */
-class KTrajectory(private val name: String, trajectory: Trajectory, newConfig: KTrajectoryConfig?) : Trajectory(trajectory.states), Debug {
-    constructor(name: String, waypoints: List<Pose2d>, config: KTrajectoryConfig? = null) : this(name, generateTrajectory(waypoints, config), config)
+class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory(trajectory.states), Debug {
+    constructor(name: String, waypoints: List<Pose2d>, config: KTrajectoryConfig? = null) : this(name, generateTrajectory(waypoints, config))
 
-    constructor(name: String, startPose2d: Pose2d, waypoints: Collection<Translation2d>, config: KTrajectoryConfig? = null) : this(name, generateTrajectory(startPose2d, waypoints.toMutableList(), config), config)  // check if .toMutableList maintains order
+    constructor(name: String, startPose2d: Pose2d, waypoints: Collection<Translation2d>, config: KTrajectoryConfig? = null) : this(name, generateTrajectory(startPose2d, waypoints.toMutableList(), config))  // check if .toMutableList maintains order
 
-    constructor(name: String, startPose2d: Pose2d, waypoints: Collection<Translation2d>, endPose2d: Pose2d, config: KTrajectoryConfig? = null) : this(name, generateTrajectory(startPose2d, waypoints.toMutableList(), endPose2d, config), config)
+    constructor(name: String, startPose2d: Pose2d, waypoints: Collection<Translation2d>, endPose2d: Pose2d, config: KTrajectoryConfig? = null) : this(name, generateTrajectory(startPose2d, waypoints.toMutableList(), endPose2d, config))
+
 
     companion object {
         var generalConfig: KTrajectoryConfig? = null
@@ -28,11 +29,11 @@ class KTrajectory(private val name: String, trajectory: Trajectory, newConfig: K
          * @throws NoSuchFileException if it is an invalid trajectory
          */
         fun load(name: String): KTrajectory {
-            val jsonFile = File("${KyberlibConfig.TRAJECTORY_PATH}/$name.json")
-            val configFile = File("${KyberlibConfig.TRAJECTORY_PATH}/${name}Config.json")
+            val jsonFile = File("${KyberlibConfig.TRAJECTORY_PATH}/$name.wpilib.json")
+//            val configFile = File("${KyberlibConfig.TRAJECTORY_PATH}/${name}Config.json")
             val wpiTrajectory = TrajectoryUtil.deserializeTrajectory(jsonFile.readText())
-            val config = KTrajectoryConfig.load(configFile)
-            return KTrajectory(name, wpiTrajectory, config)
+//            val config = KTrajectoryConfig.load(configFile)
+            return KTrajectory(name, wpiTrajectory)
         }
 
         private fun generateTrajectory(startPose2d: Pose2d, waypoints: MutableList<Translation2d>, newConfig: KTrajectoryConfig?): Trajectory {
@@ -88,8 +89,7 @@ class KTrajectory(private val name: String, trajectory: Trajectory, newConfig: K
             trajFolder.mkdir()
         }
 
-        val jsonFile = File("${KyberlibConfig.TRAJECTORY_PATH}/$name.json")
-        val configFile = File("${KyberlibConfig.TRAJECTORY_PATH}/${name}Config.json")
+        val jsonFile = File("${KyberlibConfig.TRAJECTORY_PATH}/$name.wpilib.json")
         val hashFile = File("${KyberlibConfig.TRAJECTORY_PATH}/$name.hash")
         if (jsonFile.exists() && hashFile.exists()) {
             if (hash != hashFile.readText().toInt()) {
@@ -104,18 +104,12 @@ class KTrajectory(private val name: String, trajectory: Trajectory, newConfig: K
 
         jsonFile.writeText(TrajectoryUtil.serializeTrajectory(this))
         hashFile.writeText(hash.toString())
-        config.save(configFile)
     }
 
     init {
         // add to Map of trajectories
         TrajectoryManager.trajectories[name] = this
     }
-
-    /**
-     * The config that the trajectory was generated with
-     */
-    private val config = putConfig(newConfig)
 
     private val hash
         get() = hashCode()
@@ -124,7 +118,7 @@ class KTrajectory(private val name: String, trajectory: Trajectory, newConfig: K
      * Creates a hash to determine uniqueness of trajectories
      */
     override fun hashCode(): Int {
-        return "${states.hashCode()},${config.hashCode()}".hashCode()
+        return "${states.hashCode()}".hashCode()
     }
 
     /**

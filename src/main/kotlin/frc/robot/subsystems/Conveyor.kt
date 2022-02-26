@@ -21,7 +21,7 @@ public enum class CONVEYOR_STATUS {
  */
 object Conveyor : SubsystemBase(), Debug {
     init {
-        println("Conveyor")
+        log("init")
     }
 
     //FIXME: - change id

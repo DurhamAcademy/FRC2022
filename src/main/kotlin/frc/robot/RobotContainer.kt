@@ -6,6 +6,14 @@ import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.commands.intake.Intake
 import frc.robot.subsystems.Drivetrain
+import frc.robot.commands.Emote
+import frc.robot.commands.climb.Climb
+import frc.robot.commands.shooter.ForceShoot
+import frc.robot.commands.shooter.Shoot
+import frc.robot.commands.turret.LockTurret
+import frc.robot.controls.ControlSchema2022
+import frc.robot.controls.DefaultControls
+import frc.robot.subsystems.*
 import org.photonvision.PhotonCamera
 
 /**
@@ -19,28 +27,17 @@ object RobotContainer {
 
     val navigation = Navigator(gyro, Constants.START_POSE)
 
-    val controller = KXboxController(0).apply {
-        // steering
-        rightX.apply {
-            maxVal = -1.0 //-5 * PI
-            expo = 1.0//73.0
-            deadband = 0.1
-        }
+    val controller = KXboxController(0)
 
-        // throttle
-        leftY.apply {
-            maxVal = -1.0//-12.0
-            expo = 1.0//20.0
-            deadband = 0.2
-        }
-
-        leftTrigger.activateAt(0.5).whileActiveOnce(Intake)
-        leftDPad.whenActive(Intake)
-//        leftBumper.whileActiveOnce(Flush)
-//
-//        yButton.toggleWhenActive(fullAutoClimb)
-//        aButton.toggleWhenActive(Climb)
-//        bButton.whileActiveOnce(ToggleArmLift())
+    val controlScheme: ControlSchema2022 = DefaultControls.apply {
+        INTAKE.whileActiveOnce(Intake)
+        SHOOT.whileActiveOnce(Shoot)  //  todo: edit to make manual
+        FORCE_SHOT.whileActiveOnce(ForceShoot)
+        EJECT.whileActiveOnce(Intake)
+        FLUSH.whileActiveOnce(Intake)
+        LOCK_TURRET.toggleWhenActive(LockTurret)
+        CLIMB_MODE.toggleWhenActive(Climb)
+        EMOTE.whileActiveOnce(Emote)
     }
 
 //    val leds = KLEDStrip(0, 103).apply {
@@ -113,12 +110,12 @@ object RobotContainer {
 
     init {
         // initialize subsystems here:
-//        Climber
-//        Conveyor
+        Climber
+        Conveyor
         Drivetrain
-//        Intaker
-//        Shooter
-//        Turret
+        Intaker
+        Shooter
+        Turret
     }
 
 }

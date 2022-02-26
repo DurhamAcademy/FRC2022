@@ -23,4 +23,5 @@ val AngularVelocity.rotationsPerSecond get() = value / AngleConversions.rotation
 fun AngularVelocity.toTangentialVelocity(radius: Length) = (value * radius.value).metersPerSecond
 fun AngularVelocity.encoderVelocity(cpr: Int) = (value / (AngleConversions.rotationsToRadians * 10)) * (cpr * 4)
 
+operator fun AngularVelocity.times(radius: Length): LinearVelocity = this.toTangentialVelocity(radius)
 operator fun AngularVelocity.times(time: Time): Angle = (this.radiansPerSecond * time.seconds).radians

@@ -2,6 +2,8 @@ package frc.robot.commands.climb
 
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.wpilibj2.command.CommandBase
+import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugLevel
 import frc.robot.RobotContainer
 import frc.robot.subsystems.*
 import frc.kyberlib.math.filters.Differentiator
@@ -34,24 +36,34 @@ object Climb : CommandBase() {
      * Prepare the climber to climb.
      */
     override fun initialize() {
-        Turret.fieldRelativeAngle = 0.degrees
-        Climber.armsLifted = true
+        Debug.log("Climb Command", "init", level = DebugLevel.LowPriority)
+        Turret.turret.position = 0.degrees
+        Climber.staticsLifted = true
         Climber.status = CLIMBER_STATUS.ACTIVE
 
-        Climber.staticMaster.position = 90.degrees
+        Climber.leftExtendable.position = 90.degrees
+        Climber.rightExtendable.position = 90.degrees
     }
 
     /**
      * Set the winch percentage based on left/right joysticks
      */
     override fun execute() {
+        Debug.log("Climb Command", "execute", level = DebugLevel.LowPriority)
+        Turret.turret.updateVoltage()
+
         Climber.leftWinch.percent = RobotContainer.controller.leftY.value / RobotContainer.controller.leftY.maxVal
+        Climber.leftExtendable.percent = RobotContainer.controller.leftX.value / RobotContainer.controller.leftX.maxVal
         Climber.rightWinch.percent = RobotContainer.controller.rightY.value / RobotContainer.controller.rightY.maxVal
+        Climber.rightExtendable.percent = RobotContainer.controller.rightX.value / RobotContainer.controller.rightX.maxVal
+
 
         // set the status of the robot based on what the winches are doing
         if (Climber.leftWinch.percent.absoluteValue < 0.1) Climber.status = CLIMBER_STATUS.ACTIVE
         else if (Climber.leftWinch.percent < 0.0) Climber.status = CLIMBER_STATUS.FALLING
         else if (Climber.leftWinch.percent.absoluteValue > 0.0) Climber.status = CLIMBER_STATUS.RISING
-        stabalize()
+//        stabalize()
     }
+
+    override fun isFinished(): Boolean = false
 }

@@ -19,13 +19,10 @@ import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.auto.trajectory.KTrajectoryConfig
 import frc.kyberlib.command.Game
+import frc.kyberlib.math.units.Prefixes
 import frc.kyberlib.math.units.Translation2d
 import frc.kyberlib.math.units.debugValues
-import frc.kyberlib.math.units.extensions.feet
-import frc.kyberlib.math.units.extensions.k
-import frc.kyberlib.math.units.extensions.meters
-import frc.kyberlib.math.units.extensions.metersPerSecond
-import frc.kyberlib.math.units.extensions.feetPerSecond
+import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
 import frc.kyberlib.motorcontrol.MotorType
 import frc.kyberlib.motorcontrol.rev.KSparkMax
@@ -111,7 +108,8 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
             val angle = Turret.visionOffset!! + Turret.fieldRelativeAngle
             val transform = Translation2d(distance, 0.meters).rotateBy(angle)
             val newPosition = Constants.HUB_POSITION.minus(transform)
-            val time = Game.time - RobotContainer.limelight.latestResult!!.latencyMillis * 1000  // TODO: wrong units
+            val resultDelay = (RobotContainer.limelight.latestResult!!.latencyMillis / Prefixes.milli).seconds
+            val time = (Game.time - resultDelay).seconds * Prefixes.milli
             RobotContainer.navigation.update(Pose2d(newPosition, RobotContainer.navigation.heading), time)
 
         }
@@ -158,19 +156,17 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
             kinematics.trackWidthMeters,  // The track width
             leftMaster.radius!!.meters,  // wheel radius
             // The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
-            VecBuilder.fill(0.000, 0.000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000) // TODO: add noise back
+            VecBuilder.fill(0.000, 0.000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000)
         )
     }
 
-    private fun roundLows(v: Double): Double = if (v.absoluteValue < 0.2) 0.0 else v
-
-    override fun simUpdate(dt: Double) {
+    override fun simUpdate(dt: Time) {
         // update the sim with new inputs
         val leftVolt = leftMaster.voltage.zeroIf{it: Double -> it.absoluteValue < Constants.DRIVE_KS}
         val rightVolt = rightMaster.voltage.zeroIf{it: Double -> it.absoluteValue < Constants.DRIVE_KS}
         if (leftVolt == 0.0 && rightVolt == 0.0) return
         driveSim.setInputs(leftVolt, rightVolt)
-        driveSim.update(dt)
+        driveSim.update(dt.seconds)
 
         // update the motors with what they should be
         leftMaster.simLinearPosition = driveSim.leftPositionMeters.meters

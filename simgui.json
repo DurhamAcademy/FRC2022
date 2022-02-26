@@ -50,7 +50,7 @@
         "Robot": {
           "arrows": false
         },
-        "image": "/Users/22staples/FRC2022/Rapid React Field.png",
+
         "traj": {
           "arrowSize": 0,
           "arrows": false,
@@ -75,12 +75,6 @@
     }
   },
   "NetworkTables": {
-    "LiveWindow": {
-      "Climber": {
-        "open": true
-      },
-      "open": true
-    },
     "SmartDashboard": {
       "Climber": {
         "Left Arm": {
@@ -88,11 +82,13 @@
         },
         "Left Winch": {
           "open": true
-        },
-        "open": true
+        }
       },
       "Drivetrain": {
         "leftMaster": {
+          "open": true
+        },
+        "pose": {
           "open": true
         },
         "rightMaster": {
@@ -108,11 +104,18 @@
         }
       },
       "Shooter": {
+        "flywheel": {
+          "open": true
+        },
         "hood": {
+          "open": true
+        },
+        "top Shooter": {
           "open": true
         }
       },
       "Turret": {
+        "open": true,
         "turret": {
           "open": true
         }
@@ -131,21 +134,39 @@
           "series": [
             {
               "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Drivetrain/rightMaster/Linear Velocity (Meters  per  Seconds)"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/Linear Velocity (Meters  per  Seconds)"
+            },
+            {
+              "color": [
+                0.0,
+                0.20588231086730957,
+                1.0,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/setpoint"
+            },
+            {
+              "color": [
                 0.7686275243759155,
                 0.30588236451148987,
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Drivetrain/speed/forward (m per s)"
-            },
-            {
-              "color": [
-                0.5058823823928833,
-                0.44705885648727417,
-                0.7019608020782471,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard//Drivetrain/speed/turn (rad per s)"
+              "id": "NT:/SmartDashboard//Drivetrain/rightMaster/setpoint"
             }
           ]
         },
@@ -159,7 +180,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/Linear Velocity (m per s)"
+              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/Voltage"
             },
             {
               "color": [
@@ -168,7 +189,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Drivetrain/rightMaster/Linear Velocity (m per s)"
+              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/error"
             },
             {
               "color": [
@@ -177,7 +198,7 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/error"
+              "id": "NT:/SmartDashboard//Drivetrain/rightMaster/Voltage"
             },
             {
               "color": [
@@ -187,24 +208,6 @@
                 1.0
               ],
               "id": "NT:/SmartDashboard//Drivetrain/rightMaster/error"
-            },
-            {
-              "color": [
-                0.5058823823928833,
-                0.44705885648727417,
-                0.7019608020782471,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/Voltage"
-            },
-            {
-              "color": [
-                0.5764706134796143,
-                0.4705882668495178,
-                0.3764706254005432,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard//Drivetrain/rightMaster/Voltage"
             }
           ]
         }
@@ -259,7 +262,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Turret/turret/Angular Velocity (rad per s)"
+              "id": "NT:/SmartDashboard//Turret/turret/Angular Velocity (Radians  per  Seconds)"
             },
             {
               "color": [
@@ -268,7 +271,16 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Turret/turret/error"
+              "id": "NT:/SmartDashboard//Turret/turret/setpoint (degrees)"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Turret/turret/Angular Position (degrees)"
             }
           ]
         }
@@ -289,7 +301,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Shooter/flywheel/Angular Velocity (rad per s)"
+              "id": "NT:/SmartDashboard//Shooter/hood/Angular Position (degrees)"
             },
             {
               "color": [
@@ -298,7 +310,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Shooter/top Shooter/Angular Velocity (rad per s)"
+              "id": "NT:/SmartDashboard//Shooter/flywheel/Angular Velocity (Radians  per  Seconds)"
             },
             {
               "color": [
@@ -307,7 +319,7 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Shooter/hood/Angular Position (rad)"
+              "id": "NT:/SmartDashboard//Shooter/top Shooter/Angular Velocity (Radians  per  Seconds)"
             }
           ]
         }

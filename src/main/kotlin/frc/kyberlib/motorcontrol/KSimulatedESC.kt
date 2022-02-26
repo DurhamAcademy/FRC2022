@@ -24,10 +24,6 @@ class KSimulatedESC(name: Any) : KMotorController() {  // potentially remove thi
 
     override var rawPercent: Double = 0.0
 
-    override fun writePid(p: Double, i: Double, d: Double) {}
-
-    override fun writeMultipler(mv: Double, mp: Double) {}
-
     override fun resetPosition(position: Angle) { this.position = position }
 
     override fun followTarget(kmc: KBasicMotorController) {

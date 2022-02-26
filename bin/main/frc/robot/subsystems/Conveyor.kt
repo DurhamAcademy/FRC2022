@@ -2,9 +2,8 @@ package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.motorcontrol.rev.KSparkMax
-import frc.robot.commands.conveyor.Feed
-import frc.robot.commands.conveyor.Agitate
 import frc.kyberlib.command.Debug
+import frc.kyberlib.motorcontrol.KSimulatedESC
 
 /**
  * State of the hopper. Used for LEDs and other dependencies
@@ -18,26 +17,19 @@ public enum class CONVEYOR_STATUS {
  * Waiting for design to be finalized before code is added
  */
 object Conveyor : SubsystemBase(), Debug {
+    init {
+        println("Conveyor")
+    }
     var status = CONVEYOR_STATUS.FULL_GOOD
     
-    val indexer = KSparkMax(0)
+    val indexer = KSimulatedESC(0)
     val feeder = KSparkMax(0)
 
-    init {
-        defaultCommand = Agitate
-    }
-
     val good
-        get() = when(status) {
-            CONVEYOR_STATUS.FULL_GOOD -> true
-            CONVEYOR_STATUS.SINGLE_GOOD -> true
-            CONVEYOR_STATUS.FEEDING -> true
-            else -> false
-        }
+        get() = true
 
     fun feed() {
-        if (status != CONVEYOR_STATUS.FEEDING)
-            Feed.schedule()
+        status = CONVEYOR_STATUS.FEEDING
     }
 
     override fun periodic() {

@@ -2,35 +2,28 @@ package frc.kyberlib.motorcontrol.rev
 
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
+import com.revrobotics.RelativeEncoder
 import com.revrobotics.SparkMaxPIDController
 import com.revrobotics.SparkMaxRelativeEncoder
-import com.revrobotics.RelativeEncoder
 import frc.kyberlib.command.LogMode
-import frc.kyberlib.motorcontrol.EncoderType
-import frc.kyberlib.motorcontrol.KEncoderConfig
-import frc.kyberlib.motorcontrol.KMotorController
-import frc.kyberlib.motorcontrol.MotorType.BRUSHED
-import frc.kyberlib.motorcontrol.MotorType.BRUSHLESS
-import frc.kyberlib.math.units.extensions.Angle
-import frc.kyberlib.math.units.extensions.AngularVelocity
-import frc.kyberlib.math.units.extensions.rotations
-import frc.kyberlib.math.units.extensions.rpm
-import frc.kyberlib.motorcontrol.CANId
-import frc.kyberlib.motorcontrol.CANRegistry
-import frc.kyberlib.motorcontrol.KBasicMotorController
+import frc.kyberlib.math.filters.Differentiator
+import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.motorcontrol.*
+import frc.kyberlib.motorcontrol.BrushType.BRUSHED
+import frc.kyberlib.motorcontrol.BrushType.BRUSHLESS
 
 
 /**
  * Represents a REV Robotics Spark MAX motor controller. Recommend using .apply to setup move configs
  * [canId] is the controller's ID on the CAN bus
- * [motorType] is the type of motor being driven. WARNING: If set incorrectly this can seriously damage hardware. You've been warned.
+ * [brushType] is the type of motor being driven. WARNING: If set incorrectly this can seriously damage hardware. You've been warned.
  */
-class KSparkMax(val canId: CANId, val motorType: frc.kyberlib.motorcontrol.MotorType = BRUSHLESS) : KMotorController() {
+class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRUSHLESS) : KMotorController() {
 
     // ----- low-level stuff ----- //
     public override var identifier: String = CANRegistry.filterValues { it == canId }.keys.firstOrNull() ?: "can$canId"
 
-    private val _spark = if (real) CANSparkMax(canId, when (motorType) {
+    private val _spark = if (real) CANSparkMax(canId, when (brushType) {
         BRUSHLESS -> MotorType.kBrushless
         BRUSHED -> MotorType.kBrushed
     }) else null
@@ -41,7 +34,7 @@ class KSparkMax(val canId: CANId, val motorType: frc.kyberlib.motorcontrol.Motor
         if (real)
            _spark!!.restoreFactoryDefaults()
         // running NEO with integrated encoder
-        if (motorType == BRUSHLESS) {
+        if (brushType == BRUSHLESS) {
             encoderConfig = KEncoderConfig(42, EncoderType.NEO_HALL)
         }
     }
@@ -58,12 +51,13 @@ class KSparkMax(val canId: CANId, val motorType: frc.kyberlib.motorcontrol.Motor
         get() = _spark!!.appliedOutput
         set(value) {_spark!!.set(value)}
 
-    override var rawReversed: Boolean
+    override var rawReversed: Boolean  // todo: check if raw brake things
         get() = _spark!!.inverted
         set(value) { _spark?.inverted = value }
 
+//    private val velCalc = Differentiator()
     override var rawVelocity: AngularVelocity
-        get() = _enc!!.velocity.rpm
+        get() = _enc!!.velocity.rpm//velCalc.calculate(rawPosition.radians).radiansPerSecond//_enc!!.velocity.rpm
         set(value) {
             _pid!!.setReference(value.rpm, CANSparkMax.ControlType.kVelocity, 0, 0.0, SparkMaxPIDController.ArbFFUnits.kVoltage)
         }
@@ -73,6 +67,12 @@ class KSparkMax(val canId: CANId, val motorType: frc.kyberlib.motorcontrol.Motor
         set(value) {
             _pid!!.setReference(value.rotations, CANSparkMax.ControlType.kPosition, 0, 0.0, SparkMaxPIDController.ArbFFUnits.kVoltage)
         }
+
+    override fun stop() {
+        if (real)
+            _spark!!.stopMotor()
+        else simVelocity = 0.rpm
+    }
 
     override var currentLimit: Int = -1
         set(value) {
@@ -85,11 +85,11 @@ class KSparkMax(val canId: CANId, val motorType: frc.kyberlib.motorcontrol.Motor
 
     override fun configureEncoder(config: KEncoderConfig): Boolean {
         return when {
-            config.type == EncoderType.NEO_HALL && motorType == BRUSHLESS -> {
+            config.type == EncoderType.NEO_HALL && brushType == BRUSHLESS -> {
                 _enc = _spark?.encoder
                 true
             }
-            config.type == EncoderType.QUADRATURE && motorType == BRUSHED -> {
+            config.type == EncoderType.QUADRATURE && brushType == BRUSHED -> {
                 _enc = _spark?.getEncoder(SparkMaxRelativeEncoder.Type.kQuadrature, config.cpr)
                 _enc?.inverted = config.reversed
                 true
@@ -100,29 +100,18 @@ class KSparkMax(val canId: CANId, val motorType: frc.kyberlib.motorcontrol.Motor
         }
     }
 
-    override fun writePid(p: Double, i: Double, d: Double) {
-        _pid?.p = p
-        _pid?.i = i
-        _pid?.d = d
-    }
-
-    override fun writeMultipler(mv: Double, mp: Double) {
-        _enc?.velocityConversionFactor = mv
-        _enc?.positionConversionFactor = mp
-    }
-
     override fun followTarget(kmc: KBasicMotorController) {
         if (kmc is KSparkMax && real) {
             _spark?.follow(kmc._spark, reversed)
         } else {
             kmc.followers.add(this)
-            kmc.notifier.startPeriodic(0.005)
+            kmc.notifier.startPeriodic(followPeriodic.seconds)
         }
     }
 
     override fun resetPosition(position: Angle) {
         if (!encoderConfigured) {
-            return log("Cannot reset encoder position without configured encoder", LogMode.ERROR)
+            return log("Cannot reset encoder angle without configured encoder", LogMode.ERROR)
         }
         _enc?.position = position.rotations
     }

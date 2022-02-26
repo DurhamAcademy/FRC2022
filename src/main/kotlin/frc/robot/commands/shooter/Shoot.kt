@@ -2,16 +2,12 @@ package frc.robot.commands.shooter
 
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.Constants
-import frc.robot.subsystems.Conveyor
-import frc.robot.subsystems.SHOOTER_STATUS
-import frc.robot.subsystems.CONVEYOR_STATUS
-import frc.robot.subsystems.Shooter
-import frc.robot.subsystems.Turret
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.math.units.extensions.radiansPerSecond
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
+import frc.robot.subsystems.*
 
 
 /**
@@ -29,6 +25,7 @@ object Shoot : CommandBase() {
         // check if shooter should spin up
         if (Conveyor.good && (Turret.targetVisible || Conveyor.status == CONVEYOR_STATUS.FEEDING)) {
             val dis = if (Turret.targetVisible) Shooter.targetDistance!!.meters else prevDistance
+            val parallelSpeed = Drivetrain.polarSpeeds.dr
             prevDistance = dis
 
             // calculate values given the current distance from the hub

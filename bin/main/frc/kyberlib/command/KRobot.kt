@@ -7,9 +7,12 @@ import edu.wpi.first.wpilibj.TimedRobot
 import edu.wpi.first.wpilibj.livewindow.LiveWindow
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 
-open class KRobot(private val period: Double = 0.02) {
-    var enabled = false
-        private set
+open class KRobot() {
+    companion object {
+        var enabled = false
+            private set
+        const val period: Double = 0.02
+    }
 
     /**
      * Normal Robot.

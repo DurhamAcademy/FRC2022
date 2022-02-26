@@ -91,10 +91,10 @@ class DifferentialDriveTrain(private val leftMotors: Array<KMotorController>, pr
         )
     }
 
-    override fun simUpdate(dt: Double) {
+    override fun simUpdate(dt: Time) {
         // update the sim with new inputs
         driveSim.setInputs(leftMaster.voltage, rightMaster.voltage)
-        driveSim.update(dt)
+        driveSim.update(dt.seconds)
 
         // update the motors with what they should be
         leftMaster.simLinearPosition = driveSim.leftPositionMeters.meters
