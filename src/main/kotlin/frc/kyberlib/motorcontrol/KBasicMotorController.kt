@@ -134,6 +134,8 @@ abstract class KBasicMotorController : NTSendable, Debug {
         }
     }
 
+    open fun checkError(): Boolean = false
+
     /**
      * Converts motor in NTSendable graphics widget
      */

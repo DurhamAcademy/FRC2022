@@ -50,6 +50,7 @@
         "Robot": {
           "arrows": false
         },
+
         "traj": {
           "arrowSize": 0,
           "arrows": false,

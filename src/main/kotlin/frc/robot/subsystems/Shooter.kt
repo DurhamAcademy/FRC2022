@@ -1,5 +1,6 @@
 package frc.robot.subsystems
 
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.Notifier
@@ -14,6 +15,7 @@ import frc.kyberlib.command.Game
 import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.mechanisms.Flywheel
+import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.motorcontrol.KServo
 import frc.kyberlib.motorcontrol.KSimulatedESC
@@ -24,7 +26,7 @@ import frc.kyberlib.simulation.Simulation
 /**
  * Current status of the shooter mechanism
  */
-enum class SHOOTER_STATUS {
+enum class SHOOTER_STATUS {  // todo: make sure these are used
     IDLE, SPINUP, LOW_READY, HIGH_READY, AUTO_SHOT, FORCE_SHOT
 }
 
@@ -34,7 +36,7 @@ enum class SHOOTER_STATUS {
  */
 object Shooter : SubsystemBase(), Debug, Simulatable {
     init {
-        println("Intake")
+        log("Shooter")
     }
     var status = SHOOTER_STATUS.IDLE
 
@@ -43,9 +45,14 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         identifier = "flywheel"
         radius = Constants.FLYWHEEL_RADIUS
         motorType = DCMotor.getNEO(2)
-//        Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.002)
+
+        val system = flywheelSystem(Constants.FLYWHEEL_MOMENT_OF_INERTIA)
+        val loop = KMotorController.StateSpace.systemLoop(system, 3.0, 0.01, 3.0)
+        setupSim(system)
+        stateSpaceControl(loop)
+//        Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.02)
     }
-    val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 0.02)
+//    val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 0.02)
     // additional motors that copy the main
     private val flywheel2 = KSimulatedESC(32).apply { follow(flywheelMaster) }
 
@@ -71,9 +78,13 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         kP = 10.0
         kD = 2.0
         motorType = DCMotor.getNeo550(2)
+        val system = flywheelSystem(0.00001)
+        stateSpaceControl(system, 3.0, 0.01, 8.0)
+        setupSim(system)
     }
     private val topFollower = KSimulatedESC(34).apply {
         follow(topShooter)
+        reversed = true
     }
 
     init {
@@ -96,8 +107,8 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     override fun simUpdate(dt: Time) {
-        flywheelControl.simUpdate(dt)
+//        flywheelControl.simUpdate(dt)
         hood.simPosition = hood.positionSetpoint
-        topShooter.simVelocity = topShooter.velocitySetpoint
+//        topShooter.simVelocity = topShooter.velocitySetpoint
     }
 }

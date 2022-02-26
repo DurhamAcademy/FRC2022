@@ -66,8 +66,8 @@ interface Debug {
                 is Debug -> sendMapToDashboard((info.value as Debug).debugValues(), path)
                 is Map<*, *> -> sendMapToDashboard(info.value as Map<String, Any?>, path)
                 is NTSendable -> SmartDashboard.putData(path, info.value as NTSendable)
-//                is Angle -> SmartDashboard.putNumber(path, (info.value as Angle).degrees)
-//                is KUnit<*> -> SmartDashboard.putNumber(path, info.value as Double)
+                is Angle -> SmartDashboard.putNumber(path + " (degrees)", (info.value as Angle).degrees)
+                is KUnit<*> -> SmartDashboard.putNumber(path + " (${(info.value as KUnit<*>).units.replace("/", " per ")})", (info.value as KUnit<*>).value)
                 else -> SmartDashboard.putString(path, info.value.toString())
             }
         }

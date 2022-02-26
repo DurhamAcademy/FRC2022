@@ -3,14 +3,11 @@ package frc.robot.subsystems
 import edu.wpi.first.math.controller.ArmFeedforward
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.wpilibj.PneumaticsModuleType
-import edu.wpi.first.wpilibj.Solenoid
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.Constants
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.Time
@@ -19,9 +16,10 @@ import frc.kyberlib.math.units.extensions.inches
 import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KSimulatedESC
-import frc.kyberlib.motorcontrol.rev.KSparkMax
+import frc.kyberlib.pneumatics.KSolenoid
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
+import frc.robot.Constants
 import kotlin.math.absoluteValue
 
 /**
@@ -41,8 +39,8 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     var status = CLIMBER_STATUS.IDLE
 
     // pneumatics that lift the climb arms
-    private val leftArmLift = Solenoid(PneumaticsModuleType.CTREPCM, 0)
-    private val rightArmLift = Solenoid(PneumaticsModuleType.CTREPCM, 1)
+    private val leftArmLift = KSolenoid(0, fake = true)
+    private val rightArmLift = KSolenoid(1, fake = true)
 
     private val armFF = ArmFeedforward(3.0, 2.0, 5.0, 8.0)
     val leftExtendable = KSimulatedESC(40).apply {
@@ -94,10 +92,10 @@ object Climber : SubsystemBase(), Debug, Simulatable {
 
     // public variable to get/set whether the arms are lifted
     var staticsLifted
-        get() = false//leftArmLift.get()
+        get() = leftArmLift.extended
         set(value) {
-//            leftArmLift.set(value)
-//            rightArmLift.set(value)
+            leftArmLift.extended = value
+            rightArmLift.extended = value
         }
     var extendableAngle
         get() = leftExtendable.position

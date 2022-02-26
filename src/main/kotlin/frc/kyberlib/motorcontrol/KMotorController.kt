@@ -1,5 +1,7 @@
 package frc.kyberlib.motorcontrol
 
+import edu.wpi.first.math.Matrix
+import edu.wpi.first.math.Nat
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.*
 import edu.wpi.first.math.estimator.KalmanFilter
@@ -169,7 +171,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
 
     /**
      * Used to create builtin functions for angular position sheet.
-     * @exception WhyFuckingLinear you should not have linear controlled arm.
      */
     fun addFeedforward(feedforward: ArmFeedforward) {
         customControl = {
@@ -605,11 +606,29 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         if(!motorConfigured) throw MotorUnconfigured
         return LinearSystemId.createSingleJointedArmSystem(motorType, momentOfInertia, gearRatio)
     }
+    fun armSystem(armFeedforward: ArmFeedforward): LinearSystem<N2, N1, N1> {
+        if(!motorConfigured) throw MotorUnconfigured
+        val motor = motorType!!
+        return LinearSystem(  // todo: check if this works
+            // a
+            Matrix.mat(N2.instance, N2.instance).fill(0.0, 1.0, 0.0, -armFeedforward.kv/armFeedforward.ka),
+            // b
+            VecBuilder.fill(0.0, 1.0 / armFeedforward.ka),
+            // c
+            Matrix.mat(Nat.N1(), Nat.N2()).fill(1.0, 0.0),
+            // d
+            Matrix(Nat.N1(), Nat.N1())
+        )
+    }
     fun drivetrainSystem(ff: SimpleMotorFeedforward, kvAngular: Double, kaAngular: Double, trackWidth: Length = 2.meters): LinearSystem<N2, N2, N2> {
         if(!motorConfigured) throw MotorUnconfigured
         return LinearSystemId.identifyDrivetrainSystem(ff.kv, ff.ka, kvAngular, kaAngular, trackWidth.meters)
     }
-    fun customSystem() {}  // todo: allow for generation based on formula
+    fun estimateFF(momentOfInertia: Double){
+        val ka = (motorType!!.rOhms * momentOfInertia) / (gearRatio * motorType!!.KtNMPerAmp)
+        val kv = -gearRatio * gearRatio * motorType!!.KtNMPerAmp / (motorType!!.KvRadPerSecPerVolt * motorType!!.rOhms * momentOfInertia) * -ka
+        println("kv: $kv, ka: $ka")
+    }
 
     var torque: Double
         get() {
@@ -621,7 +640,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             voltage = motorType!!.rOhms / (value/motorType!!.KtNMPerAmp + 1.0/motorType!!.KvRadPerSecPerVolt / motorType!!.rOhms * velocity.radiansPerSecond)
         }
 
-    // velocity system
     @JvmName("velocityStateSpaceControl")
     fun stateSpaceControl(loop: LinearSystemLoop<N1, N1, N1>, timeDelay: Time=0.02.seconds) {
         customControl = {
@@ -662,74 +680,105 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         }
     }
     @JvmName("velocityStateSpaceControl")
-    fun stateSpaceControl(plant: LinearSystem<N1, N1, N1>, modelAccuracy: Double, measurementAccuracy: Double, errorCost: Double, inputCost: Double=12.0, timeDelay: Time=0.02.seconds) { stateSpaceControl(systemLoop(plant, modelAccuracy, measurementAccuracy, errorCost, inputCost, timeDelay)) }
+    fun stateSpaceControl(plant: LinearSystem<N1, N1, N1>, modelAccuracy: Double, measurementAccuracy: Double, errorCost: Double, inputCost: Double=12.0, timeDelay: Time=0.02.seconds) { stateSpaceControl(StateSpace.systemLoop(plant, modelAccuracy, measurementAccuracy, errorCost, inputCost, timeDelay)) }
     @JvmName("positionStateSpaceControl")
-    fun stateSpaceControl(plant: LinearSystem<N2, N1, N1>, modelAccuracy: Double, measurementAccuracy: Double, positionErrorCost: Double, velocityErrorCost: Double, inputCost: Double=12.0, timeDelay: Time=0.02.seconds) { stateSpaceControl(systemLoop(plant, modelAccuracy, measurementAccuracy, positionErrorCost, velocityErrorCost, inputCost, timeDelay)) }
+    fun stateSpaceControl(plant: LinearSystem<N2, N1, N1>, modelAccuracy: Double, measurementAccuracy: Double, positionErrorCost: Double, velocityErrorCost: Double, inputCost: Double=12.0, timeDelay: Time=0.02.seconds) { stateSpaceControl(StateSpace.systemLoop(plant, modelAccuracy, measurementAccuracy, positionErrorCost, velocityErrorCost, inputCost, timeDelay)) }
     @JvmName("dualStateSpaceControl")
-    fun stateSpaceControl(plant: LinearSystem<N2, N1, N2>, modelAccuracy: Double, measurementAccuracy: Double, positionErrorCost: Double, velocityErrorCost: Double, inputCost: Double=12.0, timeDelay: Time=0.02.seconds) { stateSpaceControl(systemLoop(plant, modelAccuracy, measurementAccuracy, positionErrorCost, velocityErrorCost, inputCost, timeDelay)) }
-    @JvmName("velocitySystemLoop")
-    fun systemLoop(plant: LinearSystem<N1, N1, N1>,
-                          modelAccuracy: Double, measurementAccuracy: Double,
-                          errorCost: Double,
-                          inputCost: Double=12.0,
-                          timeDelay: Time=0.02.seconds): LinearSystemLoop<N1, N1, N1> {
-        val observer: KalmanFilter<N1, N1, N1> = KalmanFilter(
-            N1.instance, N1.instance,
-            plant,
-            VecBuilder.fill(modelAccuracy),  // How accurate we think our model is
-            VecBuilder.fill(measurementAccuracy),  // How accurate we think our encoder
-            timeDelay.seconds
-        )
-        val optimizer = LinearQuadraticRegulator(
-            plant,
-            VecBuilder.fill(errorCost),  // q-elms. Velocity error tolerance, in radians per second.
-            VecBuilder.fill(inputCost),  // r-elms. 12 cause max battery voltage
-            timeDelay.seconds  // estimated loop time. 0.020 for TimedRobot, but lower if using notifiers.
-        )
-        return LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds)
-    }
-    @JvmName("positionSystemLoop")
-    // position systems
-    fun systemLoop(plant: LinearSystem<N2, N1, N1>,
-                          modelAccuracy: Double, measurementAccuracy: Double,
-                          positionErrorCost: Double, velocityErrorCost: Double,
-                          inputCost: Double=12.0,
-                          timeDelay: Time=0.02.seconds): LinearSystemLoop<N2, N1, N1> {
-        val observer: KalmanFilter<N2, N1, N1> = KalmanFilter(
-            N2.instance, N1.instance,
-            plant,
-            VecBuilder.fill(modelAccuracy, modelAccuracy),  // How accurate we think our model is
-            VecBuilder.fill(measurementAccuracy),  // How accurate we think our encoder
-            timeDelay.seconds
-        )
-        val optimizer = LinearQuadraticRegulator(
-            plant,
-            VecBuilder.fill(positionErrorCost, velocityErrorCost),  // q-elms. Velocity error tolerance, in radians per second.
-            VecBuilder.fill(inputCost),  // r-elms. 12 cause max battery voltage
-            timeDelay.seconds  // estimated loop time. 0.020 for TimedRobot, but lower if using notifiers.
-        )
-        return LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds)
-    }
-    @JvmName("dualSystemLoop")
-    fun systemLoop(plant: LinearSystem<N2, N1, N2>,
-                          modelAccuracy: Double, measurementAccuracy: Double,
-                          positionErrorCost: Double, velocityErrorCost: Double,
-                          inputCost: Double=12.0,
-                          timeDelay: Time=0.02.seconds): LinearSystemLoop<N2, N1, N2> {
-        val observer: KalmanFilter<N2, N1, N2> = KalmanFilter(
-            N2.instance, N2.instance,
-            plant,
-            VecBuilder.fill(modelAccuracy, modelAccuracy),  // How accurate we think our model is
-            VecBuilder.fill(measurementAccuracy, measurementAccuracy),  // How accurate we think our encoder
-            timeDelay.seconds
-        )
-        val optimizer = LinearQuadraticRegulator(
-            plant,
-            VecBuilder.fill(positionErrorCost, velocityErrorCost),  // q-elms. Velocity error tolerance, in radians per second.
-            VecBuilder.fill(inputCost),  // r-elms. 12 cause max battery voltage
-            timeDelay.seconds  // estimated loop time. 0.020 for TimedRobot, but lower if using notifiers.
-        )
-        return LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds)
+    fun stateSpaceControl(plant: LinearSystem<N2, N1, N2>, modelAccuracy: Double, measurementAccuracy: Double, positionErrorCost: Double, velocityErrorCost: Double, inputCost: Double=12.0, timeDelay: Time=0.02.seconds) { stateSpaceControl(StateSpace.systemLoop(plant, modelAccuracy, measurementAccuracy, positionErrorCost, velocityErrorCost, inputCost, timeDelay)) }
+
+    object StateSpace {
+        @JvmName("velocityObserver")
+        fun observer(plant: LinearSystem<N1, N1, N1>, modelAccuracy: Double, measurementAccuracy: Double, timeDelay: Time=0.02.seconds): KalmanFilter<N1, N1, N1> {
+            return KalmanFilter(
+                N1.instance, N1.instance,
+                plant,
+                VecBuilder.fill(modelAccuracy),  // How accurate we think our model is
+                VecBuilder.fill(measurementAccuracy),  // How accurate we think our encoder
+                timeDelay.seconds
+            )
+
+        }
+        @JvmName("positionObserver")
+        fun observer(plant: LinearSystem<N2, N1, N1>, modelAccuracy: Double, measurementAccuracy: Double, timeDelay: Time=0.02.seconds): KalmanFilter<N2, N1, N1> {
+            return KalmanFilter(
+                N2.instance, N1.instance,
+                plant,
+                VecBuilder.fill(modelAccuracy, modelAccuracy),  // How accurate we think our model is
+                VecBuilder.fill(measurementAccuracy),  // How accurate we think our encoder
+                timeDelay.seconds
+            )
+
+        }
+        @JvmName("dualObserver")
+        fun observer(plant: LinearSystem<N2, N1, N2>, modelAccuracy: Double, measurementAccuracy: Double, timeDelay: Time=0.02.seconds): KalmanFilter<N2, N1, N2> {
+            return KalmanFilter(
+                N2.instance, N2.instance,
+                plant,
+                VecBuilder.fill(modelAccuracy, modelAccuracy),  // How accurate we think our model is
+                VecBuilder.fill(measurementAccuracy, measurementAccuracy),  // How accurate we think our encoder
+                timeDelay.seconds
+            )
+
+        }
+
+        @JvmName("velocityOptimizer")
+        fun optimizer(plant: LinearSystem<N1, N1, N1>, velocityTolerance: Double, voltageTolerance: Double=12.0, timeDelay: Time=0.02.seconds): LinearQuadraticRegulator<N1, N1, N1> {
+            return LinearQuadraticRegulator(
+                plant,
+                VecBuilder.fill(velocityTolerance),  // q-elms. Velocity error tolerance, in radians per second.
+                VecBuilder.fill(voltageTolerance),  // r-elms. 12 cause max battery voltage
+                timeDelay.seconds  // estimated loop time. 0.020 for TimedRobot, but lower if using notifiers.
+            )
+        }
+        @JvmName("positionOptimizer")
+        fun optimizer(plant: LinearSystem<N2, N1, N1>, velocityTolerance: Double, positionTolerance: Double, voltageTolerance: Double=12.0, timeDelay: Time=0.02.seconds): LinearQuadraticRegulator<N2, N1, N1> {
+            return LinearQuadraticRegulator(
+                plant,
+                VecBuilder.fill(positionTolerance, velocityTolerance),  // q-elms. Velocity error tolerance, in radians per second.
+                VecBuilder.fill(voltageTolerance),  // r-elms. 12 cause max battery voltage
+                timeDelay.seconds  // estimated loop time. 0.020 for TimedRobot, but lower if using notifiers.
+            )
+        }
+        @JvmName("dualOptimizer")
+        fun optimizer(plant: LinearSystem<N2, N1, N2>, velocityTolerance: Double, positionTolerance: Double, voltageTolerance: Double=12.0, timeDelay: Time=0.02.seconds): LinearQuadraticRegulator<N2, N1, N2> {
+            return LinearQuadraticRegulator(
+                plant,
+                VecBuilder.fill(positionTolerance, velocityTolerance),  // q-elms. Velocity error tolerance, in radians per second.
+                VecBuilder.fill(voltageTolerance),  // r-elms. 12 cause max battery voltage
+                timeDelay.seconds  // estimated loop time. 0.020 for TimedRobot, but lower if using notifiers.
+            )
+        }
+
+        @JvmName("velocitySystemLoop")
+        fun systemLoop(plant: LinearSystem<N1, N1, N1>,
+                       modelAccuracy: Double, measurementAccuracy: Double,
+                       velocityTolerance: Double,
+                       voltageTolerance: Double=12.0,
+                       timeDelay: Time=0.02.seconds): LinearSystemLoop<N1, N1, N1> {
+            val kalman = observer(plant, modelAccuracy, measurementAccuracy, timeDelay)
+            val lqr = optimizer(plant, velocityTolerance, voltageTolerance, timeDelay)
+            return LinearSystemLoop(plant, lqr, kalman, Game.batteryVoltage, timeDelay.seconds)
+        }
+        @JvmName("positionSystemLoop")
+        fun systemLoop(plant: LinearSystem<N2, N1, N1>,
+                       modelAccuracy: Double, measurementAccuracy: Double,
+                       positionErrorCost: Double, velocityErrorCost: Double,
+                       inputCost: Double=12.0,
+                       timeDelay: Time=0.02.seconds): LinearSystemLoop<N2, N1, N1> {
+            val observer = observer(plant, modelAccuracy, measurementAccuracy, timeDelay)
+            val optimizer = optimizer(plant, positionErrorCost, velocityErrorCost, inputCost, timeDelay)
+            return LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds)
+        }
+        @JvmName("dualSystemLoop")
+        fun systemLoop(plant: LinearSystem<N2, N1, N2>,
+                       modelAccuracy: Double, measurementAccuracy: Double,
+                       positionErrorCost: Double, velocityErrorCost: Double,
+                       inputCost: Double=12.0,
+                       timeDelay: Time=0.02.seconds): LinearSystemLoop<N2, N1, N2> {
+            val observer = observer(plant, modelAccuracy, measurementAccuracy, timeDelay)
+            val optimizer = optimizer(plant, positionErrorCost, velocityErrorCost, inputCost, timeDelay)
+            return LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds)
+        }
     }
 }
 

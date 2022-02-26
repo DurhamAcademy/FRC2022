@@ -28,8 +28,8 @@ object Drive : CommandBase() {
      * Get xbox inputs and drive corresponding values
      */
     override fun execute() {
-        val fwd = RobotContainer.controller.leftY.value.feetPerSecond
-        val turn = RobotContainer.controller.rightX.value.radiansPerSecond
+        val fwd = RobotContainer.controlScheme.DRIVE_FORWARD.feetPerSecond
+        val turn = RobotContainer.controlScheme.DRIVE_TURN.radiansPerSecond
         val speeds = ChassisSpeeds(velFilter.calculate(fwd.metersPerSecond), 0.0, rotFilter.calculate(turn.radiansPerSecond))
         Debug.log("Default Drive", "fwd: $fwd, turn: $turn", level=DebugLevel.LowPriority)
         Drivetrain.drive(speeds)

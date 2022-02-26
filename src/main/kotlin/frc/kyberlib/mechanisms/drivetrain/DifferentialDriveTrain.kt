@@ -35,6 +35,11 @@ abstract class DifferentialDriveTrain: SubsystemBase(), Simulatable,
     abstract val leftMaster: KMotorController
     abstract val rightMaster: KMotorController
     abstract val trackWidth: Length
+    abstract val ks: Double
+    abstract val kv: Double
+    abstract val ka: Double
+    abstract val kvAngular: Double
+    abstract val kaAngular: Double
 
     // control values
     private val odometry = DifferentialDriveOdometry(0.degrees)
