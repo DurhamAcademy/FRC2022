@@ -1,6 +1,7 @@
 package frc.kyberlib.input.controller
 
 import edu.wpi.first.wpilibj.GenericHID
+import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import frc.kyberlib.input.KAxis
 import frc.kyberlib.input.KController
@@ -29,6 +30,14 @@ class KXboxController(port: Int) : KController(port), Debug {
 
     val leftTrigger = KAxis { joystick.getRawAxis(2) }
     val rightTrigger = KAxis { joystick.getRawAxis(3) }
+
+    val pressedLeftStick = JoystickButton(joystick, 9)
+    val pressedRightStick = JoystickButton(joystick, 10)
+
+    // todo: check these
+    val leftMenu = JoystickButton(joystick, 7)
+    val rightMenu = JoystickButton(joystick, 8)
+    val share = JoystickButton(joystick, 11)
 
     private val DPad
         get() = joystick.pov  // up = 0, 45º increments clockwise, none = -1

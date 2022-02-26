@@ -86,7 +86,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     init {
-        defaultCommand = Shoot
+//        defaultCommand = Shoot
         if(Game.sim) Simulation.instance.include(this)
     }
 

@@ -18,7 +18,7 @@ public enum class CONVEYOR_STATUS {
  */
 object Conveyor : SubsystemBase(), Debug {
     init {
-        println("Conveyor")
+        log("init")
     }
     var status = CONVEYOR_STATUS.FULL_GOOD
     

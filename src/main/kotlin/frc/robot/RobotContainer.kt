@@ -4,13 +4,16 @@ import edu.wpi.first.wpilibj.DigitalInput
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
-import frc.robot.commands.Intake
+import frc.robot.commands.Emote
+import frc.robot.commands.intake.Intake
 import frc.robot.commands.climb.Climb
-import frc.robot.commands.climb.ToggleArmLift
-import frc.robot.commands.climb.auto.fullAutoClimb
+import frc.robot.commands.shooter.ForceShoot
+import frc.robot.commands.shooter.Shoot
+import frc.robot.commands.turret.LockTurret
+import frc.robot.controls.ControlSchema2022
+import frc.robot.controls.DefaultControls
 import frc.robot.subsystems.*
 import org.photonvision.PhotonCamera
-import kotlin.math.PI
 
 /**
  * Contains all Robot subsystems and sensors
@@ -23,27 +26,17 @@ object RobotContainer {
 
     val navigation = Navigator(gyro, Constants.START_POSE)
 
-    val controller = KXboxController(0).apply {
-        // steering
-        rightX.apply {
-            maxVal = -5 * PI
-            expo = 73.0
-            deadband = 0.1
-        }
+    val controller = KXboxController(0)
 
-        // throttle
-        leftY.apply {
-            maxVal = -12.0
-            expo = 20.0
-            deadband = 0.2
-        }
-
-        leftTrigger.activateAt(0.5).whileActiveOnce(Intake)
-//        leftBumper.whileActiveOnce(Flush)
-//
-        yButton.toggleWhenActive(fullAutoClimb)
-        aButton.toggleWhenActive(Climb)
-        bButton.whileActiveOnce(ToggleArmLift())
+    val controlScheme: ControlSchema2022 = DefaultControls.apply {
+        INTAKE.whileActiveOnce(Intake)
+        SHOOT.whileActiveOnce(Shoot)  //  todo: edit to make manual
+        FORCE_SHOT.whileActiveOnce(ForceShoot)
+        EJECT.whileActiveOnce(Intake)
+        FLUSH.whileActiveOnce(Intake)
+        LOCK_TURRET.toggleWhenActive(LockTurret)
+        CLIMB_MODE.toggleWhenActive(Climb)
+        EMOTE.whileActiveOnce(Emote)
     }
 
 //    val leds = KLEDStrip(0, 103).apply {
