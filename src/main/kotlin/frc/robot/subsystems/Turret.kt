@@ -7,10 +7,8 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.TrapezoidProfile
-import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
-import frc.kyberlib.command.LogMode
+import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.units.extensions.Angle
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.k
@@ -18,12 +16,10 @@ import frc.kyberlib.math.units.extensions.radiansPerSecond
 import frc.kyberlib.math.units.towards
 import frc.kyberlib.motorcontrol.KMotorController.StateSpace.systemLoop
 import frc.kyberlib.motorcontrol.KSimulatedESC
-import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.commands.turret.AimTurret
-import frc.robot.commands.turret.SeekTurret
 import org.photonvision.targeting.PhotonPipelineResult
 import org.photonvision.targeting.PhotonTrackedTarget
 
@@ -39,7 +35,7 @@ enum class TURRET_STATUS {
 /**
  * Controls the turret
  */
-object Turret : SubsystemBase(), Debug {
+object Turret : KSubsystem() {
     init {
         log("init")
     }

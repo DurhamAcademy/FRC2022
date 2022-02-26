@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
+import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.PolarPose
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.polar
@@ -37,7 +38,7 @@ import frc.robot.commands.drive.Drive
 /**
  * Mechanism that controls how the robot drives
  */
-object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
+object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
     // motors
     val leftMaster = KSparkMax(10, BrushType.BRUSHLESS).apply {
         identifier = "leftMaster"

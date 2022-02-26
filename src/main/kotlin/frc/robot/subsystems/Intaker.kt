@@ -1,21 +1,15 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.wpilibj2.command.SubsystemBase
-import edu.wpi.first.wpilibj.PneumaticsModuleType
-import edu.wpi.first.wpilibj.Solenoid
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.command.Debug
-import frc.kyberlib.math.units.extensions.inches
-import frc.kyberlib.math.units.extensions.radiansPerSecond
-import frc.kyberlib.motorcontrol.KSimulatedESC
+import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.pneumatics.KSolenoid
 
 /**
  * Controls the intake mechanism of the robot
  */
-object Intaker  : SubsystemBase(), Debug {
+object Intaker : KSubsystem(), Debug {
     init {
         log("init")
     }

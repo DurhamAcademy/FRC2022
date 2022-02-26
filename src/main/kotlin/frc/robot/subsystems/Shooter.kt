@@ -1,26 +1,20 @@
 package frc.robot.subsystems
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.wpilibj.Notifier
-import edu.wpi.first.wpilibj.Servo
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.Constants
-import frc.robot.RobotContainer
-import frc.robot.commands.shooter.Shoot
-import frc.robot.subsystems.Turret.targetVisible
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.mechanisms.Flywheel
 import frc.kyberlib.motorcontrol.KMotorController
-import frc.kyberlib.motorcontrol.rev.KSparkMax
-import frc.kyberlib.motorcontrol.KServo
 import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
+import frc.robot.Constants
+import frc.robot.RobotContainer
+import frc.robot.subsystems.Turret.targetVisible
 
 
 /**
@@ -34,10 +28,7 @@ enum class SHOOTER_STATUS {  // todo: make sure these are used
 /**
  * Encapsulates all the things relevant to shooting the ball
  */
-object Shooter : SubsystemBase(), Debug, Simulatable {
-    init {
-        log("Shooter")
-    }
+object Shooter : KSubsystem(), Simulatable {
     var status = SHOOTER_STATUS.IDLE
 
     // main motor attached to the flywheel

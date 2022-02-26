@@ -5,6 +5,7 @@ import edu.wpi.first.networktables.NTSendable
 import edu.wpi.first.networktables.NTSendableBuilder
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.seconds
 
@@ -12,6 +13,15 @@ import frc.kyberlib.math.units.extensions.seconds
  * A basic motor controller. No closed-loop control
  */
 abstract class KBasicMotorController : NTSendable, Debug {
+    companion object {
+        val allMotors = mutableListOf<KBasicMotorController>()
+    }
+    init {
+        run {
+            KSubsystem.active?.addMotor(this)
+            allMotors.add(this)
+        }
+    }
     protected val followPeriodic = 0.005.seconds
     var controlMode = ControlMode.NULL
     // ------ configs ----- //
@@ -65,13 +75,14 @@ abstract class KBasicMotorController : NTSendable, Debug {
      */
     protected abstract var rawPercent: Double
 
+    var maxVoltage = 13.0
     /**
      * Sets controller voltage directly
      */
     var voltage: Double
         get() = percent * vbus
         set(value) {
-            val norm = value.coerceIn(-vbus , vbus)
+            val norm = value.coerceIn(-vbus , vbus).coerceIn(-maxVoltage, maxVoltage)
             percent = (norm / vbus)
         }
 

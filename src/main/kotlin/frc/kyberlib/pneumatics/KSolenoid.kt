@@ -6,8 +6,12 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType
 import edu.wpi.first.wpilibj.Solenoid
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.KSubsystem
 
 class KSolenoid(port: Int, type: PneumaticsModuleType = PneumaticsModuleType.CTREPCM, private val fake: Boolean = false) : Debug, NTSendable {
+    init {
+        KSubsystem.active?.addSolenoid(this)
+    }
     override val identifier: String = "Pneumatic$port"
     val solenoid = Solenoid(type, port)
     var extended: Boolean = false
