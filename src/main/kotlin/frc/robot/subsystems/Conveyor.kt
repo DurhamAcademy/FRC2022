@@ -7,6 +7,7 @@ import frc.kyberlib.math.units.extensions.rotationsPerSecond
 import frc.kyberlib.math.units.extensions.rpm
 import frc.kyberlib.motorcontrol.BrushType
 import frc.kyberlib.motorcontrol.KSimulatedESC
+import frc.robot.commands.intake.Idle
 
 /**
  * State of the hopper. Used for LEDs and other dependencies
@@ -26,7 +27,7 @@ object Conveyor : SubsystemBase(), Debug {
 
     val ConveyorMotor = KSparkMax(21, BrushType.BRUSHLESS).apply {
         identifier = "conveyor"
-        reversed = false
+        reversed = true
         currentLimit = 20 // @Everett: this motor has a current limit of 20 because it goes into the smaller breaker
         gearRatio = 1/5.0
     }
@@ -54,6 +55,10 @@ object Conveyor : SubsystemBase(), Debug {
         ConveyorMotor.velocity = 1.rotationsPerSecond
         ConveyorMotor.maxAcceleration = 0.1.rotationsPerSecond
         // consider having the feeder motor idle backwards to prevent balls getting up ot the flywheel
+    }
+
+    init {
+        defaultCommand = Idle
     }
 
     override fun periodic() {

@@ -41,13 +41,13 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     // motors
     val leftMaster = KSparkMax(10, BrushType.BRUSHLESS).apply {
         identifier = "leftMaster"
-        reversed = false
+        reversed = true
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
     val rightMaster  = KSparkMax(12, BrushType.BRUSHLESS).apply {
         identifier = "rightMaster"
-        reversed = true
+        reversed = false
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }

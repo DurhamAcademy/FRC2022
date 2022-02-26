@@ -2,6 +2,7 @@ package frc.robot.subsystems
 
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.filter.MedianFilter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.system.plant.DCMotor
@@ -21,6 +22,7 @@ import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
 import frc.robot.RobotContainer
+import frc.robot.commands.turret.AimTurret
 import frc.robot.commands.turret.SeekTurret
 import org.photonvision.targeting.PhotonPipelineResult
 import org.photonvision.targeting.PhotonTrackedTarget
@@ -44,17 +46,18 @@ object Turret : SubsystemBase(), Debug {
     var status = TURRET_STATUS.LOST
 
     // characterization of the turret
-    private val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
+    private val feedforward = SimpleMotorFeedforward(0.94765, 1.2215, 0.05002)
+    val visionFilter = MedianFilter(8)
     // actual turret motors
-    val turret = KSparkMax(30).apply {
-        kP = 0.1
-        kD = .0
+    val turret = KSimulatedESC(30).apply {
+        kP = 0.0
+        kD = 0.0
         gearRatio = Constants.TURRET_GEAR_RATIO
         motorType = DCMotor.getNeo550(1)
-        val loop = systemLoop(positionSystem(feedforward), 3.0, 0.01, 3.degrees.radians, 10.0)
+        val loop = systemLoop(positionSystem(feedforward), 3.0, 0.1, 3.degrees.radians, 10.0)
 
         // fancy control
-        val offsetCorrector = ProfiledPIDController(30.00, 0.0, 5.0, TrapezoidProfile.Constraints(12.0, 4.0)).apply { 
+        val offsetCorrector = ProfiledPIDController(0.3, 0.0, 0.0, TrapezoidProfile.Constraints(12.0, 4.0)).apply {
             setTolerance(Constants.TURRET_DEADBAND.radians)
             setIntegratorRange(-1.0, 1.0)
          }
@@ -64,7 +67,7 @@ object Turret : SubsystemBase(), Debug {
             val chassisComp = Drivetrain.chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond
             val setpoint = clampSafePosition(it.positionSetpoint)
             val offsetCorrection = offsetCorrector.calculate((it.position - setpoint).radians).radiansPerSecond
-            val targetVelocity = offsetCorrection - chassisComp - movementComp
+            val targetVelocity = -offsetCorrection - chassisComp * 0.0 - movementComp * 0.0
             val velocityError = it.velocity - targetVelocity
             val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(velocityError.radiansPerSecond)
             voltage
@@ -81,8 +84,8 @@ object Turret : SubsystemBase(), Debug {
         }
 
     init {
-//        defaultCommand = SeekTurret
-        log("SeekTurret as default is off until built", logMode = LogMode.WARN)
+        defaultCommand = AimTurret
+//        log("SeekTurret as default is off until built", logMode = LogMode.WARN)
     }
 
     /**
@@ -109,8 +112,10 @@ object Turret : SubsystemBase(), Debug {
         get() = if(targetVisible) latestResult!!.bestTarget else null
 
     val visionOffset: Angle?
-        get() = if (Game.real) target?.yaw?.degrees
-                else (RobotContainer.navigation.position.towards(Constants.HUB_POSITION) - fieldRelativeAngle).k
+        get() = if (Game.real) {
+//            println(target)
+            target?.yaw?.let { visionFilter.calculate(it).degrees }
+        } else (RobotContainer.navigation.position.towards(Constants.HUB_POSITION) - fieldRelativeAngle).k
     val visionPitch: Angle?
         get() = target?.pitch?.degrees
 

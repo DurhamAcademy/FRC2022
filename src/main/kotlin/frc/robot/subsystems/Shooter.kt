@@ -94,7 +94,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     override fun periodic() {
-        debugDashboard()
+//        debugDashboard()
     }
 
     override fun debugValues(): Map<String, Any?> {

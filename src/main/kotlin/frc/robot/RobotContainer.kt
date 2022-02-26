@@ -39,7 +39,7 @@ object RobotContainer {
         setDefaultOption("Default", DefaultControls)
         addOption("RocketLeague", RocketLeague)
     }
-    val controlScheme = schemaChooser.selected!!.apply {
+    val controlScheme = RocketLeague.apply {
         INTAKE.whileActiveOnce(Intake)
         SHOOT.whileActiveOnce(Shoot)  //  todo: edit to make manual
         FORCE_SHOT.whileActiveOnce(ForceShoot)

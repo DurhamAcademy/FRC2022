@@ -49,6 +49,7 @@ object AimTurret : CommandBase() {
             Turret.fieldRelativeAngle = Turret.fieldRelativeAngle + goalOrientation
         }
         else {
+            Turret.turret.stop()
             notFoundTimer.start()
             // wait for awhile to make sure the target is lost
             if (notFoundTimer.hasElapsed(Constants.NOT_FOUND_WAIT)) {

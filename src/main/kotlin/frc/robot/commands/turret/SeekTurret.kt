@@ -43,7 +43,8 @@ object SeekTurret : CommandBase() {
             acquisitionTimer.reset()
 
             // spins menacingly
-            Turret.fieldRelativeAngle = (Turret.fieldRelativeAngle + 5.degrees).k
+            Turret.turret.stop()
+//            Turret.fieldRelativeAngle = (Turret.fieldRelativeAngle + 5.degrees).k
         }
 
         // if you are sure you see the target
