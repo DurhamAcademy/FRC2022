@@ -5,8 +5,8 @@ import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.command.Debug
 import frc.kyberlib.math.units.extensions.rotationsPerSecond
 import frc.kyberlib.math.units.extensions.rpm
+import frc.kyberlib.motorcontrol.BrushType
 import frc.kyberlib.motorcontrol.KSimulatedESC
-import frc.kyberlib.motorcontrol.MotorType
 
 /**
  * State of the hopper. Used for LEDs and other dependencies
@@ -24,18 +24,22 @@ object Conveyor : SubsystemBase(), Debug {
         log("init")
     }
 
-    //FIXME: - change id
-    val ConveyorMotor = KSparkMax(10, MotorType.BRUSHLESS).apply {
+    val ConveyorMotor = KSparkMax(21, BrushType.BRUSHLESS).apply {
         identifier = "conveyor"
         reversed = false
-        currentLimit = 40 //FIXME: - is this correct?
+        currentLimit = 20 // @Everett: this motor has a current limit of 20 because it goes into the smaller breaker
         gearRatio = 1/5.0
     }
+
+    // @Everett: this is probably deprecated since we dont have color sensors
     var status = CONVEYOR_STATUS.FULL_GOOD // FIXME: NO! bad named variable
 
-    val indexer = KSimulatedESC(21)
-    val feeder = KSimulatedESC(22)
+    val feeder = KSparkMax(22).apply {
+        identifier = "feeder"
+    }
 
+    // @Everett: this is probably deprecated since we dont have color sensors
+    // find usages and remove them
     val good // FIXME: NO! why pelase stop
         get() = true
 
@@ -44,15 +48,12 @@ object Conveyor : SubsystemBase(), Debug {
         ConveyorMotor.velocity = 6.rotationsPerSecond
     }
 
+    // @Everett - move this into a default command
     fun idle() {
         status = CONVEYOR_STATUS.IDLE
         ConveyorMotor.velocity = 1.rotationsPerSecond
         ConveyorMotor.maxAcceleration = 0.1.rotationsPerSecond
-    }
-
-    fun off() {
-        ConveyorMotor.brakeMode= true
-        ConveyorMotor.velocity = 0.rpm
+        // consider having the feeder motor idle backwards to prevent balls getting up ot the flywheel
     }
 
     override fun periodic() {
@@ -61,7 +62,7 @@ object Conveyor : SubsystemBase(), Debug {
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
-            "indexer" to indexer,
+            "indexer" to ConveyorMotor,
             "feeder" to feeder,
             "status" to status.name
         )
