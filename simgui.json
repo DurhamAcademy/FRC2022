@@ -37,6 +37,8 @@
       "/LiveWindow/WpiSubsystem/Shooter": "Subsystem",
       "/LiveWindow/WpiSubsystem/Turret": "Subsystem",
       "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/SendableChooser[0]": "String Chooser",
+      "/SmartDashboard/SendableChooser[1]": "String Chooser",
       "/SmartDashboard/climb sim": "Mechanism2d"
     },
     "windows": {
@@ -79,8 +81,7 @@
         "Climber": {
           "open": true
         }
-      },
-      "open": true
+      }
     },
     "SmartDashboard": {
       "Climber": {
@@ -109,6 +110,9 @@
         "intake": {
           "open": true
         }
+      },
+      "SendableChooser[0]": {
+        "open": true
       },
       "Shooter": {
         "flywheel": {

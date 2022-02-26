@@ -1,7 +1,7 @@
 {
   "MainWindow": {
     "GLOBAL": {
-      "height": "768",
+      "height": "900",
       "maximized": "0",
       "style": "0",
       "userScale": "2",
@@ -54,7 +54,7 @@
     "###Joysticks": {
       "Collapsed": "1",
       "Pos": "334,19",
-      "Size": "796,172"
+      "Size": "436,125"
     },
     "###Keyboard 1 Settings": {
       "Collapsed": "1",
@@ -99,7 +99,7 @@
     "###System Joysticks": {
       "Collapsed": "1",
       "Pos": "115,31",
-      "Size": "192,218"
+      "Size": "111,152"
     },
     "###Timing": {
       "Collapsed": "1",

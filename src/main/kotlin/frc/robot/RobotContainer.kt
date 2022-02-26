@@ -3,6 +3,7 @@ package frc.robot
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.Filesystem
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.command.Debug
@@ -20,6 +21,7 @@ import frc.robot.controls.ControlSchema2022
 import frc.robot.controls.DefaultControls
 import frc.robot.controls.RocketLeague
 import frc.robot.subsystems.*
+import kotlinx.serialization.json.Json
 import org.photonvision.PhotonCamera
 
 /**
@@ -38,8 +40,9 @@ object RobotContainer {
     private val schemaChooser = SendableChooser<ControlSchema2022>().apply {
         setDefaultOption("Default", DefaultControls)
         addOption("RocketLeague", RocketLeague)
+        SmartDashboard.putData("control system", this)
     }
-    val controlScheme = RocketLeague.apply {
+    val controlScheme = DefaultControls.apply {
         INTAKE.whileActiveOnce(Intake)
         SHOOT.whileActiveOnce(Shoot)  //  todo: edit to make manual
         FORCE_SHOT.whileActiveOnce(ForceShoot)
@@ -58,7 +61,7 @@ object RobotContainer {
             for (path in KTrajectory.savedTrajectories)
                 addOption(path, KTrajectory.load(path))
         }
-
+        SmartDashboard.putData("auto", this)
     }
 
 //    val leds = KLEDStrip(0, 103).apply {
