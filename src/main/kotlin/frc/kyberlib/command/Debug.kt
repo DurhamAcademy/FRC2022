@@ -30,7 +30,7 @@ enum class DebugLevel {
 interface Debug {
     companion object {
         var debugging = true
-        var loggingLevel = DebugLevel.NORMAL
+        var loggingLevel = DebugLevel.LowPriority
 
         fun log(identifier:String, text: String, mode: LogMode = LogMode.PRINT, level: DebugLevel = DebugLevel.NORMAL, stacktrace: Boolean = false) {
             if (level < loggingLevel) return

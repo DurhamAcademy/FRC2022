@@ -32,13 +32,6 @@ class Simulation : SubsystemBase() {  // TODO: figure out the hardware tab
     val dt
         get() = time - prevTime
 
-    var chassisFF = SimpleMotorFeedforward(0.0, 0.0)
-
-    /**
-     * Takes voltage and velocity and calculates what acceleration should be
-     */
-    fun inverseFF(voltage: Double, velocity: Double): Double = ((voltage / chassisFF.ks) - chassisFF.kv * velocity) / chassisFF.ka
-
     // field to draw robot
     val field = KField2d
 

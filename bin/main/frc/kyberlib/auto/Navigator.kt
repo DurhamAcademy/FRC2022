@@ -14,6 +14,7 @@ import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.auto.trajectory.KTrajectoryConfig
 import frc.kyberlib.command.Debug
 import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.milli
 import frc.kyberlib.math.units.string
 import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.sensors.gyros.KGyro
@@ -76,9 +77,9 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
      * @param globalPosition the detected pose of the Robot
      * @param time the time of the detection
      */
-    fun update(globalPosition: Pose2d, time: Double) {  // apply global position update
+    fun update(globalPosition: Pose2d, time: Time) {  // apply global position update
         SmartDashboard.putString("global pose", globalPosition.string)
-        poseEstimator.addVisionMeasurement(globalPosition, time)
+        poseEstimator.addVisionMeasurement(globalPosition, time.seconds / 1.milli)
     }
 
     override fun debugValues(): Map<String, Any?> {

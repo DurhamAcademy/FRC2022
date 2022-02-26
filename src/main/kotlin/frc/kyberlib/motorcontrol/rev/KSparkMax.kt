@@ -39,6 +39,11 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
         }
     }
 
+    override fun checkError(): Boolean {
+        // check setCANTimeout
+        return false//_spark!!.stickyFaults
+    }
+
     override var brakeMode = false
         get() = if(real) _spark!!.idleMode == CANSparkMax.IdleMode.kBrake else field
         set(value) {

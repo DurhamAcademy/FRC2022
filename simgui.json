@@ -1,11 +1,4 @@
 {
-  "HALProvider": {
-    "PWM Outputs": {
-      "window": {
-        "visible": true
-      }
-    }
-  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -37,20 +30,21 @@
       "/LiveWindow/Ungrouped/PIDController[8]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[9]": "PIDController",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/LiveWindow/WpiSubsystem/Climber": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Conveyor": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Drivetrain": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Intaker": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Shooter": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Turret": "Subsystem",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/climb sim": "Mechanism2d"
     },
     "windows": {
-      "/LiveWindow/Ungrouped/DigitalInput[0]": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/Field": {
         "Robot": {
           "arrows": false
         },
-
+        "image": "/Users/22staples/FRC2022/Rapid React Field.png",
         "traj": {
           "arrowSize": 0,
           "arrows": false,
@@ -75,6 +69,19 @@
     }
   },
   "NetworkTables": {
+    "LiveWindow": {
+      "Ungrouped": {
+        "Solenoid[0,0]": {
+          "open": true
+        }
+      },
+      "WpiSubsystem": {
+        "Climber": {
+          "open": true
+        }
+      },
+      "open": true
+    },
     "SmartDashboard": {
       "Climber": {
         "Left Arm": {
@@ -115,9 +122,15 @@
         }
       },
       "Turret": {
-        "open": true,
         "turret": {
           "open": true
+        }
+      },
+      "backend": {
+        "Climber": {
+          "Left Arm": {
+            "open": true
+          }
         }
       },
       "open": true,

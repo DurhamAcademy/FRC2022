@@ -39,11 +39,6 @@ class KServo(port: Int) : KMotorController() {
         get() = 10
         set(value) {log("this no work on Servo", LogMode.WARN)}
 
-    override fun writePid(p: Double, i: Double, d: Double) {
-    }
-
-    override fun writeMultipler(mv: Double, mp: Double) {
-    }
 
     override fun configureEncoder(config: KEncoderConfig): Boolean {
         return true

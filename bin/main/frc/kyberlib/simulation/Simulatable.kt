@@ -1,6 +1,5 @@
 package frc.kyberlib.simulation
 
-import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.Time
 
 
@@ -13,7 +12,4 @@ interface Simulatable {
      * @param dt how long since the last update
      */
     fun simUpdate(dt: Time)
-
-    val real: Boolean
-        get() = Game.real
 }

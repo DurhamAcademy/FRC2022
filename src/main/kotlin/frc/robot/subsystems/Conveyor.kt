@@ -3,6 +3,7 @@ package frc.robot.subsystems
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.units.extensions.rotationsPerSecond
 import frc.kyberlib.math.units.extensions.rpm
 import frc.kyberlib.motorcontrol.BrushType
@@ -20,7 +21,7 @@ public enum class CONVEYOR_STATUS {
  * Controls all aspects of the hopper.
  * Waiting for design to be finalized before code is added
  */
-object Conveyor : SubsystemBase(), Debug {
+object Conveyor : KSubsystem() {
     init {
         log("init")
     }
