@@ -12,6 +12,7 @@ import frc.robot.commands.shooter.Shoot
 import frc.robot.subsystems.Turret.targetVisible
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.mechanisms.Flywheel
 import frc.kyberlib.motorcontrol.KMotorController
@@ -44,6 +45,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         identifier = "flywheel"
         radius = Constants.FLYWHEEL_RADIUS
         motorType = DCMotor.getNEO(2)
+
         val system = flywheelSystem(Constants.FLYWHEEL_MOMENT_OF_INERTIA)
         val loop = KMotorController.StateSpace.systemLoop(system, 3.0, 0.01, 3.0)
         setupSim(system)
@@ -87,6 +89,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     init {
 //        defaultCommand = Shoot
+        log("default command off", LogMode.WARN)
         if(Game.sim) Simulation.instance.include(this)
     }
 

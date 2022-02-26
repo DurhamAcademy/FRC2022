@@ -50,7 +50,7 @@
         "Robot": {
           "arrows": false
         },
-        "image": "/Users/24wilber/Documents/FRC6502/2022Robot/Rapid React Field.png",
+
         "traj": {
           "arrowSize": 0,
           "arrows": false,
@@ -219,7 +219,7 @@
     "Plot <1>": {
       "plots": [
         {
-          "height": 302,
+          "height": -29,
           "name": "Aim",
           "series": [
             {
@@ -243,7 +243,7 @@
           ]
         },
         {
-          "height": 302,
+          "height": -29,
           "name": "Movement",
           "series": [
             {
