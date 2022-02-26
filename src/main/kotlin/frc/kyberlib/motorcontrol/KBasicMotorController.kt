@@ -5,8 +5,10 @@ import edu.wpi.first.networktables.NTSendable
 import edu.wpi.first.networktables.NTSendableBuilder
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.KRobot
 import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.invertIf
+import frc.kyberlib.math.units.extensions.Time
 import frc.kyberlib.math.units.extensions.seconds
 
 /**
@@ -16,6 +18,8 @@ abstract class KBasicMotorController : NTSendable, Debug {
     companion object {
         val allMotors = mutableListOf<KBasicMotorController>()
     }
+
+    // todo: auto update with either notifier or parent KSubsystem
     init {
         run {
             KSubsystem.active?.addMotor(this)
@@ -34,8 +38,6 @@ abstract class KBasicMotorController : NTSendable, Debug {
      * Determines if the motor should run in the opposite direction
      */
     var reversed: Boolean = false
-        get() = if (real && false) rawReversed else field
-        set(value) {if (real && false) rawReversed else field = value}
 
     abstract var rawReversed: Boolean
 
@@ -61,12 +63,12 @@ abstract class KBasicMotorController : NTSendable, Debug {
     /**
      * What percent output is currently being applied?
      */
-    var percent: Double = 0.0
-        get() = if (real) rawPercent.invertIf { reversed } else field  // todo: does this compound with raw reversal
+    var percent: Double
+        get() = percentCache  // todo: does this compound with raw reversal
         set(value) {
             val adjusted = value.invertIf { reversed }
             controlMode = ControlMode.VOLTAGE
-            if (real) rawPercent = adjusted else field = adjusted
+            if (real) rawPercent = adjusted else percentCache = adjusted
         }
 
     /**
@@ -74,6 +76,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
      * Recommend using Percent because it is safer
      */
     protected abstract var rawPercent: Double
+    private var percentCache: Double = 0.0
 
     var maxVoltage = 13.0
     /**
@@ -85,6 +88,15 @@ abstract class KBasicMotorController : NTSendable, Debug {
             val norm = value.coerceIn(-vbus , vbus).coerceIn(-maxVoltage, maxVoltage)
             percent = (norm / vbus)
         }
+
+
+    /**
+     * Updates the motor values and caches them so that code repeated references to slow code and overwhelm CAN BUS
+     */
+    open fun updateValues() {
+        // todo: check for errors here
+        percentCache = rawPercent.invertIf { reversed }
+    }
 
     /**
      * The voltage available to the motor
@@ -132,6 +144,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
      * Internal update function
      */
     open fun update() {
+        updateValues()
         updateFollowers()
     }
 
