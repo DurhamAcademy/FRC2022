@@ -22,10 +22,6 @@ public enum class CONVEYOR_STATUS {
  * Waiting for design to be finalized before code is added
  */
 object Conveyor : KSubsystem() {
-    init {
-        log("init")
-    }
-
     val ConveyorMotor = KSparkMax(21, BrushType.BRUSHLESS).apply {
         identifier = "conveyor"
         reversed = true

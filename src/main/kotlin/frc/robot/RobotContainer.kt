@@ -43,14 +43,14 @@ object RobotContainer {
         SmartDashboard.putData("control system", this)
     }
     val controlScheme = DefaultControls.apply {
-        INTAKE.whileActiveOnce(Intake)
-        SHOOT.whileActiveOnce(Shoot)  //  todo: edit to make manual
-        FORCE_SHOT.whileActiveOnce(ForceShoot)
-        EJECT.whileActiveOnce(Intake)
-        FLUSH.whileActiveOnce(Intake)
-        LOCK_TURRET.toggleWhenActive(LockTurret)
-        CLIMB_MODE.toggleWhenActive(Climb)
-        EMOTE.whileActiveOnce(Emote)
+//        INTAKE.whileActiveOnce(Intake)
+//        SHOOT.whileActiveOnce(Shoot)  //  todo: edit to make manual
+//        FORCE_SHOT.whileActiveOnce(ForceShoot)
+//        EJECT.whileActiveOnce(Intake)
+//        FLUSH.whileActiveOnce(Intake)
+//        LOCK_TURRET.toggleWhenActive(LockTurret)
+//        CLIMB_MODE.toggleWhenActive(Climb)
+//        EMOTE.whileActiveOnce(Emote)
     }
 
     val autoChooser = SendableChooser<KTrajectory>().apply {

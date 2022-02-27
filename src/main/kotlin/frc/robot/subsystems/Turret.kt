@@ -36,16 +36,14 @@ enum class TURRET_STATUS {
  * Controls the turret
  */
 object Turret : KSubsystem() {
-    init {
-        log("init")
-    }
     var status = TURRET_STATUS.LOST
 
     // characterization of the turret
     private val feedforward = SimpleMotorFeedforward(0.94765, 1.2215, 0.05002)
-    val visionFilter = MedianFilter(8)
+    val visionFilter = MedianFilter(1)
     // actual turret motors
     val turret = KSimulatedESC(30).apply {
+        identifier = "turret"
         kP = 0.0
         kD = 0.0
         gearRatio = Constants.TURRET_GEAR_RATIO
@@ -53,7 +51,7 @@ object Turret : KSubsystem() {
         val loop = systemLoop(positionSystem(feedforward), 3.0, 0.1, 3.degrees.radians, 10.0)
 
         // fancy control
-        val offsetCorrector = ProfiledPIDController(0.3, 0.0, 0.0, TrapezoidProfile.Constraints(12.0, 4.0)).apply {
+        val offsetCorrector = ProfiledPIDController(10.0, 0.0, 5.0, TrapezoidProfile.Constraints(12.0, 4.0)).apply {
             setTolerance(Constants.TURRET_DEADBAND.radians)
             setIntegratorRange(-1.0, 1.0)
          }
@@ -63,7 +61,7 @@ object Turret : KSubsystem() {
             val chassisComp = Drivetrain.chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond
             val setpoint = clampSafePosition(it.positionSetpoint)
             val offsetCorrection = offsetCorrector.calculate((it.position - setpoint).radians).radiansPerSecond
-            val targetVelocity = -offsetCorrection - chassisComp * 0.0 - movementComp * 0.0
+            val targetVelocity = -offsetCorrection - chassisComp - movementComp
             val velocityError = it.velocity - targetVelocity
             val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(velocityError.radiansPerSecond)
             voltage

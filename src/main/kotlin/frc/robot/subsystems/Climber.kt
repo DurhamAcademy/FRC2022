@@ -69,6 +69,7 @@ object Climber : KSubsystem(), Simulatable {
     // winches that pull the robot up
     private val winchFF = SimpleMotorFeedforward(1.0, 10.0, 5.0)
     val leftWinch = KSimulatedESC(42).apply {
+        identifier = "left winch"
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
@@ -79,6 +80,7 @@ object Climber : KSubsystem(), Simulatable {
         if(Game.sim) setupSim(winchFF)
         }
     val rightWinch = KSimulatedESC(43).apply {
+        identifier = "right winch"
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO

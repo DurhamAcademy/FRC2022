@@ -19,12 +19,12 @@ abstract class KBasicMotorController : NTSendable, Debug {
         val allMotors = mutableListOf<KBasicMotorController>()
     }
 
-    // todo: auto update with either notifier or parent KSubsystem
     init {
-        run {
-            KSubsystem.active?.addMotor(this)
-            allMotors.add(this)
-        }
+        addReferences()
+    }
+    private fun addReferences() {
+        KSubsystem.motorDump?.add(this)
+        allMotors.add(this)
     }
     protected val followPeriodic = 0.005.seconds
     var controlMode = ControlMode.NULL
@@ -64,7 +64,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
      * What percent output is currently being applied?
      */
     var percent: Double
-        get() = percentCache  // todo: does this compound with raw reversal
+        get() = percentCache
         set(value) {
             val adjusted = value.invertIf { reversed }
             controlMode = ControlMode.VOLTAGE
@@ -154,7 +154,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
     private fun updateFollowers() {
         for (follower in followers) {
              follower.percent = percent.invertIf { follower.reversed }
-             follower.update()
+//             follower.update()
         }
     }
 

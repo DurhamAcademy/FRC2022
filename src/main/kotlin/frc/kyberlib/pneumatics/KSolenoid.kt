@@ -10,7 +10,7 @@ import frc.kyberlib.command.KSubsystem
 
 class KSolenoid(port: Int, type: PneumaticsModuleType = PneumaticsModuleType.CTREPCM, private val fake: Boolean = false) : Debug, NTSendable {
     init {
-        KSubsystem.active?.addSolenoid(this)
+        KSubsystem.solenoidDump?.add(this)
     }
     override val identifier: String = "Pneumatic$port"
     val solenoid = Solenoid(type, port)

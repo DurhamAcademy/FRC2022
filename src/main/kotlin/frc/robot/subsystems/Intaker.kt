@@ -10,9 +10,6 @@ import frc.kyberlib.pneumatics.KSolenoid
  * Controls the intake mechanism of the robot
  */
 object Intaker : KSubsystem(), Debug {
-    init {
-        log("init")
-    }
     // deployment solenoids
     private val leftIntakeDeploy = KSolenoid(2, fake = true)
     private val rightIntakeDeploy = KSolenoid(3, fake = true)
@@ -26,6 +23,7 @@ object Intaker : KSubsystem(), Debug {
         }
     // motor controlling the intake speed
     val intakeMotor = KSparkMax(20).apply {
+        identifier = "intake"
         kP = 1.0
         motorType = DCMotor.getNeo550(1)
     }

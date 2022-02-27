@@ -12,36 +12,39 @@ import frc.kyberlib.motorcontrol.KBasicMotorController
 import frc.kyberlib.pneumatics.KSolenoid
 
 
-// todo: Check how command requirements work
 open class KSubsystem : Subsystem, Debug, Sendable {
-
-    override val priority: DebugLevel = DebugLevel.LowPriority
-
-    companion object Static {
-        var active: KSubsystem? = null
+    companion object {
+        var active = "unset"
+        var motorDump: MutableList<KBasicMotorController>? = null
+        var solenoidDump: MutableList<KSolenoid>? = null
+    }
+    private val motors = arrayListOf<KBasicMotorController>()
+    private val solenoids = arrayListOf<KSolenoid>()
+    init {
+        log("init")
+        active = identifier
+        motorDump = motors
+        solenoidDump = solenoids
     }
 
     private inner class WpiSubsystem : SubsystemBase() {
         override fun periodic() {
-            active = null
             val time = Game.time
-            if(!manualControl)
-                this@KSubsystem.periodic()
-            log("periodic time: ${Game.time - time}")
+            for(motor in motors) motor.updateValues()
+            if(!manualControl) this@KSubsystem.periodic()
+            log("periodic time: ${Game.time - time}", level = DebugLevel.LowPriority)
         }
 
         override fun simulationPeriodic() {val time = Game.time
             if(!manualControl)
                 this@KSubsystem.simulationPeriodic()
             debugDashboard("backend/")
-            log("sim periodic time: ${Game.time - time}")
+            log("sim periodic time: ${Game.time - time}", level = DebugLevel.LowPriority)
         }
     }
     private val internal = WpiSubsystem()
-
     init {
         internal.name = identifier
-        run {active = this}
         Notifier {
             for (motor: KBasicMotorController in motors)
                 if (motor.checkError()) {
@@ -52,20 +55,13 @@ open class KSubsystem : Subsystem, Debug, Sendable {
         }.startPeriodic(1.0)
     }
 
-//    override fun getDefaultCommand(): Command? = internal.defaultCommand
-//    override fun setDefaultCommand(value: Command?) { internal.defaultCommand = value }
-
-    private val motors = arrayListOf<KBasicMotorController>()
-    private val solenoids = arrayListOf<KSolenoid>()
-    fun addMotor(motor: KBasicMotorController) {motors.add(motor)}
-    fun addSolenoid(solenoid: KSolenoid) {solenoids.add(solenoid)}
     private var manualControl = false
-    set(value) {
-        if (value && !field) {
-            manual()
+        set(value) {
+            if (value && !field) {
+                manual()
+            }
+            field = value
         }
-        field = value
-    }
 
     override fun periodic() {}
     override fun simulationPeriodic() {}
@@ -89,6 +85,4 @@ open class KSubsystem : Subsystem, Debug, Sendable {
     override fun initSendable(builder: SendableBuilder?) {
         internal.initSendable(builder)
     }
-
-        // todo: add default command
 }

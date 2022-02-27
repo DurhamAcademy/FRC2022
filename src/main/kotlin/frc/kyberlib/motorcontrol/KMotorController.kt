@@ -66,7 +66,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             field = value
             if (field != KRobot.period.seconds) updateNotifier.startPeriodic(value.seconds)
         }
-    init { if (KSubsystem.active == null) updateNotifier.startPeriodic(KRobot.period) }
+    init { if (KSubsystem.motorDump == null) updateNotifier.startPeriodic(KRobot.period / 2.0) }
     // ----- configs ----- //
     /**
      * Defines the relationship between rotation and linear motion for the motor.
@@ -358,6 +358,9 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             super.updateValues()
             velocityCache = rawVelocity * gearRatio.invertIf { reversed }
             positionCache = (rawPosition * gearRatio.invertIf { reversed }).k
+        } else {
+            velocityCache = simVelocity
+            positionCache = simPosition
         }
     }
 
@@ -480,13 +483,11 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         set(value) {
             assert(!real) {"This value should only be set from a simulation"}
             field = value
-            velocityCache = value
         }
     var simPosition: Angle = 0.degrees
         set(value) {
             assert(!real) {"This value should only be set from a simulation"}
             field = value
-            positionCache = value
         }
     var simLinearVelocity
         get() = rotationToLinear(simVelocity)
@@ -771,7 +772,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     }
 
     init {
-        kotlin.run { assert(encoderConfigured) {"configure your motor before using"} }
+        assert(encoderConfigured) {"configure your motor before using"}
     }
 }
 

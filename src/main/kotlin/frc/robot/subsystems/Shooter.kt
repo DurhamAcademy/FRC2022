@@ -14,6 +14,7 @@ import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
 import frc.robot.RobotContainer
+import frc.robot.commands.shooter.Shoot
 import frc.robot.subsystems.Turret.targetVisible
 
 
@@ -45,10 +46,15 @@ object Shooter : KSubsystem(), Simulatable {
     }
 //    val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 0.02)
     // additional motors that copy the main
-    private val flywheel2 = KSimulatedESC(32).apply { follow(flywheelMaster) }
+    private val flywheel2 = KSimulatedESC(32).apply {
+        identifier = "flywheel2"
+        follow(flywheelMaster)
+    }
 
     // Servo that sets the hood angle
-    private val hood = KSimulatedESC(1)
+    private val hood = KSimulatedESC(1).apply {
+        identifier = "hood"
+    }
 
     // FIXME: KServo is completely bs
     var hoodAngle: Angle
@@ -66,6 +72,7 @@ object Shooter : KSubsystem(), Simulatable {
 
     // motor controlling top roller speed
     val topShooter = KSimulatedESC(33).apply {
+        identifier = "top1"
         kP = 10.0
         kD = 2.0
         motorType = DCMotor.getNeo550(2)
@@ -74,13 +81,14 @@ object Shooter : KSubsystem(), Simulatable {
         setupSim(system)
     }
     private val topFollower = KSimulatedESC(34).apply {
+        identifier = "top2"
         follow(topShooter)
         reversed = true
     }
 
     init {
-//        defaultCommand = Shoot
-        log("default command off", LogMode.WARN)
+        defaultCommand = Shoot
+//        log("default command off", LogMode.WARN)
         if(Game.sim) Simulation.instance.include(this)
     }
 

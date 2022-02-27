@@ -21,7 +21,6 @@ object Shoot : CommandBase() {
     var prevDistance = 1.0
 
     override fun execute() {
-        return
         Debug.log("Shoot", "execute", level=DebugLevel.LowPriority)
         // check if shooter should spin up
         if (Conveyor.good && (Turret.targetVisible || Conveyor.status == CONVEYOR_STATUS.FEEDING)) {
