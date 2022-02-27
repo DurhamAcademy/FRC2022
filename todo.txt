@@ -1,8 +1,5 @@
 In Sim:
 Turret
-zero turret before hall sensor. Spasing coming from accumulated position
-make Shoot manual and Force shot work
-make LockTurret and enure it works
 Make sure things are isolatable (specifically autoDrive)
 detect CAN issues
 emergency mode (low priority)
