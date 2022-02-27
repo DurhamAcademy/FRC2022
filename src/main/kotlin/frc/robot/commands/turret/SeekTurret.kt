@@ -32,6 +32,7 @@ object SeekTurret : CommandBase() {
         Turret.status = TURRET_STATUS.LOST
     }
 
+    private var direction = 1.0
     override fun execute() {
         Debug.log("Seek", "execute", level=DebugLevel.LowPriority)
         if (Turret.targetVisible) { // the limelight sees something and it's valid if required
@@ -42,8 +43,11 @@ object SeekTurret : CommandBase() {
             acquisitionTimer.stop()
             acquisitionTimer.reset()
 
-            // spins menacingly
-            Turret.turret.stop()
+            // sweeps menacingly
+            Turret.turret.percent = 0.5 * direction
+            if(Turret.turret.position < Turret.turret.minPosition!! + 5.degrees) direction = 1.0
+            else if(Turret.turret.position > Turret.turret.maxPosition!! - 5.degrees) direction = -1.0
+//            Turret.turret.stop()
 //            Turret.fieldRelativeAngle = (Turret.fieldRelativeAngle + 5.degrees).k
         }
 
