@@ -19,14 +19,6 @@ import frc.kyberlib.simulation.Simulatable
 
 
 /**
- * Current status of the shooter mechanism
- */
-enum class SHOOTER_STATUS {
-    IDLE, SPINUP, LOW_READY, HIGH_READY, AUTO_SHOT, FORCE_SHOT
-}
-
-
-/**
  * Encapsulates all the things relevant to shooting the ball
  */
 object Shooter : SubsystemBase(), Debug, Simulatable {

@@ -21,7 +21,6 @@ object Intake : CommandBase() {
 
     override fun initialize() {
         Debug.log("Intake", "start", level=DebugLevel.LowPriority)
-//        Intaker.deployed = true
         Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
     }
 
@@ -32,7 +31,7 @@ object Intake : CommandBase() {
 
     override fun end(interrupted: Boolean) {
         Debug.log("Intake", "end", level=DebugLevel.LowPriority)
-//        Intaker.deployed = false
+        Intaker.deployed = false
         Intaker.intakeMotor.stop()
     }
 }

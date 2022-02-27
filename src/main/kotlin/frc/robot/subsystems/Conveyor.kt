@@ -9,13 +9,6 @@ import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.MotorType
 
 /**
- * State of the hopper. Used for LEDs and other dependencies
- */
-public enum class CONVEYOR_STATUS {
-    EMPTY, SINGLE_GOOD, FULL_GOOD, BAD, FEEDING, IDLE
-}
-
-/**
  * Controls all aspects of the hopper.
  * Waiting for design to be finalized before code is added
  */
@@ -51,6 +44,7 @@ object Conveyor : SubsystemBase(), Debug {
     }
 
     fun off() {
+        status = CONVEYOR_STATUS.OFF
         ConveyorMotor.brakeMode= true
         ConveyorMotor.velocity = 0.rpm
     }

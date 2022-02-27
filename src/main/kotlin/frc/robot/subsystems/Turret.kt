@@ -22,12 +22,7 @@ import org.photonvision.targeting.PhotonTrackedTarget
 import kotlin.math.absoluteValue
 
 
-/**
- * Status of what the turret is doing
- */
-enum class TURRET_STATUS {
-    LOCKED, ADJUSTING, NOT_FOUND, LOST
-}
+
 
 
 /**

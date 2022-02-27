@@ -23,25 +23,21 @@ import frc.kyberlib.simulation.Simulatable
 import kotlin.math.absoluteValue
 
 /**
- * Modes for what the climber is doing. Useful for LEDs and other dependencies
- */
-enum class CLIMBER_STATUS {
-    IDLE, ACTIVE, RISING, FALLING
-}
-
-/**
  * Mechanism representing the actuators for climbing
  */
 object Climber : SubsystemBase(), Debug, Simulatable {
+    /* no-op */
     init {
         println("Climber")
     }
     var status = CLIMBER_STATUS.IDLE
 
-    // pneumatics that lift the climb arms
+    /**left climb arm pneumatic (lifts the climb arms)*/
     private val leftArmLift = Solenoid(PneumaticsModuleType.CTREPCM, 0)
+    /**right climb arm pneumatic (lifts the climb arms)*/
     private val rightArmLift = Solenoid(PneumaticsModuleType.CTREPCM, 1)
 
+    /**Arm feed foreward.*/
     private val armFF = ArmFeedforward(3.0, 2.0, 5.0, 8.0)
     val leftExtendable = KSimulatedESC(0).apply {
         identifier = "leftArm"
@@ -64,8 +60,9 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         resetPosition(22.5.degrees)
     }
 
-    // winches that pull the robot up
+    /** (right) winches that pull the robot up */
     private val winchFF = SimpleMotorFeedforward(1.0, 10.0, 5.0)
+    /** (left) winches that pull the robot up */
     val leftWinch = KSimulatedESC(0).apply {
         radius = Constants.WINCH_RADIUS
         brakeMode = true
@@ -74,6 +71,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
         }
+    /** (right) winches that pull the robot up */
     val rightWinch = KSimulatedESC(0).apply {
         radius = Constants.WINCH_RADIUS
         brakeMode = true
@@ -83,7 +81,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         maxLinearPosition = 30.inches
     }
 
-    // public variable to get/set whether the arms are lifted
+    /** public variable to get/set whether the arms are lifted */
     var staticsLifted
         get() = leftArmLift.get()
         set(value) {

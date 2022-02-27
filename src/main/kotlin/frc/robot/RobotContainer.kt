@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.DigitalInput
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
+import frc.robot.commands.intake.Eject
 import frc.robot.commands.intake.Intake
 import frc.robot.subsystems.Drivetrain
 import org.photonvision.PhotonCamera
@@ -35,7 +36,10 @@ object RobotContainer {
         }
 
         leftTrigger.activateAt(0.5).whileActiveOnce(Intake)
-        leftDPad.whenActive(Intake)
+        leftDPad.whileActiveOnce(Eject)
+
+
+
 //        leftBumper.whileActiveOnce(Flush)
 //
 //        yButton.toggleWhenActive(fullAutoClimb)
