@@ -56,7 +56,6 @@ object Shooter : KSubsystem(), Simulatable {
         identifier = "hood"
     }
 
-    // FIXME: KServo is completely bs
     var hoodAngle: Angle
         get() = hood.position
         set(value) {

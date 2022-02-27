@@ -45,6 +45,8 @@ object Climber : KSubsystem(), Simulatable {
     private val armFF = ArmFeedforward(3.0, 2.0, 5.0, 8.0)
     val leftExtendable = KSimulatedESC(40).apply {
         identifier = "leftArm"
+        gearRatio = Constants.EXTENDABLE_ROTATION_GEAR_RATIO
+        motorType = DCMotor.getNeo550(1)
         brakeMode = true
 //        kP = 0.1
 //        kD = 5.0
@@ -59,6 +61,8 @@ object Climber : KSubsystem(), Simulatable {
     }
     val rightExtendable = KSimulatedESC(41).apply {
         identifier = "rightArm"
+        gearRatio = Constants.EXTENDABLE_ROTATION_GEAR_RATIO
+        motorType = DCMotor.getNeo550(1)
         brakeMode = true
         kP = 5.0
         kD = 1.0
@@ -78,7 +82,7 @@ object Climber : KSubsystem(), Simulatable {
         customControl = { bangBang(it) }
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
-        motorType = DCMotor.getNeo550(1)
+        motorType = DCMotor.getNEO(1)
         if(Game.sim) setupSim(winchFF)
         }
     val rightWinch = KSimulatedESC(43).apply {
@@ -89,7 +93,7 @@ object Climber : KSubsystem(), Simulatable {
         customControl = { bangBang(it) }
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
-        motorType = DCMotor.getNeo550(1)
+        motorType = DCMotor.getNEO(1)
     }
 
     // public variable to get/set whether the arms are lifted

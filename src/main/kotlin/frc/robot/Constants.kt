@@ -14,25 +14,30 @@ import frc.kyberlib.simulation.field.KField2d
  */
 object Constants {
     // ------ Climb ------ //
-    val WINCH_RADIUS: Length = 1.inches  // TODO
-    const val WINCH_GEAR_RATIO = 1.0 / 250.0
+    val WINCH_RADIUS: Length = 0.6.inches
+    const val EXTENDABLE_ROTATION_GEAR_RATIO = 1.0 / 250.0
+    const val WINCH_GEAR_RATIO = (12.0 / 62.0) * (18.0 / 34.0) * (36.0 / 54.0)
 
     // ------ Conveyor ------ //
 
-    // ------ Drivetrain ------ // TODO: characterize
+    // ------ Drivetrain ------ //
     // pids
     const val DRIVE_P = 0.0//0.7
     const val DRIVE_I = 0.0
     const val DRIVE_D = 0.0
 
+
     // feed forwards
     const val DRIVE_KS = 0.246
     const val DRIVE_KV = 2.59
     const val DRIVE_KA = 0.494
+    const val DRIVE_KS_L = 0.246
+    const val DRIVE_KV_L = 2.59
+    const val DRIVE_KA_L = 0.494
 
-    // drivetrain setup - TODO: tune
+    // drivetrain setup
     const val TRACK_WIDTH = 0.657299651
-    val WHEEL_RADIUS = 2.inches  // TODO: measure
+    val WHEEL_RADIUS = 2.inches
     const val DRIVE_GEAR_RATIO = (10.0 / 50.0) * (50.0 / 62.0)
 
     const val NAVIGATION_CORRECTION = false
@@ -41,34 +46,34 @@ object Constants {
     const val INTAKE_PERCENT = 0.5
 
     // ------ Shooter ------ //
-    val LIMELIGHT_HEIGHT: Length = 36.inches // TODO
-    val LIMELIGHT_ANGLE: Angle = 45.degrees // TODO
+    val LIMELIGHT_HEIGHT: Length = 23.216.inches
+    val LIMELIGHT_ANGLE: Angle = 40.degrees
 
+    // TODO: test shots
     val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf(
         100.inches.meters to 3.0,
         200.inches.meters to 5.0,
         300.inches.meters to 7.0
-    ))  // TODO
+    ))
     val TOPWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf(
         100.inches.meters to 1.0,
         200.inches.meters to 2.0,
         300.inches.meters to 3.0
-    ))  // TODO
+    ))
     val HOODANGLE_INTERPOLATOR: Interpolator = Interpolator(mapOf(
         100.inches.meters to 80.0,
         200.inches.meters to 60.0,
         300.inches.meters to 4.0
-    ))  // TODO
+    ))
 
     val SHOOTER_VELOCITY_TOLERANCE = 50.0.rpm
     val FLYWHEEL_RADIUS = 2.inches
-    const val FLYWHEEL_MOMENT_OF_INERTIA = 0.00064 // kg * m^2
 
     // ------ Turret ------ //
-    val TURRET_GEAR_RATIO: Double = (1.0 / 10.0) * (18.0 / 215.0) // TODO
+    val TURRET_GEAR_RATIO: Double = (1.0 / 10.0) * (18.0 / 215.0)
     const val NOT_FOUND_WAIT = 0.2
     const val LOST_WAIT = 2.0
-    const val SMART_LOSS = true
+    const val SMART_LOSS = false
 
     const val SHOOTER_AQUISITION_TIME = 0.2
     val TURRET_TOLERANCE = 3.degrees // how close the heading must be to fire
@@ -88,7 +93,9 @@ object Constants {
     val TRAVERSAL_RUNG_HEIGHT = 7.feet + 7.inches
     val HIGH2TRAVERSE = 2.feet
 
+    // ----- measurements ----- //
     val ROBOT_WEIGHT = 120.0 * MassConversions.poundsToGrams * 1000.0
     const val CLIMB_MOMENT_OF_INERTIA = 0.10571
     const val TOP_ROLLER_MOMENT_OF_INERTIA = 0.00001
+    const val FLYWHEEL_MOMENT_OF_INERTIA = 0.00064 // kg * m^2
 }
