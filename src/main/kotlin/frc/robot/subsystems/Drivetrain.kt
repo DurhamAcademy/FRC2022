@@ -198,7 +198,6 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
         // update the sim with new inputs
         val leftVolt = leftMaster.voltage.invertIf { leftMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
         val rightVolt = rightMaster.voltage.invertIf { rightMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
-        if (leftVolt == 0.0 && rightVolt == 0.0) return
         driveSim.setInputs(leftVolt, rightVolt)
         driveSim.update(dt.seconds)
 //
@@ -207,7 +206,6 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
         leftMaster.simLinearVelocity = driveSim.leftVelocityMetersPerSecond.metersPerSecond
         rightMaster.simLinearPosition = driveSim.rightPositionMeters.meters
         rightMaster.simLinearVelocity = driveSim.rightVelocityMetersPerSecond.metersPerSecond
-//        log("setpoint: $wheelSpeeds, sim: ${DifferentialDriveWheelSpeeds(driveSim.leftVelocityMetersPerSecond, driveSim.rightVelocityMetersPerSecond)}")
         Navigator.instance!!.heading = driveSim.heading.k
 //        Navigator.instance!!.heading += chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond * dt
     }
