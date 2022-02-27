@@ -3,9 +3,7 @@ package frc.kyberlib.command
 import edu.wpi.first.util.sendable.Sendable
 import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj.Notifier
-import edu.wpi.first.wpilibj.Watchdog
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Subsystem
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.motorcontrol.KBasicMotorController
@@ -21,7 +19,7 @@ open class KSubsystem : Subsystem, Debug, Sendable {
     private val motors = arrayListOf<KBasicMotorController>()
     private val solenoids = arrayListOf<KSolenoid>()
     init {
-        active = identifier
+        active = javaClass.simpleName
         motorDump = motors
         solenoidDump = solenoids
     }
@@ -43,7 +41,7 @@ open class KSubsystem : Subsystem, Debug, Sendable {
     }
     private val internal = WpiSubsystem()
     init {
-        internal.name = identifier
+        internal.name = javaClass.simpleName + "(internal)"
         Notifier {
             for (motor: KBasicMotorController in motors)
                 if (motor.checkError()) {
