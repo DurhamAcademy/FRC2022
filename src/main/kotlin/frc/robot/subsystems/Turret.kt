@@ -14,6 +14,7 @@ import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.k
 import frc.kyberlib.math.units.extensions.radiansPerSecond
 import frc.kyberlib.math.units.towards
+import frc.kyberlib.math.zeroIf
 import frc.kyberlib.motorcontrol.KMotorController.StateSpace.systemLoop
 import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.simulation.field.KField2d
@@ -22,6 +23,7 @@ import frc.robot.RobotContainer
 import frc.robot.commands.turret.AimTurret
 import org.photonvision.targeting.PhotonPipelineResult
 import org.photonvision.targeting.PhotonTrackedTarget
+import kotlin.math.absoluteValue
 
 
 /**
@@ -60,11 +62,12 @@ object Turret : KSubsystem() {
             val movementComp = polarSpeeds.dTheta
             val chassisComp = Drivetrain.chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond
             val setpoint = clampSafePosition(it.positionSetpoint)
-            val offsetCorrection = offsetCorrector.calculate((it.position - setpoint).radians).radiansPerSecond
+            val offset = it.position - setpoint
+            val offsetCorrection = offsetCorrector.calculate(offset.radians).radiansPerSecond
             val targetVelocity = offsetCorrection - chassisComp - movementComp
             val velocityError = it.velocity - targetVelocity
             val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(velocityError.radiansPerSecond)
-            voltage
+            voltage.zeroIf { voltage.absoluteValue < 1.0 }
         }
 
         if(Game.sim) setupSim(feedforward)
