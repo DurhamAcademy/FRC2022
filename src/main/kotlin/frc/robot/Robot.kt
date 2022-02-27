@@ -10,6 +10,7 @@ import frc.robot.commands.turret.ZeroTurret
 import frc.robot.subsystems.Climber
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Intaker
+import frc.robot.subsystems.Turret
 
 class Robot : KRobot() {
     private var autoCommand : Command? = null
@@ -26,6 +27,7 @@ class Robot : KRobot() {
 
     override fun enabledInit() {
 //         ZeroTurret.schedule(false) // don't uncomment this until the Hall sensor is added or bad things might happen
+        Turret.turret.resetPosition(0.degrees)  // remove this when you add zeroTurret back in
     }
 
     override fun autonomousInit() {
