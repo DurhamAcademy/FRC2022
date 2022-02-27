@@ -10,11 +10,11 @@ object Idle : CommandBase() {
 
     override fun initialize() {
         Conveyor.feeder.percent = -0.1
-        Conveyor.ConveyorMotor.percent = 0.1
+        Conveyor.conveyor.percent = 0.1
     }
 
     override fun end(interrupted: Boolean) {
 //        Conveyor.feeder.stop()
-//        Conveyor.ConveyorMotor.stop()
+//        Conveyor.conveyor.stop()
     }
 }
