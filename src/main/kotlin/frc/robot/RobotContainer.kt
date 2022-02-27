@@ -1,27 +1,24 @@
 package frc.robot
 
 import edu.wpi.first.wpilibj.DigitalInput
-import edu.wpi.first.wpilibj.Filesystem
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.KRobot
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
-import frc.robot.commands.intake.Intake
-import frc.robot.subsystems.Drivetrain
 import frc.robot.commands.Emote
 import frc.robot.commands.climb.Climb
+import frc.robot.commands.intake.Intake
 import frc.robot.commands.shooter.ForceShoot
 import frc.robot.commands.shooter.Shoot
 import frc.robot.commands.turret.LockTurret
+import frc.robot.subsystems.Drivetrain
 import frc.robot.controls.ControlSchema2022
 import frc.robot.controls.DefaultControls
 import frc.robot.controls.RocketLeague
 import frc.robot.subsystems.*
-import kotlinx.serialization.json.Json
 import org.photonvision.PhotonCamera
 
 /**
@@ -42,15 +39,15 @@ object RobotContainer {
         addOption("RocketLeague", RocketLeague)
         SmartDashboard.putData("control system", this)
     }
-    val controlScheme = DefaultControls.apply {
-//        INTAKE.whileActiveOnce(Intake)
-//        SHOOT.whileActiveOnce(Shoot)  //  todo: edit to make manual
-//        FORCE_SHOT.whileActiveOnce(ForceShoot)
+    val controlScheme = schemaChooser.selected!!.apply {
+        INTAKE.whileActiveOnce(Intake)
+        SHOOT.whileActiveOnce(Shoot)
+        FORCE_SHOT.whileActiveOnce(ForceShoot)
 //        EJECT.whileActiveOnce(Intake)
 //        FLUSH.whileActiveOnce(Intake)
-//        LOCK_TURRET.toggleWhenActive(LockTurret)
-//        CLIMB_MODE.toggleWhenActive(Climb)
-//        EMOTE.whileActiveOnce(Emote)
+        LOCK_TURRET.toggleWhenActive(LockTurret)
+        CLIMB_MODE.toggleWhenActive(Climb)
+        EMOTE.whileActiveOnce(Emote)
     }
 
     val autoChooser = SendableChooser<KTrajectory>().apply {

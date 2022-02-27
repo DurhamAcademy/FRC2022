@@ -2,11 +2,8 @@ package frc.robot.subsystems
 
 import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KSubsystem
-import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KSimulatedESC
@@ -52,7 +49,7 @@ object Shooter : KSubsystem(), Simulatable {
     }
 
     // Servo that sets the hood angle
-    private val hood = KSimulatedESC(1).apply {
+    val hood = KSimulatedESC(1).apply {
         identifier = "hood"
     }
 
@@ -86,8 +83,6 @@ object Shooter : KSubsystem(), Simulatable {
     }
 
     init {
-        defaultCommand = Shoot
-//        log("default command off", LogMode.WARN)
         if(Game.sim) Simulation.instance.include(this)
     }
 
