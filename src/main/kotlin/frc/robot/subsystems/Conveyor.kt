@@ -3,6 +3,7 @@ package frc.robot.subsystems
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugLevel
 import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.units.extensions.rotationsPerSecond
 import frc.kyberlib.math.units.extensions.rpm
@@ -22,6 +23,8 @@ public enum class CONVEYOR_STATUS {
  * Waiting for design to be finalized before code is added
  */
 object Conveyor : KSubsystem() {
+    override val priority: DebugLevel = DebugLevel.LowPriority
+
     val ConveyorMotor = KSparkMax(21, BrushType.BRUSHLESS).apply {
         identifier = "conveyor"
         reversed = true

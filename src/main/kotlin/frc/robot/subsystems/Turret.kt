@@ -44,14 +44,14 @@ object Turret : KSubsystem() {
     // actual turret motors
     val turret = KSimulatedESC(30).apply {
         identifier = "turret"
-        kP = 0.0
+        kP = 1.0
         kD = 0.0
         gearRatio = Constants.TURRET_GEAR_RATIO
         motorType = DCMotor.getNeo550(1)
         val loop = systemLoop(positionSystem(feedforward), 3.0, 0.1, 3.degrees.radians, 10.0)
 
         // fancy control
-        val offsetCorrector = ProfiledPIDController(10.0, 0.0, 5.0, TrapezoidProfile.Constraints(12.0, 4.0)).apply {
+        val offsetCorrector = ProfiledPIDController(2.0, 0.0, 0.0, TrapezoidProfile.Constraints(12.0, 4.0)).apply {
             setTolerance(Constants.TURRET_DEADBAND.radians)
             setIntegratorRange(-1.0, 1.0)
          }
@@ -61,7 +61,7 @@ object Turret : KSubsystem() {
             val chassisComp = Drivetrain.chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond
             val setpoint = clampSafePosition(it.positionSetpoint)
             val offsetCorrection = offsetCorrector.calculate((it.position - setpoint).radians).radiansPerSecond
-            val targetVelocity = -offsetCorrection - chassisComp - movementComp
+            val targetVelocity = offsetCorrection - chassisComp - movementComp
             val velocityError = it.velocity - targetVelocity
             val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(velocityError.radiansPerSecond)
             voltage
@@ -106,9 +106,7 @@ object Turret : KSubsystem() {
         get() = if(targetVisible) latestResult!!.bestTarget else null
 
     val visionOffset: Angle?
-        get() = if (Game.real) {
-//            println(target)
-            target?.yaw?.let { visionFilter.calculate(it).degrees }
+        get() = if (Game.real) { target?.yaw?.let { visionFilter.calculate(it).degrees }
         } else (RobotContainer.navigation.position.towards(Constants.HUB_POSITION) - fieldRelativeAngle).k
     val visionPitch: Angle?
         get() = target?.pitch?.degrees
@@ -127,7 +125,7 @@ object Turret : KSubsystem() {
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
             "turret" to turret,
-            "turret error" to visionOffset?.radians,
+            "turret error" to visionOffset,
             "field Heading" to fieldRelativeAngle.radians,
             "target detected" to targetVisible
         )

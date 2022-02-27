@@ -21,7 +21,6 @@ open class KSubsystem : Subsystem, Debug, Sendable {
     private val motors = arrayListOf<KBasicMotorController>()
     private val solenoids = arrayListOf<KSolenoid>()
     init {
-        log("init")
         active = identifier
         motorDump = motors
         solenoidDump = solenoids
