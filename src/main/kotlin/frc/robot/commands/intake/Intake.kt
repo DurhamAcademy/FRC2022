@@ -13,19 +13,13 @@ import frc.robot.subsystems.Conveyor
  */
 object Intake : CommandBase() {
     init {
-        addRequirements(Intaker, Conveyor)
+        addRequirements(Intaker)
     }
 
     override fun initialize() {
         Debug.log("Intake", "start", level=DebugLevel.LowPriority)
         Intaker.deployed = true
         Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
-    }
-
-
-    override fun execute() {
-        Conveyor.idle()
-        Intaker.deployed = true
     }
 
     override fun end(interrupted: Boolean) {

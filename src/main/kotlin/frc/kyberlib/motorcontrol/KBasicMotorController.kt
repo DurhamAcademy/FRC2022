@@ -3,10 +3,7 @@ package frc.kyberlib.motorcontrol
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.networktables.NTSendable
 import edu.wpi.first.networktables.NTSendableBuilder
-import frc.kyberlib.command.Debug
-import frc.kyberlib.command.Game
-import frc.kyberlib.command.KRobot
-import frc.kyberlib.command.KSubsystem
+import frc.kyberlib.command.*
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.Time
 import frc.kyberlib.math.units.extensions.seconds
@@ -76,7 +73,6 @@ abstract class KBasicMotorController : NTSendable, Debug {
      * Recommend using Percent because it is safer
      */
     protected abstract var rawPercent: Double
-    private var percentCache: Double = 0.0
 
     var maxVoltage = 13.0
     /**
@@ -89,13 +85,21 @@ abstract class KBasicMotorController : NTSendable, Debug {
             percent = (norm / vbus)
         }
 
-
+    private var percentCache: Double = 0.0
+    protected var quarentined = false
     /**
      * Updates the motor values and caches them so that code repeated references to slow code and overwhelm CAN BUS
      */
     open fun updateValues() {
-        // todo: check for errors here
-        percentCache = rawPercent.invertIf { reversed }
+        if(!checkError()) {
+            percentCache = rawPercent.invertIf { reversed }
+            quarentined = false
+        }
+
+        else {
+            quarentined = true
+            log("CAN ERROR", LogMode.WARN, DebugLevel.HighPriority)
+        }
     }
 
     /**
@@ -165,9 +169,8 @@ abstract class KBasicMotorController : NTSendable, Debug {
      */
     override fun initSendable(builder: NTSendableBuilder) {
         builder.setSmartDashboardType("Encoder")
-        builder.addDoubleProperty("Voltage", this::voltage) { this.voltage = it }
-        builder.addBooleanProperty("brake mode", this::brakeMode, this::brakeMode::set)
-        builder.addBooleanProperty("reversed", this::reversed, this::reversed::set)
+        builder.addStringProperty("Control Type", {controlMode.name}, {})
+        builder.addDoubleProperty("Voltage", this::voltage) { if(it != voltage) this.voltage = it }
     }
 
     override fun debugValues(): Map<String, Any?> {

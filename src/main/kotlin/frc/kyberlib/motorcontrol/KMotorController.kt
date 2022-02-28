@@ -344,7 +344,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Updates the voltage after changing position / velocity setpoint
      */
     fun updateVoltage() {
-        if (!isFollower && customControl != null && controlMode != ControlMode.VOLTAGE) {
+        if (!quarentined && !isFollower && customControl != null && controlMode != ControlMode.VOLTAGE) {
             customControlLock = true  // todo: mitigate customControl crashes
             safeSetVoltage(customControl!!(this))
             customControlLock = false
@@ -430,11 +430,21 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
 
     override fun initSendable(builder: NTSendableBuilder) {
         super.initSendable(builder)
-        builder.addDoubleProperty("Angular Position (rad)", {linearPosition.meters}, { linearPosition = it.meters })
-        builder.addDoubleProperty("Angular Velocity (rad per s)", {linearVelocity.metersPerSecond}, { linearVelocity = it.metersPerSecond })
+        builder.setActuator(true)
+        builder.setUpdateTable {
+            updateValues()
+            updateVoltage()
+        }
         if (linearConfigured) {
-            builder.addDoubleProperty("Linear Position (m)", {linearPosition.meters}, { linearPosition = it.meters })
-            builder.addDoubleProperty("Linear Velocity (m per s)", {linearVelocity.metersPerSecond}, { linearVelocity = it.metersPerSecond })
+            builder.addDoubleProperty("Linear Position (m)", {linearPosition.meters}, {})
+            builder.addDoubleProperty("Linear Position Setpoint (m)", {linearPositionSetpoint.meters}, { if (it.meters != linearPosition) linearPosition = it.meters })
+            builder.addDoubleProperty("Linear Velocity (m per s)", {linearVelocity.metersPerSecond}, {})
+            builder.addDoubleProperty("Linear Setpoint Velocity (m per s)", {linearVelocitySetpoint.metersPerSecond}, { if (it.metersPerSecond != linearVelocity) linearVelocity = it.metersPerSecond })
+        } else {
+            builder.addDoubleProperty("Angular Position (degrees)", {position.degrees}, {})
+            builder.addDoubleProperty("Angular Position Setpoint (degrees)", {positionSetpoint.degrees}, { if (it.degrees != position) position = it.degrees })
+            builder.addDoubleProperty("Angular Velocity (rad per s)", {velocity.radiansPerSecond}, {})
+            builder.addDoubleProperty("Angular Velocity Setpoint (rad per s)", {velocitySetpoint.radiansPerSecond}, { if (it.radiansPerSecond != velocity) velocity = it.radiansPerSecond })
         }
     }
     override fun debugValues(): Map<String, Any?> {
@@ -510,7 +520,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         Simulation.instance.include(this)
         simUpdater = {dt: Time -> feedforwardUpdate(feedforward.ks * voltage.sign + feedforward.kg, feedforward.kv, feedforward.ka, dt) }
     }
-    fun feedforwardUpdate(staticVolt: Double, kV: Double, kA: Double, dt: Time) {
+    private fun feedforwardUpdate(staticVolt: Double, kV: Double, kA: Double, dt: Time) {
         if(voltage.absoluteValue < staticVolt) {
             simVelocity = 0.radiansPerSecond
             // kinda assuming brakeMode
