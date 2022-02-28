@@ -100,11 +100,11 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     var maxAcceleration: AngularVelocity
         get() = constraints.maxAcceleration.radiansPerSecond
         set(value) { constraints = TrapezoidProfile.Constraints(constraints.maxVelocity, value.radiansPerSecond) }
-    var maxPosition: Angle? = null
+    open var maxPosition: Angle? = null
     var maxLinearPosition: Length?
         get() = maxPosition?.let { rotationToLinear(it) }
         set(value) {maxPosition = if (value == null) value else linearToRotation(value)}
-    var minPosition: Angle? = null
+    open var minPosition: Angle? = null
     var minLinearPosition: Length?
         get() = minPosition?.let { rotationToLinear(it) }
         set(value) {minPosition = if (value == null) value else linearToRotation(value)}

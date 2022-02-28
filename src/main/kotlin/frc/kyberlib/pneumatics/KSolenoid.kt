@@ -12,7 +12,7 @@ class KSolenoid(port: Int, type: PneumaticsModuleType = PneumaticsModuleType.CTR
     init {
         KSubsystem.solenoidDump?.add(this)
     }
-    override val identifier: String = "Pneumatic$port"
+    override var identifier: String = "Pneumatic$port"
     val solenoid = Solenoid(type, port)
     var extended: Boolean = false
         get() = if (Game.real || fake) field else solenoid.get()

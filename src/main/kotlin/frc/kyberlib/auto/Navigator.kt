@@ -68,8 +68,8 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
     /**
      * Update position based on estimated motion
      */
-    fun update(speeds: DifferentialDriveWheelSpeeds) {  // estimate motion
-        poseEstimator.update(heading, speeds, Drivetrain.leftMaster.linearPosition.meters, Drivetrain.rightMaster.linearPosition.meters)
+    fun update(speeds: DifferentialDriveWheelSpeeds, leftPosition: Length, rightPosition: Length) {  // estimate motion
+        poseEstimator.update(heading, speeds, leftPosition.meters, rightPosition.meters)
     }
     /**
      * Update position based on a different position guess

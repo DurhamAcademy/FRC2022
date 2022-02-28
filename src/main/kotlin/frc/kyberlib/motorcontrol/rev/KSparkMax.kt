@@ -7,6 +7,7 @@ import com.revrobotics.SparkMaxPIDController
 import com.revrobotics.SparkMaxRelativeEncoder
 import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.filters.Differentiator
+import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.*
 import frc.kyberlib.motorcontrol.BrushType.BRUSHED
@@ -29,6 +30,25 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
     }) else null
     private var _enc: RelativeEncoder? = null
     private val _pid = _spark?.pidController
+
+    // todo: check this works
+    override var minPosition: Angle? = null
+        set(value) {
+            field = value
+            if (value != null && _spark != null) {
+                val direction = if (reversed) CANSparkMax.SoftLimitDirection.kForward else CANSparkMax.SoftLimitDirection.kReverse
+                _spark.setSoftLimit(direction, (value.rotations * gearRatio.invertIf { reversed }).toFloat())
+            }
+        }
+
+    override var maxPosition: Angle? = null
+        set(value) {
+            field = value
+            if (value != null && _spark != null) {
+                val direction = if (reversed) CANSparkMax.SoftLimitDirection.kReverse else CANSparkMax.SoftLimitDirection.kForward
+                _spark.setSoftLimit(direction, (value.rotations * gearRatio.invertIf { reversed }).toFloat())
+            }
+        }
 
     init {
         if (real)

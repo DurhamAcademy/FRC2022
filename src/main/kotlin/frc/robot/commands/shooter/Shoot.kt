@@ -8,6 +8,7 @@ import frc.kyberlib.math.units.extensions.radiansPerSecond
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
 import frc.robot.RobotContainer
+import frc.robot.commands.intake.Feed
 import frc.robot.commands.intake.Idle
 import frc.robot.subsystems.*
 
@@ -42,8 +43,8 @@ object Shoot : CommandBase() {
 
             // if the turret is on target
             if (Turret.readyToShoot && Shooter.flywheelMaster.velocityError < Constants.SHOOTER_VELOCITY_TOLERANCE) {
-                Conveyor.feed()
                 Shooter.status = ShooterStatus.SHOT
+                Feed.schedule()
             } 
             else {
                 Idle.execute()

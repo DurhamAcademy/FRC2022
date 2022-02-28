@@ -37,11 +37,6 @@ object Conveyor : KSubsystem() {
         currentLimit = 20
     }
 
-    fun feed() {
-        status = ConveyorStatus.FEEDING
-        conveyor.velocity = 6.rotationsPerSecond
-    }
-
     init {
         defaultCommand = Idle
     }

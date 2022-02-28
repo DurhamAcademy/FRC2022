@@ -37,8 +37,12 @@ object Climber : KSubsystem(), Simulatable {
     var status = ClimberStatus.IDLE
 
     // pneumatics that lift the climb arms
-    private val leftStatic = KSolenoid(0, fake = true)
-    private val rightStatic = KSolenoid(1, fake = true)
+    private val leftStatic = KSolenoid(0, fake = true).apply {
+        identifier = "left static"
+    }
+    private val rightStatic = KSolenoid(1, fake = true).apply {
+        identifier = "right static"
+    }
 
     private val armFF = ArmFeedforward(3.0, 2.0, 5.0, 8.0)
     val leftExtendable = KSimulatedESC(40).apply {
@@ -51,6 +55,10 @@ object Climber : KSubsystem(), Simulatable {
 //        kI = 0.2
 //        addFeedforward(armFF)
         customControl = { bangBang(it) }
+        if(Constants.doStateSpace) {
+            val loop = KMotorController.StateSpace.systemLoop(armSystem(armFF), 3.0, .01, 3.degrees.value, 10.0)
+            stateSpaceControl(loop)
+        }
         minPosition = 0.degrees
         maxPosition = 90.degrees
         resetPosition(22.5.degrees)

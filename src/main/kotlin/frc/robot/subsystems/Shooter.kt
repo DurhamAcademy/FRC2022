@@ -33,11 +33,13 @@ object Shooter : KSubsystem(), Simulatable {
         identifier = "flywheel"
         radius = Constants.FLYWHEEL_RADIUS
         motorType = DCMotor.getNEO(2)
+        kP = 0.0002
 
         val system = flywheelSystem(Constants.FLYWHEEL_MOMENT_OF_INERTIA)
         val loop = KMotorController.StateSpace.systemLoop(system, 3.0, 0.01, 3.0)
         setupSim(system)
-        stateSpaceControl(loop)
+        if(Constants.doStateSpace)
+            stateSpaceControl(loop)
 //        Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.02)
     }
 //    val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 0.02)

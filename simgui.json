@@ -110,12 +110,7 @@
         }
       },
       "Drivetrain": {
-        "pose": {
-          "open": true
-        },
-        "rightMaster": {
-          "open": true
-        },
+        "open": true,
         "speed": {
           "open": true
         }
@@ -167,7 +162,7 @@
     "Plot <0>": {
       "plots": [
         {
-          "height": -29,
+          "height": 274,
           "series": [
             {
               "color": [
@@ -208,7 +203,7 @@
           ]
         },
         {
-          "height": -29,
+          "height": 274,
           "series": [
             {
               "color": [
@@ -256,7 +251,7 @@
     "Plot <1>": {
       "plots": [
         {
-          "height": -29,
+          "height": 302,
           "name": "Aim",
           "series": [
             {
@@ -280,7 +275,7 @@
           ]
         },
         {
-          "height": -29,
+          "height": 302,
           "name": "Movement",
           "series": [
             {

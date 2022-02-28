@@ -50,10 +50,14 @@ object Turret : KSubsystem() {
         kD = 0.0
         gearRatio = Constants.TURRET_GEAR_RATIO
         motorType = DCMotor.getNeo550(1)
-        val loop = systemLoop(positionSystem(feedforward), 3.0, 0.1, 3.degrees.radians, 10.0)
+        // todo: figure out how you would implement this
+        val loop = systemLoop(velocitySystem(feedforward), 3.0, 0.1, 3.degrees.radians, 10.0)
 
         // fancy control
-        val offsetCorrector = ProfiledPIDController(2.0, 0.0, 0.0, TrapezoidProfile.Constraints(12.0, 4.0)).apply {
+        val pid2020 = ProfiledPIDController(30.0, 2.0, 5.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
+            this.setIntegratorRange(0.0,3.0)
+        }
+        val offsetCorrector = ProfiledPIDController(2.0, 0.0, 0.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
             setTolerance(Constants.TURRET_DEADBAND.radians)
             setIntegratorRange(-1.0, 1.0)
          }
@@ -63,7 +67,7 @@ object Turret : KSubsystem() {
             val chassisComp = Drivetrain.chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond
             val setpoint = clampSafePosition(it.positionSetpoint)
             val offset = it.position - setpoint
-            val offsetCorrection = offsetCorrector.calculate(offset.radians).radiansPerSecond
+            val offsetCorrection = pid2020.calculate(offset.radians).radiansPerSecond
             val targetVelocity = offsetCorrection - chassisComp - movementComp
             val velocityError = it.velocity - targetVelocity
             val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(velocityError.radiansPerSecond)

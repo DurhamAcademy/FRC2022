@@ -46,7 +46,6 @@ object ForceShoot : CommandBase() {
             Shooter.topShooter.percent = 0.5
             Shooter.flywheelMaster.percent = 0.5
         }
-        Conveyor.feed()
     }
 
 }
