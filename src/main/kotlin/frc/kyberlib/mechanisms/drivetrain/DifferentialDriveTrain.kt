@@ -51,7 +51,6 @@ abstract class DifferentialDriveTrain: KSubsystem(), Simulatable, KDrivetrain, D
     abstract val rightFF: SimpleMotorFeedforward
     abstract val angularFeedforward: SimpleMotorFeedforward
     // control values
-    private val odometry = DifferentialDriveOdometry(0.degrees)
     private val kinematics = DifferentialDriveKinematics(trackWidth.meters)
 
     override val chassisSpeeds: ChassisSpeeds
@@ -73,6 +72,9 @@ abstract class DifferentialDriveTrain: KSubsystem(), Simulatable, KDrivetrain, D
         Navigator.instance!!.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
     }
 
+    init {
+        if(Game.sim) setupSim()
+    }
     private lateinit var driveSim: DifferentialDrivetrainSim
     fun setupSim() {
         driveSim = DifferentialDrivetrainSim( // Create a linear system from our characterization gains.

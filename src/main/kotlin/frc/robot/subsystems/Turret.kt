@@ -67,7 +67,7 @@ object Turret : KSubsystem() {
             val chassisComp = Drivetrain.chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond
             val setpoint = clampSafePosition(it.positionSetpoint)
             val offset = it.position - setpoint
-            val offsetCorrection = pid2020.calculate(offset.radians).radiansPerSecond
+            val offsetCorrection = offsetCorrector.calculate(offset.radians).radiansPerSecond
             val targetVelocity = offsetCorrection - chassisComp - movementComp
             val velocityError = it.velocity - targetVelocity
             val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(velocityError.radiansPerSecond)
