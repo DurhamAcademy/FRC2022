@@ -20,11 +20,11 @@ object ForceShoot : CommandBase() {
 
     override fun initialize() {
         Feed.schedule()
+        Shooter.status = ShooterStatus.FORCE_SHOT
     }
 
     override fun execute() {
         Debug.log("Force Shoot", "execute", level=DebugLevel.LowPriority)
-        Shooter.status = SHOOTER_STATUS.FORCE_SHOT
 
         if (Turret.targetVisible && Shooter.flywheelMaster.percent > 0.1) {
             val dis = if (Turret.targetVisible) Shooter.targetDistance!!.meters else Shoot.prevDistance

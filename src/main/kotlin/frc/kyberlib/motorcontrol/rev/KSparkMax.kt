@@ -56,7 +56,7 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
         get() = _spark!!.appliedOutput
         set(value) {_spark!!.set(value)}
 
-    override var rawReversed: Boolean  // todo: check if raw brake things
+    override var rawReversed: Boolean
         get() = _spark!!.inverted
         set(value) { _spark?.inverted = value }
 

@@ -11,15 +11,14 @@ import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
 import frc.robot.RobotContainer
-import frc.robot.commands.shooter.Shoot
 import frc.robot.subsystems.Turret.targetVisible
 
 
 /**
  * Current status of the shooter mechanism
  */
-enum class SHOOTER_STATUS {  // todo: make sure these are used
-    IDLE, SPINUP, LOW_READY, HIGH_READY, AUTO_SHOT, FORCE_SHOT
+enum class ShooterStatus {
+    IDLE, SPINUP, SHOT, FORCE_SHOT
 }
 
 
@@ -27,7 +26,7 @@ enum class SHOOTER_STATUS {  // todo: make sure these are used
  * Encapsulates all the things relevant to shooting the ball
  */
 object Shooter : KSubsystem(), Simulatable {
-    var status = SHOOTER_STATUS.IDLE
+    var status = ShooterStatus.IDLE
 
     // main motor attached to the flywheel
     val flywheelMaster = KSimulatedESC(31).apply {

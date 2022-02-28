@@ -1,11 +1,13 @@
 package frc.kyberlib.motorcontrol
 
 import edu.wpi.first.wpilibj.Servo
+import frc.kyberlib.command.DebugLevel
 import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.Angle
 import frc.kyberlib.math.units.extensions.AngularVelocity
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.radiansPerSecond
+import java.lang.UnsupportedOperationException
 import kotlin.math.absoluteValue
 
 class KServo(port: Int) : KMotorController() {
@@ -30,9 +32,9 @@ class KServo(port: Int) : KMotorController() {
 
         }
     override var rawVelocity: AngularVelocity
-        get() = native.speed.radiansPerSecond  // TODO: check if this is true
+        get() = native.speed.radiansPerSecond
         set(value) {
-            log("Don't velocity control servos", LogMode.WARN)
+            log("Don't velocity control servos", LogMode.WARN, DebugLevel.HighPriority)
             native.speed = value.radiansPerSecond.coerceIn(-1.0, 1.0)
         }
     override var currentLimit: Int
@@ -58,6 +60,6 @@ class KServo(port: Int) : KMotorController() {
         set(value) {native.speed = value}
 
     override fun followTarget(kmc: KBasicMotorController) {
-        TODO("Not yet implemented")
+        throw UnsupportedOperationException("This hasn't been made yet")
     }
 }

@@ -1,15 +1,14 @@
 In Sim:
-Turret
+fancy drivetrain
+ask trevor what proper cheesy drive is (also any additional plans he had for Overthrow)
 Make sure things are isolatable (specifically autoDrive)
-detect CAN issues
-emergency mode (low priority)
 kyberlib optimizations
 think about roborio2
 
 With robot:
-Drivetrain Sim
+Drivetrain characterization
 Turret tuning
-loop times
+loop times - maybe resolved
 Tune feedforwards
 Auto paths
 

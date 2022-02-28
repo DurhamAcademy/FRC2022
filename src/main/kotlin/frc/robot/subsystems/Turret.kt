@@ -30,7 +30,7 @@ import kotlin.math.absoluteValue
  * Status of what the turret is doing
  */
 enum class TURRET_STATUS {
-    LOCKED, ADJUSTING, NOT_FOUND, LOST
+    LOCKED, ADJUSTING, NOT_FOUND, LOST, FROZEN
 }
 
 
@@ -67,6 +67,7 @@ object Turret : KSubsystem() {
             val targetVelocity = offsetCorrection - chassisComp - movementComp
             val velocityError = it.velocity - targetVelocity
             val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(velocityError.radiansPerSecond)
+            if (offset < Constants.TURRET_TOLERANCE) status = TURRET_STATUS.LOCKED
             voltage.zeroIf { voltage.absoluteValue < 1.0 }
         }
 

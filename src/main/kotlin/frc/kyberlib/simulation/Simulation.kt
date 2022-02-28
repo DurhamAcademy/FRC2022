@@ -1,13 +1,10 @@
 package frc.kyberlib.simulation
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.Time
-import frc.kyberlib.math.units.extensions.seconds
 import frc.kyberlib.simulation.field.KField2d
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Simulation that will run a loop to update simulatable objects

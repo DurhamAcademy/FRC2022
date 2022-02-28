@@ -28,9 +28,9 @@ object Constants {
 
 
     // feed forwards
-    const val DRIVE_KS = 0.246
-    const val DRIVE_KV = 2.59
-    const val DRIVE_KA = 0.494
+    const val DRIVE_KS_R = 0.246
+    const val DRIVE_KV_R = 2.59
+    const val DRIVE_KA_R = 0.494
     const val DRIVE_KS_L = 0.246
     const val DRIVE_KV_L = 2.59
     const val DRIVE_KA_L = 0.494

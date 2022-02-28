@@ -25,9 +25,9 @@ object Shoot : CommandBase() {
     override fun execute() {
         Debug.log("Shoot", "execute", level=DebugLevel.LowPriority)
         // check if shooter should spin up
-        if ((Turret.targetVisible || Conveyor.status == CONVEYOR_STATUS.FEEDING)) {
+        if ((Turret.targetVisible || Shooter.status == ShooterStatus.SHOT)) {
             val dis = if (Turret.targetVisible) Shooter.targetDistance!!.meters else prevDistance
-            val parallelSpeed = Drivetrain.polarSpeeds.dr
+//            val parallelSpeed = Drivetrain.polarSpeeds.dr
             prevDistance = dis
 
             // calculate values given the current distance from the hub
@@ -43,11 +43,12 @@ object Shoot : CommandBase() {
             // if the turret is on target
             if (Turret.readyToShoot && Shooter.flywheelMaster.velocityError < Constants.SHOOTER_VELOCITY_TOLERANCE) {
                 Conveyor.feed()
+                Shooter.status = ShooterStatus.SHOT
             } 
             else {
                 Idle.execute()
                 RobotContainer.controller.rumble = 0.5
-                Shooter.status = SHOOTER_STATUS.SPINUP
+                Shooter.status = ShooterStatus.SPINUP
             }
         }
     }
@@ -56,6 +57,6 @@ object Shoot : CommandBase() {
         Debug.log("Shoot", "idle", level=DebugLevel.LowPriority)
         Shooter.flywheelMaster.stop()
         Shooter.topShooter.stop()
-        Shooter.status = SHOOTER_STATUS.IDLE
+        Shooter.status = ShooterStatus.IDLE
     }
 }

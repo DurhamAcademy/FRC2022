@@ -7,8 +7,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.util.Color8Bit
-import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KSubsystem
@@ -27,7 +25,7 @@ import kotlin.math.absoluteValue
 /**
  * Modes for what the climber is doing. Useful for LEDs and other dependencies
  */
-enum class CLIMBER_STATUS {
+enum class ClimberStatus {
     IDLE, ACTIVE, RISING, FALLING
 }
 
@@ -36,11 +34,11 @@ enum class CLIMBER_STATUS {
  */
 object Climber : KSubsystem(), Simulatable {
     override val priority: DebugLevel = DebugLevel.LowPriority
-    var status = CLIMBER_STATUS.IDLE
+    var status = ClimberStatus.IDLE
 
     // pneumatics that lift the climb arms
-    private val leftArmLift = KSolenoid(0, fake = true)
-    private val rightArmLift = KSolenoid(1, fake = true)
+    private val leftStatic = KSolenoid(0, fake = true)
+    private val rightStatic = KSolenoid(1, fake = true)
 
     private val armFF = ArmFeedforward(3.0, 2.0, 5.0, 8.0)
     val leftExtendable = KSimulatedESC(40).apply {
@@ -98,10 +96,10 @@ object Climber : KSubsystem(), Simulatable {
 
     // public variable to get/set whether the arms are lifted
     var staticsLifted
-        get() = leftArmLift.extended
+        get() = leftStatic.extended
         set(value) {
-            leftArmLift.extended = value
-            rightArmLift.extended = value
+            leftStatic.extended = value
+            rightStatic.extended = value
         }
     var extendableAngle
         get() = leftExtendable.position

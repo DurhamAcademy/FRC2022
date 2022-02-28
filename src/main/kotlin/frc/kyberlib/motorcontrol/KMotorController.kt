@@ -156,7 +156,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             when (controlMode) {
                 ControlMode.VELOCITY -> {
 //                    val ff = feedforward.calculate(velocity.radiansPerSecond, -velocityError.radiansPerSecond / KRobot.period / feedforward.ka / 1.0)
-                    val ff = feedforward.calculate(velocitySetpoint.radiansPerSecond)  // todo: check if better
+                    val ff = feedforward.calculate(velocitySetpoint.radiansPerSecond)
                     val pid = PID.calculate(velocityError.radiansPerSecond)
                     ff + pid
                 }
@@ -209,7 +209,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     /**
      * Follows a trapezoidal motion profile and then reverts when done
      */
-    fun followProfile(profile: TrapezoidProfile) {  // todo: follow this better
+    fun followProfile(profile: TrapezoidProfile) {
         val timer = Timer()
         val prevControl = customControl
         timer.start()

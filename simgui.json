@@ -1,4 +1,13 @@
 {
+  "HALProvider": {
+    "Solenoids": {
+      "0": {
+        "header": {
+          "open": true
+        }
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -31,15 +40,23 @@
       "/LiveWindow/Ungrouped/PIDController[9]": "PIDController",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
       "/LiveWindow/WpiSubsystem/Climber": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Climber(internal)": "Subsystem",
       "/LiveWindow/WpiSubsystem/Conveyor": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Conveyor(internal)": "Subsystem",
       "/LiveWindow/WpiSubsystem/Drivetrain": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Drivetrain(internal)": "Subsystem",
       "/LiveWindow/WpiSubsystem/Intaker": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Intaker(internal)": "Subsystem",
       "/LiveWindow/WpiSubsystem/Shooter": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Shooter(internal)": "Subsystem",
       "/LiveWindow/WpiSubsystem/Turret": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Turret(internal)": "Subsystem",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/SendableChooser[0]": "String Chooser",
       "/SmartDashboard/SendableChooser[1]": "String Chooser",
-      "/SmartDashboard/climb sim": "Mechanism2d"
+      "/SmartDashboard/auto": "String Chooser",
+      "/SmartDashboard/climb sim": "Mechanism2d",
+      "/SmartDashboard/control system": "String Chooser"
     },
     "windows": {
       "/SmartDashboard/Field": {
@@ -93,9 +110,6 @@
         }
       },
       "Drivetrain": {
-        "leftMaster": {
-          "open": true
-        },
         "pose": {
           "open": true
         },
@@ -110,6 +124,9 @@
         "intake": {
           "open": true
         }
+      },
+      "Pneumatic0": {
+        "open": true
       },
       "SendableChooser[0]": {
         "open": true
@@ -136,6 +153,9 @@
             "open": true
           }
         }
+      },
+      "leftArm": {
+        "open": true
       },
       "open": true,
       "solenoid3": {
@@ -255,7 +275,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Turret/turret error"
+              "id": "NT:/SmartDashboard//Turret/turret error (degrees)"
             }
           ]
         },
