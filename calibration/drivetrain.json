@@ -2,7 +2,7 @@
   "counts per rotation": 1.0,
   "encoder type": "Encoder Port",
   "encoding": false,
-  "gearing denominator": 10.1,
+  "gearing denominator": 10.0,
   "gearing numerator": 62.0,
   "gyro": "Pigeon",
   "gyro ctor": "6",

@@ -95,7 +95,7 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
     // setup motors
     private val leftFF = SimpleMotorFeedforward(Constants.DRIVE_KS_L, Constants.DRIVE_KV_L, Constants.DRIVE_KA_L)
     private val rightFF = SimpleMotorFeedforward(Constants.DRIVE_KS_R, Constants.DRIVE_KV_R, Constants.DRIVE_KA_R)
-    private val angularFeedforward = SimpleMotorFeedforward(0.0, 8.5 * Constants.TRACK_WIDTH / 2.0, 0.5 * Constants.TRACK_WIDTH / 2.0)
+    private val angularFeedforward = SimpleMotorFeedforward(0.90868, 2.7143, 0.14424)
     init {
         defaultCommand = Drive
 
