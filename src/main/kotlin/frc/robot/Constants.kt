@@ -23,19 +23,19 @@ object Constants {
 
     // ------ Drivetrain ------ //
     // pids
-    const val DRIVE_P = 0.0//0.7
+    const val DRIVE_P = 0.5
     const val DRIVE_I = 0.0
     const val DRIVE_D = 0.0
 
 
     // feed forwards
-    const val DRIVE_KS_R = 0.246
-    const val DRIVE_KV_R = 2.59
-    const val DRIVE_KA_R = 0.494
+    const val DRIVE_KS_R = 0.31568
+    const val DRIVE_KV_R = 0.13272
+    const val DRIVE_KA_R = 0.0091552
 
-    const val DRIVE_KS_L = 0.246
-    const val DRIVE_KV_L = 2.59
-    const val DRIVE_KA_L = 0.494
+    const val DRIVE_KS_L = 0.26459
+    const val DRIVE_KV_L = 0.13066
+    const val DRIVE_KA_L = 0.0071033
 
     // drivetrain setup
     const val TRACK_WIDTH = 0.657299651
