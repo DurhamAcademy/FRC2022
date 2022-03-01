@@ -186,7 +186,6 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     fun setupSim() {
         driveSim = DifferentialDrivetrainSim( // Create a linear system from our characterization gains.
             betterDrivetrainSystem(),
-//            LinearSystemId.identifyDrivetrainSystem(Constants.DRIVE_KV_L, Constants.DRIVE_KA_L, KvAngular, KaAngular),
             DCMotor.getNEO(2),  // 2 NEO motors on each side of the drivetrain.
             leftMaster.gearRatio,  // gearing reduction
             kinematics.trackWidthMeters,  // The track width
@@ -202,12 +201,10 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
 //        return LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka)
         val kVAngular = angularFeedforward.kv * 2.0 / Constants.TRACK_WIDTH
         val kAAngular = angularFeedforward.ka * 2.0 / Constants.TRACK_WIDTH
-        val kVLinear = leftFF.kv
-        val kALinear = leftFF.ka
-        val A1: Double = 0.5 * -(kVLinear / kALinear + kVAngular / kAAngular)
-        val A2: Double = 0.5 * -(kVLinear / kALinear - kVAngular / kAAngular)
-        val B1: Double = 0.5 * (1.0 / kALinear + 1.0 / kAAngular)
-        val B2: Double = 0.5 * (1.0 / kALinear - 1.0 / kAAngular)
+        val A1: Double = 0.5 * -(leftFF.kv / leftFF.ka + kVAngular / kAAngular)
+        val A2: Double = 0.5 * -(rightFF.kv / rightFF.ka - kVAngular / kAAngular)
+        val B1: Double = 0.5 * (1.0 / leftFF.ka + 1.0 / kAAngular)
+        val B2: Double = 0.5 * (1.0 / rightFF.ka - 1.0 / kAAngular)
 
         return LinearSystem(
             Matrix.mat(Nat.N2(), Nat.N2()).fill(A1, A2, A2, A1),

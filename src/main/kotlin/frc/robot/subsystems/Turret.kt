@@ -1,5 +1,6 @@
 package frc.robot.subsystems
 
+import edu.wpi.first.math.StateSpaceUtil
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
@@ -14,6 +15,7 @@ import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.filters.Differentiator
+import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.towards
 import frc.kyberlib.math.zeroIf
@@ -75,6 +77,10 @@ object Turret : SubsystemBase(), Debug {
 //            loop.correct(VecBuilder.fill(velocity.radiansPerSecond))  // update with empirical
 //            loop.predict(0.02)  // math
 //            val v = loop.getU(0)  // input
+            SmartDashboard.putNumber("off", offsetCorrection.degreesPerSecond)
+            SmartDashboard.putNumber("chas", -chassisComp.degreesPerSecond)
+            SmartDashboard.putNumber("mov", -movementComp.degreesPerSecond)
+            SmartDashboard.putNumber("tar", targetVelocity.degreesPerSecond)
             val velocityError = it.velocity - targetVelocity
             val v = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(velocityError.radiansPerSecond)
             if (offset < Constants.TURRET_TOLERANCE) status = TURRET_STATUS.LOCKED
@@ -117,11 +123,13 @@ object Turret : SubsystemBase(), Debug {
     val targetVisible: Boolean 
         get() = Game.sim || (latestResult != null && latestResult!!.hasTargets())
     private val target: PhotonTrackedTarget?
-        get() = if(targetVisible) latestResult!!.bestTarget else null
+        get() = latestResult?.bestTarget
 
     val visionOffset: Angle?
-        get() = if (Game.real) { target?.yaw?.let { visionFilter.calculate(-it).degrees }
-        } else (RobotContainer.navigation.position.towards(Constants.HUB_POSITION) - fieldRelativeAngle).k
+        get() = if (Game.real) { target?.yaw?.let { visionFilter.calculate(it).degrees }
+        } else
+                (RobotContainer.navigation.position.towards(Constants.HUB_POSITION) - fieldRelativeAngle
+                + StateSpaceUtil.makeWhiteNoiseVector(VecBuilder.fill(1.0)).get(0, 0).degrees).k
     val visionPitch: Angle?
         get() = target?.pitch?.degrees
 
