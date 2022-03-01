@@ -2,8 +2,9 @@ package frc.robot.subsystems
 
 import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
-import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KSimulatedESC
@@ -25,7 +26,7 @@ enum class ShooterStatus {
 /**
  * Encapsulates all the things relevant to shooting the ball
  */
-object Shooter : KSubsystem(), Simulatable {
+object Shooter : SubsystemBase(), Debug, Simulatable {
     var status = ShooterStatus.IDLE
 
     // main motor attached to the flywheel
@@ -74,7 +75,7 @@ object Shooter : KSubsystem(), Simulatable {
         kD = 2.0
         motorType = DCMotor.getNeo550(2)
         val system = flywheelSystem(0.00001)
-        stateSpaceControl(system, 3.0, 0.01, 8.0)
+        if (Constants.doStateSpace) stateSpaceControl(system, 3.0, 0.01, 8.0)
         setupSim(system)
     }
     private val topFollower = KSimulatedESC(34).apply {

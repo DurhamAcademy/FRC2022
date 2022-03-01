@@ -1,10 +1,10 @@
 package frc.robot.subsystems
 
-import frc.kyberlib.motorcontrol.rev.KSparkMax
+import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
-import frc.kyberlib.command.KSubsystem
-import frc.kyberlib.math.units.extensions.rotationsPerSecond
 import frc.kyberlib.motorcontrol.BrushType
+import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.robot.commands.intake.Idle
 
 /**
@@ -19,7 +19,7 @@ enum class ConveyorStatus {
  * Controls all aspects of the hopper.
  * Waiting for design to be finalized before code is added
  */
-object Conveyor : KSubsystem() {
+object Conveyor : SubsystemBase(), Debug {
     override val priority: DebugLevel = DebugLevel.LowPriority
 
     val conveyor = KSparkMax(21, BrushType.BRUSHLESS).apply {
@@ -42,7 +42,7 @@ object Conveyor : KSubsystem() {
     }
 
     override fun periodic() {
-        debugDashboard()
+//        debugDashboard()
     }
 
     override fun debugValues(): Map<String, Any?> {

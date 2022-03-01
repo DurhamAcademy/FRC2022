@@ -63,7 +63,6 @@
         "Robot": {
           "arrows": false
         },
-        "image": "/Users/22staples/FRC2022/Rapid React Field.png",
         "traj": {
           "arrowSize": 0,
           "arrows": false,
@@ -111,6 +110,9 @@
       },
       "Drivetrain": {
         "open": true,
+        "rightMaster": {
+          "open": true
+        },
         "speed": {
           "open": true
         }
@@ -251,7 +253,7 @@
     "Plot <1>": {
       "plots": [
         {
-          "height": 302,
+          "height": -29,
           "name": "Aim",
           "series": [
             {
@@ -275,7 +277,7 @@
           ]
         },
         {
-          "height": 302,
+          "height": -29,
           "name": "Movement",
           "series": [
             {

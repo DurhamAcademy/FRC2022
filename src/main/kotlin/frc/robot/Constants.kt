@@ -23,7 +23,7 @@ object Constants {
 
     // ------ Drivetrain ------ //
     // pids
-    const val DRIVE_P = 0.5
+    const val DRIVE_P = 0.0//0.5
     const val DRIVE_I = 0.0
     const val DRIVE_D = 0.0
 

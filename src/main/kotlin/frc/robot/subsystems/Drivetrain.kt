@@ -14,12 +14,12 @@ import edu.wpi.first.math.numbers.N2
 import edu.wpi.first.math.system.LinearSystem
 import edu.wpi.first.math.system.LinearSystemLoop
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.math.system.plant.LinearSystemId
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
+import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
+import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
-import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.PolarPose
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.polar
@@ -27,7 +27,7 @@ import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.milli
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
-import frc.kyberlib.motorcontrol.BrushType
+import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
@@ -40,27 +40,27 @@ import frc.robot.commands.drive.Drive
 /**
  * Mechanism that controls how the robot drives
  */
-object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
+object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     // motors
-    val leftMaster = KSparkMax(10, BrushType.BRUSHLESS).apply {
+    val leftMaster = KSparkMax(10).apply {
         identifier = "leftMaster"
         reversed = true
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
-    val rightMaster  = KSparkMax(12, BrushType.BRUSHLESS).apply {
+    val rightMaster  = KSparkMax(12).apply {
         identifier = "rightMaster"
         reversed = false
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
-    private val leftFollower  = KSparkMax(11, BrushType.BRUSHLESS).apply {
+    private val leftFollower  = KSparkMax(11).apply {
         identifier = "leftFollow"
         reversed = false
         currentLimit = 40
         follow(leftMaster)
     }
-    private val rightFollower = KSparkMax(13, BrushType.BRUSHLESS).apply {
+    private val rightFollower = KSparkMax(13).apply {
         identifier = "rightFollow"
         currentLimit = 40
         reversed = false
@@ -110,10 +110,10 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
                 kP = Constants.DRIVE_P
                 kI = Constants.DRIVE_I
                 kD = Constants.DRIVE_D
-
-                addFeedforward(leftFF)
             }
         }
+        leftMaster.addFeedforward(leftFF)
+        rightMaster.addFeedforward(rightFF)
         Navigator.instance!!.applyMovementRestrictions(5.39.feetPerSecond, 2.metersPerSecond)
         Navigator.instance!!.applyKinematics(kinematics)
     }
@@ -167,7 +167,7 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
-        debugDashboard()
+//        debugDashboard()
         RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
         if(Turret.targetVisible && Constants.NAVIGATION_CORRECTION)  {  // TODO: test
             val distance = Shooter.targetDistance!!
@@ -195,7 +195,7 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
             VecBuilder.fill(0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001)
         )
         driveSim.pose = RobotContainer.navigation.pose
-        Simulation.instance.include(this)
+        if (Game.sim) Simulation.instance.include(this)
     }
 
     fun betterDrivetrainSystem(): LinearSystem<N2, N2, N2> {  // todo: implement these into the builtin

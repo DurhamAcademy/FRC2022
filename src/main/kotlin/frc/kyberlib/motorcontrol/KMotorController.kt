@@ -58,7 +58,7 @@ data class KEncoderConfig(val cpr: Int, val type: EncoderType, val reversed: Boo
 abstract class KMotorController : KBasicMotorController(), Simulatable {
     open var motorType: DCMotor? = null
     private val updateNotifier = Notifier {
-        updateValues()
+//        updateValues()
         updateVoltage()
     }
     var updateRate: Time = KRobot.period.seconds  // builtin notifier system
@@ -66,7 +66,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             field = value
             if (field != KRobot.period.seconds) updateNotifier.startPeriodic(value.seconds)
         }
-    init { if (KSubsystem.motorDump == null) updateNotifier.startPeriodic(KRobot.period / 2.0) }
     // ----- configs ----- //
     /**
      * Defines the relationship between rotation and linear motion for the motor.
@@ -432,7 +431,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         super.initSendable(builder)
         builder.setActuator(true)
         builder.setUpdateTable {
-            updateValues()
+//            updateValues()
             updateVoltage()
         }
         if (linearConfigured) {
@@ -507,17 +506,17 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         set(value) {simPosition = linearToRotation(value)}
 
     fun setupSim(feedforward: SimpleMotorFeedforward) {
-        Simulation.instance.include(this)
+        if (Game.sim) Simulation.instance.include(this)
         simUpdater = { dt: Time -> feedforwardUpdate(feedforward.ks, feedforward.kv, feedforward.ka, dt) }
     }
     fun setupSim(feedforward: ArmFeedforward) {
         if(!brakeMode) log("Use brakeMode", logMode = LogMode.WARN)
-        Simulation.instance.include(this)
+        if (Game.sim) Simulation.instance.include(this)
         simUpdater = { dt: Time -> feedforwardUpdate(feedforward.ks + feedforward.kcos * position.cos, feedforward.kv, feedforward.ka, dt) }
     }
     fun setupSim(feedforward: ElevatorFeedforward) {
         if(!brakeMode) log("Use brakeMode", logMode = LogMode.WARN)
-        Simulation.instance.include(this)
+        if (Game.sim) Simulation.instance.include(this)
         simUpdater = {dt: Time -> feedforwardUpdate(feedforward.ks * voltage.sign + feedforward.kg, feedforward.kv, feedforward.ka, dt) }
     }
     private fun feedforwardUpdate(staticVolt: Double, kV: Double, kA: Double, dt: Time) {
@@ -547,7 +546,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     }
     fun setupSim(system: LinearSystem<N1, N1, N1>) {
         val sim = LinearSystemSim(system)
-        Simulation.instance.include(this)
+        if (Game.sim) Simulation.instance.include(this)
         simUpdater = { dt: Time ->
             sim.setInput(voltage)
             sim.update(dt.seconds)
@@ -557,7 +556,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     @JvmName("setupPositionSim")
     fun setupSim(system: LinearSystem<N2, N1, N1>) {
         val sim = LinearSystemSim(system)
-        Simulation.instance.include(this)
+        if (Game.sim) Simulation.instance.include(this)
         simUpdater = { dt: Time ->
             sim.setInput(voltage)
             sim.update(dt.seconds)
@@ -567,7 +566,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     @JvmName("setupDualSim")
     fun setupSim(system: LinearSystem<N2, N1, N2>) {
         val sim = LinearSystemSim(system)
-        Simulation.instance.include(this)
+        if (Game.sim) Simulation.instance.include(this)
         simUpdater = { dt: Time ->
             sim.setInput(voltage)
             sim.update(dt.seconds)

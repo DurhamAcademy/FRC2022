@@ -7,9 +7,10 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.util.Color8Bit
+import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
 import frc.kyberlib.command.Game
-import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.units.extensions.Time
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.inches
@@ -32,7 +33,7 @@ enum class ClimberStatus {
 /**
  * Mechanism representing the actuators for climbing
  */
-object Climber : KSubsystem(), Simulatable {
+object Climber : SubsystemBase(), Debug, Simulatable {
     override val priority: DebugLevel = DebugLevel.LowPriority
     var status = ClimberStatus.IDLE
 
@@ -163,7 +164,7 @@ object Climber : KSubsystem(), Simulatable {
     }
 
     override fun periodic() {
-        debugDashboard()
+//        debugDashboard()
     }
 
     override fun debugValues(): Map<String, Any?> {

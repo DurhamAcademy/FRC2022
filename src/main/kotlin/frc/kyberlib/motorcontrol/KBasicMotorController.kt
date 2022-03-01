@@ -16,14 +16,11 @@ abstract class KBasicMotorController : NTSendable, Debug {
         val allMotors = mutableListOf<KBasicMotorController>()
     }
 
-    init {
-        addReferences()
-    }
+    init { addReferences() }
     private fun addReferences() {
-        KSubsystem.motorDump?.add(this)
         allMotors.add(this)
     }
-    protected val followPeriodic = 0.005.seconds
+    protected val followPeriodic = 0.02.seconds
     var controlMode = ControlMode.NULL
     // ------ configs ----- //
     /**
@@ -148,7 +145,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
      * Internal update function
      */
     open fun update() {
-        updateValues()
+        percentCache = rawPercent
         updateFollowers()
     }
 
