@@ -1,5 +1,7 @@
 package frc.robot.subsystems
 
+import edu.wpi.first.math.StateSpaceUtil
+import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.MedianFilter
@@ -7,12 +9,10 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.TrapezoidProfile
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KSubsystem
-import frc.kyberlib.math.units.extensions.Angle
-import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.extensions.k
-import frc.kyberlib.math.units.extensions.radiansPerSecond
+import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.towards
 import frc.kyberlib.math.zeroIf
 import frc.kyberlib.motorcontrol.KMotorController.StateSpace.systemLoop
@@ -57,7 +57,7 @@ object Turret : KSubsystem() {
         val pid2020 = ProfiledPIDController(30.0, 2.0, 5.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
             this.setIntegratorRange(0.0,3.0)
         }
-        val offsetCorrector = ProfiledPIDController(2.0, 0.0, 0.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
+        val offsetCorrector = ProfiledPIDController(0.4, 0.0, 0.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
             setTolerance(Constants.TURRET_DEADBAND.radians)
             setIntegratorRange(-1.0, 1.0)
          }
@@ -69,6 +69,10 @@ object Turret : KSubsystem() {
             val offset = it.position - setpoint
             val offsetCorrection = offsetCorrector.calculate(offset.radians).radiansPerSecond
             val targetVelocity = offsetCorrection - chassisComp - movementComp
+            SmartDashboard.putNumber("off", offsetCorrection.degreesPerSecond)
+            SmartDashboard.putNumber("chas", -chassisComp.degreesPerSecond)
+            SmartDashboard.putNumber("mov", -movementComp.degreesPerSecond)
+            SmartDashboard.putNumber("tar", targetVelocity.degreesPerSecond)
             val velocityError = it.velocity - targetVelocity
             val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(velocityError.radiansPerSecond)
             if (offset < Constants.TURRET_TOLERANCE) status = TURRET_STATUS.LOCKED
@@ -111,11 +115,13 @@ object Turret : KSubsystem() {
     val targetVisible: Boolean 
         get() = Game.sim || (latestResult != null && latestResult!!.hasTargets())
     private val target: PhotonTrackedTarget?
-        get() = if(targetVisible) latestResult!!.bestTarget else null
+        get() = latestResult?.bestTarget
 
     val visionOffset: Angle?
         get() = if (Game.real) { target?.yaw?.let { visionFilter.calculate(it).degrees }
-        } else (RobotContainer.navigation.position.towards(Constants.HUB_POSITION) - fieldRelativeAngle).k
+        } else
+                (RobotContainer.navigation.position.towards(Constants.HUB_POSITION) - fieldRelativeAngle
+                + StateSpaceUtil.makeWhiteNoiseVector(VecBuilder.fill(1.0)).get(0, 0).degrees).k
     val visionPitch: Angle?
         get() = target?.pitch?.degrees
 
