@@ -1,17 +1,17 @@
 package frc.kyberlib.motorcontrol.rev
 
-import com.revrobotics.CANSparkMax
+import com.revrobotics.*
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
-import com.revrobotics.RelativeEncoder
-import com.revrobotics.SparkMaxPIDController
-import com.revrobotics.SparkMaxRelativeEncoder
 import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.milli
 import frc.kyberlib.motorcontrol.*
 import frc.kyberlib.motorcontrol.BrushType.BRUSHED
 import frc.kyberlib.motorcontrol.BrushType.BRUSHLESS
+import frc.kyberlib.motorcontrol.EncoderType
+import kotlin.time.Duration.Companion.milliseconds
 
 
 /**
@@ -22,7 +22,7 @@ import frc.kyberlib.motorcontrol.BrushType.BRUSHLESS
 class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRUSHLESS) : KMotorController() {
 
     // ----- low-level stuff ----- //
-    public override var identifier: String = CANRegistry.filterValues { it == canId }.keys.firstOrNull() ?: "can$canId"
+    override var identifier: String = CANRegistry.filterValues { it == canId }.keys.firstOrNull() ?: "can$canId"
 
     private val _spark = if (real) CANSparkMax(canId, when (brushType) {
         BRUSHLESS -> MotorType.kBrushless
@@ -61,7 +61,7 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
 
     override fun checkError(): Boolean {
         // check setCANTimeout
-        return false//_spark!!.stickyFaults
+        return if(real) _spark!!.getFault(CANSparkMax.FaultID.kCANTX) else false
     }
 
     override var brakeMode = false
@@ -94,8 +94,7 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
         }
 
     override fun stop() {
-        if (real)
-            _spark!!.stopMotor()
+        if (real) _spark!!.stopMotor()
         else simVelocity = 0.rpm
     }
 
@@ -140,4 +139,22 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
         }
         _enc?.position = position.rotations
     }
+
+    var errorRefreshRate = 10.milliseconds
+        set(value) {
+            field = value
+            _spark!!.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, value.inWholeMilliseconds.toInt())
+        }
+
+    var velocityRefreshRate = 20.milliseconds
+        set(value) {
+            field = value
+            _spark!!.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, value.inWholeMilliseconds.toInt())
+        }
+
+    var positionRefreshRate = 20.milliseconds
+        set(value) {
+            field = value
+            _spark!!.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, value.inWholeMilliseconds.toInt())
+        }
 }

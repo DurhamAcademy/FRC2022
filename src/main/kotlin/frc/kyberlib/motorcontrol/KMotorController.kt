@@ -57,10 +57,7 @@ data class KEncoderConfig(val cpr: Int, val type: EncoderType, val reversed: Boo
  */
 abstract class KMotorController : KBasicMotorController(), Simulatable {
     open var motorType: DCMotor? = null
-    private val updateNotifier = Notifier {
-        updateValues()
-        updateVoltage()
-    }
+    private val updateNotifier = Notifier { updateVoltage() }
     var updateRate: Time = KRobot.period.seconds  // builtin notifier system
         set(value) {
             field = value
@@ -230,11 +227,10 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Uses the motor state to determine what voltage should be applied.
      * Can be set to null to use in-built motor control system
      */
-    var customControl: ((it: KMotorController) -> Double)? = {
+    var customControl: ((it: KMotorController) -> Double)? = {  // todo: figure out if prebuilt should exist
         when (controlMode) {
             ControlMode.POSITION -> PID.calculate(positionError.radians)
             ControlMode.VELOCITY -> PID.calculate(velocityError.radiansPerSecond)
-            ControlMode.VOLTAGE -> it.voltage
             else -> 0.0
         }
     }
@@ -248,7 +244,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Angle that the motor is at / should be at
      */
     var position: Angle
-        get() = positionCache
+        get() = if (Game.real) (rawPosition * gearRatio.invertIf { reversed }).k else simPosition
         set(value) {
             controlMode = ControlMode.POSITION
             positionSetpoint = value
@@ -263,7 +259,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Spin rate of motor system
      */
     var velocity: AngularVelocity
-        get() = velocityCache
+        get() = if(Game.real) rawVelocity * gearRatio.invertIf { reversed } else simVelocity
         set(value) {
             controlMode = ControlMode.VELOCITY
             velocitySetpoint = value
@@ -345,23 +341,10 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Updates the voltage after changing position / velocity setpoint
      */
     fun updateVoltage() {
-        if (!quarentined && !isFollower && customControl != null && controlMode != ControlMode.VOLTAGE) {
+        if (!isFollower && customControl != null && controlMode != ControlMode.VOLTAGE) {
             customControlLock = true  // todo: mitigate customControl crashes
             safeSetVoltage(customControl!!(this))
             customControlLock = false
-        }
-    }
-
-    private var velocityCache: AngularVelocity = 0.radiansPerSecond
-    private var positionCache: Angle = 0.radians
-    override fun updateValues() {
-        if (Game.real) {
-            super.updateValues()
-            velocityCache = rawVelocity * gearRatio.invertIf { reversed }
-            positionCache = (rawPosition * gearRatio.invertIf { reversed }).k
-        } else {
-            velocityCache = simVelocity
-            positionCache = simPosition
         }
     }
 
@@ -433,7 +416,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         super.initSendable(builder)
         builder.setActuator(true)
         builder.setUpdateTable {
-            updateValues()
             updateVoltage()
         }
         if (linearConfigured) {
