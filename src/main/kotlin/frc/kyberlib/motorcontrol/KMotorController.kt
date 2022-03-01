@@ -155,8 +155,8 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         customControl = {
             when (controlMode) {
                 ControlMode.VELOCITY -> {
-//                    val ff = feedforward.calculate(velocity.radiansPerSecond, -velocityError.radiansPerSecond / KRobot.period / feedforward.ka / 1.0)
-                    val ff = feedforward.calculate(velocitySetpoint.radiansPerSecond)
+                    val ff = if (linearConfigured) feedforward.calculate(linearVelocitySetpoint.metersPerSecond)///, linearVelocitySetpoint.metersPerSecond, updateRate.seconds)
+                                else feedforward.calculate(velocitySetpoint.radiansPerSecond)//, velocitySetpoint.radiansPerSecond, updateRate.seconds)
                     val pid = PID.calculate(velocityError.radiansPerSecond)
                     ff + pid
                 }
@@ -193,11 +193,12 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         customControl = {
             when (controlMode) {
                 ControlMode.POSITION -> {
-                    val ff = feedforward.calculate(linearPosition.meters, PID.calculate(linearPositionError.meters))
-                    ff
+                    val ff = feedforward.calculate(0.0)
+                    val pid = PID.calculate(linearPositionError.meters)
+                    ff + pid
                 }
                 ControlMode.VELOCITY -> {
-                    val ff = feedforward.calculate(linearPosition.meters, linearVelocity.metersPerSecond)
+                    val ff = feedforward.calculate(linearVelocity.metersPerSecond)
                     val pid = PID.calculate(linearVelocityError.metersPerSecond)
                     ff + pid
                 }
@@ -649,9 +650,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             val nextVoltage = loop.getU(0)  // input
             nextVoltage
         }
-        if(timeDelay != 0.02.seconds) {
-            Notifier{ updateVoltage() }.startPeriodic(timeDelay.seconds)
-        }
+        updateRate = timeDelay
     }
     @JvmName("positionStateSpaceControl")
     fun stateSpaceControl(loop: LinearSystemLoop<N2, N1, N1>, timeDelay: Time=0.02.seconds) {
@@ -662,9 +661,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             val nextVoltage = loop.getU(0)  // input
             nextVoltage
         }
-        if(timeDelay != 0.02.seconds) {
-            Notifier{ updateVoltage() }.startPeriodic(timeDelay.seconds)
-        }
+        updateRate = timeDelay
     }
     @JvmName("dualStateSpaceControl")
     fun stateSpaceControl(loop: LinearSystemLoop<N2, N1, N2>, timeDelay: Time=0.02.seconds) {
@@ -675,9 +672,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             val nextVoltage = loop.getU(0)  // input
             nextVoltage
         }
-        if(timeDelay != 0.02.seconds) {
-            Notifier{ updateVoltage() }.startPeriodic(timeDelay.seconds)
-        }
+        updateRate = timeDelay
     }
     @JvmName("velocityStateSpaceControl")
     fun stateSpaceControl(plant: LinearSystem<N1, N1, N1>, modelAccuracy: Double, measurementAccuracy: Double, errorCost: Double, inputCost: Double=12.0, timeDelay: Time=0.02.seconds) { stateSpaceControl(StateSpace.systemLoop(plant, modelAccuracy, measurementAccuracy, errorCost, inputCost, timeDelay)) }

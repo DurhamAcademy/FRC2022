@@ -110,10 +110,10 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
                 kP = Constants.DRIVE_P
                 kI = Constants.DRIVE_I
                 kD = Constants.DRIVE_D
-
-                addFeedforward(leftFF)
             }
         }
+        leftMaster.addFeedforward(leftFF)
+        rightMaster.addFeedforward(rightFF)
         Navigator.instance!!.applyMovementRestrictions(5.39.feetPerSecond, 2.metersPerSecond)
         Navigator.instance!!.applyKinematics(kinematics)
     }
@@ -147,7 +147,7 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
     fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) {
         leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
         rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
-        if(Constants.doStateSpace) {
+        if(true || Constants.doStateSpace) {
             loop.nextR = VecBuilder.fill(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond)  // r = reference (setpoint)
             loop.correct(VecBuilder.fill(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond))  // update with empirical
             loop.predict(KRobot.period)  // math
@@ -202,12 +202,10 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
 //        return LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka)
         val kVAngular = angularFeedforward.kv * 2.0 / Constants.TRACK_WIDTH
         val kAAngular = angularFeedforward.ka * 2.0 / Constants.TRACK_WIDTH
-        val kVLinear = leftFF.kv
-        val kALinear = leftFF.ka
-        val A1: Double = 0.5 * -(kVLinear / kALinear + kVAngular / kAAngular)
-        val A2: Double = 0.5 * -(kVLinear / kALinear - kVAngular / kAAngular)
-        val B1: Double = 0.5 * (1.0 / kALinear + 1.0 / kAAngular)
-        val B2: Double = 0.5 * (1.0 / kALinear - 1.0 / kAAngular)
+        val A1: Double = 0.5 * -(leftFF.kv / leftFF.ka + kVAngular / kAAngular)
+        val A2: Double = 0.5 * -(rightFF.kv / rightFF.ka - kVAngular / kAAngular)
+        val B1: Double = 0.5 * (1.0 / leftFF.ka + 1.0 / kAAngular)
+        val B2: Double = 0.5 * (1.0 / rightFF.ka - 1.0 / kAAngular)
 
         return LinearSystem(
             Matrix.mat(Nat.N2(), Nat.N2()).fill(A1, A2, A2, A1),
