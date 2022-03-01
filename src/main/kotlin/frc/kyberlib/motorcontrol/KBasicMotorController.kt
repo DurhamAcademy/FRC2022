@@ -57,12 +57,12 @@ abstract class KBasicMotorController : NTSendable, Debug {
     /**
      * What percent output is currently being applied?
      */
-    var percent: Double
-        get() = rawPercent
+    var percent: Double = 0.0
+        get() = if (Game.real) rawPercent else field
         set(value) {
             val adjusted = value.invertIf { reversed }
             controlMode = ControlMode.VOLTAGE
-            if (real) rawPercent = adjusted
+            if (real) rawPercent = adjusted else field = value
         }
 
     /**

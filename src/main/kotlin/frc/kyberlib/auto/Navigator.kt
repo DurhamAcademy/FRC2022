@@ -59,14 +59,17 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
         get() = gyro.heading
         set(value) {gyro.heading = value}
     var pose: Pose2d  // the location and direction of the robot
-        get() = poseEstimator.getEstimatedPosition()
+        get() = if(Constants.NAVIGATION_CORRECTION) poseEstimator.estimatedPosition else odometry.poseMeters
         set(value) {
             poseEstimator.resetPosition(value, heading)
+            odometry.resetPosition(value, heading)
             KField2d.robotPose = value
         }
     val position: Translation2d  // the estimated location of the robot
         get() = pose.translation
-    val odometry = DifferentialDriveOdometry(Constants.START_POSE.rotation)
+    val odometry = DifferentialDriveOdometry(Constants.START_POSE.rotation).apply {
+        resetPosition(Constants.START_POSE, heading)
+    }
 
     /**
      * Update position based on estimated motion

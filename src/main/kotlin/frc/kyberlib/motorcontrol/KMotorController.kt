@@ -434,17 +434,18 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     }
     override fun debugValues(): Map<String, Any?> {
         val map = super.debugValues().toMutableMap()
-        map.putAll(mapOf(
-            "Angular Position" to position,
-            "Angular Velocity" to velocity,
-            // "Angular Acceleration (rad per s per s)" to acceleration.radiansPerSecond  // temporary (here for testing)
-        ))
         if (linearConfigured)
             map.putAll(mapOf(
                 "Linear Position" to linearPosition,
                 "Linear Velocity" to linearVelocity,
                 // "Linear Acceleration (m per s per s)" to linearAcceleration.metersPerSecond
             ))
+        else
+            map.putAll(mapOf(
+            "Angular Position" to position,
+            "Angular Velocity" to velocity,
+            // "Angular Acceleration (rad per s per s)" to acceleration.radiansPerSecond  // temporary (here for testing)
+        ))
         if (controlMode == ControlMode.POSITION) {
             if (linearConfigured)
                 map.putAll(mapOf(

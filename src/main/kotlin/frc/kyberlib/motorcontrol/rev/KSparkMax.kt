@@ -3,10 +3,8 @@ package frc.kyberlib.motorcontrol.rev
 import com.revrobotics.*
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import frc.kyberlib.command.LogMode
-import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.math.units.milli
 import frc.kyberlib.motorcontrol.*
 import frc.kyberlib.motorcontrol.BrushType.BRUSHED
 import frc.kyberlib.motorcontrol.BrushType.BRUSHLESS
@@ -31,6 +29,7 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
     private var _enc: RelativeEncoder? = null
     private val _pid = _spark?.pidController
 
+    // todo: think about moving functionality back here for speed
     // todo: check this works
     override var minPosition: Angle? = null
         set(value) {
@@ -67,14 +66,13 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
     override var brakeMode = false
         get() = if(real) _spark!!.idleMode == CANSparkMax.IdleMode.kBrake else field
         set(value) {
-            if (real)
-                _spark!!.idleMode = if(value) CANSparkMax.IdleMode.kBrake else CANSparkMax.IdleMode.kCoast
+            if (real) _spark!!.idleMode = if(value) CANSparkMax.IdleMode.kBrake else CANSparkMax.IdleMode.kCoast
             else field = value
         }
 
     override var rawPercent
         get() = _spark!!.appliedOutput
-        set(value) {_spark!!.set(value)}
+        set(value) {_spark?.set(value)}
 
     override var rawReversed: Boolean
         get() = _spark!!.inverted
@@ -84,13 +82,13 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
     override var rawVelocity: AngularVelocity
         get() = _enc!!.velocity.rpm//velCalc.calculate(rawPosition.radians).radiansPerSecond//_enc!!.velocity.rpm
         set(value) {
-            _pid!!.setReference(value.rpm, CANSparkMax.ControlType.kVelocity, 0, 0.0, SparkMaxPIDController.ArbFFUnits.kVoltage)
+            _pid?.setReference(value.rpm, CANSparkMax.ControlType.kVelocity, 0, 0.0, SparkMaxPIDController.ArbFFUnits.kVoltage)
         }
 
     override var rawPosition: Angle
         get() = _enc!!.position.rotations
         set(value) {
-            _pid!!.setReference(value.rotations, CANSparkMax.ControlType.kPosition, 0, 0.0, SparkMaxPIDController.ArbFFUnits.kVoltage)
+            _pid?.setReference(value.rotations, CANSparkMax.ControlType.kPosition, 0, 0.0, SparkMaxPIDController.ArbFFUnits.kVoltage)
         }
 
     override fun stop() {
@@ -125,6 +123,8 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
     }
 
     override fun followTarget(kmc: KBasicMotorController) {
+        velocityRefreshRate = 100.milliseconds
+        positionRefreshRate = 100.milliseconds
         if (kmc is KSparkMax && real) {
             _spark?.follow(kmc._spark, reversed)
         } else {
@@ -140,21 +140,22 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
         _enc?.position = position.rotations
     }
 
+    // todo: replace with kyberlib time
     var errorRefreshRate = 10.milliseconds
         set(value) {
             field = value
-            _spark!!.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, value.inWholeMilliseconds.toInt())
+            if (real) _spark!!.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, value.inWholeMilliseconds.toInt())
         }
 
     var velocityRefreshRate = 20.milliseconds
         set(value) {
             field = value
-            _spark!!.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, value.inWholeMilliseconds.toInt())
+            if (real) _spark!!.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, value.inWholeMilliseconds.toInt())
         }
 
     var positionRefreshRate = 20.milliseconds
         set(value) {
             field = value
-            _spark!!.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, value.inWholeMilliseconds.toInt())
+            if(real) _spark!!.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, value.inWholeMilliseconds.toInt())
         }
 }

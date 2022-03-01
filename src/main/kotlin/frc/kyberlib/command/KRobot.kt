@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.TimedRobot
 import edu.wpi.first.wpilibj.livewindow.LiveWindow
 import edu.wpi.first.wpilibj2.command.CommandScheduler
-import frc.kyberlib.motorcontrol.KBasicMotorController
 
 open class KRobot() {
     companion object {
@@ -23,7 +22,6 @@ open class KRobot() {
 
         override fun robotInit() {
             Debug.log("Robot", "robot init", level=DebugLevel.LowPriority)
-            for(motor in KBasicMotorController.allMotors) motor.updateValues()
             HAL.report(FRCNetComm.tResourceType.kResourceType_Language, FRCNetComm.tInstances.kLanguage_Kotlin)
             if (Game.real) LiveWindow.disableAllTelemetry()
             this@KRobot.robotInit()
