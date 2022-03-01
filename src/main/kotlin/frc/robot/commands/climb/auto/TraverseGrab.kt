@@ -18,7 +18,7 @@ class TraverseGrab : CommandBase() {
     override fun initialize() {
         Debug.log("Traverse Grab", "init", level = DebugLevel.LowPriority)
         Climber.extendableAngle = 25.degrees
-        Climber.extension = 30.inches
+        Climber.extension = 10.inches
     }
 
     override fun execute() {
@@ -29,8 +29,8 @@ class TraverseGrab : CommandBase() {
     }
 
     override fun end(interrupted: Boolean) {
-        Climber.extension = 18.inches
+        Climber.extension = 10.inches
     }
 
-    override fun isFinished(): Boolean = false //Climber.leftExtendable.positionError < 3.degrees
+    override fun isFinished(): Boolean = Climber.leftExtendable.positionError < 3.degrees
 }

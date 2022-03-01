@@ -5,8 +5,6 @@ import frc.robot.Constants
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
 import frc.robot.RobotContainer
-
-//hi
 import frc.robot.subsystems.Intaker
 import frc.robot.subsystems.Conveyor
 
@@ -16,17 +14,12 @@ import frc.robot.subsystems.Conveyor
 object Intake : CommandBase() {
     init {
         addRequirements(Intaker)
-        addRequirements(Conveyor)
     }
 
     override fun initialize() {
         Debug.log("Intake", "start", level=DebugLevel.LowPriority)
-        Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
-    }
-
-    override fun execute() {
-        Conveyor.idle()
         Intaker.deployed = true
+        Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
     }
 
     override fun end(interrupted: Boolean) {

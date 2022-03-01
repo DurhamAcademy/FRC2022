@@ -25,11 +25,7 @@ class PopClimb : CommandBase() {
     }
 
     override fun execute() {
-        Climber.leftWinch.updateVoltage()
-        Climber.rightWinch.updateVoltage()
-
-        Climber.leftExtendable.updateVoltage()
-        Climber.rightExtendable.updateVoltage()
+        Climber.updateMotors()
     }
 
     override fun end(interrupted: Boolean) {
@@ -38,6 +34,6 @@ class PopClimb : CommandBase() {
 
     override fun isFinished(): Boolean {
         return Climber.leftWinch.linearPositionError < 2.inches && Climber.leftWinch.linearPositionError < 2.inches
-                && Climber.leftExtendable.positionError < 4.degrees && Climber.rightExtendable.positionError < 4.degrees
+                && Climber.leftExtendable.positionError < 2.degrees && Climber.rightExtendable.positionError < 2.degrees
     }
 }

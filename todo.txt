@@ -1,10 +1,28 @@
 In Sim:
-Full Auto Climb?
-Refractor some variables
-Auto Paths?
-Make sure things are isolatable
-documentation of kyberlib
+fancy drivetrain
+ask trevor what proper cheesy drive is (also any additional plans he had for Overthrow)
+Make sure things are isolatable (specifically autoDrive)
+kyberlib optimizations
+think about roborio2
 
 With robot:
+Drivetrain characterization
+Turret tuning
+loop times - maybe resolved
 Tune feedforwards
 Auto paths
+
+Anyone can do:
+1. mount hall sensor or limit switch for turret
+2. mess with auto paths
+How? -->
+- search for Pathweaver.jar on your laptop
+- open the availble project
+- drag around the nodes until you like the line.
+- find the save button (it's something like build path)
+- move output into code (Pathweaver/output to src/main.deploy
+- switch the name of the auto path in Robot.kt
+
+3. Conveyor Code (Everetts messing with this)
+4. documentation of kyberlib (good project to try to understand whats happening)
+5. Try auto climb

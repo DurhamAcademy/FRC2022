@@ -1,62 +1,66 @@
 package frc.robot.subsystems
 
+import edu.wpi.first.math.Matrix
+import edu.wpi.first.math.Nat
+import edu.wpi.first.math.VecBuilder
+import edu.wpi.first.math.controller.LinearQuadraticRegulator
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.estimator.KalmanFilter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
-import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.math.numbers.N2
+import edu.wpi.first.math.system.LinearSystem
+import edu.wpi.first.math.system.LinearSystemLoop
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.system.plant.LinearSystemId
-import edu.wpi.first.wpilibj2.command.SubsystemBase
-import edu.wpi.first.math.VecBuilder
-import frc.robot.Constants
-import frc.robot.RobotContainer
-import frc.robot.commands.drive.Drive
-import frc.robot.commands.shooter.Shoot
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import frc.kyberlib.auto.Navigator
-import frc.kyberlib.auto.trajectory.KTrajectory
-import frc.kyberlib.auto.trajectory.KTrajectoryConfig
 import frc.kyberlib.command.Game
-import frc.kyberlib.math.units.Prefixes
-import frc.kyberlib.math.units.Translation2d
+import frc.kyberlib.command.KRobot
+import frc.kyberlib.command.KSubsystem
+import frc.kyberlib.math.PolarPose
+import frc.kyberlib.math.invertIf
+import frc.kyberlib.math.polar
 import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.milli
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
-import frc.kyberlib.motorcontrol.MotorType
+import frc.kyberlib.motorcontrol.BrushType
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
 import frc.kyberlib.simulation.field.KField2d
-import frc.kyberlib.math.zeroIf
-import kotlin.math.absoluteValue
-import kotlin.math.cos
-import kotlin.math.sin
+import frc.robot.Constants
+import frc.robot.RobotContainer
+import frc.robot.commands.drive.Drive
 
 
 /**
  * Mechanism that controls how the robot drives
  */
-object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
+object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
     // motors
-    val leftMaster = KSparkMax(10, MotorType.BRUSHLESS).apply {
+    val leftMaster = KSparkMax(10, BrushType.BRUSHLESS).apply {
         identifier = "leftMaster"
-        reversed = false
-        currentLimit = 40
-    }
-    val rightMaster  = KSparkMax(12, MotorType.BRUSHLESS).apply {
-        identifier = "rightMaster"
         reversed = true
         currentLimit = 40
+        motorType = DCMotor.getNEO(2)
     }
-    private val leftFollower  = KSparkMax(11, MotorType.BRUSHLESS).apply {
+    val rightMaster  = KSparkMax(12, BrushType.BRUSHLESS).apply {
+        identifier = "rightMaster"
+        reversed = false
+        currentLimit = 40
+        motorType = DCMotor.getNEO(2)
+    }
+    private val leftFollower  = KSparkMax(11, BrushType.BRUSHLESS).apply {
         identifier = "leftFollow"
         reversed = false
         currentLimit = 40
         follow(leftMaster)
     }
-    private val rightFollower = KSparkMax(13, MotorType.BRUSHLESS).apply {
+    private val rightFollower = KSparkMax(13, BrushType.BRUSHLESS).apply {
         identifier = "rightFollow"
         currentLimit = 40
         reversed = false
@@ -72,27 +76,86 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
     var wheelSpeeds: DifferentialDriveWheelSpeeds  // variable representing the speed of each side of the drivetrain
         get() = DifferentialDriveWheelSpeeds(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond)
         set(value) { drive(value) }
-    val fieldRelativeSpeeds: ChassisSpeeds  // robot speeds from the perspective of the driver
-        get() {
-            val pose = Navigator.instance!!.pose
-            val robotRelativeSpeeds = chassisSpeeds
-            val vx = chassisSpeeds.vxMetersPerSecond * cos(pose.rotation.radians)
-            val vy = chassisSpeeds.vxMetersPerSecond * sin(pose.rotation.radians)
-            return ChassisSpeeds(vx, vy, robotRelativeSpeeds.omegaRadiansPerSecond)
+    var pose
+        get() = RobotContainer.navigation.pose
+        set(value) {
+            val latency = RobotContainer.limelight.latestResult!!.latencyMillis.milli.seconds
+            val detectionTime = Game.time - latency
+            RobotContainer.navigation.update(value, detectionTime)
         }
+    var polarCoordinates
+        get() = RobotContainer.navigation.pose.polar(Constants.HUB_POSITION)
+        set(value) {
+            pose = Pose2d(value.cartesian(Constants.HUB_POSITION).translation, RobotContainer.navigation.heading)
+        }
+    val polarSpeeds
+        get() = chassisSpeeds.polar(RobotContainer.navigation.pose.polar(Constants.HUB_POSITION))
 
-    // commands
+
+    // setup motors
+    private val leftFF = SimpleMotorFeedforward(Constants.DRIVE_KS_L, Constants.DRIVE_KV_L, Constants.DRIVE_KA_L)
+    private val rightFF = SimpleMotorFeedforward(Constants.DRIVE_KS_R, Constants.DRIVE_KV_R, Constants.DRIVE_KA_R)
+    private val angularFeedforward = SimpleMotorFeedforward(0.90868, 2.7143, 0.14424)
+    init {
+        defaultCommand = Drive
+
+        // setup controls for drive motors
+        for (motor in motors) {
+            motor.apply {
+                brakeMode = true
+                gearRatio = Constants.DRIVE_GEAR_RATIO
+                radius = Constants.WHEEL_RADIUS
+                currentLimit = 40
+
+                kP = Constants.DRIVE_P
+                kI = Constants.DRIVE_I
+                kD = Constants.DRIVE_D
+
+                addFeedforward(leftFF)
+            }
+        }
+        Navigator.instance!!.applyMovementRestrictions(5.39.feetPerSecond, 2.metersPerSecond)
+        Navigator.instance!!.applyKinematics(kinematics)
+    }
+
     /**
      * Drive the robot at the provided speeds
      */
     override fun drive(speeds: ChassisSpeeds) { drive(kinematics.toWheelSpeeds(speeds)) }
-
+    val driveSystem = betterDrivetrainSystem()
+    val loop = LinearSystemLoop(
+        driveSystem,
+        LinearQuadraticRegulator(
+            driveSystem,
+            VecBuilder.fill(0.1, 0.1),  // left/right velocity error tolerance
+            VecBuilder.fill(Game.batteryVoltage, Game.batteryVoltage),
+            KRobot.period
+        ),
+        KalmanFilter(
+            N2.instance, N2.instance,
+            driveSystem,
+            VecBuilder.fill(3.0, 3.0),
+            VecBuilder.fill(.01, 0.01),
+            KRobot.period
+        ),
+        Game.batteryVoltage,
+        KRobot.period
+    )
     /**
      * Drive the robot at the provided speeds
      */
     fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) {
         leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
         rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
+        if(Constants.doStateSpace) {
+            loop.nextR = VecBuilder.fill(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond)  // r = reference (setpoint)
+            loop.correct(VecBuilder.fill(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond))  // update with empirical
+            loop.predict(KRobot.period)  // math
+            val leftVoltage = loop.getU(0)  // input
+            val rightVoltage = loop.getU(1)
+            leftMaster.voltage = leftVoltage
+            rightMaster.voltage = rightVoltage
+        }
     }
 
     fun stop() {
@@ -104,17 +167,12 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
-        debugValues()
-        RobotContainer.navigation.update(wheelSpeeds)
+        debugDashboard()
+        RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
         if(Turret.targetVisible && Constants.NAVIGATION_CORRECTION)  {  // TODO: test
-            val distance = Shooter.targetDistance!! + 2.feet  // two feet is the radius of the hub
-            val angle = Turret.visionOffset!! + Turret.fieldRelativeAngle
-            val transform = Translation2d(distance, 0.meters).rotateBy(angle)
-            val newPosition = Constants.HUB_POSITION.minus(transform)
-            val resultDelay = (RobotContainer.limelight.latestResult!!.latencyMillis / Prefixes.milli).seconds
-            val time = (Game.time - resultDelay).seconds * Prefixes.milli
-            RobotContainer.navigation.update(Pose2d(newPosition, RobotContainer.navigation.heading), time)
-
+            val distance = Shooter.targetDistance!!
+            val angle = Turret.visionOffset!! + Turret.fieldRelativeAngle + 180.degrees
+            polarCoordinates = PolarPose(distance, angle, Turret.visionOffset!!)
         }
     }
 
@@ -123,60 +181,59 @@ object Drivetrain : SubsystemBase(), KDrivetrain, Simulatable {
         KField2d.robotPose = RobotContainer.navigation.pose
     }
 
-    // setup motors
-    init {
-        defaultCommand = Drive
-
-        // setup controls for drive motors
-        val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
-        if(Game.sim) Simulation.instance.chassisFF = feedforward
-        for (motor in motors) {
-            motor.apply {
-                brakeMode = true
-                gearRatio = Constants.DRIVE_GEAR_RATIO
-                radius = Constants.WHEEL_RADIUS
-                currentLimit = 40
-
-//                kP = Constants.DRIVE_P
-//                kI = Constants.DRIVE_I
-//                kD = Constants.DRIVE_D
-
-                addFeedforward(feedforward)
-            }
-        }
-        Navigator.instance!!.applyMovementRestrictions(5.39.feetPerSecond, 2.metersPerSecond)
-        Navigator.instance!!.applyKinematics(kinematics)
-    }
-
-
     // ignore this, it is sim and debug support
     private lateinit var driveSim: DifferentialDrivetrainSim
-    fun setupSim(KvAngular: Double = 8.5, KaAngular: Double = 0.5) {
+    fun setupSim() {
         driveSim = DifferentialDrivetrainSim( // Create a linear system from our characterization gains.
-            LinearSystemId.identifyDrivetrainSystem(Constants.DRIVE_KV, Constants.DRIVE_KA, KvAngular, KaAngular),
+            betterDrivetrainSystem(),
+//            LinearSystemId.identifyDrivetrainSystem(Constants.DRIVE_KV_L, Constants.DRIVE_KA_L, KvAngular, KaAngular),
             DCMotor.getNEO(2),  // 2 NEO motors on each side of the drivetrain.
             leftMaster.gearRatio,  // gearing reduction
             kinematics.trackWidthMeters,  // The track width
             leftMaster.radius!!.meters,  // wheel radius
-            // The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
-            VecBuilder.fill(0.000, 0.000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000)
+//             The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
+            VecBuilder.fill(0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001)
+        )
+        driveSim.pose = RobotContainer.navigation.pose
+        Simulation.instance.include(this)
+    }
+
+    fun betterDrivetrainSystem(): LinearSystem<N2, N2, N2> {  // todo: implement these into the builtin
+//        return LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka)
+        val kVAngular = angularFeedforward.kv * 2.0 / Constants.TRACK_WIDTH
+        val kAAngular = angularFeedforward.ka * 2.0 / Constants.TRACK_WIDTH
+        val kVLinear = leftFF.kv
+        val kALinear = leftFF.ka
+        val A1: Double = 0.5 * -(kVLinear / kALinear + kVAngular / kAAngular)
+        val A2: Double = 0.5 * -(kVLinear / kALinear - kVAngular / kAAngular)
+        val B1: Double = 0.5 * (1.0 / kALinear + 1.0 / kAAngular)
+        val B2: Double = 0.5 * (1.0 / kALinear - 1.0 / kAAngular)
+
+        return LinearSystem(
+            Matrix.mat(Nat.N2(), Nat.N2()).fill(A1, A2, A2, A1),
+            Matrix.mat(Nat.N2(), Nat.N2()).fill(B1, B2, B2, B1),
+            Matrix.mat(Nat.N2(), Nat.N2()).fill(1.0, 0.0, 0.0, 1.0),
+            Matrix.mat(Nat.N2(), Nat.N2()).fill(0.0, 0.0, 0.0, 0.0)
         )
     }
 
+    init {
+        if(Game.sim) setupSim()
+    }
     override fun simUpdate(dt: Time) {
         // update the sim with new inputs
-        val leftVolt = leftMaster.voltage.zeroIf{it: Double -> it.absoluteValue < Constants.DRIVE_KS}
-        val rightVolt = rightMaster.voltage.zeroIf{it: Double -> it.absoluteValue < Constants.DRIVE_KS}
-        if (leftVolt == 0.0 && rightVolt == 0.0) return
+        val leftVolt = leftMaster.voltage.invertIf { leftMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
+        val rightVolt = rightMaster.voltage.invertIf { rightMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
         driveSim.setInputs(leftVolt, rightVolt)
         driveSim.update(dt.seconds)
-
-        // update the motors with what they should be
+//
+//         update the motors with what they should be
         leftMaster.simLinearPosition = driveSim.leftPositionMeters.meters
         leftMaster.simLinearVelocity = driveSim.leftVelocityMetersPerSecond.metersPerSecond
         rightMaster.simLinearPosition = driveSim.rightPositionMeters.meters
         rightMaster.simLinearVelocity = driveSim.rightVelocityMetersPerSecond.metersPerSecond
         Navigator.instance!!.heading = driveSim.heading.k
+//        Navigator.instance!!.heading += chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond * dt
     }
 
     override fun debugValues(): Map<String, Any?> {

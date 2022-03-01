@@ -4,8 +4,8 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.RobotController
 import edu.wpi.first.wpilibj.RobotState
-import frc.kyberlib.math.units.Prefixes
 import frc.kyberlib.math.units.extensions.seconds
+import frc.kyberlib.math.units.micro
 
 object Game {
     val real
@@ -34,7 +34,7 @@ object Game {
         get() = RobotController.getBatteryVoltage()
 
     val time
-        get() = RobotController.getFPGATime().seconds * Prefixes.micro
+        get() = RobotController.getFPGATime().micro.seconds
 
     val alliance: DriverStation.Alliance = DriverStation.getAlliance()
     val game: String = DriverStation.getGameSpecificMessage()

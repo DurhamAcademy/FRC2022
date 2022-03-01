@@ -1,5 +1,7 @@
 package frc.kyberlib.mechanisms.drivetrain
 
+import edu.wpi.first.math.Matrix
+import edu.wpi.first.math.Nat
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
@@ -11,18 +13,26 @@ import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.system.plant.LinearSystemId
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.math.VecBuilder
+import edu.wpi.first.math.controller.LinearQuadraticRegulator
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.estimator.KalmanFilter
+import edu.wpi.first.math.numbers.N2
+import edu.wpi.first.math.system.LinearSystem
+import edu.wpi.first.math.system.LinearSystemLoop
+import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.Game
+import frc.kyberlib.command.KRobot
+import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.sensors.gyros.KGyro
 import frc.kyberlib.simulation.Simulatable
-
-/**
- * Stores important information for the motion of a DifferentialDrive Robot
- */
-data class DifferentialDriveConfigs(val wheelRadius: Length, val trackWidth: Length)
+import frc.kyberlib.simulation.Simulation
+import frc.robot.Constants
+import frc.robot.subsystems.Drivetrain
 
 /**
  * Pre-made DifferentialDrive Robot.
@@ -31,38 +41,22 @@ data class DifferentialDriveConfigs(val wheelRadius: Length, val trackWidth: Len
  * @param configs information about the physical desciption of this drivetrain
  * @param gyro KGyro to provide heading information
  */
-class DifferentialDriveTrain(private val leftMotors: Array<KMotorController>, private val rightMotors: Array<KMotorController>,
-                             private val configs: DifferentialDriveConfigs, val gyro: KGyro) : SubsystemBase(), Simulatable,
-    KDrivetrain, Debug {
-    constructor(leftMotor: KMotorController, rightMotor: KMotorController,
-                configs: DifferentialDriveConfigs, gyro: KGyro) : this(arrayOf(leftMotor), arrayOf(rightMotor), configs, gyro)
+abstract class DifferentialDriveTrain: KSubsystem(), Simulatable, KDrivetrain, Debug {
 
-    private val motors = leftMotors.plus(rightMotors)
-    private val leftMaster = leftMotors[0]
-    private val rightMaster = rightMotors[0]
+    abstract val leftMaster: KMotorController
+    abstract val rightMaster: KMotorController
+    abstract val trackWidth: Length
 
-    init {
-        for (info in leftMotors.withIndex()) if (info.index > 0) info.value.follow(leftMaster)
-        for (info in rightMotors.withIndex()) if (info.index > 0) info.value.follow(rightMaster)
-        for (motor in motors)
-            motor.radius = configs.wheelRadius
-    }
-
+    abstract val leftFF: SimpleMotorFeedforward
+    abstract val rightFF: SimpleMotorFeedforward
+    abstract val angularFeedforward: SimpleMotorFeedforward
     // control values
-    private val odometry = DifferentialDriveOdometry(0.degrees)
-    private val kinematics = DifferentialDriveKinematics(configs.trackWidth.meters)
+    private val kinematics = DifferentialDriveKinematics(trackWidth.meters)
 
-    // useful information
-    var pose: Pose2d
-        set(value) {
-            odometry.resetPosition(value, gyro.heading)
-        }
-        get() = odometry.poseMeters
-    var heading
-        get() = gyro.heading
-        set(value) {gyro.heading = value}
     override val chassisSpeeds: ChassisSpeeds
-        get() = kinematics.toChassisSpeeds(DifferentialDriveWheelSpeeds(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond))
+        get() = kinematics.toChassisSpeeds(wheelSpeeds)
+    val wheelSpeeds
+        get() = DifferentialDriveWheelSpeeds(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond)
 
     // drive functions
     override fun drive(speeds: ChassisSpeeds) {
@@ -75,20 +69,24 @@ class DifferentialDriveTrain(private val leftMotors: Array<KMotorController>, pr
     }
 
     override fun periodic() {
-        odometry.update(gyro.heading, leftMaster.linearPosition.meters, rightMaster.linearPosition.meters)
+        Navigator.instance!!.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
     }
 
+    init {
+        if(Game.sim) setupSim()
+    }
     private lateinit var driveSim: DifferentialDrivetrainSim
-    fun setupSim(KvLinear: Double, KaLinear: Double, KvAngular: Double, KaAngular: Double) {
+    fun setupSim() {
         driveSim = DifferentialDrivetrainSim( // Create a linear system from our characterization gains.
-            LinearSystemId.identifyDrivetrainSystem(KvLinear, KaLinear, KvAngular, KaAngular),
+            driveSystem,
             DCMotor.getNEO(2),  // 2 NEO motors on each side of the drivetrain.
-            1.0,  // gearing reduction
-            1.0,  // The track width
-            0.1,  // wheel radius
+            leftMaster.gearRatio,  // gearing reduction
+            trackWidth.value,  // The track width
+            leftMaster.radius!!.value,  // wheel radius
             // The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
             VecBuilder.fill(0.001, 0.001, 0.001, 0.1, 0.1, 0.005, 0.005)
         )
+        Simulation.instance.include(this)
     }
 
     override fun simUpdate(dt: Time) {
@@ -101,18 +99,48 @@ class DifferentialDriveTrain(private val leftMotors: Array<KMotorController>, pr
         leftMaster.simLinearVelocity = driveSim.leftVelocityMetersPerSecond.metersPerSecond
         rightMaster.simLinearPosition = driveSim.rightPositionMeters.meters
         rightMaster.simLinearVelocity = driveSim.rightVelocityMetersPerSecond.metersPerSecond
-        gyro.heading = driveSim.heading.k
+        Navigator.instance!!.heading = driveSim.heading.k
     }
 
+    private val driveSystem: LinearSystem<N2, N2, N2>
+        get() {
+            val kVAngular = angularFeedforward.kv * 2.0 / trackWidth.value
+            val kAAngular = angularFeedforward.ka * 2.0 / trackWidth.value
+            val A1: Double = 0.5 * -(leftFF.kv / kAAngular + kVAngular / kAAngular)
+            val A2: Double = 0.5 * -(rightFF.kv / kAAngular + kVAngular / kAAngular)
+            val B1: Double = 0.5 * (1.0 / leftFF.ka + 1.0 / kAAngular)
+            val B2: Double = 0.5 * (1.0 / rightFF.ka - 1.0 / kAAngular)
+
+            return LinearSystem(
+                Matrix.mat(Nat.N2(), Nat.N2()).fill(A1, A2, A2, A1),
+                Matrix.mat(Nat.N2(), Nat.N2()).fill(B1, B2, B2, B1),
+                Matrix.mat(Nat.N2(), Nat.N2()).fill(1.0, 0.0, 0.0, 1.0),
+                Matrix.mat(Nat.N2(), Nat.N2()).fill(0.0, 0.0, 0.0, 0.0)
+            )
+        }
+    private val velocityTolerance = 0.5
+    private val optimizer = LinearQuadraticRegulator(
+        driveSystem,
+        VecBuilder.fill(velocityTolerance, velocityTolerance),  // left/right velocity error tolerance
+        VecBuilder.fill(Game.batteryVoltage, Game.batteryVoltage),
+        KRobot.period
+    )
+    private val observer = KalmanFilter(
+        N2.instance, N2.instance,
+        driveSystem,
+        VecBuilder.fill(3.0, 3.0),
+        VecBuilder.fill(.01, 0.01),
+        KRobot.period
+    )
+    private val loop = LinearSystemLoop(driveSystem, optimizer, observer, Game.batteryVoltage, KRobot.period)
+
+
     override fun debugValues(): Map<String, Any?> {
-        val map = mutableMapOf(
-            "pose" to pose.debugValues,
+        return mapOf(
+            "pose" to Navigator.instance!!.pose.debugValues,
             "speed" to chassisSpeeds.debugValues,
             "leftMaster" to leftMaster,
             "rightMaster" to rightMaster
         )
-        leftMotors.forEachIndexed { index, motor -> if (index != 0) map["leftFollow$index"] = motor }
-        rightMotors.forEachIndexed { index, motor -> if (index != 0) map["rightFollow$index"] = motor }
-        return map.toMap()
     }
 }

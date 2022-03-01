@@ -2,24 +2,24 @@ package frc.robot.subsystems
 
 import edu.wpi.first.math.controller.ArmFeedforward
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
-import edu.wpi.first.wpilibj.PneumaticsModuleType
-import edu.wpi.first.wpilibj.Solenoid
+import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.util.Color8Bit
-import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.Constants
-import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugLevel
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.units.extensions.Time
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.inches
 import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KSimulatedESC
-import frc.kyberlib.motorcontrol.rev.KSparkMax
+import frc.kyberlib.pneumatics.KSolenoid
 import frc.kyberlib.simulation.Simulatable
+import frc.kyberlib.simulation.Simulation
+import frc.robot.Constants
 import kotlin.math.absoluteValue
 
 /**
@@ -33,24 +33,40 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     var status = CLIMBER_STATUS.IDLE
 
     /**left climb arm pneumatic (lifts the climb arms)*/
-    private val leftArmLift = Solenoid(PneumaticsModuleType.CTREPCM, 0)
+    private val leftStatic = KSolenoid(0, fake = true).apply {
+        identifier = "left static"
+    }
     /**right climb arm pneumatic (lifts the climb arms)*/
-    private val rightArmLift = Solenoid(PneumaticsModuleType.CTREPCM, 1)
+    private val rightStatic = KSolenoid(1, fake = true).apply {
+        identifier = "right static"
+    }
 
     /**Arm feed foreward.*/
     private val armFF = ArmFeedforward(3.0, 2.0, 5.0, 8.0)
-    val leftExtendable = KSimulatedESC(0).apply {
+    val leftExtendable = KSimulatedESC(40).apply {
         identifier = "leftArm"
+        gearRatio = Constants.EXTENDABLE_ROTATION_GEAR_RATIO
+        motorType = DCMotor.getNeo550(1)
         brakeMode = true
-        kP = 5.0
-        kD = 1.0
-        addFeedforward(armFF)
+//        kP = 0.1
+//        kD = 5.0
+//        kI = 0.2
+//        addFeedforward(armFF)
+        customControl = { bangBang(it) }
+        if(Constants.doStateSpace) {
+            val loop = KMotorController.StateSpace.systemLoop(armSystem(armFF), 3.0, .01, 3.degrees.value, 10.0)
+            stateSpaceControl(loop)
+        }
         minPosition = 0.degrees
         maxPosition = 90.degrees
         resetPosition(22.5.degrees)
+        if(Game.sim) setupSim(armFF)
+        voltage = 0.0
     }
-    val rightExtendable = KSimulatedESC(0).apply {
+    val rightExtendable = KSimulatedESC(41).apply {
         identifier = "rightArm"
+        gearRatio = Constants.EXTENDABLE_ROTATION_GEAR_RATIO
+        motorType = DCMotor.getNeo550(1)
         brakeMode = true
         kP = 5.0
         kD = 1.0
@@ -63,30 +79,35 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     /** (right) winches that pull the robot up */
     private val winchFF = SimpleMotorFeedforward(1.0, 10.0, 5.0)
     /** (left) winches that pull the robot up */
-    val leftWinch = KSimulatedESC(0).apply {
+    val leftWinch = KSimulatedESC(42).apply {
+        identifier = "left winch"
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
         customControl = { bangBang(it) }
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
+        motorType = DCMotor.getNEO(1)
+        if(Game.sim) setupSim(winchFF)
         }
     /** (right) winches that pull the robot up */
-    val rightWinch = KSimulatedESC(0).apply {
+    val rightWinch = KSimulatedESC(43).apply {
+        identifier = "right winch"
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
         customControl = { bangBang(it) }
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
+        motorType = DCMotor.getNEO(1)
     }
 
     /** public variable to get/set whether the arms are lifted */
     var staticsLifted
-        get() = leftArmLift.get()
+        get() = leftStatic.extended
         set(value) {
-            leftArmLift.set(value)
-            rightArmLift.set(value)
+            leftStatic.extended = value
+            rightStatic.extended = value
         }
     var extendableAngle
         get() = leftExtendable.position
@@ -105,7 +126,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         leftWinch.updateVoltage()
         leftExtendable.updateVoltage()
         rightWinch.updateVoltage()
-        rightExtendable
+        rightExtendable.updateVoltage()
     }
 
     /**
@@ -115,9 +136,9 @@ object Climber : SubsystemBase(), Debug, Simulatable {
      * @return voltage represented as double
      */
     fun bangBang(motor: KMotorController): Double {
-        if(motor.linearPositionError.inches.absoluteValue < 2.0) return 0.0
-        else if (motor.linearPositionError < 0.inches) return 10.0
-        else return -0.0
+        return if(motor.positionError.degrees.absoluteValue < 2.0) 0.0
+        else if (motor.positionError.value < 0.0) 10.0
+        else -10.0
     }
 
     /**
@@ -130,25 +151,15 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     private val static = staticPivot.append(MechanismLigament2d("static", 31.inches.value, 0.0, 1.0, Color8Bit(255, 255, 0)))
 
     init {
-        if (Game.sim)
+        if (Game.sim) {
             SmartDashboard.putData("climb sim", sim)
+            Simulation.instance.include(this)
+        }
     }
-    
     override fun simUpdate(dt: Time) {
         extendable.length = (35.inches.value + leftWinch.position.value)
         extendable.angle = leftExtendable.position.degrees
         static.angle = if(staticsLifted) 90.0 else 0.0
-
-        leftExtendable.simUpdate(armFF, dt)
-        rightExtendable.simUpdate(armFF, dt)
-        leftExtendable.simPosition = leftExtendable.position.degrees.coerceIn(leftExtendable.minPosition!!.degrees, leftExtendable.maxPosition!!.degrees).degrees
-        rightExtendable.simPosition = rightExtendable.position.degrees.coerceIn(rightExtendable.minPosition!!.degrees, rightExtendable.maxPosition!!.degrees).degrees
-
-        leftWinch.simUpdate(winchFF, dt)
-        rightWinch.simUpdate(winchFF, dt)
-        leftWinch.simLinearPosition = leftWinch.position.value.coerceIn(leftWinch.minLinearPosition!!.value, leftWinch.maxLinearPosition!!.value).meters
-        rightWinch.simLinearPosition = rightWinch.position.value.coerceIn(rightWinch.minLinearPosition!!.value, rightWinch.maxLinearPosition!!.value).meters
-
     }
 
     override fun periodic() {

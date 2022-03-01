@@ -2,60 +2,72 @@ package frc.robot.subsystems
 
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.filter.MedianFilter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.TrapezoidProfile
-import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
-import frc.kyberlib.math.invertIf
-import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.command.KSubsystem
+import frc.kyberlib.math.units.extensions.Angle
+import frc.kyberlib.math.units.extensions.degrees
+import frc.kyberlib.math.units.extensions.k
+import frc.kyberlib.math.units.extensions.radiansPerSecond
 import frc.kyberlib.math.units.towards
+import frc.kyberlib.math.zeroIf
+import frc.kyberlib.motorcontrol.KMotorController.StateSpace.systemLoop
 import frc.kyberlib.motorcontrol.KSimulatedESC
-import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
 import frc.robot.RobotContainer
-import frc.robot.commands.turret.SeekTurret
+import frc.robot.commands.turret.AimTurret
 import org.photonvision.targeting.PhotonPipelineResult
 import org.photonvision.targeting.PhotonTrackedTarget
 import kotlin.math.absoluteValue
 
 
-
-
-
 /**
  * Controls the turret
  */
-object Turret : SubsystemBase(), Debug, Simulatable {
-    init {
-        println("Turret")
-    }
+object Turret : KSubsystem() {
     var status = TURRET_STATUS.LOST
 
     // characterization of the turret
-    private val feedforward = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
+    private val feedforward = SimpleMotorFeedforward(0.94765, 1.2215, 0.05002)
+    val visionFilter = MedianFilter(1)
     // actual turret motors
-    val turret = KSimulatedESC(0).apply {
-        kP = 0.1
-        kD = .0
+    val turret = KSimulatedESC(30).apply {
+        identifier = "turret"
+        kP = 1.0
+        kD = 0.0
         gearRatio = Constants.TURRET_GEAR_RATIO
+        motorType = DCMotor.getNeo550(1)
+        // todo: figure out how you would implement this
+        val loop = systemLoop(velocitySystem(feedforward), 3.0, 0.1, 3.degrees.radians, 10.0)
 
         // fancy control
-        val offsetCorrector = ProfiledPIDController(30.00, 0.0, 5.0, TrapezoidProfile.Constraints(12.0, 4.0)).apply { 
+        val pid2020 = ProfiledPIDController(30.0, 2.0, 5.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
+            this.setIntegratorRange(0.0,3.0)
+        }
+        val offsetCorrector = ProfiledPIDController(2.0, 0.0, 0.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
             setTolerance(Constants.TURRET_DEADBAND.radians)
             setIntegratorRange(-1.0, 1.0)
          }
         customControl = {
+            val polarSpeeds = Drivetrain.polarSpeeds
+            val movementComp = polarSpeeds.dTheta
             val chassisComp = Drivetrain.chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond
             val setpoint = clampSafePosition(it.positionSetpoint)
-            val offsetCorrection = offsetCorrector.calculate((it.position - setpoint).radians).radiansPerSecond
-            val targetVelocity = offsetCorrection - chassisComp
+            val offset = it.position - setpoint
+            val offsetCorrection = offsetCorrector.calculate(offset.radians).radiansPerSecond
+            val targetVelocity = offsetCorrection - chassisComp - movementComp
             val velocityError = it.velocity - targetVelocity
             val voltage = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(velocityError.radiansPerSecond)
-            voltage
+            if (offset < Constants.TURRET_TOLERANCE) status = TURRET_STATUS.LOCKED
+            voltage.zeroIf { voltage.absoluteValue < 1.0 }
         }
+
+        if(Game.sim) setupSim(feedforward)
     }
 
     // angle of the turret from top view
@@ -66,7 +78,8 @@ object Turret : SubsystemBase(), Debug, Simulatable {
         }
 
     init {
-        defaultCommand = SeekTurret
+        defaultCommand = AimTurret
+//        log("SeekTurret as default is off until built", logMode = LogMode.WARN)
     }
 
     /**
@@ -93,8 +106,8 @@ object Turret : SubsystemBase(), Debug, Simulatable {
         get() = if(targetVisible) latestResult!!.bestTarget else null
 
     val visionOffset: Angle?
-        get() = if (Game.real) target?.yaw?.degrees
-                else (RobotContainer.navigation.position.towards(Constants.HUB_POSITION) - fieldRelativeAngle).k
+        get() = if (Game.real) { target?.yaw?.let { visionFilter.calculate(it).degrees }
+        } else (RobotContainer.navigation.position.towards(Constants.HUB_POSITION) - fieldRelativeAngle).k
     val visionPitch: Angle?
         get() = target?.pitch?.degrees
 
@@ -112,18 +125,9 @@ object Turret : SubsystemBase(), Debug, Simulatable {
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
             "turret" to turret,
-            "turret error" to visionOffset?.radians,
+            "turret error" to visionOffset,
             "field Heading" to fieldRelativeAngle.radians,
             "target detected" to targetVisible
         )
-    }
-
-    /**
-     * Guess to velocity of the turret from a given voltage
-     */
-    fun guessVelocity(v: Double): AngularVelocity = ((v.absoluteValue - feedforward.ks) / feedforward.kv).coerceAtLeast(0.0).invertIf { v < 0.0 }.radiansPerSecond
-
-    override fun simUpdate(dt: Time) {
-        turret.simUpdate(feedforward, dt)
     }
 }

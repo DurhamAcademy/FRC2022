@@ -1,0 +1,42 @@
+{
+  "counts per rotation": 1.0,
+  "encoder type": "Encoder Port",
+  "encoding": false,
+  "gearing denominator": 10.0,
+  "gearing numerator": 62.0,
+  "gyro": "Pigeon",
+  "gyro ctor": "6",
+  "is drivetrain": true,
+  "motor controllers": [
+    "SPARK MAX (Brushless)",
+    "SPARK MAX (Brushless)"
+  ],
+  "number of samples per average": 1,
+  "primary encoder inverted": false,
+  "primary encoder ports": [
+    0,
+    1
+  ],
+  "primary motor ports": [
+    10,
+    11
+  ],
+  "primary motors inverted": [
+    true,
+    true
+  ],
+  "secondary encoder inverted": false,
+  "secondary encoder ports": [
+    2,
+    3
+  ],
+  "secondary motor ports": [
+    12,
+    13
+  ],
+  "secondary motors inverted": [
+    false,
+    false
+  ],
+  "velocity measurement period": 100
+}

@@ -1,8 +1,10 @@
 {
   "HALProvider": {
-    "PWM Outputs": {
-      "window": {
-        "visible": true
+    "Solenoids": {
+      "0": {
+        "header": {
+          "open": true
+        }
       }
     }
   },
@@ -37,15 +39,26 @@
       "/LiveWindow/Ungrouped/PIDController[8]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[9]": "PIDController",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/LiveWindow/WpiSubsystem/Climber": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Climber(internal)": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Conveyor": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Conveyor(internal)": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Drivetrain": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Drivetrain(internal)": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Intaker": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Intaker(internal)": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Shooter": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Shooter(internal)": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Turret": "Subsystem",
+      "/LiveWindow/WpiSubsystem/Turret(internal)": "Subsystem",
       "/SmartDashboard/Field": "Field2d",
-      "/SmartDashboard/climb sim": "Mechanism2d"
+      "/SmartDashboard/SendableChooser[0]": "String Chooser",
+      "/SmartDashboard/SendableChooser[1]": "String Chooser",
+      "/SmartDashboard/auto": "String Chooser",
+      "/SmartDashboard/climb sim": "Mechanism2d",
+      "/SmartDashboard/control system": "String Chooser"
     },
     "windows": {
-      "/LiveWindow/Ungrouped/DigitalInput[0]": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/Field": {
         "Robot": {
           "arrows": false
@@ -76,10 +89,16 @@
   },
   "NetworkTables": {
     "LiveWindow": {
-      "Climber": {
-        "open": true
+      "Ungrouped": {
+        "Solenoid[0,0]": {
+          "open": true
+        }
       },
-      "open": true
+      "WpiSubsystem": {
+        "Climber": {
+          "open": true
+        }
+      }
     },
     "SmartDashboard": {
       "Climber": {
@@ -88,16 +107,10 @@
         },
         "Left Winch": {
           "open": true
-        },
-        "open": true
+        }
       },
       "Drivetrain": {
-        "leftMaster": {
-          "open": true
-        },
-        "rightMaster": {
-          "open": true
-        },
+        "open": true,
         "speed": {
           "open": true
         }
@@ -107,8 +120,20 @@
           "open": true
         }
       },
+      "Pneumatic0": {
+        "open": true
+      },
+      "SendableChooser[0]": {
+        "open": true
+      },
       "Shooter": {
+        "flywheel": {
+          "open": true
+        },
         "hood": {
+          "open": true
+        },
+        "top Shooter": {
           "open": true
         }
       },
@@ -116,6 +141,16 @@
         "turret": {
           "open": true
         }
+      },
+      "backend": {
+        "Climber": {
+          "Left Arm": {
+            "open": true
+          }
+        }
+      },
+      "leftArm": {
+        "open": true
       },
       "open": true,
       "solenoid3": {
@@ -131,21 +166,39 @@
           "series": [
             {
               "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Drivetrain/rightMaster/Linear Velocity (Meters  per  Seconds)"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/Linear Velocity (Meters  per  Seconds)"
+            },
+            {
+              "color": [
+                0.0,
+                0.20588231086730957,
+                1.0,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/setpoint"
+            },
+            {
+              "color": [
                 0.7686275243759155,
                 0.30588236451148987,
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Drivetrain/speed/forward (m per s)"
-            },
-            {
-              "color": [
-                0.5058823823928833,
-                0.44705885648727417,
-                0.7019608020782471,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard//Drivetrain/speed/turn (rad per s)"
+              "id": "NT:/SmartDashboard//Drivetrain/rightMaster/setpoint"
             }
           ]
         },
@@ -159,7 +212,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/Linear Velocity (m per s)"
+              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/Voltage"
             },
             {
               "color": [
@@ -168,7 +221,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Drivetrain/rightMaster/Linear Velocity (m per s)"
+              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/error"
             },
             {
               "color": [
@@ -177,7 +230,7 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/error"
+              "id": "NT:/SmartDashboard//Drivetrain/rightMaster/Voltage"
             },
             {
               "color": [
@@ -187,24 +240,6 @@
                 1.0
               ],
               "id": "NT:/SmartDashboard//Drivetrain/rightMaster/error"
-            },
-            {
-              "color": [
-                0.5058823823928833,
-                0.44705885648727417,
-                0.7019608020782471,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard//Drivetrain/leftMaster/Voltage"
-            },
-            {
-              "color": [
-                0.5764706134796143,
-                0.4705882668495178,
-                0.3764706254005432,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard//Drivetrain/rightMaster/Voltage"
             }
           ]
         }
@@ -216,7 +251,7 @@
     "Plot <1>": {
       "plots": [
         {
-          "height": -29,
+          "height": 302,
           "name": "Aim",
           "series": [
             {
@@ -235,12 +270,12 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Turret/turret error"
+              "id": "NT:/SmartDashboard//Turret/turret error (degrees)"
             }
           ]
         },
         {
-          "height": -29,
+          "height": 302,
           "name": "Movement",
           "series": [
             {
@@ -259,7 +294,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Turret/turret/Angular Velocity (rad per s)"
+              "id": "NT:/SmartDashboard//Turret/turret/Angular Velocity (Radians  per  Seconds)"
             },
             {
               "color": [
@@ -268,7 +303,16 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Turret/turret/error"
+              "id": "NT:/SmartDashboard//Turret/turret/setpoint (degrees)"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Turret/turret/Angular Position (degrees)"
             }
           ]
         }
@@ -289,7 +333,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Shooter/flywheel/Angular Velocity (rad per s)"
+              "id": "NT:/SmartDashboard//Shooter/hood/Angular Position (degrees)"
             },
             {
               "color": [
@@ -298,7 +342,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Shooter/top Shooter/Angular Velocity (rad per s)"
+              "id": "NT:/SmartDashboard//Shooter/flywheel/Angular Velocity (Radians  per  Seconds)"
             },
             {
               "color": [
@@ -307,7 +351,7 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Shooter/hood/Angular Position (rad)"
+              "id": "NT:/SmartDashboard//Shooter/top Shooter/Angular Velocity (Radians  per  Seconds)"
             }
           ]
         }

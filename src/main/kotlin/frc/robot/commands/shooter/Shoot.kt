@@ -2,16 +2,15 @@ package frc.robot.commands.shooter
 
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.Constants
-import frc.robot.subsystems.Conveyor
-import frc.robot.subsystems.SHOOTER_STATUS
-import frc.robot.subsystems.CONVEYOR_STATUS
-import frc.robot.subsystems.Shooter
-import frc.robot.subsystems.Turret
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.math.units.extensions.radiansPerSecond
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
+import frc.robot.RobotContainer
+import frc.robot.commands.intake.Feed
+import frc.robot.commands.intake.Idle
+import frc.robot.subsystems.*
 
 
 /**
@@ -19,7 +18,7 @@ import frc.kyberlib.command.DebugLevel
  */
 object Shoot : CommandBase() {
     init {
-        addRequirements(Conveyor, Shooter)
+        addRequirements(Shooter)
     }
 
     var prevDistance = 1.0
@@ -27,8 +26,9 @@ object Shoot : CommandBase() {
     override fun execute() {
         Debug.log("Shoot", "execute", level=DebugLevel.LowPriority)
         // check if shooter should spin up
-        if (Conveyor.good && (Turret.targetVisible || Conveyor.status == CONVEYOR_STATUS.FEEDING)) {
+        if ((Turret.targetVisible || Shooter.status == ShooterStatus.SHOT)) {
             val dis = if (Turret.targetVisible) Shooter.targetDistance!!.meters else prevDistance
+//            val parallelSpeed = Drivetrain.polarSpeeds.dr
             prevDistance = dis
 
             // calculate values given the current distance from the hub
@@ -43,18 +43,21 @@ object Shoot : CommandBase() {
 
             // if the turret is on target
             if (Turret.readyToShoot && Shooter.flywheelMaster.velocityError < Constants.SHOOTER_VELOCITY_TOLERANCE) {
-                Conveyor.feed()
-                Shooter.status = SHOOTER_STATUS.AUTO_SHOT
+                Shooter.status = ShooterStatus.SHOT
+                Feed.schedule()
             } 
-            else Shooter.status = SHOOTER_STATUS.SPINUP
-        } 
-        else {
-            Debug.log("Shoot", "idle", level=DebugLevel.LowPriority)
-            Shooter.flywheelMaster.stop()
-            Shooter.topShooter.stop()
-            Shooter.status = SHOOTER_STATUS.IDLE
+            else {
+                Idle.execute()
+                RobotContainer.controller.rumble = 0.5
+                Shooter.status = ShooterStatus.SPINUP
+            }
         }
     }
 
-    override fun isFinished(): Boolean = false
+    override fun end(interrupted: Boolean) {
+        Debug.log("Shoot", "idle", level=DebugLevel.LowPriority)
+        Shooter.flywheelMaster.stop()
+        Shooter.topShooter.stop()
+        Shooter.status = ShooterStatus.IDLE
+    }
 }

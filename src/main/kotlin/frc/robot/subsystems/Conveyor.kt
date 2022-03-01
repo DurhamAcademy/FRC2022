@@ -1,52 +1,41 @@
 package frc.robot.subsystems
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.motorcontrol.rev.KSparkMax
-import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.units.extensions.rotationsPerSecond
-import frc.kyberlib.math.units.extensions.rpm
-import frc.kyberlib.motorcontrol.KSimulatedESC
-import frc.kyberlib.motorcontrol.MotorType
+import frc.kyberlib.motorcontrol.BrushType
+import frc.robot.commands.intake.Idle
+
 
 /**
  * Controls all aspects of the hopper.
  * Waiting for design to be finalized before code is added
  */
-object Conveyor : SubsystemBase(), Debug {
-    init {
-        println("Conveyor")
-    }
+object Conveyor : KSubsystem() {
+    override val priority: DebugLevel = DebugLevel.LowPriority
 
-    //FIXME: - change id
-    val ConveyorMotor = KSparkMax(10, MotorType.BRUSHLESS).apply {
+    val conveyor = KSparkMax(21, BrushType.BRUSHLESS).apply {
         identifier = "conveyor"
-        reversed = false
-        currentLimit = 40 //FIXME: - is this correct?
+        reversed = true
+        currentLimit = 20
         gearRatio = 1/5.0
     }
-    var status = CONVEYOR_STATUS.FULL_GOOD // FIXME: NO! bad named variable
 
-    val indexer = KSimulatedESC(21)
-    val feeder = KSimulatedESC(22)
+    var status = ConveyorStatus.IDLE
 
-    val good // FIXME: NO! why pelase stop
-        get() = true
-
-    fun feed() {
-        status = CONVEYOR_STATUS.FEEDING
-        ConveyorMotor.velocity = 6.rotationsPerSecond
-    }
-
-    fun idle() {
-        status = CONVEYOR_STATUS.IDLE
-        ConveyorMotor.velocity = 1.rotationsPerSecond
-        ConveyorMotor.maxAcceleration = 0.1.rotationsPerSecond
+    val feeder = KSparkMax(22).apply {
+        identifier = "feeder"
+        gearRatio = 1/5.0
+        currentLimit = 20
     }
 
     fun off() {
         status = CONVEYOR_STATUS.OFF
-        ConveyorMotor.brakeMode= true
-        ConveyorMotor.velocity = 0.rpm
+        conveyor.velocity = 0.rpm
+    }
+    init {
+        defaultCommand = Idle
     }
 
     override fun periodic() {
@@ -55,7 +44,7 @@ object Conveyor : SubsystemBase(), Debug {
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
-            "indexer" to indexer,
+            "indexer" to conveyor,
             "feeder" to feeder,
             "status" to status.name
         )
