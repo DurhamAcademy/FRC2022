@@ -43,6 +43,7 @@ object Conveyor : SubsystemBase(), Debug {
         ConveyorMotor.maxAcceleration = 0.1.rotationsPerSecond
     }
 
+    @Suppress("unused")
     fun off() {
         status = CONVEYOR_STATUS.OFF
         ConveyorMotor.brakeMode= true

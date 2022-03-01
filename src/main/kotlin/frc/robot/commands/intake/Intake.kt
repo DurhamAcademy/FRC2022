@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.Constants
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
-import frc.robot.RobotContainer
 
 //hi
 import frc.robot.subsystems.Intaker
@@ -15,8 +14,7 @@ import frc.robot.subsystems.Conveyor
  */
 object Intake : CommandBase() {
     init {
-        addRequirements(Intaker)
-        addRequirements(Conveyor)
+        addRequirements(Intaker, Conveyor)
     }
 
     override fun initialize() {

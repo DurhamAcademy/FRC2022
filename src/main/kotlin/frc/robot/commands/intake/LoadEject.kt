@@ -14,13 +14,12 @@ object LoadEject : CommandBase() {
     override fun execute() {
         if (Shooter.flywheelMaster.velocity <= 7.rotationsPerSecond)
             Shooter.flywheelMaster.velocity = 7.rotationsPerSecond
-        Conveyor.feeder.velocity = 1.rotationsPerSecond
-        Conveyor.ConveyorMotor.velocity = 1.rotationsPerSecond
+        // MARK: Uncomment the stuff below if the ball is not getting into the shooter.
+//        Conveyor.feeder.voltage = 0.9
+//        Conveyor.ConveyorMotor.voltage = 0.1
     }
 
     override fun isFinished(): Boolean {
-        return (Shooter.flywheelMaster.velocity <= 6.5.rotationsPerSecond) &&
-                (Conveyor.ConveyorMotor.velocity >= 0.25.rotationsPerSecond) &&
-                Conveyor.feeder.velocity < 1.25.rotationsPerSecond
+        return (Shooter.flywheelMaster.velocity <= 4.5.rotationsPerSecond)
     }
 }
