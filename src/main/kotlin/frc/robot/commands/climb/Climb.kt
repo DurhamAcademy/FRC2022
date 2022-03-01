@@ -8,6 +8,7 @@ import frc.robot.RobotContainer
 import frc.robot.subsystems.*
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.units.extensions.degrees
+import frc.kyberlib.math.units.extensions.inches
 import frc.kyberlib.math.units.extensions.radiansPerSecond
 import kotlin.math.absoluteValue
 
@@ -26,10 +27,12 @@ object Climb : CommandBase() {
      * Fun reaction wheel stuff. Optional, but cool if done
      */
     fun stabalize() {
+        if (Climber.leftWinch.linearPosition < 5.inches) return
         val dTheta = swing.calculate(RobotContainer.gyro.pitch.radians).radiansPerSecond * -1.0
 
         Drivetrain.drive(DifferentialDriveWheelSpeeds( dTheta.value * dampeningConstant, dTheta.value * dampeningConstant))
-        Shooter.flywheelMaster.voltage = dTheta.value * dampeningConstant
+        Shooter.flywheelMaster.torque = dTheta.value * dampeningConstant
+
     }
 
     /**
@@ -39,7 +42,7 @@ object Climb : CommandBase() {
         Debug.log("Climb Command", "init", level = DebugLevel.LowPriority)
         Turret.turret.position = 0.degrees
         Climber.staticsLifted = true
-        Climber.status = CLIMBER_STATUS.ACTIVE
+        Climber.status = ClimberStatus.ACTIVE
 
         Climber.leftExtendable.position = 90.degrees
         Climber.rightExtendable.position = 90.degrees
@@ -59,9 +62,9 @@ object Climb : CommandBase() {
 
 
         // set the status of the robot based on what the winches are doing
-        if (Climber.leftWinch.percent.absoluteValue < 0.1) Climber.status = CLIMBER_STATUS.ACTIVE
-        else if (Climber.leftWinch.percent < 0.0) Climber.status = CLIMBER_STATUS.FALLING
-        else if (Climber.leftWinch.percent.absoluteValue > 0.0) Climber.status = CLIMBER_STATUS.RISING
+        if (Climber.leftWinch.percent.absoluteValue < 0.1) Climber.status = ClimberStatus.ACTIVE
+        else if (Climber.leftWinch.percent < 0.0) Climber.status = ClimberStatus.FALLING
+        else if (Climber.leftWinch.percent.absoluteValue > 0.0) Climber.status = ClimberStatus.RISING
 //        stabalize()
     }
 

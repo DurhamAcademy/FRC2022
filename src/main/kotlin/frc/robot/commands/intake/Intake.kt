@@ -25,6 +25,7 @@ object Intake : CommandBase() {
     override fun execute() {
         Conveyor.idle()
         Intaker.deployed = true
+        Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
     }
 
     override fun end(interrupted: Boolean) {

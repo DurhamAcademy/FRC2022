@@ -1,13 +1,10 @@
 package frc.kyberlib.simulation
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.Time
-import frc.kyberlib.math.units.extensions.seconds
 import frc.kyberlib.simulation.field.KField2d
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Simulation that will run a loop to update simulatable objects
@@ -31,13 +28,6 @@ class Simulation : SubsystemBase() {  // TODO: figure out the hardware tab
         get() = time - startTime
     val dt
         get() = time - prevTime
-
-    var chassisFF = SimpleMotorFeedforward(0.0, 0.0)
-
-    /**
-     * Takes voltage and velocity and calculates what acceleration should be
-     */
-    fun inverseFF(voltage: Double, velocity: Double): Double = ((voltage / chassisFF.ks) - chassisFF.kv * velocity) / chassisFF.ka
 
     // field to draw robot
     val field = KField2d

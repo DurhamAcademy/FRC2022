@@ -5,6 +5,7 @@ import frc.robot.RobotContainer
 import frc.robot.subsystems.Turret
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.Game
 
 /**
  * Called at the beginning of the match to get the absolute encoding of the turret
@@ -24,6 +25,6 @@ object ZeroTurret: CommandBase() {
         Turret.zeroTurret()
     }
 
-    override fun isFinished() = !RobotContainer.turretLimit.get()
+    override fun isFinished() = !RobotContainer.turretLimit.get() || Game.sim
 
 }

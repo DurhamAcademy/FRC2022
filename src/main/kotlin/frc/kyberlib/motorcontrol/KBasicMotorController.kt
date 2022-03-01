@@ -3,14 +3,27 @@ package frc.kyberlib.motorcontrol
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.networktables.NTSendable
 import edu.wpi.first.networktables.NTSendableBuilder
-import frc.kyberlib.command.Debug
-import frc.kyberlib.command.Game
+import frc.kyberlib.command.*
 import frc.kyberlib.math.invertIf
+import frc.kyberlib.math.units.extensions.Time
+import frc.kyberlib.math.units.extensions.seconds
 
 /**
  * A basic motor controller. No closed-loop control
  */
 abstract class KBasicMotorController : NTSendable, Debug {
+    companion object {
+        val allMotors = mutableListOf<KBasicMotorController>()
+    }
+
+    init {
+        addReferences()
+    }
+    private fun addReferences() {
+        KSubsystem.motorDump?.add(this)
+        allMotors.add(this)
+    }
+    protected val followPeriodic = 0.005.seconds
     var controlMode = ControlMode.NULL
     // ------ configs ----- //
     /**
@@ -22,8 +35,6 @@ abstract class KBasicMotorController : NTSendable, Debug {
      * Determines if the motor should run in the opposite direction
      */
     var reversed: Boolean = false
-        get() = if (real) rawReversed else field
-        set(value) {if (real) rawReversed else field = value}
 
     abstract var rawReversed: Boolean
 
@@ -49,12 +60,12 @@ abstract class KBasicMotorController : NTSendable, Debug {
     /**
      * What percent output is currently being applied?
      */
-    var percent: Double = 0.0
-        get() = if (real) rawPercent.invertIf { reversed } else field
+    var percent: Double
+        get() = percentCache
         set(value) {
-            val adjusted = value
+            val adjusted = value.invertIf { reversed }
             controlMode = ControlMode.VOLTAGE
-            if (real) rawPercent = adjusted else field = adjusted
+            if (real) rawPercent = adjusted else percentCache = adjusted
         }
 
     /**
@@ -63,15 +74,33 @@ abstract class KBasicMotorController : NTSendable, Debug {
      */
     protected abstract var rawPercent: Double
 
+    var maxVoltage = 13.0
     /**
      * Sets controller voltage directly
      */
     var voltage: Double
         get() = percent * vbus
         set(value) {
-            val norm = value.coerceIn(-vbus , vbus)
+            val norm = value.coerceIn(-vbus , vbus).coerceIn(-maxVoltage, maxVoltage)
             percent = (norm / vbus)
         }
+
+    private var percentCache: Double = 0.0
+    protected var quarentined = false
+    /**
+     * Updates the motor values and caches them so that code repeated references to slow code and overwhelm CAN BUS
+     */
+    open fun updateValues() {
+        if(!checkError()) {
+            percentCache = rawPercent.invertIf { reversed }
+            quarentined = false
+        }
+
+        else {
+            quarentined = true
+            log("CAN ERROR", LogMode.WARN, DebugLevel.HighPriority)
+        }
+    }
 
     /**
      * The voltage available to the motor
@@ -111,7 +140,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
     /**
      * Halts the motor
      */
-    fun stop() {
+    open fun stop() {
         safeSetVoltage(0.0)
     }
 
@@ -119,6 +148,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
      * Internal update function
      */
     open fun update() {
+        updateValues()
         updateFollowers()
     }
 
@@ -128,18 +158,19 @@ abstract class KBasicMotorController : NTSendable, Debug {
     private fun updateFollowers() {
         for (follower in followers) {
              follower.percent = percent.invertIf { follower.reversed }
-             follower.update()
+//             follower.update()
         }
     }
+
+    open fun checkError(): Boolean = false
 
     /**
      * Converts motor in NTSendable graphics widget
      */
     override fun initSendable(builder: NTSendableBuilder) {
         builder.setSmartDashboardType("Encoder")
-        builder.addDoubleProperty("Voltage", this::voltage) { this.voltage = it }
-        builder.addBooleanProperty("brake mode", this::brakeMode, this::brakeMode::set)
-        builder.addBooleanProperty("reversed", this::reversed, this::reversed::set)
+        builder.addStringProperty("Control Type", {controlMode.name}, {})
+        builder.addDoubleProperty("Voltage", this::voltage) { if(it != voltage) this.voltage = it }
     }
 
     override fun debugValues(): Map<String, Any?> {

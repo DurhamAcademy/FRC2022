@@ -1,12 +1,25 @@
 package frc.robot
 
 import edu.wpi.first.wpilibj.DigitalInput
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.Navigator
+import frc.kyberlib.auto.trajectory.KTrajectory
+import frc.kyberlib.command.Debug
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.commands.intake.Eject
+import frc.robot.commands.Emote
+import frc.robot.commands.climb.Climb
 import frc.robot.commands.intake.Intake
+import frc.robot.commands.shooter.ForceShoot
+import frc.robot.commands.shooter.Shoot
+import frc.robot.commands.turret.LockTurret
 import frc.robot.subsystems.Drivetrain
+import frc.robot.controls.ControlSchema2022
+import frc.robot.controls.DefaultControls
+import frc.robot.controls.RocketLeague
+import frc.robot.subsystems.*
 import org.photonvision.PhotonCamera
 
 /**
@@ -20,31 +33,33 @@ object RobotContainer {
 
     val navigation = Navigator(gyro, Constants.START_POSE)
 
-    val controller = KXboxController(0).apply {
-        // steering
-        rightX.apply {
-            maxVal = -1.0 //-5 * PI
-            expo = 1.0//73.0
-            deadband = 0.1
+    val controller = KXboxController(0)
+
+    private val schemaChooser = SendableChooser<ControlSchema2022>().apply {
+        setDefaultOption("Default", DefaultControls)
+        addOption("RocketLeague", RocketLeague)
+        SmartDashboard.putData("control system", this)
+    }
+    val controlScheme = schemaChooser.selected!!.apply {
+        INTAKE.whileActiveOnce(Intake)
+        SHOOT.whileActiveOnce(Shoot)
+        FORCE_SHOT.whileActiveOnce(ForceShoot)
+        EJECT.whileActiveOnce(Eject)
+//        FLUSH.whileActiveOnce(Intake)
+        LOCK_TURRET.toggleWhenActive(LockTurret)
+        CLIMB_MODE.toggleWhenActive(Climb)
+        EMOTE.whileActiveOnce(Emote)
+    }
+
+    val autoChooser = SendableChooser<KTrajectory>().apply {
+        val options = KTrajectory.savedTrajectories
+        if (options == null) {
+            Debug.log("Auto Chooser", "no auto paths found")
+        } else {
+            for (path in KTrajectory.savedTrajectories)
+                addOption(path, KTrajectory.load(path))
         }
-
-        // throttle
-        leftY.apply {
-            maxVal = -1.0//-12.0
-            expo = 1.0//20.0
-            deadband = 0.2
-        }
-
-        leftTrigger.activateAt(0.5).whileActiveOnce(Intake)
-        leftDPad.whileActiveOnce(Eject)
-
-
-
-//        leftBumper.whileActiveOnce(Flush)
-//
-//        yButton.toggleWhenActive(fullAutoClimb)
-//        aButton.toggleWhenActive(Climb)
-//        bButton.whileActiveOnce(ToggleArmLift())
+        SmartDashboard.putData("auto", this)
     }
 // QUOTE: I dont need a christmas tree, i need a robot. -Cherith
 //    val leds = KLEDStrip(0, 103).apply {
@@ -117,12 +132,12 @@ object RobotContainer {
 
     init {
         // initialize subsystems here:
-//        Climber
-//        Conveyor
+        Climber
+        Conveyor
         Drivetrain
-//        Intaker
-//        Shooter
-//        Turret
+        Intaker
+        Shooter
+        Turret
     }
 
 }
