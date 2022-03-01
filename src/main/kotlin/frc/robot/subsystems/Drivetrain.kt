@@ -14,7 +14,6 @@ import edu.wpi.first.math.numbers.N2
 import edu.wpi.first.math.system.LinearSystem
 import edu.wpi.first.math.system.LinearSystemLoop
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.math.system.plant.LinearSystemId
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Game
@@ -147,7 +146,7 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
     fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) {
         leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
         rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
-        if(true || Constants.doStateSpace) {
+        if(Constants.doStateSpace) {
             loop.nextR = VecBuilder.fill(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond)  // r = reference (setpoint)
             loop.correct(VecBuilder.fill(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond))  // update with empirical
             loop.predict(KRobot.period)  // math
@@ -186,7 +185,6 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
     fun setupSim() {
         driveSim = DifferentialDrivetrainSim( // Create a linear system from our characterization gains.
             betterDrivetrainSystem(),
-//            LinearSystemId.identifyDrivetrainSystem(Constants.DRIVE_KV_L, Constants.DRIVE_KA_L, KvAngular, KaAngular),
             DCMotor.getNEO(2),  // 2 NEO motors on each side of the drivetrain.
             leftMaster.gearRatio,  // gearing reduction
             kinematics.trackWidthMeters,  // The track width
