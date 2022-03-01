@@ -11,7 +11,6 @@ import kotlin.collections.ArrayList
 // https://github.com/ReadyPlayer2/TSP
 typealias Waypoint = Translation2d
 typealias Route = ArrayList<Waypoint>
-// TODO: add more algorithms just for fun
 
 /**
  * Implementation of various Traveling Saleman Problem Solution.
@@ -113,7 +112,6 @@ class TravelingSalesman(
             dense()
         }
 
-        // TODO: continue
         // 2) Construct a minimum-weight perfect matching M in this subgraph
         // 3) Unite matching and spanning tree T ∪ M to form an Eulerian multigraph
         // 4) Calculate Euler tour - https://www.geeksforgeeks.org/euler-tour-tree/

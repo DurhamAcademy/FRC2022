@@ -3,13 +3,15 @@ package frc.kyberlib.math.units.extensions
 import frc.kyberlib.math.units.KUnit
 import frc.kyberlib.math.units.Second
 import frc.kyberlib.math.units.TimeConversions
+import kotlin.time.*
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * KUnit representing time.
  * Should not be created directly. Use the number extensions instead.
  */
 typealias Time = KUnit<Second>
-
 /**
  * Creates a Time unit and sets the unit to seconds.
  * Only called from internal

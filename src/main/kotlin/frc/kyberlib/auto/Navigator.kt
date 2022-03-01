@@ -13,12 +13,14 @@ import frc.robot.subsystems.Drivetrain
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.auto.trajectory.KTrajectoryConfig
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.milli
 import frc.kyberlib.math.units.string
 import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.sensors.gyros.KGyro
 import frc.kyberlib.simulation.field.KField2d
+import frc.robot.Constants
 
 /**
  * Class to store and update robot navigation information
@@ -64,12 +66,14 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
         }
     val position: Translation2d  // the estimated location of the robot
         get() = pose.translation
+    val odometry = DifferentialDriveOdometry(Constants.START_POSE.rotation)
 
     /**
      * Update position based on estimated motion
      */
     fun update(speeds: DifferentialDriveWheelSpeeds, leftPosition: Length, rightPosition: Length) {  // estimate motion
-        poseEstimator.update(heading, speeds, leftPosition.meters, rightPosition.meters)
+        if (Constants.NAVIGATION_CORRECTION) poseEstimator.update(heading, speeds, leftPosition.meters, rightPosition.meters)
+        else odometry.update(gyro.heading, leftPosition.meters, rightPosition.meters)
     }
     /**
      * Update position based on a different position guess
@@ -79,6 +83,7 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
      */
     fun update(globalPosition: Pose2d, time: Time) {  // apply global position update
         SmartDashboard.putString("global pose", globalPosition.string)
+        log("poseEstimator not active", LogMode.WARN)
         poseEstimator.addVisionMeasurement(globalPosition, time.seconds / 1.milli)
     }
 

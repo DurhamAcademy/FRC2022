@@ -63,7 +63,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             field = value
             if (field != KRobot.period.seconds) updateNotifier.startPeriodic(value.seconds)
         }
-    init { if (KSubsystem.motorDump == null) updateNotifier.startPeriodic(KRobot.period / 2.0) }
     // ----- configs ----- //
     /**
      * Defines the relationship between rotation and linear motion for the motor.
