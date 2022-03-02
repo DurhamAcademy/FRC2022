@@ -43,6 +43,7 @@ object Constants {
     const val DRIVE_GEAR_RATIO = 62.0 / 10.0
 
     const val NAVIGATION_CORRECTION = false
+    const val DUMB_NAVIGATION = false
 
     // ------ Intake ------ //
     const val INTAKE_PERCENT = 0.5
