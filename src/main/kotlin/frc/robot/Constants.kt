@@ -40,7 +40,7 @@ object Constants {
     // drivetrain setup
     const val TRACK_WIDTH = 0.72246
     val WHEEL_RADIUS = 2.inches
-    const val DRIVE_GEAR_RATIO = 62.0 / 50.0
+    const val DRIVE_GEAR_RATIO = 62.0 / 10.0
 
     const val NAVIGATION_CORRECTION = false
 
