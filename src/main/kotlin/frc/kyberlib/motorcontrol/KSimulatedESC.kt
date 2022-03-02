@@ -27,7 +27,7 @@ class KSimulatedESC(name: Any) : KMotorController() {  // potentially remove thi
     override fun resetPosition(position: Angle) { this.position = position }
 
     override fun followTarget(kmc: KBasicMotorController) {
-        kmc.followers.add(this)
-        kmc.notifier.startPeriodic(0.005)
+//        kmc.followers.add(this)
+//        kmc.notifier.startPeriodic()
     }
 }

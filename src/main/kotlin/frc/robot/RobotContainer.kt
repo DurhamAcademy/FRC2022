@@ -56,8 +56,8 @@ object RobotContainer {
         if (options == null) {
             Debug.log("Auto Chooser", "no auto paths found")
         } else {
-            for (path in TrajectoryManager.routines!!)
-                addOption(path, KTrajectory.load(path))
+            for (path in TrajectoryManager.routines!!) 1+1
+//                addOption(path, KTrajectory.load(path))
         }
         SmartDashboard.putData("auto", this)
     }

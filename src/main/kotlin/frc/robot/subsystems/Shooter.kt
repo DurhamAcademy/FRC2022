@@ -66,7 +66,8 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     val targetDistance: Length? 
         get() = if (Game.sim) RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
                 else if (!targetVisible) null
-                else 2.feet + distanceFilter.calculate(((Constants.UPPER_HUB_HEIGHT - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
+                else 2.feet + distanceFilter.calculate((
+                (Constants.UPPER_HUB_HEIGHT - 1.inches - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
 
     // motor controlling top roller speed
     val topShooter = KSimulatedESC(33).apply {
@@ -89,7 +90,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     override fun periodic() {
-//        debugDashboard()
+        debugDashboard()
     }
 
     override fun debugValues(): Map<String, Any?> {

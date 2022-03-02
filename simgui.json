@@ -253,7 +253,7 @@
     "Plot <1>": {
       "plots": [
         {
-          "height": -29,
+          "height": 302,
           "name": "Aim",
           "series": [
             {
@@ -277,7 +277,7 @@
           ]
         },
         {
-          "height": -29,
+          "height": 302,
           "name": "Movement",
           "series": [
             {

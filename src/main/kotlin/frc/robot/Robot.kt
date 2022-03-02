@@ -1,5 +1,6 @@
 package frc.robot
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.command.KRobot
@@ -30,13 +31,17 @@ class Robot : KRobot() {
         Turret.turret.resetPosition(0.degrees)  // remove this when you add zeroTurret back in
     }
 
+    override fun teleopPeriodic() {
+        SmartDashboard.putBoolean("hall", RobotContainer.turretLimit.get())
+    }
+
     override fun autonomousInit() {
-        Intaker.deployed = true
-        Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
-        val traj = KTrajectory.load("4Ball")
-        val auto = AutoDrive(traj)
-        auto.schedule()
-        autoCommand = auto
+//        Intaker.deployed = true
+//        Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
+//        val traj = KTrajectory.load("4Ball")
+//        val auto = AutoDrive(traj)
+//        auto.schedule()
+//        autoCommand = auto
     }
 
     override fun autonomousExit() {

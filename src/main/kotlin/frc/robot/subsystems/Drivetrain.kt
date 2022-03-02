@@ -42,25 +42,25 @@ import frc.robot.commands.drive.Drive
  */
 object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     // motors
-    val leftMaster = KSparkMax(10).apply {
+    val leftMaster = KSimulatedESC(10).apply {
         identifier = "leftMaster"
         reversed = true
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
-    val rightMaster  = KSparkMax(12).apply {
+    val rightMaster  = KSimulatedESC(12).apply {
         identifier = "rightMaster"
         reversed = false
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
-    private val leftFollower  = KSparkMax(11).apply {
+    private val leftFollower  = KSimulatedESC(11).apply {
         identifier = "leftFollow"
         reversed = false
         currentLimit = 40
         follow(leftMaster)
     }
-    private val rightFollower = KSparkMax(13).apply {
+    private val rightFollower = KSimulatedESC(13).apply {
         identifier = "rightFollow"
         currentLimit = 40
         reversed = false
@@ -169,7 +169,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     override fun periodic() {
 //        debugDashboard()
         RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
-        if(Turret.targetVisible && Constants.NAVIGATION_CORRECTION)  {  // TODO: test
+        if(Constants.NAVIGATION_CORRECTION && Turret.targetVisible)  {  // TODO: test
             val distance = Shooter.targetDistance!!
             val angle = Turret.visionOffset!! + Turret.fieldRelativeAngle + 180.degrees
             polarCoordinates = PolarPose(distance, angle, Turret.visionOffset!!)
@@ -199,8 +199,8 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
 
     fun betterDrivetrainSystem(): LinearSystem<N2, N2, N2> {  // todo: implement these into the builtin
 //        return LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka)
-        val kVAngular = angularFeedforward.kv * 2.0 / Constants.TRACK_WIDTH
-        val kAAngular = angularFeedforward.ka * 2.0 / Constants.TRACK_WIDTH
+        val kVAngular = angularFeedforward.kv// * 2.0 / Constants.TRACK_WIDTH
+        val kAAngular = angularFeedforward.ka //* 2.0 / Constants.TRACK_WIDTH
         val A1: Double = 0.5 * -(leftFF.kv / leftFF.ka + kVAngular / kAAngular)
         val A2: Double = 0.5 * -(rightFF.kv / rightFF.ka - kVAngular / kAAngular)
         val B1: Double = 0.5 * (1.0 / leftFF.ka + 1.0 / kAAngular)
@@ -219,8 +219,8 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     }
     override fun simUpdate(dt: Time) {
         // update the sim with new inputs
-        val leftVolt = leftMaster.voltage.invertIf { leftMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
-        val rightVolt = rightMaster.voltage.invertIf { rightMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
+        val leftVolt = leftMaster.voltage//.invertIf { leftMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
+        val rightVolt = rightMaster.voltage//.invertIf { rightMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
         driveSim.setInputs(leftVolt, rightVolt)
         driveSim.update(dt.seconds)
 //

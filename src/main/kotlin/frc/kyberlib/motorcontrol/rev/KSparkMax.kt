@@ -18,7 +18,6 @@ import kotlin.time.Duration.Companion.milliseconds
  * [brushType] is the type of motor being driven. WARNING: If set incorrectly this can seriously damage hardware. You've been warned.
  */
 class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRUSHLESS) : KMotorController() {
-
     // ----- low-level stuff ----- //
     override var identifier: String = CANRegistry.filterValues { it == canId }.keys.firstOrNull() ?: "can$canId"
 
@@ -26,6 +25,10 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
         BRUSHLESS -> MotorType.kBrushless
         BRUSHED -> MotorType.kBrushed
     }) else null
+
+    init {
+        if (real) _spark?.restoreFactoryDefaults()
+    }
     private var _enc: RelativeEncoder? = null
     private val _pid = _spark?.pidController
 

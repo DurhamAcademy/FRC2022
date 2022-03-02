@@ -68,7 +68,7 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
     val position: Translation2d  // the estimated location of the robot
         get() = pose.translation
     val odometry = DifferentialDriveOdometry(Constants.START_POSE.rotation).apply {
-        resetPosition(Constants.START_POSE, heading)
+        resetPosition(startPose, heading)
     }
 
     /**
