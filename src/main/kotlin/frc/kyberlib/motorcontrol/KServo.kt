@@ -10,6 +10,7 @@ import frc.kyberlib.math.units.extensions.radiansPerSecond
 import java.lang.UnsupportedOperationException
 import kotlin.math.absoluteValue
 
+// todo: fix this
 class KServo(port: Int) : KMotorController() {
     private val native = Servo(port)
     private val absoluteAngle
@@ -40,11 +41,6 @@ class KServo(port: Int) : KMotorController() {
     override var currentLimit: Int
         get() = 10
         set(value) {log("this no work on Servo", LogMode.WARN)}
-
-
-    override fun configureEncoder(config: KEncoderConfig): Boolean {
-        return true
-    }
 
     override var brakeMode: BrakeMode
         get() = true

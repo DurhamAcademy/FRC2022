@@ -1,6 +1,7 @@
 package frc.kyberlib.motorcontrol
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorController
+import frc.kyberlib.math.units.extensions.seconds
 
 /**
  * Wraps a WPI SpeedController to use the KBasicMotorController API
@@ -26,7 +27,7 @@ class KSpeedController(private val m_speedController: MotorController) : KBasicM
         set(value) {m_speedController.set(value)}
 
     override fun followTarget(kmc: KBasicMotorController) {
-        if (kmc.followers.size == 0) kmc.notifier.startPeriodic(0.005)
+        if (kmc.followers.size == 0) kmc.notifier.startPeriodic(followPeriodic.seconds)
         kmc.followers.add(this)
     }
 }

@@ -65,6 +65,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         set(value) {
             field = value
             if (field != KRobot.period.seconds) updateNotifier.startPeriodic(value.seconds)
+            else updateNotifier.stop()
         }
     // ----- configs ----- //
     /**
@@ -78,14 +79,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * product of (output teeth / input teeth) for each gear stage
      */
     var gearRatio: GearRatio = 1.0
-    /**
-     * Settings relevant to the motor controller's encoder.
-     */
-    var encoderConfig: KEncoderConfig = KEncoderConfig(0, EncoderType.NONE)
-        set(value) {
-            if (configureEncoder(value)) field = value
-            else System.err.println("Invalid encoder configuration")
-        }
     // ----- constraints ---- //
     /**
      * The max angular velocity the motor can have
@@ -362,18 +355,11 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         get() = motorType != null
 
     /**
-     * Does the motor controller have an encoder configured?
-     * Allows for closed-loop control methods to be used
-     */
-    protected val encoderConfigured
-        get() = (encoderConfig.type != EncoderType.NONE && encoderConfig.cpr > 0)
-
-    /**
      * Does the motor have closed-loop gains set?
      * Allows for closed-loop control methods to be used
      */
     private val closedLoopConfigured
-        get() = encoderConfigured && customControl != null
+        get() = customControl != null
 
     // ----- natives ----- //
     /**
@@ -408,11 +394,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Max current draw for the motors
      */
     abstract var currentLimit: Int
-
-    /**
-     * Configures the respective ESC encoder settings when a new encoder configuration is set
-     */
-    protected abstract fun configureEncoder(config: KEncoderConfig): Boolean
 
     override fun initSendable(builder: NTSendableBuilder) {
         super.initSendable(builder)
@@ -759,10 +740,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             val optimizer = optimizer(plant, positionErrorCost, velocityErrorCost, inputCost, timeDelay)
             return LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds)
         }
-    }
-
-    init {
-        assert(encoderConfigured) {"configure your motor before using"}
     }
 }
 

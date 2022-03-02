@@ -3,6 +3,8 @@ package frc.kyberlib.motorcontrol.ctre
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
+import frc.kyberlib.command.LogMode
+import frc.kyberlib.math.units.extensions.seconds
 import frc.kyberlib.motorcontrol.*
 
 /**
@@ -33,7 +35,8 @@ class KVictorSPX(val canId: CANId) : KBasicMotorController() {
         if (kmc is KVictorSPX) {
             _victor.follow(kmc._victor)
         } else {
-            if (kmc.followers.size == 0) kmc.notifier.startPeriodic(0.005)
+            log("Following other devices may slow down robot", logMode = LogMode.WARN)
+            if (kmc.followers.size == 0) kmc.notifier.startPeriodic(followPeriodic.seconds)
             kmc.followers.add(this)
         }
     }

@@ -41,7 +41,6 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         setupSim(system)
         if(Constants.doStateSpace)
             stateSpaceControl(loop)
-//        Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.02)
     }
 //    val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 0.02)
     // additional motors that copy the main
