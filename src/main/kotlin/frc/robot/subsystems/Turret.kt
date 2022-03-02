@@ -20,6 +20,7 @@ import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.towards
 import frc.kyberlib.math.zeroIf
 import frc.kyberlib.motorcontrol.KMotorController.StateSpace.systemLoop
+import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
@@ -48,16 +49,18 @@ object Turret : SubsystemBase(), Debug {
     private val feedforward = SimpleMotorFeedforward(0.57083, 1.2168, 0.036495)
     val visionFilter = MedianFilter(5)
     // actual turret motors
-    val turret = KSparkMax(30).apply {
+    val turret = KSimulatedESC(30).apply {
         identifier = "turret"
         kP = 1.2
-        kD = 0.0
+        kD = 0.01
+        maxAcceleration = 2.radiansPerSecond
+        maxVelocity = 3.radiansPerSecond
         gearRatio = Constants.TURRET_GEAR_RATIO
         motorType = DCMotor.getNeo550(1)
         // todo: figure out how you would implement this
         val loop = systemLoop(velocitySystem(feedforward), 3.0, 0.1, 10.degreesPerSecond.value, 10.0)
 
-        val offsetCorrector = ProfiledPIDController(0.8, 0.0, 0.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
+        val offsetCorrector = ProfiledPIDController(2.0, 0.0, 0.0002, TrapezoidProfile.Constraints(2.0, 1.0)).apply {
             setTolerance(Constants.TURRET_DEADBAND.radians)
 //            setIntegratorRange(-1.0, 1.0)
          }
@@ -126,10 +129,10 @@ object Turret : SubsystemBase(), Debug {
         get() = latestResult?.bestTarget
 
     val visionOffset: Angle?
-        get() = if (Game.real) { target?.yaw?.let { visionFilter.calculate(it).degrees }
+        get() = if (Game.real) { target?.yaw?.let { visionFilter.calculate(-it).degrees }
         } else
                 (RobotContainer.navigation.position.towards(Constants.HUB_POSITION) - fieldRelativeAngle
-                + StateSpaceUtil.makeWhiteNoiseVector(VecBuilder.fill(1.0)).get(0, 0).degrees).k
+                + StateSpaceUtil.makeWhiteNoiseVector(VecBuilder.fill(3.0)).get(0, 0).degrees).k
     val visionPitch: Angle?
         get() = target?.pitch?.degrees
 

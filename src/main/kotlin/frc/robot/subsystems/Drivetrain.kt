@@ -120,19 +120,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     /**
      * Drive the robot at the provided speeds
      */
-    override fun drive(speeds: ChassisSpeeds) {
-//        val FF_l = leftFF.calculate(speeds.vxMetersPerSecond) + angularFeedforward.calculate(speeds.omegaRadiansPerSecond)
-//        val FF_r = rightFF.calculate(speeds.vxMetersPerSecond) - angularFeedforward.calculate(speeds.omegaRadiansPerSecond)
-//        val targetSpeeds = kinematics.toWheelSpeeds(speeds)
-//        val pid_l = leftMaster.PID.calculate(leftMaster.velocity.radiansPerSecond - targetSpeeds.leftMetersPerSecond)
-//        val pid_r = rightMaster.PID.calculate(rightMaster.velocity.radiansPerSecond - targetSpeeds.leftMetersPerSecond)
-//        leftMaster.linearVelocity = targetSpeeds.leftMetersPerSecond.metersPerSecond
-//        rightMaster.linearVelocity = targetSpeeds.rightMetersPerSecond.metersPerSecond
-//        leftMaster.voltage = FF_l// + pid_l
-//        rightMaster.voltage = FF_r// + pid_r
-//        val adjustedSpeeds = ChassisSpeeds(speeds.vxMetersPerSecond, 0.0, speeds.omegaRadiansPerSecond / Constants.TRACK_WIDTH * 2.0)
-        drive(kinematics.toWheelSpeeds(speeds))
-    }
+    override fun drive(speeds: ChassisSpeeds) { drive(kinematics.toWheelSpeeds(speeds)) }
     val driveSystem = betterDrivetrainSystem()
     val loop = LinearSystemLoop(
         driveSystem,
@@ -158,7 +146,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) {
         leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
         rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
-        if(false && Constants.doStateSpace) {
+        if(Constants.doStateSpace) {
             loop.nextR = VecBuilder.fill(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond)  // r = reference (setpoint)
             loop.correct(VecBuilder.fill(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond))  // update with empirical
             loop.predict(KRobot.period)  // math
@@ -180,7 +168,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     override fun periodic() {
 //        debugDashboard()
         RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
-        if(Turret.targetVisible && Constants.NAVIGATION_CORRECTION)  {  // TODO: test
+        if(Constants.NAVIGATION_CORRECTION && Turret.targetVisible)  {  // TODO: test
             val distance = Shooter.targetDistance!!
             val angle = Turret.visionOffset!! + Turret.fieldRelativeAngle + 180.degrees
             polarCoordinates = PolarPose(distance, angle, Turret.visionOffset!!)
@@ -210,9 +198,9 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     }
 
     fun betterDrivetrainSystem(): LinearSystem<N2, N2, N2> {  // todo: implement these into the builtin
-//        return LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka, Constants.TRACK_WIDTH)
+//        return LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka)
         val kVAngular = angularFeedforward.kv// * 2.0 / Constants.TRACK_WIDTH
-        val kAAngular = angularFeedforward.ka// * 2.0 / Constants.TRACK_WIDTH
+        val kAAngular = angularFeedforward.ka //* 2.0 / Constants.TRACK_WIDTH
         val A1: Double = 0.5 * -(leftFF.kv / leftFF.ka + kVAngular / kAAngular)
         val A2: Double = 0.5 * -(rightFF.kv / rightFF.ka - kVAngular / kAAngular)
         val B1: Double = 0.5 * (1.0 / leftFF.ka + 1.0 / kAAngular)

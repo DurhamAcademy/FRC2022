@@ -49,7 +49,7 @@ object Constants {
 
     // ------ Shooter ------ //
     val LIMELIGHT_HEIGHT: Length = 23.216.inches
-    val LIMELIGHT_ANGLE: Angle = 40.degrees
+    val LIMELIGHT_ANGLE: Angle = 50.degrees
 
     // TODO: test shots
     val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf(
