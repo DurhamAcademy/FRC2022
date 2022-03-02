@@ -7,14 +7,14 @@ import kotlin.math.PI
 object DefaultControls : ControlSchema2022() {
     private val xbox = RobotContainer.controller.apply {
         rightX.apply {
-            maxVal = -PI//-5 * PI
+            maxVal = -PI * 1.0
             expo = 73.0
             deadband = 0.1
         }
 
         // throttle
         leftY.apply {
-            maxVal = -1.0//12.0
+            maxVal = -5.0
             expo = 20.0
             deadband = 0.2
         }

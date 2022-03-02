@@ -33,7 +33,7 @@ data class PolarPose(val r: Length, val theta: Angle, val orientation: Angle) : 
 data class PolarVelocity(val dr: LinearVelocity, val dTheta: AngularVelocity, val dOrientation: AngularVelocity) : Debug {
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
-            "∆r" to dr, "∆theta" to dTheta, "∆orientation" to dOrientation
+            "dR" to dr, "dTheta" to dTheta, "dOrientation" to dOrientation
         )
     }
 
