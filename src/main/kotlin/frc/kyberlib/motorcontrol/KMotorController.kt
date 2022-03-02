@@ -75,7 +75,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     /**
      * Adds post-encoder gearing to allow for post-geared speeds to be set.
      *
-     * product of (Input teeth / output teeth) for each gear stage
+     * product of (output teeth / input teeth) for each gear stage
      */
     var gearRatio: GearRatio = 1.0
     /**
@@ -246,7 +246,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Angle that the motor is at / should be at
      */
     var position: Angle
-        get() = if (Game.real) (rawPosition * gearRatio.invertIf { reversed }).k else simPosition
+        get() = if (Game.real) (rawPosition / gearRatio.invertIf { reversed }) else simPosition
         set(value) {
             controlMode = ControlMode.POSITION
             positionSetpoint = value
@@ -261,7 +261,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Spin rate of motor system
      */
     var velocity: AngularVelocity
-        get() = if(Game.real) rawVelocity * gearRatio.invertIf { reversed } else simVelocity
+        get() = if(Game.real) rawVelocity / gearRatio.invertIf { reversed } else simVelocity
         set(value) {
             controlMode = ControlMode.VELOCITY
             velocitySetpoint = value

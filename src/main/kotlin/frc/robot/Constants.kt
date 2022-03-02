@@ -16,14 +16,14 @@ object Constants {
     const val doStateSpace = false
     // ------ Climb ------ //
     val WINCH_RADIUS: Length = 0.6.inches
-    const val EXTENDABLE_ROTATION_GEAR_RATIO = 1.0 / 250.0
-    const val WINCH_GEAR_RATIO = (12.0 / 62.0) * (18.0 / 34.0) * (36.0 / 54.0)
+    const val EXTENDABLE_ROTATION_GEAR_RATIO = 250.0
+    const val WINCH_GEAR_RATIO = (62.0 / 12.0) * (34.0 / 18.0) * (54.0 / 36.0)
 
     // ------ Conveyor ------ //
 
     // ------ Drivetrain ------ //
     // pids
-    const val DRIVE_P = 0.0//0.5
+    const val DRIVE_P = 0.5
     const val DRIVE_I = 0.0
     const val DRIVE_D = 0.0
 
@@ -40,7 +40,7 @@ object Constants {
     // drivetrain setup
     const val TRACK_WIDTH = 0.72246
     val WHEEL_RADIUS = 2.inches
-    const val DRIVE_GEAR_RATIO = (10.0 / 50.0) * (50.0 / 62.0)
+    const val DRIVE_GEAR_RATIO = 62.0 / 50.0
 
     const val NAVIGATION_CORRECTION = false
 
@@ -68,11 +68,11 @@ object Constants {
         300.inches.meters to 4.0
     ))
 
-    val SHOOTER_VELOCITY_TOLERANCE = 50.0.rpm
+    val SHOOTER_VELOCITY_TOLERANCE = 50.rpm
     val FLYWHEEL_RADIUS = 2.inches
 
     // ------ Turret ------ //
-    val TURRET_GEAR_RATIO: Double = (1.0 / 10.0) * (18.0 / 215.0)
+    val TURRET_GEAR_RATIO: Double = 10.0 * (215.0 / 18.0)  // 10 is vp and second is pulley ratio
     const val NOT_FOUND_WAIT = 0.2
     const val LOST_WAIT = 2.0
     const val SMART_LOSS = false

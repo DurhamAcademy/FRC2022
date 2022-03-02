@@ -1,15 +1,16 @@
 In Sim:
 fancy drivetrain
+add hood integrator
+set max hood velocity
 ask trevor what proper cheesy drive is (also any additional plans he had for Overthrow)
-Make sure things are isolatable (specifically autoDrive)
+Make sure things are isolatable (specifically autoDrive and Navitation)
 kyberlib optimizations
 think about roborio2
 
 With robot:
-Drivetrain characterization
-Turret tuning
-loop times - maybe resolved
-Tune feedforwards
+shooter calibration
+turret recalibration
+optimize drivercode (we no doing good)
 Auto paths
 
 Anyone can do:
