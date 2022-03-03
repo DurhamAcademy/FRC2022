@@ -1,59 +1,49 @@
 package frc.kyberlib.motorcontrol
 
+import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.Servo
 import frc.kyberlib.command.DebugLevel
 import frc.kyberlib.command.LogMode
-import frc.kyberlib.math.units.extensions.Angle
-import frc.kyberlib.math.units.extensions.AngularVelocity
-import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.extensions.radiansPerSecond
+import frc.kyberlib.math.units.extensions.*
 import java.lang.UnsupportedOperationException
 import kotlin.math.absoluteValue
 
-// todo: fix this
+// in 2022: this is for https://www.gobilda.com/2000-series-dual-mode-servo-25-2-torque/
+/**
+ * Handles a velocity servo
+ */
 class KServo(port: Int) : KMotorController() {
     private val native = Servo(port)
-    private val absoluteAngle
-        get() = native.angle.degrees
-
     private var accumulatedPosition = 0.degrees
-    private var prevAbsoluteAngle = absoluteAngle
 
     override fun resetPosition(position: Angle) {
         accumulatedPosition = position
-        prevAbsoluteAngle = absoluteAngle
     }
 
+    init {
+        if(real) Notifier {
+            accumulatedPosition += rawVelocity * 0.02.seconds
+        }.startPeriodic(0.02)
+    }
+
+    override var minPosition: Angle? = 0.degrees
+    override var maxPosition: Angle? = 300.degrees
     override var rawPosition: Angle
-        get() = accumulatedPosition
+        get() = if(controlMode == ControlMode.POSITION) accumulatedPosition else accumulatedPosition
         set(value) {
-            val positionChange = value - accumulatedPosition
-            if (positionChange.degrees.absoluteValue < 179) native.angle = value.normalized.degrees
-            else if (positionChange.degrees > 0) native.speed = 1.0
-
+            native.position = value.degrees / maxPosition!!.degrees
         }
-    override var rawVelocity: AngularVelocity
-        get() = native.speed.radiansPerSecond
-        set(value) {
-            log("Don't velocity control servos", LogMode.WARN, DebugLevel.HighPriority)
-            native.speed = value.radiansPerSecond.coerceIn(-1.0, 1.0)
-        }
-    override var currentLimit: Int
-        get() = 10
-        set(value) {log("this no work on Servo", LogMode.WARN)}
+    override var rawVelocity: AngularVelocity = 0.radiansPerSecond
 
-    override var brakeMode: BrakeMode
-        get() = true
-        set(value) {}
-    override var rawReversed: Boolean
-        get() = false
-        set(value) {}
-    override var identifier: String
-        get() = "servo"
-        set(value) {}
+    override var brakeMode: BrakeMode = true
+    override var rawReversed: Boolean = false
+    override var currentLimit: Int = -1
+    override var identifier: String = "Servo$port"
     override var rawPercent: Double
-        get() = native.speed
-        set(value) {native.speed = value}
+        get() = native.get()
+        set(value) {
+            native.set(value)
+        }
 
     override fun followTarget(kmc: KBasicMotorController) {
         throw UnsupportedOperationException("This hasn't been made yet")
