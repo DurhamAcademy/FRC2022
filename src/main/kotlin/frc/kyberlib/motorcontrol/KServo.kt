@@ -21,9 +21,12 @@ class KServo(port: Int) : KMotorController() {
     }
 
     init {
-        if(real) Notifier {
-            accumulatedPosition += rawVelocity * 0.02.seconds
-        }.startPeriodic(0.02)
+        if(real) {
+            log("Remember this notifier exists")
+            Notifier {
+                accumulatedPosition += rawVelocity * 0.02.seconds
+            }.startPeriodic(0.02)
+        }
     }
 
     override var minPosition: Angle? = 0.degrees
@@ -43,9 +46,12 @@ class KServo(port: Int) : KMotorController() {
         get() = native.get()
         set(value) {
             native.set(value)
+            for(follower in followers) follower.percent = value  // todo: maybe implement this as the default follow
         }
 
     override fun followTarget(kmc: KBasicMotorController) {
-        throw UnsupportedOperationException("This hasn't been made yet")
+        if(kmc is KServo) {
+            kmc.followers.add(this)
+        } else throw UnsupportedOperationException("This hasn't been made yet")
     }
 }
