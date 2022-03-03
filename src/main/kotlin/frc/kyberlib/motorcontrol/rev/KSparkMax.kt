@@ -61,10 +61,6 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
             }
         }
 
-    init {
-        if (real) _spark.restoreFactoryDefaults()
-    }
-
     override fun checkError(): Boolean = if(real) _spark.getFault(CANSparkMax.FaultID.kCANTX) else false
 
     override var brakeMode = false
@@ -116,7 +112,7 @@ class KSparkMax(private val canId: CANId, private val brushType: BrushType = BRU
             _spark.follow(kmc._spark, reversed)
             kmc.errorRefreshRate = followPeriodic
         } else {
-            log("Following other devices may slow down robot", logMode = logMode.Warn)
+            log("Following other devices may slow down robot", logMode = LogMode.WARN)
             kmc.followers.add(this)
             kmc.notifier.startPeriodic(followPeriodic.seconds)
         }
