@@ -23,7 +23,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
     private fun addReferences() {
         allMotors.add(this)
     }
-    protected val followPeriodic = 0.005.seconds
+    protected val followPeriodic = 0.1.seconds
     var controlMode = ControlMode.NULL
     // ------ configs ----- //
     /**

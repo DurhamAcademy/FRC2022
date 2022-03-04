@@ -44,24 +44,28 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     val leftMaster = KSparkMax(10).apply {
         identifier = "leftMaster"
         reversed = true
+        brakeMode = true
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
     val rightMaster  = KSparkMax(12).apply {
         identifier = "rightMaster"
         reversed = false
+        brakeMode = true
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
     private val leftFollower  = KSparkMax(11).apply {
         identifier = "leftFollow"
         reversed = false
+        brakeMode = true
         currentLimit = 40
         follow(leftMaster)
     }
     private val rightFollower = KSparkMax(13).apply {
         identifier = "rightFollow"
         currentLimit = 40
+        brakeMode = true
         reversed = false
         follow(rightMaster)
     }

@@ -8,6 +8,7 @@ import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KSimulatedESC
+import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
@@ -46,6 +47,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     // additional motors that copy the main
     private val flywheel2 = KSimulatedESC(32).apply {
         identifier = "flywheel2"
+        reversed = true
         follow(flywheelMaster)
     }
 
@@ -69,7 +71,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
                 (Constants.UPPER_HUB_HEIGHT - 1.inches - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
 
     // motor controlling top roller speed
-    val topShooter = KSimulatedESC(33).apply {
+    val topShooter = KSparkMax(33).apply {
         identifier = "top1"
         kP = 10.0
         kD = 2.0
@@ -78,7 +80,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         if (Constants.doStateSpace) stateSpaceControl(system, 3.0, 0.01, 8.0)
         setupSim(system)
     }
-    private val topFollower = KSimulatedESC(34).apply {
+    private val topFollower = KSparkMax(34).apply {
         identifier = "top2"
         follow(topShooter)
         reversed = true
@@ -89,7 +91,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     override fun periodic() {
-        debugDashboard()
+//        debugDashboard()
     }
 
     override fun debugValues(): Map<String, Any?> {

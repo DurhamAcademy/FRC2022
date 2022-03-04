@@ -26,7 +26,7 @@ object ForceShoot : CommandBase() {
     override fun execute() {
         Debug.log("Force Shoot", "execute", level=DebugLevel.LowPriority)
 
-        if (Turret.targetVisible && Shooter.flywheelMaster.percent > 0.1) {
+        if (false && Turret.targetVisible && Shooter.flywheelMaster.percent > 0.1) {
             val dis = if (Turret.targetVisible) Shooter.targetDistance!!.meters else Shoot.prevDistance
             val parallelSpeed = Drivetrain.polarSpeeds.dr
             Shoot.prevDistance = dis

@@ -17,11 +17,7 @@ typealias Time = KUnit<Second>
  * Creates a Time unit and sets the unit to seconds.
  * Only called from internal
  */
-internal fun time(value: Double): Time {
-    val unit = Time(value)
-    unit.units = "Seconds"
-    return unit
-}
+internal fun time(value: Double): Time = Time(value)
 
 // Number to Time
 val Number.milliseconds get() = this.milli.seconds

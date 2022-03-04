@@ -12,6 +12,7 @@ import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.commands.Emote
 import frc.robot.commands.climb.Climb
+import frc.robot.commands.intake.Flush
 import frc.robot.commands.intake.Intake
 import frc.robot.commands.shooter.ForceShoot
 import frc.robot.commands.shooter.Shoot
@@ -46,7 +47,7 @@ object RobotContainer {
         SHOOT.whileActiveOnce(Shoot)
         FORCE_SHOT.whileActiveOnce(ForceShoot)
 //        EJECT.whileActiveOnce(Intake)
-//        FLUSH.whileActiveOnce(Intake)
+        FLUSH.whileActiveOnce(Flush)
         LOCK_TURRET.toggleWhenActive(LockTurret)
         CLIMB_MODE.toggleWhenActive(Climb)
         EMOTE.whileActiveOnce(Emote)

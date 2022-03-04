@@ -29,7 +29,7 @@ enum class DebugLevel {
  */
 interface Debug {
     companion object {
-        var debugging = true
+        var debugging = false
         var loggingLevel = DebugLevel.NORMAL
 
         fun log(identifier:String, text: String, mode: LogMode = LogMode.PRINT, level: DebugLevel = DebugLevel.NORMAL, stacktrace: Boolean = false) {
@@ -67,7 +67,7 @@ interface Debug {
                 is Map<*, *> -> sendMapToDashboard(info.value as Map<String, Any?>, path)
                 is NTSendable -> SmartDashboard.putData(path, info.value as NTSendable)
                 is Angle -> SmartDashboard.putNumber(path + " (degrees)", (info.value as Angle).degrees)
-                is KUnit<*> -> SmartDashboard.putNumber(path + " (${(info.value as KUnit<*>).units.replace("/", " per ")})", (info.value as KUnit<*>).value)
+                is KUnit<*> -> SmartDashboard.putNumber(path + " (${(info.value as KUnit<*>).value})", (info.value as KUnit<*>).value)
                 else -> SmartDashboard.putString(path, info.value.toString())
             }
         }

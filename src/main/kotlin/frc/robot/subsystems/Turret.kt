@@ -101,7 +101,7 @@ object Turret : SubsystemBase(), Debug {
         }
 
     init {
-        defaultCommand = AimTurret
+//        defaultCommand = AimTurret
 //        log("SeekTurret as default is off until built", logMode = LogMode.WARN)
     }
 
