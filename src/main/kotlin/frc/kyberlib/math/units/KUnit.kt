@@ -9,9 +9,7 @@ import kotlin.math.absoluteValue
  * Allows for dimensional analysis
  * @author Trevor
  */
-class KUnit<T>(val value: Double) : Comparable<KUnit<T>> {
-    var units = "KUnit"
-
+inline class KUnit<T>(val value: Double) : Comparable<KUnit<T>> {
     // math functions
     operator fun plus(other: KUnit<T>): KUnit<T> {
         val unit = KUnit<T>(value + other.value)
@@ -37,7 +35,6 @@ class KUnit<T>(val value: Double) : Comparable<KUnit<T>> {
         return unit
     }
 
-
     val absoluteValue get() = KUnit<T>(value.absoluteValue)
     override fun compareTo(other: KUnit<T>) = value.compareTo(other.value)
 
@@ -46,61 +43,7 @@ class KUnit<T>(val value: Double) : Comparable<KUnit<T>> {
      */
     infix fun epsilonEquals(other: KUnit<T>) = value epsilonEquals other.value
 
-    /**
-     * Removes redundant units from unit name
-     */
-    internal fun cancelExtraUnits() {
-        val seq = units.splitToSequence(' ').toList()
-        if (seq.size == 1) return
-        val topList = mutableListOf<String>()
-        val bottomList = mutableListOf<String>()
-        var top = true
-        for (item in seq) {
-            if (item == "*") top = true
-            else if (item == "/") top = false
-            else {
-                if (top) {
-                    if (item in bottomList) bottomList.remove(item)
-                    else topList.add(item)
-                } else {
-                    if (item in topList) topList.remove(item)
-                    else bottomList.add(item)
-                }
-            }
-        }
-        val string = StringBuilder()
-        var doParenthesises = bottomList.isNotEmpty() && topList.size > 1
-        if (topList.isNotEmpty()) {
-            if (doParenthesises) string.append("(")
-            topList.forEachIndexed { index, s ->
-                if (index != 0) string.append(" ")
-                string.append(s)
-                if (index != topList.size -1) string.append(" *")
-            }
-            if (doParenthesises) string.append(")")
-        } else string.append("1")
-        if (bottomList.isNotEmpty()) {
-            string.append(" / ")
-            doParenthesises = bottomList.size > 1
-            if (doParenthesises) string.append("(")
-            bottomList.forEachIndexed { index, s ->
-                if (index != 0) string.append(" ")
-                string.append(s)
-                if (index != topList.size -1) string.append(" *")
-            }
-            if (doParenthesises) string.append(")")
-        }
-        this.units = string.toString()
-    }
-
     operator fun unaryMinus(): KUnit<T> = KUnit(-value)
-
-    /**
-     * Asserts shared units with another KUnit
-     */
-    private fun shareUnits(other: KUnit<T>) {
-        other.units = units
-    }
 
     override fun toString(): String {
         return "($value $units)"
@@ -108,19 +51,8 @@ class KUnit<T>(val value: Double) : Comparable<KUnit<T>> {
 }
 
 // combining separate units
-operator fun <T : KUnitKey, U : KUnitKey> KUnit<T>.times(other: KUnit<U>): KUnit<Mul<T, U>> {
-    val unit = KUnit<Mul<T, U>>(value * other.value)
-    unit.units = "$units * ${other.units}"
-    unit.cancelExtraUnits()
-    return unit
-}
-operator fun <T : KUnitKey, U : KUnitKey> KUnit<T>.div(other: KUnit<U>): KUnit<Div<T, U>> {
-    val unit = KUnit<Div<T, U>>(value / other.value)
-    unit.units = "$units / ${other.units}"
-    unit.cancelExtraUnits()
-    return unit
-}
-
+operator fun <T : KUnitKey, U : KUnitKey> KUnit<T>.times(other: KUnit<U>): KUnit<Mul<T, U>>  = KUnit<Mul<T, U>>(value * other.value)
+operator fun <T : KUnitKey, U : KUnitKey> KUnit<T>.div(other: KUnit<U>): KUnit<Div<T, U>> = KUnit<Div<T, U>>(value / other.value)
 
 object KUnitTests {
     @JvmStatic

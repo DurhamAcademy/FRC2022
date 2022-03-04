@@ -14,11 +14,7 @@ import frc.kyberlib.math.units.centi
  */
 typealias Length = KUnit<Meter>
 
-internal fun Distance(value: Double): Length {
-    val unit = Length(value)
-    unit.units = "Meters"
-    return unit
-}
+internal fun Distance(value: Double): Length= Length(value)
 
 // Number -> length
 val Number.meters get() = Distance(this.toDouble())
