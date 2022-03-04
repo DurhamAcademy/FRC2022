@@ -1,12 +1,15 @@
 package frc.kyberlib.motorcontrol
 
-import edu.wpi.first.wpilibj.*
 import edu.wpi.first.networktables.NTSendable
 import edu.wpi.first.networktables.NTSendableBuilder
-import frc.kyberlib.command.*
+import edu.wpi.first.wpilibj.Notifier
+import edu.wpi.first.wpilibj.RobotController
+import frc.kyberlib.command.Debug
+import frc.kyberlib.command.Game
 import frc.kyberlib.math.invertIf
-import frc.kyberlib.math.units.extensions.Time
 import frc.kyberlib.math.units.extensions.seconds
+
+typealias Voltage = Double
 
 /**
  * A basic motor controller. No closed-loop control
@@ -33,8 +36,6 @@ abstract class KBasicMotorController : NTSendable, Debug {
      */
     var reversed: Boolean = false
 
-    abstract var rawReversed: Boolean
-
     /**
      * The prefix used by this motor for logging of errors and debug information.
      */
@@ -49,7 +50,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
     /**
      * Sets the voltage without changing the control mode
      */
-    protected fun safeSetVoltage(v: Double) {
+    protected fun safeSetVoltage(v: Voltage) {
         val prevMode = controlMode
         voltage = v
         controlMode = prevMode
@@ -62,6 +63,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
         set(value) {
             val adjusted = value.invertIf { reversed }
             controlMode = ControlMode.VOLTAGE
+            for(follower in followers) follower.percent = adjusted
             if (real) rawPercent = adjusted else field = value
         }
 
@@ -71,14 +73,13 @@ abstract class KBasicMotorController : NTSendable, Debug {
      */
     protected abstract var rawPercent: Double
 
-    var maxVoltage = 13.0
     /**
      * Sets controller voltage directly
      */
-    var voltage: Double
+    var voltage: Voltage
         get() = percent * vbus
         set(value) {
-            val norm = value.coerceIn(-vbus , vbus).coerceIn(-maxVoltage, maxVoltage)
+            val norm = value.coerceIn(-maxVoltage , maxVoltage)
             percent = (norm / vbus)
         }
 
@@ -87,10 +88,8 @@ abstract class KBasicMotorController : NTSendable, Debug {
      */
     private val vbus = if (real) RobotController.getBatteryVoltage() else 12.0
 
-    /**
-     * The notifier to update the motor continuously
-     */
-    internal val notifier = Notifier { update() }
+    var maxVoltage: Voltage = vbus
+        set(value) {field = value.coerceIn(0.0, vbus)}
 
     /**
      * True if this motor is following another.
@@ -124,23 +123,6 @@ abstract class KBasicMotorController : NTSendable, Debug {
         safeSetVoltage(0.0)
     }
 
-    /**
-     * Internal update function
-     */
-    open fun update() {
-        updateFollowers()
-    }
-
-    /**
-     * Update all followers to match voltage
-     */
-    private fun updateFollowers() {
-        for (follower in followers) {
-             follower.percent = percent.invertIf { follower.reversed }
-//             follower.update()
-        }
-    }
-
     open fun checkError(): Boolean = false
 
     /**
@@ -148,7 +130,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
      */
     override fun initSendable(builder: NTSendableBuilder) {
         builder.setSmartDashboardType("Encoder")
-        builder.addStringProperty("Control Type", {controlMode.name}, {})
+        builder.addStringProperty("Control Type", {controlMode.name}, null)
         builder.addDoubleProperty("Voltage", this::voltage) { if(it != voltage) this.voltage = it }
     }
 

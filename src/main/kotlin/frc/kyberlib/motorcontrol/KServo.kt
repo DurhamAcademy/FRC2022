@@ -14,6 +14,10 @@ import kotlin.math.absoluteValue
  */
 class KServo(port: Int) : KMotorController() {
     private val native = Servo(port)
+    override var identifier: String = "Servo$port"
+    init {
+        PWMRegristry[identifier] = port
+    }
     private var accumulatedPosition = 0.degrees
 
     override fun resetPosition(position: Angle) {
@@ -39,14 +43,10 @@ class KServo(port: Int) : KMotorController() {
     override var rawVelocity: AngularVelocity = 0.radiansPerSecond
 
     override var brakeMode: BrakeMode = true
-    override var rawReversed: Boolean = false
-    override var currentLimit: Int = -1
-    override var identifier: String = "Servo$port"
     override var rawPercent: Double
         get() = native.get()
         set(value) {
             native.set(value)
-            for(follower in followers) follower.percent = value  // todo: maybe implement this as the default follow
         }
 
     override fun followTarget(kmc: KBasicMotorController) {

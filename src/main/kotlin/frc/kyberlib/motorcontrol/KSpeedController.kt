@@ -1,7 +1,6 @@
 package frc.kyberlib.motorcontrol
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorController
-import frc.kyberlib.math.units.extensions.seconds
 
 /**
  * Wraps a WPI SpeedController to use the KBasicMotorController API
@@ -9,25 +8,18 @@ import frc.kyberlib.math.units.extensions.seconds
 class KSpeedController(private val m_speedController: MotorController) : KBasicMotorController() {
     private companion object{
         var id = 1
-
     }
 
     private val myId = id
     init { id += 1 }
 
-    override var brakeMode: BrakeMode  // this doesn't work
-        get() = false
-        set(value) {}
-    override var rawReversed: Boolean
-        get() = m_speedController.inverted
-        set(value) {m_speedController.inverted = value}
+    override var brakeMode: BrakeMode = false  // this doesn't work
     override var identifier: String = "KSpeedController #$myId"
     override var rawPercent: Double
         get() = m_speedController.get()
         set(value) {m_speedController.set(value)}
 
     override fun followTarget(kmc: KBasicMotorController) {
-        if (kmc.followers.size == 0) kmc.notifier.startPeriodic(followPeriodic.seconds)
         kmc.followers.add(this)
     }
 }
