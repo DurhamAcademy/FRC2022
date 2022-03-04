@@ -1,19 +1,27 @@
 In Sim:
-ask trevor what proper cheesy drive is (also any additional plans he had for Overthrow)
 Make sure things are isolatable (specifically autoDrive and Navitation)
 think about roborio2 (they said 30% faster)
 
 With robot:
 shooter calibration
+    - PIDF
+    - statespace
+    - feedforward
+    - ff with voltage drop predictor
 turret recalibration
 PhotonVision update
-test if drivecode acts like expected
+setup shuffleboard
 Shooter test values
 Auto paths
 
+Fancy shooter things:
+- movement compensation
+    - this would require better integration between turret and shooter
+- make sure to calculate output velocity (based on time of flight) during calibration
+    - for now can estimate time of flight as constant
+    - iteratively figure out what is should be
+
 Anyone can do:
-1: mount hall sensor or limit switch for turret
-1.5: mount hood limit switch
 2: mess with auto paths
 How? -->
 - search for Pathweaver.jar on your laptop

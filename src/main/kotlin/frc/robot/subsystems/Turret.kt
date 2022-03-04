@@ -117,7 +117,7 @@ object Turret : SubsystemBase(), Debug {
     /**
      * Allows the turret to know its position relative to everything else
      */
-    fun zeroTurret() {
+    fun zeroTurret() {  // zeros the robot position to looking straight aheead
         turret.resetPosition()
     }
 

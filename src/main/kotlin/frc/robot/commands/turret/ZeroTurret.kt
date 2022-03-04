@@ -16,7 +16,7 @@ object ZeroTurret: CommandBase() {
     }
 
     override fun execute() {
-        Turret.turret.percent = 0.1  // TODO: check this direction
+        Turret.turret.percent = -0.3  // TODO: check this direction
         Debug.log("turretLimit", RobotContainer.turretLimit.get().toString(), level = DebugLevel.LowPriority)
     }
 
