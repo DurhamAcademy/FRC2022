@@ -1,9 +1,7 @@
 package frc.kyberlib.motorcontrol
 
-import frc.kyberlib.math.units.extensions.Angle
-import frc.kyberlib.math.units.extensions.AngularVelocity
-import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.extensions.rpm
+import frc.kyberlib.command.Game
+import frc.kyberlib.math.units.extensions.*
 
 /**
  * Raw simulated motor.
@@ -13,8 +11,6 @@ class KSimulatedESC(name: Any) : KMotorController() {  // potentially remove thi
 
     override var rawVelocity: AngularVelocity = 0.rpm
     override var currentLimit: Int = -1
-
-    override fun configureEncoder(config: KEncoderConfig) = true
 
     override var identifier = name.toString()
 
@@ -27,7 +23,9 @@ class KSimulatedESC(name: Any) : KMotorController() {  // potentially remove thi
     override fun resetPosition(position: Angle) { this.position = position }
 
     override fun followTarget(kmc: KBasicMotorController) {
-        kmc.followers.add(this)
-        kmc.notifier.startPeriodic(0.005)
+        if (Game.sim) {
+            kmc.followers.add(this)
+            kmc.notifier.startPeriodic(followPeriodic.seconds)
+        }
     }
 }

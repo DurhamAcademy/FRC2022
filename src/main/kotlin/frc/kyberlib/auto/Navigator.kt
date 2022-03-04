@@ -1,30 +1,35 @@
 package frc.kyberlib.auto
 
+import edu.wpi.first.math.MatBuilder
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.*
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.math.MatBuilder
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
 import edu.wpi.first.math.numbers.N5
-import frc.robot.subsystems.Drivetrain
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.auto.trajectory.KTrajectoryConfig
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.milli
 import frc.kyberlib.math.units.string
 import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.sensors.gyros.KGyro
 import frc.kyberlib.simulation.field.KField2d
+import frc.robot.Constants
 
+enum class TrackingMode {
+    Fast, Fancy, DumbBoth
+}
 /**
  * Class to store and update robot navigation information
  */
-class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
+class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose, private val trackingMode: TrackingMode) : Debug {
     companion object { var instance: Navigator? = null }
+    private val useOdometry = trackingMode != TrackingMode.Fancy
     init {
         instance = this
         gyro.heading = startPose.rotation.k
@@ -57,19 +62,24 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
         get() = gyro.heading
         set(value) {gyro.heading = value}
     var pose: Pose2d  // the location and direction of the robot
-        get() = poseEstimator.getEstimatedPosition()
+        get() = if(!useOdometry) poseEstimator.estimatedPosition else odometry.poseMeters
         set(value) {
-            poseEstimator.resetPosition(value, heading)
+            if(!useOdometry) poseEstimator.resetPosition(value, heading)
+            else odometry.resetPosition(value, heading)
             KField2d.robotPose = value
         }
     val position: Translation2d  // the estimated location of the robot
         get() = pose.translation
+    private val odometry = DifferentialDriveOdometry(Constants.START_POSE.rotation).apply {
+        resetPosition(startPose, heading)
+    }
 
     /**
      * Update position based on estimated motion
      */
     fun update(speeds: DifferentialDriveWheelSpeeds, leftPosition: Length, rightPosition: Length) {  // estimate motion
-        poseEstimator.update(heading, speeds, leftPosition.meters, rightPosition.meters)
+        if (!useOdometry) poseEstimator.update(heading, speeds, leftPosition.meters, rightPosition.meters)
+        else odometry.update(gyro.heading, leftPosition.meters, rightPosition.meters)
     }
     /**
      * Update position based on a different position guess
@@ -79,7 +89,11 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
      */
     fun update(globalPosition: Pose2d, time: Time) {  // apply global position update
         SmartDashboard.putString("global pose", globalPosition.string)
-        poseEstimator.addVisionMeasurement(globalPosition, time.seconds / 1.milli)
+        when(trackingMode) {
+            TrackingMode.Fancy -> poseEstimator.addVisionMeasurement(globalPosition, time.milliseconds)
+            TrackingMode.DumbBoth -> odometry.resetPosition(globalPosition, heading)
+            else -> log("Global position updates not configured", LogMode.WARN)
+        }
     }
 
     override fun debugValues(): Map<String, Any?> {

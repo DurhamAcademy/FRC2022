@@ -7,14 +7,14 @@ import kotlin.math.PI
 object DefaultControls : ControlSchema2022() {
     private val xbox = RobotContainer.controller.apply {
         rightX.apply {
-            maxVal = -PI//-5 * PI
+            maxVal = -PI * 1.0
             expo = 73.0
             deadband = 0.1
         }
 
         // throttle
         leftY.apply {
-            maxVal = -1.0//12.0
+            maxVal = -5.0
             expo = 20.0
             deadband = 0.2
         }
@@ -31,5 +31,5 @@ object DefaultControls : ControlSchema2022() {
     override val FLUSH: Trigger = xbox.rightDPad
     override val LOCK_TURRET: Trigger = xbox.leftMenu
     override val CLIMB_MODE: Trigger = xbox.rightMenu
-    override val EMOTE: Trigger = xbox.share
+    override val EMOTE: Trigger = xbox.aButton
 }

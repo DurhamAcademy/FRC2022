@@ -2,8 +2,9 @@ package frc.robot.subsystems
 
 import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
-import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KSimulatedESC
@@ -17,7 +18,7 @@ import frc.robot.subsystems.Turret.targetVisible
 /**
  * Encapsulates all the things relevant to shooting the ball
  */
-object Shooter : KSubsystem(), Simulatable {
+object Shooter : SubsystemBase(), Debug, Simulatable {
     var status = ShooterStatus.IDLE
 
     // main motor attached to the flywheel
@@ -32,7 +33,6 @@ object Shooter : KSubsystem(), Simulatable {
         setupSim(system)
         if(Constants.doStateSpace)
             stateSpaceControl(loop)
-//        Notifier{this.velocity = this.velocitySetpoint}.startPeriodic(.02)
     }
 //    val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 0.02)
     // additional motors that copy the main
@@ -57,7 +57,8 @@ object Shooter : KSubsystem(), Simulatable {
     val targetDistance: Length? 
         get() = if (Game.sim) RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
                 else if (!targetVisible) null
-                else 2.feet + distanceFilter.calculate(((Constants.UPPER_HUB_HEIGHT - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
+                else 2.feet + distanceFilter.calculate((
+                (Constants.UPPER_HUB_HEIGHT - 1.inches - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
 
     // motor controlling top roller speed
     val topShooter = KSimulatedESC(33).apply {
@@ -66,7 +67,7 @@ object Shooter : KSubsystem(), Simulatable {
         kD = 2.0
         motorType = DCMotor.getNeo550(2)
         val system = flywheelSystem(0.00001)
-        stateSpaceControl(system, 3.0, 0.01, 8.0)
+        if (Constants.doStateSpace) stateSpaceControl(system, 3.0, 0.01, 8.0)
         setupSim(system)
     }
     private val topFollower = KSimulatedESC(34).apply {
@@ -80,7 +81,7 @@ object Shooter : KSubsystem(), Simulatable {
     }
 
     override fun periodic() {
-//        debugDashboard()
+        debugDashboard()
     }
 
     override fun debugValues(): Map<String, Any?> {

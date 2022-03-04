@@ -2,18 +2,24 @@ package frc.kyberlib.pneumatics
 
 import edu.wpi.first.networktables.NTSendable
 import edu.wpi.first.networktables.NTSendableBuilder
-import edu.wpi.first.wpilibj.PneumaticsModuleType
-import edu.wpi.first.wpilibj.Solenoid
+import edu.wpi.first.wpilibj.*
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
-import frc.kyberlib.command.KSubsystem
 
-class KSolenoid(port: Int, type: PneumaticsModuleType = PneumaticsModuleType.CTREPCM, private val fake: Boolean = false) : Debug, NTSendable {
+class KSolenoid(port: Int, private val fake: Boolean = false) : Debug, NTSendable {
+    companion object {
+        val allSolenoids = mutableListOf<KSolenoid>()
+        val hub: PneumaticsBase = PneumaticsControlModule()
+        val compressor = hub.makeCompressor().apply {
+            enableDigital()
+        }
+    }
+
     init {
-        KSubsystem.solenoidDump?.add(this)
+        allSolenoids.add(this)
     }
     override var identifier: String = "Pneumatic$port"
-    val solenoid = Solenoid(type, port)
+    private val solenoid = hub.makeSolenoid(port)
     var extended: Boolean = false
         get() = if (Game.real || fake) field else solenoid.get()
         set(value) {if(Game.sim || fake) field = value else solenoid.get()}

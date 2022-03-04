@@ -2,37 +2,28 @@ package frc.kyberlib.mechanisms.drivetrain
 
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.Nat
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.kinematics.ChassisSpeeds
-import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
-import edu.wpi.first.math.kinematics.DifferentialDriveOdometry
-import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
-import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.math.system.plant.LinearSystemId
-import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.LinearQuadraticRegulator
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.estimator.KalmanFilter
+import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.math.numbers.N2
 import edu.wpi.first.math.system.LinearSystem
 import edu.wpi.first.math.system.LinearSystemLoop
+import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
+import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
-import frc.kyberlib.command.KSubsystem
-import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
-import frc.kyberlib.sensors.gyros.KGyro
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
-import frc.robot.Constants
-import frc.robot.subsystems.Drivetrain
 
 /**
  * Pre-made DifferentialDrive Robot.
@@ -41,7 +32,7 @@ import frc.robot.subsystems.Drivetrain
  * @param configs information about the physical desciption of this drivetrain
  * @param gyro KGyro to provide heading information
  */
-abstract class DifferentialDriveTrain: KSubsystem(), Simulatable, KDrivetrain, Debug {
+abstract class DifferentialDriveTrain: SubsystemBase(), Simulatable, KDrivetrain, Debug {
 
     abstract val leftMaster: KMotorController
     abstract val rightMaster: KMotorController
@@ -86,7 +77,7 @@ abstract class DifferentialDriveTrain: KSubsystem(), Simulatable, KDrivetrain, D
             // The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
             VecBuilder.fill(0.001, 0.001, 0.001, 0.1, 0.1, 0.005, 0.005)
         )
-        Simulation.instance.include(this)
+        if (Game.sim) Simulation.instance.include(this)
     }
 
     override fun simUpdate(dt: Time) {

@@ -40,6 +40,7 @@ class KRotation(val value: Double) : Rotation2d(value), Comparable<Rotation2d> {
     }
 }
 
+operator fun Rotation2d.div(other: Double) = Angle(this.radians / other)
 /**
  * Allows for division of angle by time.
  * Creates Angular Velocity

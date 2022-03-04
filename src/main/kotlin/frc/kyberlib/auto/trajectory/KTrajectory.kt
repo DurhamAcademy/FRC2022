@@ -6,8 +6,9 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.math.trajectory.TrajectoryGenerator
 import edu.wpi.first.math.trajectory.TrajectoryUtil
-import frc.kyberlib.KyberlibConfig
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.LogMode
 import java.io.File
 
 /**
@@ -28,14 +29,15 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
          * @throws NoSuchFileException if it is an invalid trajectory
          */
         fun load(name: String): KTrajectory {
-            val jsonFile = File("${KyberlibConfig.TRAJECTORY_PATH}/$name.wpilib.json")
-//            val configFile = File("${KyberlibConfig.TRAJECTORY_PATH}/${name}Config.json")
-            val wpiTrajectory = TrajectoryUtil.deserializeTrajectory(jsonFile.readText())
+            val wpiTrajectory: Trajectory = if (TrajectoryManager.paths!!.contains(name)) TrajectoryManager.getPath(name)
+                                else if (TrajectoryManager.routines!!.contains(name)) TrajectoryManager.getAuto(name)
+                                else {
+                                    Debug.log("KTrajectory", "Couldn't load trajectory $name.", level = DebugLevel.HighPriority, mode = LogMode.WARN)
+                                    Trajectory()
+                                }
 //            val config = KTrajectoryConfig.load(configFile)
             return KTrajectory(name, wpiTrajectory)
         }
-
-        val savedTrajectories = File(KyberlibConfig.TRAJECTORY_PATH).list()?.filter { it.endsWith(".wpilib.json") }?.map { it.removeSuffix(".wpilib.json") }
 
         private fun generateTrajectory(startPose2d: Pose2d, waypoints: MutableList<Translation2d>, newConfig: KTrajectoryConfig?): Trajectory {
             val config = putConfig(newConfig)
@@ -84,14 +86,14 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
      * @param debug print the process
      */
     fun save(debug: Boolean = false) {
-        val trajFolder = File(KyberlibConfig.TRAJECTORY_PATH)
+        val trajFolder = File(TrajectoryManager.TRAJECTORY_PATH)
         if (!trajFolder.exists()) {
             println("Main trajectory directory does not exist, creating...")
             trajFolder.mkdir()
         }
 
-        val jsonFile = File("${KyberlibConfig.TRAJECTORY_PATH}/$name.wpilib.json")
-        val hashFile = File("${KyberlibConfig.TRAJECTORY_PATH}/$name.hash")
+        val jsonFile = File("${TrajectoryManager.TRAJECTORY_PATH}/$name.wpilib.json")
+        val hashFile = File("${TrajectoryManager.TRAJECTORY_PATH}/$name.hash")
         if (jsonFile.exists() && hashFile.exists()) {
             if (hash != hashFile.readText().toInt()) {
                 if (debug) println("Trajectory $name out of date, recreating...")
@@ -105,11 +107,6 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
 
         jsonFile.writeText(TrajectoryUtil.serializeTrajectory(this))
         hashFile.writeText(hash.toString())
-    }
-
-    init {
-        // add to Map of trajectories
-        TrajectoryManager.trajectories[name] = this
     }
 
     private val hash

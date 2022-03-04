@@ -7,9 +7,10 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.util.Color8Bit
+import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugLevel
 import frc.kyberlib.command.Game
-import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.units.extensions.Time
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.inches
@@ -26,11 +27,8 @@ import kotlin.math.absoluteValue
  * Mechanism representing the actuators for climbing
  */
 object Climber : SubsystemBase(), Debug, Simulatable {
-    /* no-op */
-    init {
-        println("Climber")
-    }
-    var status = CLIMBER_STATUS.IDLE
+    override val priority: DebugLevel = DebugLevel.LowPriority
+    var status = ClimberStatus.IDLE
 
     /**left climb arm pneumatic (lifts the climb arms)*/
     private val leftStatic = KSolenoid(0, fake = true).apply {
@@ -163,7 +161,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     }
 
     override fun periodic() {
-        debugDashboard()
+//        debugDashboard()
     }
 
     override fun debugValues(): Map<String, Any?> {

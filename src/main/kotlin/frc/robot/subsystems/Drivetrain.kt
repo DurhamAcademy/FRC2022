@@ -16,18 +16,17 @@ import edu.wpi.first.math.system.LinearSystemLoop
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.system.plant.LinearSystemId
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
+import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
+import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
-import frc.kyberlib.command.KSubsystem
 import frc.kyberlib.math.PolarPose
-import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.polar
 import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.milli
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
-import frc.kyberlib.motorcontrol.BrushType
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
@@ -40,27 +39,27 @@ import frc.robot.commands.drive.Drive
 /**
  * Mechanism that controls how the robot drives
  */
-object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
+object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     // motors
-    val leftMaster = KSparkMax(10, BrushType.BRUSHLESS).apply {
+    val leftMaster = KSparkMax(10).apply {
         identifier = "leftMaster"
         reversed = true
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
-    val rightMaster  = KSparkMax(12, BrushType.BRUSHLESS).apply {
+    val rightMaster  = KSparkMax(12).apply {
         identifier = "rightMaster"
         reversed = false
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
-    private val leftFollower  = KSparkMax(11, BrushType.BRUSHLESS).apply {
+    private val leftFollower  = KSparkMax(11).apply {
         identifier = "leftFollow"
         reversed = false
         currentLimit = 40
         follow(leftMaster)
     }
-    private val rightFollower = KSparkMax(13, BrushType.BRUSHLESS).apply {
+    private val rightFollower = KSparkMax(13).apply {
         identifier = "rightFollow"
         currentLimit = 40
         reversed = false
@@ -83,7 +82,7 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
             val detectionTime = Game.time - latency
             RobotContainer.navigation.update(value, detectionTime)
         }
-    var polarCoordinates
+    private var polarCoordinates
         get() = RobotContainer.navigation.pose.polar(Constants.HUB_POSITION)
         set(value) {
             pose = Pose2d(value.cartesian(Constants.HUB_POSITION).translation, RobotContainer.navigation.heading)
@@ -110,10 +109,10 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
                 kP = Constants.DRIVE_P
                 kI = Constants.DRIVE_I
                 kD = Constants.DRIVE_D
-
-                addFeedforward(leftFF)
             }
         }
+        leftMaster.addFeedforward(leftFF)
+        rightMaster.addFeedforward(rightFF)
         Navigator.instance!!.applyMovementRestrictions(5.39.feetPerSecond, 2.metersPerSecond)
         Navigator.instance!!.applyKinematics(kinematics)
     }
@@ -167,9 +166,9 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
-        debugDashboard()
+//        debugDashboard()
         RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
-        if(Turret.targetVisible && Constants.NAVIGATION_CORRECTION)  {  // TODO: test
+        if(Constants.NAVIGATION_CORRECTION && Turret.targetVisible)  {  // TODO: test
             val distance = Shooter.targetDistance!!
             val angle = Turret.visionOffset!! + Turret.fieldRelativeAngle + 180.degrees
             polarCoordinates = PolarPose(distance, angle, Turret.visionOffset!!)
@@ -186,8 +185,8 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
     fun setupSim() {
         driveSim = DifferentialDrivetrainSim( // Create a linear system from our characterization gains.
             betterDrivetrainSystem(),
-//            LinearSystemId.identifyDrivetrainSystem(Constants.DRIVE_KV_L, Constants.DRIVE_KA_L, KvAngular, KaAngular),
-            DCMotor.getNEO(2),  // 2 NEO motors on each side of the drivetrain.
+//            LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka, Constants.TRACK_WIDTH),
+            leftMaster.motorType!!,  // 2 NEO motors on each side of the drivetrain.
             leftMaster.gearRatio,  // gearing reduction
             kinematics.trackWidthMeters,  // The track width
             leftMaster.radius!!.meters,  // wheel radius
@@ -195,19 +194,17 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
             VecBuilder.fill(0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001)
         )
         driveSim.pose = RobotContainer.navigation.pose
-        Simulation.instance.include(this)
+        if (Game.sim) Simulation.instance.include(this)
     }
 
     fun betterDrivetrainSystem(): LinearSystem<N2, N2, N2> {  // todo: implement these into the builtin
 //        return LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka)
-        val kVAngular = angularFeedforward.kv * 2.0 / Constants.TRACK_WIDTH
-        val kAAngular = angularFeedforward.ka * 2.0 / Constants.TRACK_WIDTH
-        val kVLinear = leftFF.kv
-        val kALinear = leftFF.ka
-        val A1: Double = 0.5 * -(kVLinear / kALinear + kVAngular / kAAngular)
-        val A2: Double = 0.5 * -(kVLinear / kALinear - kVAngular / kAAngular)
-        val B1: Double = 0.5 * (1.0 / kALinear + 1.0 / kAAngular)
-        val B2: Double = 0.5 * (1.0 / kALinear - 1.0 / kAAngular)
+        val kVAngular = angularFeedforward.kv// * 2.0 / Constants.TRACK_WIDTH
+        val kAAngular = angularFeedforward.ka //* 2.0 / Constants.TRACK_WIDTH
+        val A1: Double = 0.5 * -(leftFF.kv / leftFF.ka + kVAngular / kAAngular)
+        val A2: Double = 0.5 * -(rightFF.kv / rightFF.ka - kVAngular / kAAngular)
+        val B1: Double = 0.5 * (1.0 / leftFF.ka + 1.0 / kAAngular)
+        val B2: Double = 0.5 * (1.0 / rightFF.ka - 1.0 / kAAngular)
 
         return LinearSystem(
             Matrix.mat(Nat.N2(), Nat.N2()).fill(A1, A2, A2, A1),
@@ -222,8 +219,8 @@ object Drivetrain : KSubsystem(), KDrivetrain, Simulatable {
     }
     override fun simUpdate(dt: Time) {
         // update the sim with new inputs
-        val leftVolt = leftMaster.voltage.invertIf { leftMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
-        val rightVolt = rightMaster.voltage.invertIf { rightMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
+        val leftVolt = leftMaster.voltage//.invertIf { leftMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
+        val rightVolt = rightMaster.voltage//.invertIf { rightMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
         driveSim.setInputs(leftVolt, rightVolt)
         driveSim.update(dt.seconds)
 //

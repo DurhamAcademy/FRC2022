@@ -20,3 +20,5 @@ val LinearVelocity.milesPerHour get() = value / (LengthConversions.milesToFeet *
 fun LinearVelocity.toAngularVelocity(radius: Length) = (value / radius.value).radiansPerSecond
 
 operator fun LinearVelocity.div(radius: Length): AngularVelocity = this.toAngularVelocity(radius)
+operator fun LinearVelocity.times(time: Time): Length = Length(this.metersPerSecond * time.seconds)
+//operator fun Length.div(time: Time): LinearVelocity = LinearVelocity(this.meters / time.seconds)

@@ -16,11 +16,8 @@ abstract class KBasicMotorController : NTSendable, Debug {
         val allMotors = mutableListOf<KBasicMotorController>()
     }
 
-    init {
-        addReferences()
-    }
+    init { addReferences() }
     private fun addReferences() {
-        KSubsystem.motorDump?.add(this)
         allMotors.add(this)
     }
     protected val followPeriodic = 0.005.seconds
@@ -60,12 +57,12 @@ abstract class KBasicMotorController : NTSendable, Debug {
     /**
      * What percent output is currently being applied?
      */
-    var percent: Double
-        get() = percentCache
+    var percent: Double = 0.0
+        get() = if (Game.real) rawPercent else field
         set(value) {
             val adjusted = value.invertIf { reversed }
             controlMode = ControlMode.VOLTAGE
-            if (real) rawPercent = adjusted else percentCache = adjusted
+            if (real) rawPercent = adjusted else field = value
         }
 
     /**
@@ -84,23 +81,6 @@ abstract class KBasicMotorController : NTSendable, Debug {
             val norm = value.coerceIn(-vbus , vbus).coerceIn(-maxVoltage, maxVoltage)
             percent = (norm / vbus)
         }
-
-    private var percentCache: Double = 0.0
-    protected var quarentined = false
-    /**
-     * Updates the motor values and caches them so that code repeated references to slow code and overwhelm CAN BUS
-     */
-    open fun updateValues() {
-        if(!checkError()) {
-            percentCache = rawPercent.invertIf { reversed }
-            quarentined = false
-        }
-
-        else {
-            quarentined = true
-            log("CAN ERROR", LogMode.WARN, DebugLevel.HighPriority)
-        }
-    }
 
     /**
      * The voltage available to the motor
@@ -148,7 +128,6 @@ abstract class KBasicMotorController : NTSendable, Debug {
      * Internal update function
      */
     open fun update() {
-        updateValues()
         updateFollowers()
     }
 

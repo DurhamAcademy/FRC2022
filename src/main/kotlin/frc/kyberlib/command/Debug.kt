@@ -33,7 +33,7 @@ interface Debug {
         var loggingLevel = DebugLevel.NORMAL
 
         fun log(identifier:String, text: String, mode: LogMode = LogMode.PRINT, level: DebugLevel = DebugLevel.NORMAL, stacktrace: Boolean = false) {
-            if (level < loggingLevel) return
+            if (level < loggingLevel || !debugging) return
             val output = "[$identifier] $text"
             when (mode) {
                 LogMode.PRINT -> println(output)

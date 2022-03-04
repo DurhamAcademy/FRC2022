@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.trajectory.KTrajectory
+import frc.kyberlib.auto.trajectory.TrajectoryManager
 import frc.kyberlib.command.Debug
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
@@ -52,12 +53,12 @@ object RobotContainer {
     }
 
     val autoChooser = SendableChooser<KTrajectory>().apply {
-        val options = KTrajectory.savedTrajectories
+        val options = TrajectoryManager.routines
         if (options == null) {
             Debug.log("Auto Chooser", "no auto paths found")
         } else {
-            for (path in KTrajectory.savedTrajectories)
-                addOption(path, KTrajectory.load(path))
+            for (path in TrajectoryManager.routines!!) 1+1
+//                addOption(path, KTrajectory.load(path))
         }
         SmartDashboard.putData("auto", this)
     }
