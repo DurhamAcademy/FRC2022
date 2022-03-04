@@ -9,7 +9,7 @@ import frc.kyberlib.simulation.field.KField2d
 /**
  * Simulation that will run a loop to update simulatable objects
  */
-class Simulation : SubsystemBase() {  // TODO: figure out the hardware tab
+class Simulation : SubsystemBase() {
     companion object {
         val instance: Simulation
             get() { return if(internal == null) Simulation() else internal!! }

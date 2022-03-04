@@ -1,21 +1,28 @@
 In Sim:
-fancy drivetrain
-add hood integrator
-set max hood velocity
-ask trevor what proper cheesy drive is (also any additional plans he had for Overthrow)
 Make sure things are isolatable (specifically autoDrive and Navitation)
-kyberlib optimizations
-think about roborio2
+think about roborio2 (they said 30% faster)
 
 With robot:
 shooter calibration
+    - PIDF
+    - statespace
+    - feedforward
+    - ff with voltage drop predictor
 turret recalibration
-optimize drivercode (we no doing good)
+PhotonVision update
+setup shuffleboard
+Shooter test values
 Auto paths
 
+Fancy shooter things:
+- movement compensation
+    - this would require better integration between turret and shooter
+- make sure to calculate output velocity (based on time of flight) during calibration
+    - for now can estimate time of flight as constant
+    - iteratively figure out what is should be
+
 Anyone can do:
-1. mount hall sensor or limit switch for turret
-2. mess with auto paths
+2: mess with auto paths
 How? -->
 - search for Pathweaver.jar on your laptop
 - open the availble project
@@ -23,7 +30,5 @@ How? -->
 - find the save button (it's something like build path)
 - move output into code (Pathweaver/output to src/main.deploy
 - switch the name of the auto path in Robot.kt
-
-3. Conveyor Code (Everetts messing with this)
-4. documentation of kyberlib (good project to try to understand whats happening)
-5. Try auto climb
+4: documentation of kyberlib (good project to try to understand whats happening)
+5: Try auto climb

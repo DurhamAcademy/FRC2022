@@ -35,13 +35,6 @@ enum class EncoderType {
 }
 
 /**
- * Defines types of motors that can be used
- */
-enum class BrushType {
-    BRUSHLESS, BRUSHED
-}
-
-/**
  * The type update goal the motor is going for
  */
 enum class ControlMode {
@@ -57,10 +50,8 @@ data class KEncoderConfig(val cpr: Int, val type: EncoderType, val reversed: Boo
  */
 abstract class KMotorController : KBasicMotorController(), Simulatable {
     open var motorType: DCMotor? = null
-    private val updateNotifier = Notifier {
-//        updateValues()
-        updateVoltage()
-    }
+
+    private val updateNotifier = Notifier { updateVoltage() }
     var updateRate: Time = KRobot.period.seconds  // builtin notifier system
         set(value) {
             field = value
@@ -83,13 +74,13 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     /**
      * The max angular velocity the motor can have
      */
-    var maxVelocity: AngularVelocity
+    open var maxVelocity: AngularVelocity
         get() = constraints.maxVelocity.radiansPerSecond
         set(value) { constraints = TrapezoidProfile.Constraints(value.radiansPerSecond, constraints.maxVelocity) }
     /**
      * The max angular acceleation the motor can have
      */
-    var maxAcceleration: AngularVelocity
+    open var maxAcceleration: AngularVelocity
         get() = constraints.maxAcceleration.radiansPerSecond
         set(value) { constraints = TrapezoidProfile.Constraints(constraints.maxVelocity, value.radiansPerSecond) }
     open var maxPosition: Angle? = null
@@ -112,6 +103,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     var maxLinearAcceleration: LinearVelocity
         get() = rotationToLinear(maxAcceleration)
         set(value) { maxAcceleration = linearToRotation(value) }
+
     private var constraints = TrapezoidProfile.Constraints(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
         set(value) {
             field = value
@@ -122,21 +114,40 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     /**
      * Proportional gain of the customControl controller.
      */
-    var kP: Double
+    open var kP: Double
         get() = PID.p
         set(value) { PID.p = value }
     /**
      * Integral gain of the customControl controller.
      */
-    var kI: Double
+    open var kI: Double
         get() = PID.i
         set(value) { PID.i = value }
     /**
      * Derivative gain of the customControl controller.
      */
-    var kD: Double
+    open var kD: Double
         get() = PID.d
         set(value) { PID.d = value }
+
+    /**
+     * FF gain for native motor control.
+     * Should be equal to kv on SysID ff
+     */
+    open var kF: Double = 0.0
+
+    /**
+     * Max integration value
+     */
+    open var kIRange = 0.0
+        set(value) {
+            field = value
+            PID.setIntegratorRange(0.0, value)
+        }
+
+    /**
+     * Builtin PID controller for motor
+     */
     var PID = ProfiledPIDController(0.0, 0.0, 0.0, constraints)  // what does the profile do?
 
     /**
@@ -144,6 +155,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Useful in both position and velocity control
      */
     fun addFeedforward(feedforward: SimpleMotorFeedforward) {
+        kF = feedforward.kv
         customControl = {
             when (controlMode) {
                 ControlMode.VELOCITY -> {
@@ -180,6 +192,10 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             }
         }
     }
+
+    /**
+     * Add builtin control to control elevator from FF
+     */
     fun addFeedforward(feedforward: ElevatorFeedforward) {
         if (!linearConfigured) log("elevator requires linear option", logMode = LogMode.ERROR, level = DebugLevel.MaxPriority)
         customControl = {
@@ -222,13 +238,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Uses the motor state to determine what voltage should be applied.
      * Can be set to null to use in-built motor control system
      */
-    var customControl: ((it: KMotorController) -> Double)? = {  // todo: figure out if prebuilt should exist
-        when (controlMode) {
-            ControlMode.POSITION -> PID.calculate(positionError.radians)
-            ControlMode.VELOCITY -> PID.calculate(velocityError.radiansPerSecond)
-            else -> 0.0
-        }
-    }
+    var customControl: ((motor: KMotorController) -> Voltage)? = null
     /**
      * Locks recursive calls to customControl from inside of customControl
      */
@@ -267,9 +277,21 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         set(value) { velocity = linearToRotation(value) }
 
     // ----- error ---- //
+    /**
+     * Angle between where it is and where it wants to be
+     */
     val positionError get() = position - positionSetpoint
+    /**
+     * Distance between where it is and where it wants to be
+     */
     val linearPositionError get() = linearPosition - linearPositionSetpoint
+    /**
+     * Velocity difference between where it is and where it wants to be
+     */
     val velocityError get() = velocity - velocitySetpoint
+    /**
+     * Linear Velocity difference between where it is and where it wants to be
+     */
     val linearVelocityError get() = linearVelocity - linearVelocitySetpoint
 
     // ----- setpoints ---- //
@@ -290,7 +312,8 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      */
     var velocitySetpoint: AngularVelocity = 0.rpm
         private set(value) {
-            field = value.coerceIn(-maxVelocity, maxVelocity)
+            field = value
+//            field = value.coerceIn(-maxVelocity, maxVelocity)
             if (!closedLoopConfigured && real) rawVelocity = field
             else if (!customControlLock) updateVoltage()
         }
@@ -337,7 +360,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      */
     fun updateVoltage() {
         if (!isFollower && customControl != null && controlMode != ControlMode.VOLTAGE) {
-            customControlLock = true  // todo: mitigate customControl crashes
+            customControlLock = true  // todo: if custom control crashes, this might be permenantly locked
             safeSetVoltage(customControl!!(this))
             customControlLock = false
         }
@@ -351,6 +374,9 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     private val linearConfigured
         get() = radius != null
 
+    /**
+     * Whether the type of DC motor has been set. Relevant for some Statespace and sim stuff
+     */
     private val motorConfigured
         get() = motorType != null
 
@@ -391,10 +417,8 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         protected set
 
     /**
-     * Max current draw for the motors
+     * Creates Sendable which will enable manual control over the motors
      */
-    abstract var currentLimit: Int
-
     override fun initSendable(builder: NTSendableBuilder) {
         super.initSendable(builder)
         builder.setActuator(true)
@@ -402,14 +426,14 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             updateVoltage()
         }
         if (linearConfigured) {
-            builder.addDoubleProperty("Linear Position (m)", {linearPosition.meters}, {})
+            builder.addDoubleProperty("Linear Position (m)", {linearPosition.meters}, null)
             builder.addDoubleProperty("Linear Position Setpoint (m)", {linearPositionSetpoint.meters}, { if (it.meters != linearPosition) linearPosition = it.meters })
-            builder.addDoubleProperty("Linear Velocity (m per s)", {linearVelocity.metersPerSecond}, {})
+            builder.addDoubleProperty("Linear Velocity (m per s)", {linearVelocity.metersPerSecond}, null)
             builder.addDoubleProperty("Linear Setpoint Velocity (m per s)", {linearVelocitySetpoint.metersPerSecond}, { if (it.metersPerSecond != linearVelocity) linearVelocity = it.metersPerSecond })
         } else {
-            builder.addDoubleProperty("Angular Position (degrees)", {position.degrees}, {})
+            builder.addDoubleProperty("Angular Position (degrees)", {position.degrees}, null)
             builder.addDoubleProperty("Angular Position Setpoint (degrees)", {positionSetpoint.degrees}, { if (it.degrees != position) position = it.degrees })
-            builder.addDoubleProperty("Angular Velocity (rad per s)", {velocity.radiansPerSecond}, {})
+            builder.addDoubleProperty("Angular Velocity (rad per s)", {velocity.radiansPerSecond}, null)
             builder.addDoubleProperty("Angular Velocity Setpoint (rad per s)", {velocitySetpoint.radiansPerSecond}, { if (it.radiansPerSecond != velocity) velocity = it.radiansPerSecond })
         }
     }
@@ -456,11 +480,17 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     }
 
     // ----- sim ---- //
+    /**
+     * Settable variabe describing velocity according to whatever simulation
+     */
     var simVelocity: AngularVelocity = 0.rpm
         set(value) {
             assert(!real) {"This value should only be set from a simulation"}
             field = value
         }
+    /**
+     * Settable variabe describing velocity according to whatever simulation
+     */
     var simPosition: Angle = 0.degrees
         set(value) {
             assert(!real) {"This value should only be set from a simulation"}
@@ -473,6 +503,9 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         get() = rotationToLinear(simPosition)
         set(value) {simPosition = linearToRotation(value)}
 
+    /**
+     * Setup simulations based on a feedforward of how the motor should move
+     */
     fun setupSim(feedforward: SimpleMotorFeedforward) {
         if (Game.sim) Simulation.instance.include(this)
         simUpdater = { dt: Time -> feedforwardUpdate(feedforward.ks, feedforward.kv, feedforward.ka, dt) }
@@ -487,7 +520,11 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         if (Game.sim) Simulation.instance.include(this)
         simUpdater = {dt: Time -> feedforwardUpdate(feedforward.ks * voltage.sign + feedforward.kg, feedforward.kv, feedforward.ka, dt) }
     }
-    private fun feedforwardUpdate(staticVolt: Double, kV: Double, kA: Double, dt: Time) {
+
+    /**
+     * Private math to estimate how the feedforward would predict
+     */
+    private fun feedforwardUpdate(staticVolt: Voltage, kV: Double, kA: Double, dt: Time) {
         if(voltage.absoluteValue < staticVolt) {
             simVelocity = 0.radiansPerSecond
             // kinda assuming brakeMode
@@ -512,6 +549,10 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         }
         simPosition += velocity * dt
     }
+
+    /**
+     * Setup simulation based on LinearSystem plant
+     */
     fun setupSim(system: LinearSystem<N1, N1, N1>) {
         val sim = LinearSystemSim(system)
         if (Game.sim) Simulation.instance.include(this)
@@ -548,35 +589,65 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         if(this::simUpdater.isInitialized) simUpdater(dt)
     }
 
-    // ----- state-space ---- // -> LinearSystem<# States, #Outpust, #inputs> todo: add documentation
+    // ----- state-space ---- // -> LinearSystem<# States, #Outpust, #inputs>
+    /**
+     * A note on Linear Systems.
+     * Linear System use generics to ensure the linear algebra works out.
+     *
+     * the first input is the number of states the system has. This should be how many things you need to keep track of in order to model the system
+     *
+     * the second input is the number of outputs in the system. There is typically one output, voltage.
+     *
+     * the final input is the number of inputs to the system. These are the things you are trying to control like position
+     *
+     * @see positionSystem - this has 2 states (position and velocity), 1 output (voltage), and 1 input (position setpoint)
+     */
+
+    /**
+     * Creates a plant that model how velocity for a motor evolves
+     */
     fun velocitySystem(ff: SimpleMotorFeedforward): LinearSystem<N1, N1, N1> {
-        if(!motorConfigured) throw MotorUnconfigured
         return LinearSystemId.identifyVelocitySystem(ff.kv, ff.ka)
     }
+    /**
+     * Creates a plant that model how position for a motor evolves
+     */
     fun positionSystem(ff: SimpleMotorFeedforward): LinearSystem<N2, N1, N1> {
-        if(!motorConfigured) throw MotorUnconfigured
         return LinearSystemId.identifyPositionSystem(ff.kv, ff.ka)
     }
+    /**
+     * Creates a plant that model how position and velocity for a motor evolves
+     */
     fun dcSystem(momentOfInertia: Double): LinearSystem<N2, N1, N2> {
         if(!motorConfigured) throw MotorUnconfigured
         return LinearSystemId.createDCMotorSystem(motorType, momentOfInertia, gearRatio)
     }
+    /**
+     * Creates a plant that model how velocity for a flywheel evolves based off its moment of inertia
+     */
     fun flywheelSystem(momentOfInertia: Double): LinearSystem<N1, N1, N1> {
         if(!motorConfigured) throw MotorUnconfigured
         return LinearSystemId.createFlywheelSystem(motorType, momentOfInertia, gearRatio)
     }
+    /**
+     * Creates a plant that model how position for an elevator system of a given mass
+     */
     fun elevatorSystem(mass: Double): LinearSystem<N2, N1, N1> {
         if(!motorConfigured) throw MotorUnconfigured
         return LinearSystemId.createElevatorSystem(motorType, mass, radius!!.meters, gearRatio)
     }
+    /**
+     * Creates a model of the position of an arm system given the moment of interia around the joint
+     */
     fun armSystem(momentOfInertia: Double): LinearSystem<N2, N1, N1> {
         if(!motorConfigured) throw MotorUnconfigured
         return LinearSystemId.createSingleJointedArmSystem(motorType, momentOfInertia, gearRatio)
     }
+    /**
+     * Creates model of the position of an arm system for its characterization values
+     */
     fun armSystem(armFeedforward: ArmFeedforward): LinearSystem<N2, N1, N1> {
-        if(!motorConfigured) throw MotorUnconfigured
-        val motor = motorType!!
-        return LinearSystem(  // todo: check if this works
+        return LinearSystem(
             // a
             Matrix.mat(N2.instance, N2.instance).fill(0.0, 1.0, 0.0, -armFeedforward.kv/armFeedforward.ka),
             // b
@@ -587,16 +658,24 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             Matrix(Nat.N1(), Nat.N1())
         )
     }
+    /**
+     * Creates a model to represent the two velocities of a drivetrain given ffs
+     */
     fun drivetrainSystem(ff: SimpleMotorFeedforward, kvAngular: Double, kaAngular: Double, trackWidth: Length = 2.meters): LinearSystem<N2, N2, N2> {
-        if(!motorConfigured) throw MotorUnconfigured
         return LinearSystemId.identifyDrivetrainSystem(ff.kv, ff.ka, kvAngular, kaAngular, trackWidth.meters)
     }
+    /**
+     * Takes a moment of intertia and estimates the ff values that would be generated
+     */
     fun estimateFF(momentOfInertia: Double){
         val ka = (motorType!!.rOhms * momentOfInertia) / (gearRatio * motorType!!.KtNMPerAmp)
         val kv = -gearRatio * gearRatio * motorType!!.KtNMPerAmp / (motorType!!.KvRadPerSecPerVolt * motorType!!.rOhms * momentOfInertia) * -ka
         println("kv: $kv, ka: $ka")
     }
-
+    /**
+     * Set or retrieve the estimated torque the motor is generating
+     * @throws MotorUnconfigured if you have not set motor type
+     */
     var torque: Double
         get() {
             if(!motorConfigured) throw MotorUnconfigured
@@ -606,7 +685,9 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             if(!motorConfigured) throw MotorUnconfigured
             voltage = motorType!!.rOhms / (value/motorType!!.KtNMPerAmp + 1.0/motorType!!.KvRadPerSecPerVolt / motorType!!.rOhms * velocity.radiansPerSecond)
         }
-
+    /**
+     * Sets a control system based around a velocity control loop
+     */
     @JvmName("velocityStateSpaceControl")
     fun stateSpaceControl(loop: LinearSystemLoop<N1, N1, N1>, timeDelay: Time=0.02.seconds) {
         customControl = {
@@ -618,6 +699,9 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         }
         updateRate = timeDelay
     }
+    /**
+     * Sets a control system based around a position control loop
+     */
     @JvmName("positionStateSpaceControl")
     fun stateSpaceControl(loop: LinearSystemLoop<N2, N1, N1>, timeDelay: Time=0.02.seconds) {
         customControl = {
@@ -629,6 +713,9 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         }
         updateRate = timeDelay
     }
+    /**
+     * Sets a control system based around a dc motor control loop
+     */
     @JvmName("dualStateSpaceControl")
     fun stateSpaceControl(loop: LinearSystemLoop<N2, N1, N2>, timeDelay: Time=0.02.seconds) {
         customControl = {
@@ -640,6 +727,16 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         }
         updateRate = timeDelay
     }
+    //-----------------------------------------//
+    /**
+     * Sets a control system based around a system and control parameters
+     * @param plant the system that models this motor
+     * @param modelAccuracy how much to trust the system math should me
+     * @param measurementAccuracy how much to trust the encoder values
+     * @param errorCost the tolerance on how far off from the target the motor can be. Higher cost means more agressive correction.
+     * @param inputCost the tolerance on the amount of voltage. Defaults to battery voltage (12.0). Higher cost will mean more hesitant to use a lot of power.
+     * @param timeDelay the time between each loop. Defaults to robot periodic but other values will create a notifier for faster updates.
+     */
     @JvmName("velocityStateSpaceControl")
     fun stateSpaceControl(plant: LinearSystem<N1, N1, N1>, modelAccuracy: Double, measurementAccuracy: Double, errorCost: Double, inputCost: Double=12.0, timeDelay: Time=0.02.seconds) { stateSpaceControl(StateSpace.systemLoop(plant, modelAccuracy, measurementAccuracy, errorCost, inputCost, timeDelay)) }
     @JvmName("positionStateSpaceControl")
@@ -647,7 +744,22 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     @JvmName("dualStateSpaceControl")
     fun stateSpaceControl(plant: LinearSystem<N2, N1, N2>, modelAccuracy: Double, measurementAccuracy: Double, positionErrorCost: Double, velocityErrorCost: Double, inputCost: Double=12.0, timeDelay: Time=0.02.seconds) { stateSpaceControl(StateSpace.systemLoop(plant, modelAccuracy, measurementAccuracy, positionErrorCost, velocityErrorCost, inputCost, timeDelay)) }
 
+    /**
+     * Statespace utility functions
+     */
     object StateSpace {
+        /**
+         * Creates a Kalman Filter to ensure measurement accuracy.
+         *
+         * A Kalman filter combines math of what should happen and noisy measurements of state to give a combined better estimates
+         *
+         * @param plant the system to model your motor
+         * @param modelAccuracy how much you trust the system math
+         * @param measurementAccuracy how much you trust the measurements from the encoder
+         * @param timeDelay how long between each update
+         * @return a Kalman filter combining these parameters with the same dimensions as the plant
+         */
+
         @JvmName("velocityObserver")
         fun observer(plant: LinearSystem<N1, N1, N1>, modelAccuracy: Double, measurementAccuracy: Double, timeDelay: Time=0.02.seconds): KalmanFilter<N1, N1, N1> {
             return KalmanFilter(
@@ -682,6 +794,14 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
 
         }
 
+        /**
+         * A Linear Quadractic Regulator takes a system and the cost of state error and voltage error and creates an optimal adjustment scheme.
+         * @param plant system to model the motor
+         * @param tolerance how far of from the desired state is acceptables
+         * @param voltageTolerance what is the max acceptable voltage. Default to battery voltage (12.0)
+         * @return a LQR that will optimize the control system for your plant
+         */
+
         @JvmName("velocityOptimizer")
         fun optimizer(plant: LinearSystem<N1, N1, N1>, velocityTolerance: Double, voltageTolerance: Double=12.0, timeDelay: Time=0.02.seconds): LinearQuadraticRegulator<N1, N1, N1> {
             return LinearQuadraticRegulator(
@@ -710,6 +830,11 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             )
         }
 
+        /**
+         * Generates a System Loop that is a combination of the system, kalman filer, and LQR
+         *
+         * The parameters are the same as the functions above.
+         */
         @JvmName("velocitySystemLoop")
         fun systemLoop(plant: LinearSystem<N1, N1, N1>,
                        modelAccuracy: Double, measurementAccuracy: Double,

@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.Navigator
+import frc.kyberlib.auto.TrackingMode
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.auto.trajectory.TrajectoryManager
 import frc.kyberlib.command.Debug
@@ -31,7 +32,7 @@ object RobotContainer {
     val limelight = PhotonCamera("gloworm")
     val turretLimit = DigitalInput(0)
 
-    val navigation = Navigator(gyro, Constants.START_POSE)
+    val navigation = Navigator(gyro, Constants.START_POSE, trackingMode = if(Constants.NAVIGATION_CORRECTION) TrackingMode.Fancy else if (Constants.DUMB_NAVIGATION) TrackingMode.DumbBoth else TrackingMode.Fast)
 
     val controller = KXboxController(0)
 

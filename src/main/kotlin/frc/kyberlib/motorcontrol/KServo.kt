@@ -14,6 +14,10 @@ import kotlin.math.absoluteValue
  */
 class KServo(port: Int) : KMotorController() {
     private val native = Servo(port)
+    override var identifier: String = "Servo$port"
+    init {
+        PWMRegristry[identifier] = port
+    }
     private var accumulatedPosition = 0.degrees
 
     override fun resetPosition(position: Angle) {
@@ -21,9 +25,12 @@ class KServo(port: Int) : KMotorController() {
     }
 
     init {
-        if(real) Notifier {
-            accumulatedPosition += rawVelocity * 0.02.seconds
-        }.startPeriodic(0.02)
+        if(real) {
+            log("Remember this notifier exists")
+            Notifier {
+                accumulatedPosition += rawVelocity * 0.02.seconds
+            }.startPeriodic(0.02)
+        }
     }
 
     override var minPosition: Angle? = 0.degrees
@@ -36,9 +43,6 @@ class KServo(port: Int) : KMotorController() {
     override var rawVelocity: AngularVelocity = 0.radiansPerSecond
 
     override var brakeMode: BrakeMode = true
-    override var rawReversed: Boolean = false
-    override var currentLimit: Int = -1
-    override var identifier: String = "Servo$port"
     override var rawPercent: Double
         get() = native.get()
         set(value) {
@@ -46,6 +50,8 @@ class KServo(port: Int) : KMotorController() {
         }
 
     override fun followTarget(kmc: KBasicMotorController) {
-        throw UnsupportedOperationException("This hasn't been made yet")
+        if(kmc is KServo) {
+            kmc.followers.add(this)
+        } else throw UnsupportedOperationException("This hasn't been made yet")
     }
 }

@@ -52,6 +52,8 @@ object Constants {
     val LIMELIGHT_HEIGHT: Length = 23.216.inches
     val LIMELIGHT_ANGLE: Angle = 50.degrees
 
+    val SHOOTER_COMPRESSION = 1.25.inches
+
     // TODO: test shots
     val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf(
         100.inches.meters to 3.0,
@@ -101,4 +103,5 @@ object Constants {
     const val CLIMB_MOMENT_OF_INERTIA = 0.10571
     const val TOP_ROLLER_MOMENT_OF_INERTIA = 0.00001
     const val FLYWHEEL_MOMENT_OF_INERTIA = 0.00064 // kg * m^2
+    val BALL_DIAMETER = 9.5.inches
 }
