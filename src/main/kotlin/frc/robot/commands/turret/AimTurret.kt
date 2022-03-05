@@ -3,13 +3,11 @@ package frc.robot.commands.turret
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.k
-import frc.kyberlib.math.units.extensions.toTangentialVelocity
 import frc.kyberlib.math.units.towards
 import frc.robot.Constants
 import frc.robot.RobotContainer
-import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.TURRET_STATUS
 import frc.robot.subsystems.Turret
 
@@ -36,7 +34,7 @@ object AimTurret : CommandBase() {
     }
 
     override fun execute() {
-        Debug.log("Aim", "execute", level=DebugLevel.LowPriority)
+        Debug.log("Aim", "execute", level=DebugFilter.LowPriority)
         // if the limelight is a target
         if (Turret.targetVisible) {
             found()

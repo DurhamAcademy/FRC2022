@@ -197,7 +197,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Add builtin control to control elevator from FF
      */
     fun addFeedforward(feedforward: ElevatorFeedforward) {
-        if (!linearConfigured) log("elevator requires linear option", logMode = LogMode.ERROR, level = DebugLevel.MaxPriority)
+        if (!linearConfigured) log("elevator requires linear option", logMode = LogMode.ERROR, level = DebugFilter.MaxPriority)
         customControl = {
             when (controlMode) {
                 ControlMode.POSITION -> {
@@ -280,19 +280,19 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     /**
      * Angle between where it is and where it wants to be
      */
-    val positionError get() = position - positionSetpoint
+    inline val positionError get() = position - positionSetpoint
     /**
      * Distance between where it is and where it wants to be
      */
-    val linearPositionError get() = linearPosition - linearPositionSetpoint
+    inline val linearPositionError get() = linearPosition - linearPositionSetpoint
     /**
      * Velocity difference between where it is and where it wants to be
      */
-    val velocityError get() = velocity - velocitySetpoint
+    inline val velocityError get() = velocity - velocitySetpoint
     /**
      * Linear Velocity difference between where it is and where it wants to be
      */
-    val linearVelocityError get() = linearVelocity - linearVelocitySetpoint
+    inline val linearVelocityError get() = linearVelocity - linearVelocitySetpoint
 
     // ----- setpoints ---- //
     /**
@@ -333,6 +333,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Converts linear units to rotational units
      * @exception LinearUnconfigured: you must set wheel radius before using
      */
+    @JvmName("linearToRotation1")
     private fun linearToRotation(len: Length): Angle {
         if (!linearConfigured) throw LinearUnconfigured
         return len.toAngle(radius!!)
@@ -346,6 +347,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Converts rotational units to linear
      * @exception LinearUnconfigured you must set wheel radius before using
      */
+    @JvmName("rotationToLinear1")
     private fun rotationToLinear(ang: Angle): Length {
         if (!linearConfigured) throw LinearUnconfigured
         return ang.toCircumference(radius!!)
@@ -372,20 +374,20 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Allows for linear units to be used.
      */
     private val linearConfigured
-        get() = radius != null
+        inline get() = radius != null
 
     /**
      * Whether the type of DC motor has been set. Relevant for some Statespace and sim stuff
      */
     private val motorConfigured
-        get() = motorType != null
+        inline get() = motorType != null
 
     /**
      * Does the motor have closed-loop gains set?
      * Allows for closed-loop control methods to be used
      */
     private val closedLoopConfigured
-        get() = customControl != null
+        inline get() = customControl != null
 
     // ----- natives ----- //
     /**
@@ -398,6 +400,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Resets where the encoder thinks it is.
      * Does *not* move motor to that spot, just internal variable.
      */
+    @JvmName("resetPosition1")
     fun resetPosition(position: Length) {
         resetPosition(linearToRotation(position))
     }

@@ -3,12 +3,13 @@ package frc.robot.commands.climb
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.DebugFilter
 import frc.robot.RobotContainer
 import frc.robot.subsystems.*
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.inches
+import frc.kyberlib.math.units.extensions.radians
 import frc.kyberlib.math.units.extensions.radiansPerSecond
 import kotlin.math.absoluteValue
 
@@ -39,7 +40,7 @@ object Climb : CommandBase() {
      * Prepare the climber to climb.
      */
     override fun initialize() {
-        Debug.log("Climb Command", "init", level = DebugLevel.LowPriority)
+        Debug.log("Climb Command", "init", level = DebugFilter.LowPriority)
         Turret.turret.position = 0.degrees
         Climber.staticsLifted = true
         Climber.status = ClimberStatus.ACTIVE
@@ -52,7 +53,7 @@ object Climb : CommandBase() {
      * Set the winch percentage based on left/right joysticks
      */
     override fun execute() {
-        Debug.log("Climb Command", "execute", level = DebugLevel.LowPriority)
+        Debug.log("Climb Command", "execute", level = DebugFilter.LowPriority)
         Turret.turret.updateVoltage()
 
         Climber.leftWinch.percent = RobotContainer.controller.leftY.value / RobotContainer.controller.leftY.maxVal

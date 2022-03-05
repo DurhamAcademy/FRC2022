@@ -20,7 +20,7 @@ data class PolarPose(val r: Length, val theta: Angle, val orientation: Angle) : 
     constructor(position: PolarPosition, orientation: Angle) : this(position.r, position.theta, orientation)
     fun cartesian(origin: Translation2d): Pose2d {
         val translation2d = Translation2d(origin.x + theta.cos * r.meters, origin.y + theta.sin * r.meters)
-        return Pose2d(translation2d, origin.towards(translation2d).minus(orientation))
+        return Pose2d(translation2d, origin.towards(translation2d).minus(orientation.w))
     }
 
     override fun debugValues(): Map<String, Any?> {

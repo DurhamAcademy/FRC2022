@@ -4,11 +4,9 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
+import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.GearRatio
 import frc.kyberlib.motorcontrol.KMotorController
-import frc.kyberlib.math.units.extensions.Length
-import frc.kyberlib.math.units.extensions.LinearVelocity
-import frc.kyberlib.math.units.extensions.metersPerSecond
 import kotlin.math.PI
 
 /**
@@ -32,7 +30,7 @@ class DifferentialSwerveModule(location: Translation2d, wheelRadius: Length,
         val goal = stateSetpoint
         val ff = feedforward.calculate(it.linearVelocity.metersPerSecond)
         val velCorrection = it.PID.calculate(goal.speedMetersPerSecond)
-        val rotationError = rotation - goal.angle
+        val rotationError = rotation - goal.angle.k
         val rotCorrection = rotationPID.calculate(rotationError.radians, goal.angle.radians)
         return ff + velCorrection + rotCorrection
     }
@@ -42,14 +40,14 @@ class DifferentialSwerveModule(location: Translation2d, wheelRadius: Length,
         bottomMotor.customControl = { it: KMotorController -> differentialControl(it) }
     }
 
-    override var rotation: Rotation2d
+    override var rotation: Angle  // todo why isnt this angle
         get() {
             val top = topMotor.position.normalized
             val bottom = bottomMotor.position.normalized
             return top.minus(bottom)
         }
         set(value) {
-            stateSetpoint.angle = value
+            stateSetpoint.angle = value.w
         }
 
     override var speed: LinearVelocity

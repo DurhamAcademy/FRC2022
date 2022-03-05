@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.networktables.NTSendable
 import frc.kyberlib.math.units.KUnit
-import frc.kyberlib.math.units.extensions.Angle
 
 /**
  * Types of ways to print to the output (driverstation)
@@ -21,18 +20,19 @@ enum class LogMode {
  * Can set the project to only send debug values for items with an importance at or above a given level.
  * Allows for control of information levels.
  */
-enum class DebugLevel {
+enum class DebugFilter {
     LowPriority, NORMAL, HighPriority, MaxPriority  // todo: find a better naming scheme
 }
+typealias DebugLevel = DebugFilter
 /**
  * Inheritable class that grants multiple types of debugging
  */
 interface Debug {
     companion object {
-        var debugging = false
-        var loggingLevel = DebugLevel.NORMAL
+        var debugging = true
+        var loggingLevel = DebugFilter.NORMAL
 
-        fun log(identifier:String, text: String, mode: LogMode = LogMode.PRINT, level: DebugLevel = DebugLevel.NORMAL, stacktrace: Boolean = false) {
+        fun log(identifier:String, text: String, mode: LogMode = LogMode.PRINT, level: DebugFilter = DebugFilter.NORMAL, stacktrace: Boolean = false) {
             if (level < loggingLevel || !debugging) return
             val output = "[$identifier] $text"
             when (mode) {
@@ -66,8 +66,7 @@ interface Debug {
                 is Debug -> sendMapToDashboard((info.value as Debug).debugValues(), path)
                 is Map<*, *> -> sendMapToDashboard(info.value as Map<String, Any?>, path)
                 is NTSendable -> SmartDashboard.putData(path, info.value as NTSendable)
-                is Angle -> SmartDashboard.putNumber(path + " (degrees)", (info.value as Angle).degrees)
-                is KUnit<*> -> SmartDashboard.putNumber(path + " (${(info.value as KUnit<*>).value})", (info.value as KUnit<*>).value)
+                is KUnit<*> -> SmartDashboard.putNumber(path, (info.value as KUnit<*>).value)
                 else -> SmartDashboard.putString(path, info.value.toString())
             }
         }
@@ -80,7 +79,7 @@ interface Debug {
      * @param logMode the way the message should appear
      * @see LogMode
      */
-    fun log(message: String = debugString, logMode: LogMode = LogMode.PRINT, level: DebugLevel = priority) {
+    fun log(message: String = debugString, logMode: LogMode = LogMode.PRINT, level: DebugFilter = priority) {
         val isError = logMode == LogMode.ERROR
         Companion.log(identifier, message, logMode, level, stacktrace = isError)
         if (isError) throw AssertionError("Check the log for assertion")
@@ -110,8 +109,8 @@ interface Debug {
     /**
      * What level this should be debugged at. Allows for quick changing of how much information the console shows
      */
-    val priority: DebugLevel
-        get() = DebugLevel.NORMAL
+    val priority: DebugFilter
+        get() = DebugFilter.NORMAL
     /**
      * Function that retrieves the values that need to be debugged
      * @return map of string (name) to value. Numbers, Booleans, and NTSendables are displayed as such

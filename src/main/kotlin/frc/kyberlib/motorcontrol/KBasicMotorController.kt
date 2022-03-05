@@ -77,7 +77,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
      * Sets controller voltage directly
      */
     var voltage: Voltage
-        get() = percent * vbus
+        inline get() = percent * vbus
         set(value) {
             val norm = value.coerceIn(-maxVoltage , maxVoltage)
             percent = (norm / vbus)
@@ -86,7 +86,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
     /**
      * The voltage available to the motor
      */
-    private val vbus = if (real) RobotController.getBatteryVoltage() else 12.0
+    val vbus = if (real) RobotController.getBatteryVoltage() else 12.0
 
     var maxVoltage: Voltage = vbus
         set(value) {field = value.coerceIn(0.0, vbus)}

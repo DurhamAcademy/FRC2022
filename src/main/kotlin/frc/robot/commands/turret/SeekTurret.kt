@@ -6,9 +6,8 @@ import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.TURRET_STATUS
 import frc.robot.subsystems.Turret
 import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.extensions.k
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.DebugFilter
 import frc.robot.Constants
 
 /**
@@ -34,7 +33,7 @@ object SeekTurret : CommandBase() {
 
     private var direction = 1.0
     override fun execute() {
-        Debug.log("Seek", "execute", level=DebugLevel.LowPriority)
+        Debug.log("Seek", "execute", level=DebugFilter.LowPriority)
         if (Turret.targetVisible) { // the limelight sees something and it's valid if required
             // start timer if it isn't on yet
             if(acquisitionTimer.get() <= 0.0001) acquisitionTimer.start()

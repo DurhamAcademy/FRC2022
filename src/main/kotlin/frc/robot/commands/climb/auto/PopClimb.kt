@@ -2,7 +2,7 @@ package frc.robot.commands.climb.auto
 
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.inches
 import frc.robot.subsystems.Climber
@@ -16,7 +16,7 @@ class PopClimb : CommandBase() {
     }
 
     override fun initialize() {
-        Debug.log("Pop Climb", "init", level = DebugLevel.LowPriority)
+        Debug.log("Pop Climb", "init", level = DebugFilter.LowPriority)
         Climber.extension = 30.inches
         Climber.extendableAngle = 85.degrees
 

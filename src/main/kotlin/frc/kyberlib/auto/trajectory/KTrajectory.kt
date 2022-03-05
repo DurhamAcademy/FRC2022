@@ -7,7 +7,7 @@ import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.math.trajectory.TrajectoryGenerator
 import edu.wpi.first.math.trajectory.TrajectoryUtil
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.LogMode
 import java.io.File
 
@@ -32,7 +32,7 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
             val wpiTrajectory: Trajectory = if (TrajectoryManager.paths!!.contains(name)) TrajectoryManager.getPath(name)
                                 else if (TrajectoryManager.routines!!.contains(name)) TrajectoryManager.getAuto(name)
                                 else {
-                                    Debug.log("KTrajectory", "Couldn't load trajectory $name.", level = DebugLevel.HighPriority, mode = LogMode.WARN)
+                                    Debug.log("KTrajectory", "Couldn't load trajectory $name.", level = DebugFilter.HighPriority, mode = LogMode.WARN)
                                     Trajectory()
                                 }
 //            val config = KTrajectoryConfig.load(configFile)

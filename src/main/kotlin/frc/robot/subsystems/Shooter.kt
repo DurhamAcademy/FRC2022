@@ -43,7 +43,15 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         if(Constants.doStateSpace)
             stateSpaceControl(loop)
     }
-//    val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 0.02)
+
+    var outputVelocity
+        get() = flywheelMaster.velocity.toTangentialVelocity(Constants.BALL_DIAMETER - Constants.SHOOTER_COMPRESSION)
+        set(value) {
+            flywheelMaster.velocity = value.toAngularVelocity(Constants.BALL_DIAMETER - Constants.SHOOTER_COMPRESSION)
+        }
+    var timeOfFlight = 1.seconds
+
+
     // additional motors that copy the main
     private val flywheel2 = KSimulatedESC(32).apply {
         identifier = "flywheel2"
@@ -98,7 +106,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         return mapOf(
             "flywheel" to flywheelMaster,
             "top Shooter" to topShooter,
-            "hood" to hood,
+            "hood" to hoodAngle,
             "distance" to targetDistance
         )
     }

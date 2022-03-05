@@ -2,7 +2,7 @@ package frc.robot.commands.shooter
 
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.math.units.extensions.radiansPerSecond
@@ -24,7 +24,7 @@ object ForceShoot : CommandBase() {
     }
 
     override fun execute() {
-        Debug.log("Force Shoot", "execute", level=DebugLevel.LowPriority)
+        Debug.log("Force Shoot", "execute", level=DebugFilter.LowPriority)
 
         if (false && Turret.targetVisible && Shooter.flywheelMaster.percent > 0.1) {
             val dis = if (Turret.targetVisible) Shooter.targetDistance!!.meters else Shoot.prevDistance

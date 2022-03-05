@@ -2,11 +2,8 @@ package frc.kyberlib.motorcontrol
 
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.Servo
-import frc.kyberlib.command.DebugLevel
-import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.*
 import java.lang.UnsupportedOperationException
-import kotlin.math.absoluteValue
 
 // in 2022: this is for https://www.gobilda.com/2000-series-dual-mode-servo-25-2-torque/
 /**

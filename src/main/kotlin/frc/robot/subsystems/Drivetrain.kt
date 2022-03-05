@@ -89,7 +89,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     private var polarCoordinates
         get() = RobotContainer.navigation.pose.polar(Constants.HUB_POSITION)
         set(value) {
-            pose = Pose2d(value.cartesian(Constants.HUB_POSITION).translation, RobotContainer.navigation.heading)
+            pose = Pose2d(value.cartesian(Constants.HUB_POSITION).translation, RobotContainer.navigation.heading.w)
         }
     val polarSpeeds
         get() = chassisSpeeds.polar(RobotContainer.navigation.pose.polar(Constants.HUB_POSITION))
@@ -170,7 +170,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
-//        debugDashboard()
+        debugDashboard()
         RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
         if(Constants.NAVIGATION_CORRECTION || Constants.DUMB_NAVIGATION && Turret.targetVisible)  {  // TODO: test
             val distance = Shooter.targetDistance!!

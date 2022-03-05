@@ -9,33 +9,17 @@ import kotlin.math.absoluteValue
  * Allows for dimensional analysis
  * @author Trevor
  */
-inline class KUnit<T>(val value: Double) : Comparable<KUnit<T>> {
+@JvmInline
+value class KUnit<T>(val value: Double) : Comparable<KUnit<T>> {
     // math functions
-    operator fun plus(other: KUnit<T>): KUnit<T> {
-        val unit = KUnit<T>(value + other.value)
-        shareUnits(unit)
-        return unit
-    }
-    operator fun minus(other: KUnit<T>): KUnit<T> {
-        val unit = KUnit<T>(value - other.value)
-        shareUnits(unit)
-        return unit
-    }
+    operator fun plus(other: KUnit<T>): KUnit<T> = KUnit(value + other.value)
+    operator fun minus(other: KUnit<T>): KUnit<T> = KUnit(value - other.value)
     operator fun div(other: KUnit<T>) = this.value / other.value
     operator fun times(other: KUnit<T>) = this.value / other.value
+    operator fun times(other: Double): KUnit<T> = KUnit<T>(value * other)
+    operator fun div(other: Double): KUnit<T> = KUnit<T>(value / other)
 
-    operator fun times(other: Double): KUnit<T> {
-        val unit = KUnit<T>(value * other)
-        shareUnits(unit)
-        return unit
-    }
-    operator fun div(other: Double): KUnit<T> {
-        val unit = KUnit<T>(value / other)
-        shareUnits(unit)
-        return unit
-    }
-
-    val absoluteValue get() = KUnit<T>(value.absoluteValue)
+    val absoluteValue inline get() = KUnit<T>(value.absoluteValue)
     override fun compareTo(other: KUnit<T>) = value.compareTo(other.value)
 
     /**
@@ -44,10 +28,6 @@ inline class KUnit<T>(val value: Double) : Comparable<KUnit<T>> {
     infix fun epsilonEquals(other: KUnit<T>) = value epsilonEquals other.value
 
     operator fun unaryMinus(): KUnit<T> = KUnit(-value)
-
-    override fun toString(): String {
-        return "($value $units)"
-    }
 }
 
 // combining separate units

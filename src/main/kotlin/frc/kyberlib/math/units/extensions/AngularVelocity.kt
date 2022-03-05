@@ -1,6 +1,5 @@
 package frc.kyberlib.math.units.extensions
 
-import edu.wpi.first.math.geometry.Rotation2d
 import frc.kyberlib.math.units.*
 
 /**
@@ -24,6 +23,7 @@ val AngularVelocity.rotationsPerSecond get() = value / AngleConversions.rotation
 fun AngularVelocity.toTangentialVelocity(radius: Length) = (value * radius.value).metersPerSecond
 fun AngularVelocity.encoderVelocity(cpr: Int) = (value / (AngleConversions.rotationsToRadians * 10)) * (cpr * 4)
 
+@JvmName("times")
 operator fun AngularVelocity.times(radius: Length): LinearVelocity = this.toTangentialVelocity(radius)
 operator fun AngularVelocity.times(time: Time): Angle = Angle(this.radiansPerSecond * time.seconds)
 //operator fun Rotation2d.div(time: Time): AngularVelocity = AngularVelocity(this.radians * time.inWholeSeconds.toInt())

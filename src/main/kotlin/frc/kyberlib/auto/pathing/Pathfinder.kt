@@ -7,10 +7,7 @@ import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.auto.trajectory.KTrajectoryConfig
 import frc.kyberlib.command.Debug
 import frc.kyberlib.math.units.Translation2d
-import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.extensions.feet
-import frc.kyberlib.math.units.extensions.meters
-import frc.kyberlib.math.units.extensions.metersPerSecond
+import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.towards
 import frc.kyberlib.simulation.field.KField2d
 import frc.kyberlib.simulation.field.Obstacle
@@ -234,14 +231,14 @@ object PathingTest {
         end = Translation2d(2.meters, 2.meters)
         for (i in 0..0) {
             val p = Pathfinder.randomPoint()
-            val o = Obstacle(Pose2d(p, 0.degrees), 0.2, 0.2)
+            val o = Obstacle(Pose2d(p, 0.degrees.w), 0.2, 0.2)
             if (o.contains(start) || o.contains(end)) continue
             Pathfinder.field.obstacles.add(o)
         }
 //        val testO = Obstacle(Pose2d(3.feet, 5.feet, 0.degrees), 1.feet.meters, 1.feet.meters)
 //        _root_ide_package_.frc.kyberlib.auto.pathing.Pathfinder.field.obstacles.add(testO)
         println("field setup")
-        Pathfinder.pathTo(Pose2d(start, 0.degrees), Pose2d(end, 0.degrees))
+        Pathfinder.pathTo(Pose2d(start, 0.degrees.w), Pose2d(end, 0.degrees.w))
         println("tree loaded")
 //        println(_root_ide_package_.frc.kyberlib.auto.pathing.Pathfinder.path!!.size)
         Pathfinder.drawTreePath()

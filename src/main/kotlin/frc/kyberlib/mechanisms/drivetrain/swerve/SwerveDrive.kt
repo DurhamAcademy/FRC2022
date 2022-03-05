@@ -14,9 +14,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand
 import frc.kyberlib.command.Debug
 import frc.kyberlib.math.units.debugValues
-import frc.kyberlib.math.units.extensions.KRotation
-import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.extensions.feetPerSecond
+import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
 import frc.kyberlib.mechanisms.drivetrain.swerve.SwerveDrive
 import frc.kyberlib.sensors.gyros.KGyro
@@ -33,7 +31,7 @@ class SwerveDrive(private val gyro: KGyro,
                         ) : SubsystemBase(), KDrivetrain, Debug {
     // controls
     private val kinematics = SwerveDriveKinematics(*swerveModules.map { it.location }.toTypedArray())
-    private val odometry = SwerveDriveOdometry(kinematics, 0.degrees)
+    private val odometry = SwerveDriveOdometry(kinematics, 0.degrees.w)
 
     // field relative settings
     private var fieldHeading = gyro.heading
@@ -44,12 +42,12 @@ class SwerveDrive(private val gyro: KGyro,
 
     override val chassisSpeeds: ChassisSpeeds
         get() =  kinematics.toChassisSpeeds(*states.toTypedArray())
-    var heading: KRotation
+    var heading: Angle
         get() = gyro.heading
         set(value) { gyro.heading = value }
     var pose: Pose2d
         get() = odometry.poseMeters
-        set(value) { odometry.resetPosition(value, heading) }
+        set(value) { odometry.resetPosition(value, heading.w) }
 
     override fun drive(speeds: ChassisSpeeds) {
         drive(speeds, true)
@@ -62,7 +60,7 @@ class SwerveDrive(private val gyro: KGyro,
      */
     fun drive(speeds: ChassisSpeeds, fieldOriented: Boolean = true) {
         if (fieldOriented) {
-            val fieldSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, gyro.heading.minus(fieldHeading))
+            val fieldSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, gyro.heading.minus(fieldHeading).w)
             drive(*kinematics.toSwerveModuleStates(fieldSpeeds))
         }
         else drive(speeds)
@@ -90,7 +88,7 @@ class SwerveDrive(private val gyro: KGyro,
      */
     override fun periodic() {
         val moduleStates = swerveModules.map { it.state }
-        odometry.update(gyro.heading, *moduleStates.toTypedArray())
+        odometry.update(gyro.heading.w, *moduleStates.toTypedArray())
     }
 
     val xControl = PIDController(0.7, 0.0, 0.1)

@@ -47,10 +47,10 @@ object RobotContainer {
         SHOOT.whileActiveOnce(Shoot)
         FORCE_SHOT.whileActiveOnce(ForceShoot)
 //        EJECT.whileActiveOnce(Intake)
-        FLUSH.whileActiveOnce(Flush)
-        LOCK_TURRET.toggleWhenActive(LockTurret)
-        CLIMB_MODE.toggleWhenActive(Climb)
-        EMOTE.whileActiveOnce(Emote)
+//        FLUSH.whileActiveOnce(Flush)
+//        LOCK_TURRET.toggleWhenActive(LockTurret)
+//        CLIMB_MODE.toggleWhenActive(Climb)
+//        EMOTE.whileActiveOnce(Emote)
     }
 
     val autoChooser = SendableChooser<KTrajectory>().apply {

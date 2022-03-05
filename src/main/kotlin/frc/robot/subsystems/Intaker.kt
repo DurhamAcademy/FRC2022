@@ -3,8 +3,7 @@ package frc.robot.subsystems
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugLevel
-import frc.kyberlib.motorcontrol.KSimulatedESC
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.pneumatics.KSolenoid
 
@@ -12,7 +11,7 @@ import frc.kyberlib.pneumatics.KSolenoid
  * Controls the intake mechanism of the robot
  */
 object Intaker : SubsystemBase(), Debug {
-    override val priority: DebugLevel = DebugLevel.LowPriority
+    override val priority: DebugFilter = DebugFilter.LowPriority
     // deployment solenoids
     private val leftIntakeDeploy = KSolenoid(6, 7, fake = false)
     private val rightIntakeDeploy = KSolenoid(1, 0, fake = false)

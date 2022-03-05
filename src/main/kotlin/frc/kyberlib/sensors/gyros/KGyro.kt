@@ -1,8 +1,7 @@
 package frc.kyberlib.sensors.gyros
 
 import edu.wpi.first.wpilibj.RobotBase
-import frc.kyberlib.math.units.extensions.KRotation
-import edu.wpi.first.wpilibj.interfaces.Gyro
+import frc.kyberlib.math.units.extensions.Angle
 
 /**
  * A gyro wrapper that can be added to any gyro
@@ -15,5 +14,5 @@ interface KGyro {
     /**
      * The KRotation that the gyro is heading
      */
-    var heading: KRotation
+    var heading: Angle
 }

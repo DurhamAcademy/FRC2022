@@ -1,9 +1,8 @@
 package frc.kyberlib.motorcontrol.rev
 
 import edu.wpi.first.wpilibj.motorcontrol.Spark
-import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.LogMode
-import frc.kyberlib.math.units.extensions.seconds
 import frc.kyberlib.motorcontrol.BrakeMode
 import frc.kyberlib.motorcontrol.KBasicMotorController
 import frc.kyberlib.motorcontrol.PWMRegristry
@@ -22,7 +21,7 @@ class KSpark(channel: Int) : KBasicMotorController() {
         }
 
     override fun followTarget(kmc: KBasicMotorController) {
-        log("Enabling follow notifier. This can be slow", LogMode.WARN, DebugLevel.HighPriority)
+        log("Enabling follow notifier. This can be slow", LogMode.WARN, DebugFilter.HighPriority)
         kmc.followers.add(this)
     }
 }

@@ -2,7 +2,7 @@ package frc.robot.commands.climb.auto
 
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.inches
 import frc.robot.subsystems.Climber
 import frc.robot.subsystems.Drivetrain
@@ -15,7 +15,7 @@ class StaticLock  : CommandBase() {
     }
 
     override fun initialize() {
-        Debug.log("Static Lock", "init", level = DebugLevel.LowPriority)
+        Debug.log("Static Lock", "init", level = DebugFilter.LowPriority)
         Climber.extension = 0.inches
     }
 

@@ -13,20 +13,17 @@ import kotlin.time.Duration.Companion.milliseconds
  * Should not be created directly. Use the number extensions instead.
  */
 typealias Time = KUnit<Second>
-/**
- * Creates a Time unit and sets the unit to seconds.
- * Only called from internal
- */
-internal fun time(value: Double): Time = Time(value)
 
 // Number to Time
-val Number.milliseconds get() = this.milli.seconds
-val Number.seconds get() = time(this.toDouble())
-val Number.minutes get() = time(this.toDouble() * TimeConversions.minutesToSeconds)
-val Number.hours get() = time(this.toDouble() * TimeConversions.minutesToSeconds)
+val Number.milliseconds inline get() = this.milli.seconds
+val Number.seconds inline get() = Time(this.toDouble())
+val Number.minutes inline get() = Time(this.toDouble() * TimeConversions.minutesToSeconds)
+val Number.hours inline get() = Time(this.toDouble() * TimeConversions.minutesToSeconds)
 
 // conversions from Time back to double values
-val Time.milliseconds get() = value * 1000.0
-val Time.seconds get() = value
-val Time.minutes get() = value / TimeConversions.minutesToSeconds
-val Time.hours get() = value / (TimeConversions.hoursToMinutes * TimeConversions.minutesToSeconds)
+val Time.milliseconds inline get() = value * 1000.0
+val Time.seconds inline get() = value
+val Time.minutes inline get() = value / TimeConversions.minutesToSeconds
+val Time.hours inline get() = value / (TimeConversions.hoursToMinutes * TimeConversions.minutesToSeconds)
+val Time.string: String
+    get() = "hi"

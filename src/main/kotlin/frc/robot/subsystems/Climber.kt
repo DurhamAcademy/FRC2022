@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.Time
 import frc.kyberlib.math.units.extensions.degrees
@@ -34,7 +34,7 @@ enum class ClimberStatus {
  * Mechanism representing the actuators for climbing
  */
 object Climber : SubsystemBase(), Debug, Simulatable {
-    override val priority: DebugLevel = DebugLevel.LowPriority
+    override val priority: DebugFilter = DebugFilter.LowPriority
     var status = ClimberStatus.IDLE
 
     // pneumatics that lift the climb arms
