@@ -1,5 +1,6 @@
 package frc.robot
 
+import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -14,6 +15,7 @@ import frc.robot.commands.Emote
 import frc.robot.commands.climb.Climb
 import frc.robot.commands.intake.Flush
 import frc.robot.commands.intake.Intake
+import frc.robot.commands.shooter.FlywheelTest
 import frc.robot.commands.shooter.ForceShoot
 import frc.robot.commands.shooter.Shoot
 import frc.robot.commands.turret.LockTurret
@@ -42,12 +44,12 @@ object RobotContainer {
         addOption("RocketLeague", RocketLeague)
         SmartDashboard.putData("control system", this)
     }
-    val controlScheme = schemaChooser.selected!!.apply {
-        INTAKE.whileActiveOnce(Intake)
-        SHOOT.whileActiveOnce(Shoot)
-        FORCE_SHOT.whileActiveOnce(ForceShoot)
+    val controlScheme = DefaultControls.apply {
+        INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
+//        SHOOT.whileActiveOnce(Shoot)
+//        FORCE_SHOT.whileActiveOnce(ForceShoot)
 //        EJECT.whileActiveOnce(Intake)
-//        FLUSH.whileActiveOnce(Flush)
+        FLUSH.whileActiveOnce(Flush)
 //        LOCK_TURRET.toggleWhenActive(LockTurret)
 //        CLIMB_MODE.toggleWhenActive(Climb)
 //        EMOTE.whileActiveOnce(Emote)

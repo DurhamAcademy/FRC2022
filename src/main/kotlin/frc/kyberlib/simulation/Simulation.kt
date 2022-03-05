@@ -43,6 +43,7 @@ class Simulation : SubsystemBase() {
     override fun periodic() {
         val dt = time - prevTime
         for (sim in sims) {
+            println(sim)
             sim.simUpdate(dt)
         }
         prevTime = time

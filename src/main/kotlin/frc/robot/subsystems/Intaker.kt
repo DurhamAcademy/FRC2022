@@ -4,6 +4,7 @@ import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
+import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.pneumatics.KSolenoid
 
@@ -13,7 +14,7 @@ import frc.kyberlib.pneumatics.KSolenoid
 object Intaker : SubsystemBase(), Debug {
     override val priority: DebugFilter = DebugFilter.LowPriority
     // deployment solenoids
-    private val leftIntakeDeploy = KSolenoid(6, 7, fake = false)
+    private val leftIntakeDeploy = KSolenoid(7, 6, fake = false)
     private val rightIntakeDeploy = KSolenoid(1, 0, fake = false)
 
     // public get/set for deploy status

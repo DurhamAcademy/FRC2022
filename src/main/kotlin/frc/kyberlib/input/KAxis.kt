@@ -41,7 +41,7 @@ class KAxis(val raw: () -> Double) : Debug {
     val value: Double
         get() = modify(raw.invoke())
 
-    fun activateAt(value: Double) = Trigger { this.value > value }
+    fun activateAt(value: Double) = Trigger { this.raw() > value }
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(

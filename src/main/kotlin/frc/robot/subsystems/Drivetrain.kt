@@ -27,6 +27,7 @@ import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.milli
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
+import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
@@ -41,28 +42,28 @@ import frc.robot.commands.drive.Drive
  */
 object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     // motors
-    val leftMaster = KSparkMax(10).apply {
+    val leftMaster = KSparkMax(12).apply {
         identifier = "leftMaster"
         reversed = true
         brakeMode = true
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
-    val rightMaster  = KSparkMax(12).apply {
+    val rightMaster  = KSparkMax(13).apply {
         identifier = "rightMaster"
         reversed = false
         brakeMode = true
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
-    private val leftFollower  = KSparkMax(11).apply {
+    private val leftFollower  = KSparkMax(15).apply {
         identifier = "leftFollow"
         reversed = false
         brakeMode = true
         currentLimit = 40
         follow(leftMaster)
     }
-    private val rightFollower = KSparkMax(13).apply {
+    private val rightFollower = KSparkMax(10).apply {
         identifier = "rightFollow"
         currentLimit = 40
         brakeMode = true
@@ -108,7 +109,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
                 brakeMode = true
                 gearRatio = Constants.DRIVE_GEAR_RATIO
                 radius = Constants.WHEEL_RADIUS
-                currentLimit = 40
+//                currentLimit = 40
 
                 kP = Constants.DRIVE_P
                 kI = Constants.DRIVE_I

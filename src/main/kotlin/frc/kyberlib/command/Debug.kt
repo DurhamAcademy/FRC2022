@@ -29,7 +29,7 @@ typealias DebugLevel = DebugFilter
  */
 interface Debug {
     companion object {
-        var debugging = true
+        var debugging = false
         var loggingLevel = DebugFilter.NORMAL
 
         fun log(identifier:String, text: String, mode: LogMode = LogMode.PRINT, level: DebugFilter = DebugFilter.NORMAL, stacktrace: Boolean = false) {

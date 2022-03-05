@@ -33,6 +33,7 @@ class Robot : KRobot() {
 
     override fun teleopPeriodic() {
         SmartDashboard.putBoolean("hall", RobotContainer.turretLimit.get())
+        SmartDashboard.putNumber("gyro", RobotContainer.gyro.heading.degrees)
     }
 
     override fun autonomousInit() {

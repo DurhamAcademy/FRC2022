@@ -63,7 +63,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         minPosition = 0.degrees
         maxPosition = 90.degrees
         resetPosition(22.5.degrees)
-        if(Game.sim) setupSim(armFF)
+//        if(Game.sim) setupSim(armFF)
         voltage = 0.0
     }
     val rightExtendable = KSimulatedESC(41).apply {
@@ -90,7 +90,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
         motorType = DCMotor.getNEO(1)
-        if(Game.sim) setupSim(winchFF)
+//        if(Game.sim) setupSim(winchFF)
         }
     val rightWinch = KSimulatedESC(43).apply {
         identifier = "right winch"
@@ -154,7 +154,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     init {
         if (Game.sim) {
             SmartDashboard.putData("climb sim", sim)
-            Simulation.instance.include(this)
+//            Simulation.instance.include(this)
         }
     }
     override fun simUpdate(dt: Time) {

@@ -44,7 +44,7 @@ object Turret : SubsystemBase(), Debug {
     private val feedforward = SimpleMotorFeedforward(0.57083, 1.2168, 0.036495)
     val visionFilter = MedianFilter(5)
     // actual turret motors
-    val turret = KSimulatedESC(30).apply {
+    val turret = KSimulatedESC(11).apply {
         identifier = "turret"
         kP = 1.2
         kD = 0.01

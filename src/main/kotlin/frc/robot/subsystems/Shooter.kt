@@ -1,5 +1,6 @@
 package frc.robot.subsystems
 
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -29,19 +30,21 @@ enum class ShooterStatus {
  */
 object Shooter : SubsystemBase(), Debug, Simulatable {
     var status = ShooterStatus.IDLE
+    val ff = SimpleMotorFeedforward(0.17708, 0.020178, 0.00061369)
 
     // main motor attached to the flywheel
     val flywheelMaster = KSimulatedESC(31).apply {
         identifier = "flywheel"
-        radius = Constants.FLYWHEEL_RADIUS
+//        radius = Constants.FLYWHEEL_RADIUS
         motorType = DCMotor.getNEO(2)
         kP = 0.0002
+        addFeedforward(ff)
 
-        val system = flywheelSystem(Constants.FLYWHEEL_MOMENT_OF_INERTIA)
-        val loop = KMotorController.StateSpace.systemLoop(system, 3.0, 0.01, 3.0)
-        setupSim(system)
-        if(Constants.doStateSpace)
-            stateSpaceControl(loop)
+//        val system = flywheelSystem(Constants.FLYWHEEL_MOMENT_OF_INERTIA)
+//        val loop = KMotorController.StateSpace.systemLoop(system, 3.0, 0.01, 3.0)
+//        setupSim(system)
+//        if(Constants.doStateSpace)
+//            stateSpaceControl(loop)
     }
 
     var outputVelocity
@@ -79,7 +82,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
                 (Constants.UPPER_HUB_HEIGHT - 1.inches - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
 
     // motor controlling top roller speed
-    val topShooter = KSparkMax(33).apply {
+    val topShooter = KSimulatedESC(33).apply {
         identifier = "top1"
         kP = 10.0
         kD = 2.0
@@ -88,7 +91,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         if (Constants.doStateSpace) stateSpaceControl(system, 3.0, 0.01, 8.0)
         setupSim(system)
     }
-    private val topFollower = KSparkMax(34).apply {
+    private val topFollower = KSimulatedESC(34).apply {
         identifier = "top2"
         follow(topShooter)
         reversed = true
@@ -99,7 +102,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     override fun periodic() {
-//        debugDashboard()
+        debugDashboard()
     }
 
     override fun debugValues(): Map<String, Any?> {

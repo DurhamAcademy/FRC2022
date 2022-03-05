@@ -12,7 +12,7 @@ object Idle : CommandBase() {
     override fun initialize() {
         Conveyor.status = ConveyorStatus.IDLE
         Conveyor.feeder.percent = -0.1
-        Conveyor.conveyor.percent = 0.1
+        Conveyor.conveyor.percent = -0.1
     }
 
     override fun end(interrupted: Boolean) {
