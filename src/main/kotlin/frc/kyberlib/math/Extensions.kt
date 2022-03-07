@@ -1,5 +1,6 @@
 package frc.kyberlib.math
 
+import frc.kyberlib.math.units.*
 import java.math.BigDecimal
 import java.math.RoundingMode
 import kotlin.math.absoluteValue
@@ -31,3 +32,10 @@ val Int.odd: Boolean
 
 val Number.sign
     get() = this.toDouble() / this.toDouble().absoluteValue
+
+
+@JvmName("toDiv")
+inline infix fun <reified T : KUnitKey, reified U : KUnitKey> String.to(value: KUnit<Mul<T, U>>): Pair<String, Number>  = "$this (${value.units()})" to value.value
+@JvmName("toMul")
+inline infix fun <reified T : KUnitKey, reified U : KUnitKey> String.to(value: KUnit<Div<T, U>>): Pair<String, Number>  = "$this (${value.units()})" to value.value
+inline infix fun <reified T: KUnitKey> String.to(value: KUnit<T>): Pair<String, Number> = "$this (${value.units()})" to value.value

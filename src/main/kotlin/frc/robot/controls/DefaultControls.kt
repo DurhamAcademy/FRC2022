@@ -7,7 +7,7 @@ import kotlin.math.PI
 object DefaultControls : ControlSchema2022() {
     private val xbox = RobotContainer.controller.apply {
         rightX.apply {
-            maxVal = -PI * 5.0
+            maxVal = -PI * 3.0
             expo = 100.0
             deadband = 0.1
         }

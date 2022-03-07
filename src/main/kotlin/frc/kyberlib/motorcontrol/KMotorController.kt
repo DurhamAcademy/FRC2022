@@ -197,7 +197,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Add builtin control to control elevator from FF
      */
     fun addFeedforward(feedforward: ElevatorFeedforward) {
-        if (!linearConfigured) log("elevator requires linear option", logMode = LogMode.ERROR, level = DebugFilter.MaxPriority)
+        if (!linearConfigured) log("elevator requires linear option", logMode = LogMode.ERROR, level = DebugFilter.Max)
         customControl = {
             when (controlMode) {
                 ControlMode.POSITION -> {

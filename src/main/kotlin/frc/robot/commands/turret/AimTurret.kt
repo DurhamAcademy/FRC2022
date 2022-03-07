@@ -34,7 +34,7 @@ object AimTurret : CommandBase() {
     }
 
     override fun execute() {
-        Debug.log("Aim", "execute", level=DebugFilter.LowPriority)
+        Debug.log("Aim", "execute", level=DebugFilter.Low)
         // if the limelight is a target
         if (Turret.targetVisible) {
             found()

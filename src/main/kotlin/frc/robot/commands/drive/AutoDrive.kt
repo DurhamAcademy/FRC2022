@@ -66,7 +66,7 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
     override fun execute() {
         val targetPose = trajectory.sample(timer.get())
         val targetSpeed = calculator.calculate(Navigator.instance!!.pose, targetPose)
-        Debug.log("AutoDrive", "going to $targetPose, @ targetSpeed m/s", level=DebugFilter.LowPriority)
+        Debug.log("AutoDrive", "going to $targetPose, @ targetSpeed m/s", level=DebugFilter.Low)
 //        println("pose: ${Navigator.instance!!.pose.string}, expected: ${trajectory.sample(timer.get()).poseMeters.string}")
         Drivetrain.drive(targetSpeed)
 //        trajectory = PathPlanner.updateTrajectory(trajectory) - this should be necesary until moving obstabcles

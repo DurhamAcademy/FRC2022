@@ -40,7 +40,7 @@ object Climb : CommandBase() {
      * Prepare the climber to climb.
      */
     override fun initialize() {
-        Debug.log("Climb Command", "init", level = DebugFilter.LowPriority)
+        Debug.log("Climb Command", "init", level = DebugFilter.Low)
         Turret.turret.position = 0.degrees
         Climber.staticsLifted = true
         Climber.status = ClimberStatus.ACTIVE
@@ -53,7 +53,7 @@ object Climb : CommandBase() {
      * Set the winch percentage based on left/right joysticks
      */
     override fun execute() {
-        Debug.log("Climb Command", "execute", level = DebugFilter.LowPriority)
+        Debug.log("Climb Command", "execute", level = DebugFilter.Low)
         Turret.turret.updateVoltage()
 
         Climber.leftWinch.percent = RobotContainer.controller.leftY.value / RobotContainer.controller.leftY.maxVal

@@ -16,7 +16,7 @@ object Flush : CommandBase() {
     val timer = Timer()
 
     override fun initialize() {
-        Debug.log("Intake", "start", level= DebugFilter.LowPriority)
+        Debug.log("Intake", "start", level= DebugFilter.Low)
         timer.reset()
         Intaker.deployed = true
         Intaker.intakeMotor.percent = -Constants.INTAKE_PERCENT
@@ -28,7 +28,7 @@ object Flush : CommandBase() {
     }
 
     override fun end(interrupted: Boolean) {
-        Debug.log("Intake", "end", level= DebugFilter.LowPriority)
+        Debug.log("Intake", "end", level= DebugFilter.Low)
         Intaker.deployed = false
         Intaker.intakeMotor.stop()
         Conveyor.conveyor.stop()

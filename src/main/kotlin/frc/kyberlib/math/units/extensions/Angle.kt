@@ -28,12 +28,11 @@ fun Angle.subtractNearest(other: Angle): Angle {
     return Angle(if (diff < -PI) diff + TAU else diff)
 }
 
-operator fun Rotation2d.div(other: Double) = Angle(this.radians / other)
 /**
  * Allows for division of angle by time.
  * Creates Angular Velocity
  */
-operator fun Rotation2d.div(other: KUnit<Second>): KUnit<Div<Radian, Second>> = KUnit(radians / other.value)
+operator fun Angle.div(other: KUnit<Second>): KUnit<Div<Radian, Second>> = KUnit(radians / other.value)
 
 /**
  * Convert WPI Rotation2d to kyberlib's KRotaion2d

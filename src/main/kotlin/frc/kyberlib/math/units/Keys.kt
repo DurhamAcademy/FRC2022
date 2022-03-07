@@ -3,10 +3,12 @@ package frc.kyberlib.math.units
 /**
  * Represents a unit type
  */
-open class KUnitKey {}
+sealed class KUnitKey {
+    val unit  = javaClass.simpleName
+}
 
 // combinations of units (doesn't work beyond one change - see testing for potential workarounds)
-class Mul<T : KUnitKey, U : KUnitKey> : KUnitKey() {}
+class Mul<T : KUnitKey, U : KUnitKey> : KUnitKey()
 class Div<T : KUnitKey, U : KUnitKey> : KUnitKey()
 
 // static object representing unit type

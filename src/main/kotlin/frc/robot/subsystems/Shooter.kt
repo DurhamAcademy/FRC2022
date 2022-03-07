@@ -81,22 +81,6 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
                 else 2.feet + distanceFilter.calculate((
                 (Constants.UPPER_HUB_HEIGHT - 1.inches - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
 
-    // motor controlling top roller speed
-    val topShooter = KSimulatedESC(33).apply {
-        identifier = "top1"
-        kP = 10.0
-        kD = 2.0
-        motorType = DCMotor.getNeo550(2)
-        val system = flywheelSystem(0.00001)
-        if (Constants.doStateSpace) stateSpaceControl(system, 3.0, 0.01, 8.0)
-        setupSim(system)
-    }
-    private val topFollower = KSimulatedESC(34).apply {
-        identifier = "top2"
-        follow(topShooter)
-        reversed = true
-    }
-
     init {
         if(Game.sim) Simulation.instance.include(this)
     }
@@ -108,7 +92,6 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
             "flywheel" to flywheelMaster,
-            "top Shooter" to topShooter,
             "hood" to hoodAngle,
             "distance" to targetDistance
         )

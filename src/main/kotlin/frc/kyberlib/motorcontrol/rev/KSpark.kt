@@ -21,7 +21,7 @@ class KSpark(channel: Int) : KBasicMotorController() {
         }
 
     override fun followTarget(kmc: KBasicMotorController) {
-        log("Enabling follow notifier. This can be slow", LogMode.WARN, DebugFilter.HighPriority)
+        log("Enabling follow notifier. This can be slow", LogMode.WARN, DebugFilter.High)
         kmc.followers.add(this)
     }
 }

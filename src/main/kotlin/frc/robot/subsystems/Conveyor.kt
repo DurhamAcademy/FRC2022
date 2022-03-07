@@ -3,7 +3,6 @@ package frc.robot.subsystems
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
-import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.robot.commands.intake.Idle
 
@@ -20,7 +19,7 @@ enum class ConveyorStatus {
  * Waiting for design to be finalized before code is added
  */
 object Conveyor : SubsystemBase(), Debug {
-    override val priority: DebugFilter = DebugFilter.LowPriority
+    override val priority: DebugFilter = DebugFilter.Low
 
     val conveyor = KSparkMax(21).apply {
         identifier = "conveyor"

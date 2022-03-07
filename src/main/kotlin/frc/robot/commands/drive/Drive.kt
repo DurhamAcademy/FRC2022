@@ -32,7 +32,7 @@ object Drive : CommandBase() {
         val fwd = RobotContainer.controlScheme.DRIVE_FORWARD.feetPerSecond
         val turn = RobotContainer.controlScheme.DRIVE_TURN.radiansPerSecond
         val speeds = ChassisSpeeds(velFilter.calculate(fwd.metersPerSecond), 0.0, rotFilter.calculate(turn.radiansPerSecond))
-        Debug.log("Default Drive", "fwd: $fwd, turn: $turn", level=DebugFilter.LowPriority)
+        Debug.log("Default Drive", "fwd: $fwd, turn: $turn", level=DebugFilter.Low)
         Drivetrain.drive(speeds)
     }
 

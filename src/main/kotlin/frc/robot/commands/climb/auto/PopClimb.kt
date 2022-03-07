@@ -16,7 +16,7 @@ class PopClimb : CommandBase() {
     }
 
     override fun initialize() {
-        Debug.log("Pop Climb", "init", level = DebugFilter.LowPriority)
+        Debug.log("Pop Climb", "init", level = DebugFilter.Low)
         Climber.extension = 30.inches
         Climber.extendableAngle = 85.degrees
 

@@ -55,14 +55,10 @@ object RobotContainer {
 //        EMOTE.whileActiveOnce(Emote)
     }
 
-    val autoChooser = SendableChooser<KTrajectory>().apply {
+    val autoChooser = SendableChooser<String>().apply {
         val options = TrajectoryManager.routines
-        if (options == null) {
-            Debug.log("Auto Chooser", "no auto paths found")
-        } else {
-            for (path in TrajectoryManager.routines!!) 1+1
-//                addOption(path, KTrajectory.load(path))
-        }
+        for (path in options) addOption(path, path)
+        setDefaultOption("Default", "Default")
         SmartDashboard.putData("auto", this)
     }
 

@@ -19,7 +19,6 @@ import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.kyberlib.simulation.Simulatable
-import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
 import kotlin.math.absoluteValue
 
@@ -34,7 +33,6 @@ enum class ClimberStatus {
  * Mechanism representing the actuators for climbing
  */
 object Climber : SubsystemBase(), Debug, Simulatable {
-    override val priority: DebugFilter = DebugFilter.LowPriority
     var status = ClimberStatus.IDLE
 
     // pneumatics that lift the climb arms

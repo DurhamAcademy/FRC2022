@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.TimedRobot
 import edu.wpi.first.wpilibj.livewindow.LiveWindow
 import edu.wpi.first.wpilibj2.command.CommandScheduler
+import frc.kyberlib.auto.trajectory.TrajectoryManager
 
 open class KRobot() {
     companion object {
@@ -21,90 +22,92 @@ open class KRobot() {
     private inner class KRobotInternal : TimedRobot(period) {
 
         override fun robotInit() {
-            Debug.log("Robot", "robot init", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "robot init", level=DebugFilter.Low)
             HAL.report(FRCNetComm.tResourceType.kResourceType_Language, FRCNetComm.tInstances.kLanguage_Kotlin)
             if (Game.real) LiveWindow.disableAllTelemetry()
             this@KRobot.robotInit()
         }
 
         override fun robotPeriodic() {
-            Debug.log("Robot", "robot periodic", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "robot periodic", level=DebugFilter.Low)
             CommandScheduler.getInstance().run()
             this@KRobot.robotPeriodic()
         }
 
         override fun disabledInit() {
             enabled = false
-            Debug.log("Robot", "disabled", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "disabled", level=DebugFilter.Low)
             this@KRobot.disabledInit()
         }
 
         override fun disabledPeriodic() {
-            Debug.log("Robot", "disabled periodic", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "disabled periodic", level=DebugFilter.Low)
             this@KRobot.disabledPeriodic()
         }
 
         override fun disabledExit() {
-            Debug.log("Robot", "disabled periodic", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "disabled periodic", level=DebugFilter.Low)
             this@KRobot.disabledExit()
         }
 
         override fun autonomousInit() {
             if (!enabled) enabledInit()
             enabled = true
-            Debug.log("Robot", "auto init", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "auto init", level=DebugFilter.Low)
+            TrajectoryManager.load()
             this@KRobot.autonomousInit()
         }
 
         override fun autonomousPeriodic() {
-            Debug.log("Robot", "auto periodic", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "auto periodic", level=DebugFilter.Low)
             this@KRobot.autonomousPeriodic()
         }
 
         override fun autonomousExit() {
-            Debug.log("Robot", "auto exit", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "auto exit", level=DebugFilter.Low)
+            TrajectoryManager.release()
             this@KRobot.autonomousExit()
         }
 
         override fun teleopInit() {
             if (!enabled) enabledInit()
             enabled = true
-            Debug.log("Robot", "teleop init", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "teleop init", level=DebugFilter.Low)
             this@KRobot.teleopInit()
         }
 
         override fun teleopPeriodic() {
-            Debug.log("Robot", "teleop periodic", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "teleop periodic", level=DebugFilter.Low)
             this@KRobot.teleopPeriodic()
         }
 
         override fun teleopExit() {
-            Debug.log("Robot", "teleop exit", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "teleop exit", level=DebugFilter.Low)
             this@KRobot.teleopExit()
         }
 
         override fun simulationInit() {
-            Debug.log("Robot", "sim init", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "sim init", level=DebugFilter.Low)
             this@KRobot.simulationInit()
         }
 
         override fun simulationPeriodic() {
-            Debug.log("Robot", "sim periodic", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "sim periodic", level=DebugFilter.Low)
             this@KRobot.simulationPeriodic()
         }
 
         override fun testInit() {
-            Debug.log("Robot", "test init", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "test init", level=DebugFilter.Low)
             this@KRobot.testInit()
         }
 
         override fun testPeriodic() {
-            Debug.log("Robot", "test periodic", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "test periodic", level=DebugFilter.Low)
             this@KRobot.testPeriodic()
         }
 
         override fun testExit() {
-            Debug.log("Robot", "test exit", level=DebugFilter.LowPriority)
+            Debug.log("Robot", "test exit", level=DebugFilter.Low)
             this@KRobot.testExit()
         }
     }

@@ -16,7 +16,7 @@ class TraverseGrab : CommandBase() {
     }
 
     override fun initialize() {
-        Debug.log("Traverse Grab", "init", level = DebugFilter.LowPriority)
+        Debug.log("Traverse Grab", "init", level = DebugFilter.Low)
         Climber.extendableAngle = 25.degrees
         Climber.extension = 10.inches
     }

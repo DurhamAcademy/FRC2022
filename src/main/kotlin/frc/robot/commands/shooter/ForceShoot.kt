@@ -24,7 +24,7 @@ object ForceShoot : CommandBase() {
     }
 
     override fun execute() {
-        Debug.log("Force Shoot", "execute", level=DebugFilter.LowPriority)
+        Debug.log("Force Shoot", "execute", level=DebugFilter.Low)
 
         if (false && Turret.targetVisible && Shooter.flywheelMaster.percent > 0.1) {
             val dis = if (Turret.targetVisible) Shooter.targetDistance!!.meters else Shoot.prevDistance
@@ -38,12 +38,10 @@ object ForceShoot : CommandBase() {
 
             // set the positions/velocities to the motors
             Shooter.flywheelMaster.velocity = targetFlywheelVelocity
-            Shooter.topShooter.velocity = targetTopWheelVelocity
             Shooter.hoodAngle = targetHoodAngle
         }
         else {
             Shooter.hood.stop()
-            Shooter.topShooter.percent = 0.5
             Shooter.flywheelMaster.percent = 0.5
         }
     }

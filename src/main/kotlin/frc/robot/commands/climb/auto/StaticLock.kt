@@ -15,7 +15,7 @@ class StaticLock  : CommandBase() {
     }
 
     override fun initialize() {
-        Debug.log("Static Lock", "init", level = DebugFilter.LowPriority)
+        Debug.log("Static Lock", "init", level = DebugFilter.Low)
         Climber.extension = 0.inches
     }
 

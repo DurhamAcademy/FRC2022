@@ -25,7 +25,7 @@ object Shoot : CommandBase() {
     var prevDistance = 1.0
 
     override fun execute() {
-        Debug.log("Shoot", "execute", level=DebugFilter.LowPriority)
+        Debug.log("Shoot", "execute", level=DebugFilter.Low)
         // check if shooter should spin up
         if ((Turret.targetVisible || Shooter.status == ShooterStatus.SHOT)) {
             val dis = if (Turret.targetVisible) Shooter.targetDistance!!.meters else prevDistance
@@ -44,7 +44,6 @@ object Shoot : CommandBase() {
 
             // set the positions/velocities to the motors
             Shooter.flywheelMaster.velocity = targetFlywheelVelocity
-            Shooter.topShooter.velocity = targetTopWheelVelocity
             Shooter.hoodAngle = targetHoodAngle
 
             // if the turret is on target
@@ -61,9 +60,8 @@ object Shoot : CommandBase() {
     }
 
     override fun end(interrupted: Boolean) {
-        Debug.log("Shoot", "idle", level=DebugFilter.LowPriority)
+        Debug.log("Shoot", "idle", level=DebugFilter.Low)
         Shooter.flywheelMaster.stop()
-        Shooter.topShooter.stop()
         Shooter.status = ShooterStatus.IDLE
     }
 }

@@ -41,7 +41,7 @@ object MassConversions {
     const val poundsToGrams = 453.592
 }
 
-// todo: convert some of these to floats so they still work
+// the extreme ones probably won't even work as doubles
 // todo: Integration with KUnit
 val Number.deci: Double inline get() = this.toDouble() * 1.0e-1         //	d	10^-1	0.1	tenth
 val Number.centi: Double inline get() = this.toDouble() * 1.0e-2        //	c	10^-2	0.01	hundredth

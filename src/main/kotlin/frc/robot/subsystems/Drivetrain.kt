@@ -4,6 +4,7 @@ import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.Nat
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.LinearQuadraticRegulator
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.estimator.KalmanFilter
 import edu.wpi.first.math.geometry.Pose2d
@@ -162,6 +163,13 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         }
     }
 
+    private val anglePid = PIDController(0.5, 0.0, 0.0)
+    fun fieldOrientedDrive(speed: LinearVelocity, direction: Angle) {
+        val dTheta = RobotContainer.navigation.heading - direction + 90.degrees // fixme
+        val vx = dTheta.cos
+        drive(ChassisSpeeds(vx, 1.0, anglePid.calculate(dTheta.radians)))
+    }
+
     fun stop() {
         leftMaster.stop()
         rightMaster.stop()
@@ -205,7 +213,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     fun betterDrivetrainSystem(): LinearSystem<N2, N2, N2> {  // todo: implement these into the builtin
 //        return LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka)
         val kVAngular = angularFeedforward.kv// * 2.0 / Constants.TRACK_WIDTH
-        val kAAngular = angularFeedforward.ka //* 2.0 / Constants.TRACK_WIDTH
+        val kAAngular = angularFeedforward.ka// * 2.0 / Constants.TRACK_WIDTH
         val A1: Double = 0.5 * -(leftFF.kv / leftFF.ka + kVAngular / kAAngular)
         val A2: Double = 0.5 * -(rightFF.kv / rightFF.ka - kVAngular / kAAngular)
         val B1: Double = 0.5 * (1.0 / leftFF.ka + 1.0 / kAAngular)

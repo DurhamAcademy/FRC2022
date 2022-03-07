@@ -3,7 +3,9 @@ package frc.kyberlib.command
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.networktables.NTSendable
-import frc.kyberlib.math.units.KUnit
+import frc.kyberlib.math.units.*
+import frc.kyberlib.math.units.extensions.Angle
+import frc.kyberlib.math.units.extensions.degrees
 
 /**
  * Types of ways to print to the output (driverstation)
@@ -21,7 +23,7 @@ enum class LogMode {
  * Allows for control of information levels.
  */
 enum class DebugFilter {
-    LowPriority, NORMAL, HighPriority, MaxPriority  // todo: find a better naming scheme
+    Low, Normal, High, Max
 }
 typealias DebugLevel = DebugFilter
 /**
@@ -29,10 +31,10 @@ typealias DebugLevel = DebugFilter
  */
 interface Debug {
     companion object {
-        var debugging = false
-        var loggingLevel = DebugFilter.NORMAL
+        var debugging = true
+        var loggingLevel = if(Game.real) DebugFilter.High else DebugFilter.Normal
 
-        fun log(identifier:String, text: String, mode: LogMode = LogMode.PRINT, level: DebugFilter = DebugFilter.NORMAL, stacktrace: Boolean = false) {
+        fun log(identifier:String, text: String, mode: LogMode = LogMode.PRINT, level: DebugFilter = DebugFilter.Normal, stacktrace: Boolean = false) {
             if (level < loggingLevel || !debugging) return
             val output = "[$identifier] $text"
             when (mode) {
@@ -110,7 +112,7 @@ interface Debug {
      * What level this should be debugged at. Allows for quick changing of how much information the console shows
      */
     val priority: DebugFilter
-        get() = DebugFilter.NORMAL
+        get() = DebugFilter.Normal
     /**
      * Function that retrieves the values that need to be debugged
      * @return map of string (name) to value. Numbers, Booleans, and NTSendables are displayed as such
