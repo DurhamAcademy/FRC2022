@@ -7,9 +7,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.milli
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
+import frc.kyberlib.servo.KLinearActuator
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
@@ -63,14 +65,12 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     // Servo that sets the hood angle
-    val hood = KSimulatedESC(1).apply {
-        identifier = "hood"
-    }
+    val hood = KLinearActuator(1, 100, 18.0)
 
-    var hoodAngle: Angle
-        get() = hood.position
+    var hoodDistance: Length
+        get() = (hood.estimatedPosition * 10).centimeters
         set(value) {
-            hood.position = value
+            hood.targetPosition = value.centimeters * 10
         }
 
     // how far from the center of the hub the robot is (based on limelight)
@@ -92,14 +92,14 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
             "flywheel" to flywheelMaster,
-            "hood" to hoodAngle,
+            "hood" to hoodDistance,
             "distance" to targetDistance
         )
     }
 
     override fun simUpdate(dt: Time) {
 //        flywheelControl.simUpdate(dt)
-        hood.simPosition = hood.positionSetpoint
+//        hood.simPosition = hood.positionSetpoint
 //        topShooter.simVelocity = topShooter.velocitySetpoint
     }
 }
