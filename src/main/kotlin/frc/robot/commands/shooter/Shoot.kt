@@ -2,12 +2,9 @@ package frc.robot.commands.shooter
 
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.Constants
-import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.extensions.meters
-import frc.kyberlib.math.units.extensions.radiansPerSecond
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
-import frc.kyberlib.math.units.extensions.rpm
+import frc.kyberlib.math.units.extensions.*
 import frc.robot.RobotContainer
 import frc.robot.commands.intake.Feed
 import frc.robot.commands.intake.Idle
@@ -40,14 +37,14 @@ object Shoot : CommandBase() {
             // tof(angle) =
             val targetFlywheelVelocity = Constants.FLYWHEEL_INTERPOLATOR.calculate(dis)!!.radiansPerSecond
             val targetTopWheelVelocity = targetFlywheelVelocity + 50.rpm//Constants.TOPWHEEL_INTERPOLATOR.calculate(dis)!!.radiansPerSecond
-            val targetHoodAngle = Constants.HOODANGLE_INTERPOLATOR.calculate(dis)!!.degrees
+            val targetHoodAngle = Constants.HOODANGLE_INTERPOLATOR.calculate(dis)!!
 
             // set the positions/velocities to the motors
             Shooter.flywheelMaster.velocity = targetFlywheelVelocity
-            Shooter.hoodAngle = targetHoodAngle
+            Shooter.hoodDistance = (targetHoodAngle / 10).centimeters
 
             // if the turret is on target
-            if (Turret.readyToShoot && Shooter.flywheelMaster.velocityError < Constants.SHOOTER_VELOCITY_TOLERANCE) {
+            if (Turret.readyToShoot && Shooter.flywheelMaster.velocityError < Constants.SHOOTER_VELOCITY_TOLERANCE && Shooter.hood.atSetpoint) {
                 Shooter.status = ShooterStatus.SHOT
                 Feed.schedule()
             } 

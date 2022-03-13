@@ -36,10 +36,10 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     var status = ClimberStatus.IDLE
 
     // pneumatics that lift the climb arms
-    private val leftStatic = KSolenoid(3, 4, fake = true).apply {
+    private val leftStatic = KSolenoid(4, 5, fake = true).apply {
         identifier = "left static"
     }
-    private val rightStatic = KSolenoid(5, 2, fake = true).apply {
+    private val rightStatic = KSolenoid(6, 7, fake = true).apply {
         identifier = "right static"
     }
 

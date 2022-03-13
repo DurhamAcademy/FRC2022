@@ -46,7 +46,7 @@ object RobotContainer {
     }
     val controlScheme = DefaultControls.apply {
         INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
-//        SHOOT.whileActiveOnce(Shoot)
+        SHOOT.whileActiveOnce(FlywheelTest)
 //        FORCE_SHOT.whileActiveOnce(ForceShoot)
 //        EJECT.whileActiveOnce(Intake)
         FLUSH.whileActiveOnce(Flush)
@@ -56,8 +56,8 @@ object RobotContainer {
     }
 
     val autoChooser = SendableChooser<String>().apply {
-        val options = TrajectoryManager.routines
-        for (path in options) addOption(path, path)
+//        val options = TrajectoryManager.routines
+//        for (path in options) addOption(path, path)
         setDefaultOption("Default", "Default")
         SmartDashboard.putData("auto", this)
     }

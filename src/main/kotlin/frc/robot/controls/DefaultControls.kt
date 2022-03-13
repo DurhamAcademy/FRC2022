@@ -25,7 +25,7 @@ object DefaultControls : ControlSchema2022() {
     override val DRIVE_TURN: Double
         get() = xbox.rightX.value
     override val INTAKE: Trigger = xbox.leftBumper
-    override val SHOOT: Trigger = xbox.rightTrigger.activateAt(0.5)
+    override val SHOOT: Trigger = xbox.rightTrigger.activateAt(0.1)
     override val FORCE_SHOT: Trigger = xbox.rightBumper
     override val EJECT: Trigger = xbox.leftDPad
     override val FLUSH: Trigger = xbox.rightDPad
