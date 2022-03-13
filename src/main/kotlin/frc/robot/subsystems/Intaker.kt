@@ -12,8 +12,8 @@ import frc.kyberlib.pneumatics.KSolenoid
  */
 object Intaker : SubsystemBase(), Debug {
     // deployment solenoids
-    private val leftIntakeDeploy = KSolenoid(7, 6, fake = false)
-    private val rightIntakeDeploy = KSolenoid(1, 0, fake = false)
+    private val leftIntakeDeploy = KSolenoid(3, 1, fake = false)
+    private val rightIntakeDeploy = KSolenoid(2, 0, fake = false)
 
     // public get/set for deploy status
     var deployed

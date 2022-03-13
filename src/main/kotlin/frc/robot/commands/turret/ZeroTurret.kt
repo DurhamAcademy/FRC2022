@@ -16,15 +16,16 @@ object ZeroTurret: CommandBase() {
     }
 
     override fun execute() {
-        Turret.turret.percent = -0.3  // TODO: check this direction
+        Turret.turret.percent = -0.1  // TODO: check this direction
         Debug.log("turretLimit", RobotContainer.turretLimit.get().toString(), level = DebugFilter.Low)
     }
 
     override fun end(interrupted: Boolean) {
         Debug.log("turretLimit", "zeroed")
         Turret.zeroTurret()
+        Turret.turret.stop()
     }
 
-    override fun isFinished() = !RobotContainer.turretLimit.get() || Game.sim
+    override fun isFinished() = !RobotContainer.turretLimit.get()
 
 }
