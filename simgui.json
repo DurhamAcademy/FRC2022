@@ -121,7 +121,8 @@
       "Intaker": {
         "intake": {
           "open": true
-        }
+        },
+        "open": true
       },
       "Pneumatic0": {
         "open": true

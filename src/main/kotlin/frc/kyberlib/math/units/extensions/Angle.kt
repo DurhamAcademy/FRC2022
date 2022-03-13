@@ -11,7 +11,7 @@ typealias Angle = KUnit<Radian>
 val Angle.rotations inline get() = value / AngleConversions.rotationsToRadians
 val Angle.degrees inline get() = value / AngleConversions.degreesToRadians
 val Angle.radians inline get() = value
-val Angle.normalized inline get() = ((rotations - rotations.toInt())).rotations
+val Angle.normalized inline get() = if (value >= 0.0) (rotations - rotations.toInt()).rotations else (rotations + rotations.toInt() + 1.0).rotations
 
 val Angle.w inline get() = Rotation2d(value)
 

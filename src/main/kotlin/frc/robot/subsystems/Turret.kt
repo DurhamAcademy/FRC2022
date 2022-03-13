@@ -5,6 +5,7 @@ import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.LinearFilter
+import edu.wpi.first.math.filter.MedianFilter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.TrapezoidProfile
@@ -19,6 +20,7 @@ import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.towards
 import frc.kyberlib.math.zeroIf
 import frc.kyberlib.motorcontrol.KMotorController.StateSpace.systemLoop
+import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
@@ -46,8 +48,9 @@ object Turret : SubsystemBase(), Debug {
     // characterization of the turret
     private val feedforward = SimpleMotorFeedforward(0.57083, 1.2168, 0.036495)
     private val visionFilter: LinearFilter = LinearFilter.movingAverage(10)
+    private val positionFilter = MedianFilter(5)
     // actual turret motors
-    val turret = KSparkMax(11).apply {
+    val turret = KSimulatedESC(11).apply {
         identifier = "turret"
         kP = 1.2
         kD = 0.01
@@ -71,7 +74,7 @@ object Turret : SubsystemBase(), Debug {
             val setpoint = clampSafePosition(it.positionSetpoint)
             val offset = it.position - setpoint
             val offsetCorrection = offsetCorrector.calculate(offset.radians).radiansPerSecond
-            val targetVelocity = offsetCorrection - chassisComp * 0.0 - movementComp * 0.0
+            val targetVelocity = offsetCorrection - chassisComp - movementComp * 0.0
 //            loop.nextR = VecBuilder.fill(targetVelocity.radiansPerSecond)  // r = reference (setpoint)
 //            loop.correct(VecBuilder.fill(velocity.radiansPerSecond))  // update with empirical
 //            loop.predict(0.02)  // math
@@ -110,7 +113,7 @@ object Turret : SubsystemBase(), Debug {
 //        return  if(angle.value.between(minAngle.value, maxAngle.value)) angle
 //                else if (angle.normalized.value.between(minAngle.value, maxAngle.value)) angle.normalized
 //                else angle.coerceIn(minAngle, maxAngle)
-        return angle.normalized
+        return positionFilter.calculate(angle.normalized.value).radians
     }
 
     /**
@@ -131,7 +134,7 @@ object Turret : SubsystemBase(), Debug {
         get() = if (Game.real) target?.yaw?.let { visionFilter.calculate(-it).degrees }
                 else {
                     val off = (RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k - fieldRelativeAngle
-                            + randomizer.nextGaussian().degrees * 3.0)
+                            + randomizer.nextGaussian().degrees * 2.0)
                     if(off.degrees.absoluteValue < 20.0 || true) visionFilter.calculate(off.degrees).degrees else null
                 }
 
