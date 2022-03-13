@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.auto.trajectory.KTrajectoryConfig
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.Game
 import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.milli
@@ -91,7 +92,7 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose, private v
         SmartDashboard.putString("global pose", globalPosition.string)
         when(trackingMode) {
             TrackingMode.Fancy -> poseEstimator.addVisionMeasurement(globalPosition, time.milliseconds)
-            TrackingMode.DumbBoth -> odometry.resetPosition(globalPosition, heading.w)
+            TrackingMode.DumbBoth -> if(Game.OPERATED) odometry.resetPosition(globalPosition, heading.w)
             else -> log("Global position updates not configured", LogMode.WARN)
         }
     }

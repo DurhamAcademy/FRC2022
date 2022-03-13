@@ -5,6 +5,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
+import kotlin.random.Random
 
 val Double.rtf: Double get() = (this * 10000).roundToInt() / 10000.0
 
@@ -32,6 +33,10 @@ val Int.odd: Boolean
 
 val Number.sign
     get() = this.toDouble() / this.toDouble().absoluteValue
+
+fun Number.between(low: Number, high: Number) = this.toDouble() >= low.toDouble()  && this.toDouble() <= high.toDouble()
+
+val randomizer = java.util.Random()
 
 
 @JvmName("toDiv")

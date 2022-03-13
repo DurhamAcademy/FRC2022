@@ -31,7 +31,7 @@ class AutoShot : CommandBase() {
 
             // set the positions/velocities to the motors
             Shooter.flywheelMaster.velocity = targetFlywheelVelocity
-            Shooter.hoodDistance = (targetHoodAngle / 10).centimeters
+            Shooter.hoodAngle = targetHoodAngle.degrees
 
             // if the turret is on target
             if (Turret.readyToShoot && Shooter.flywheelMaster.velocityError < Constants.SHOOTER_VELOCITY_TOLERANCE && Shooter.hood.atSetpoint) {

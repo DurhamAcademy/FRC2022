@@ -60,11 +60,6 @@ object Constants {
         200.inches.meters to 5.0,
         300.inches.meters to 7.0
     ))
-    val TOPWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf(
-        100.inches.meters to 1.0,
-        200.inches.meters to 2.0,
-        300.inches.meters to 3.0
-    ))
     val HOODANGLE_INTERPOLATOR: Interpolator = Interpolator(mapOf(
         100.inches.meters to 80.0,
         200.inches.meters to 60.0,

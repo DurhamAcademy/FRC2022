@@ -34,12 +34,11 @@ object ForceShoot : CommandBase() {
 
             // calculate values given the current distance from the hub
             val targetFlywheelVelocity = Constants.FLYWHEEL_INTERPOLATOR.calculate(dis)!!.radiansPerSecond
-            val targetTopWheelVelocity = Constants.TOPWHEEL_INTERPOLATOR.calculate(dis)!!.radiansPerSecond
             val targetHoodAngle = Constants.HOODANGLE_INTERPOLATOR.calculate(dis)!!
 
             // set the positions/velocities to the motors
             Shooter.flywheelMaster.velocity = targetFlywheelVelocity
-            Shooter.hoodDistance = (targetHoodAngle / 10).centimeters
+            Shooter.hoodAngle = targetHoodAngle.degrees
         }
         else {
             Shooter.flywheelMaster.percent = 0.5

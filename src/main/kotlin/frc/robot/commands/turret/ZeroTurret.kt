@@ -26,6 +26,6 @@ object ZeroTurret: CommandBase() {
         Turret.turret.stop()
     }
 
-    override fun isFinished() = !RobotContainer.turretLimit.get()
+    override fun isFinished() = !RobotContainer.turretLimit.get() || Game.sim
 
 }

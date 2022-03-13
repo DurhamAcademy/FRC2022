@@ -36,12 +36,11 @@ object Shoot : CommandBase() {
             // min useful = 6.4516 m/s
             // tof(angle) =
             val targetFlywheelVelocity = Constants.FLYWHEEL_INTERPOLATOR.calculate(dis)!!.radiansPerSecond
-            val targetTopWheelVelocity = targetFlywheelVelocity + 50.rpm//Constants.TOPWHEEL_INTERPOLATOR.calculate(dis)!!.radiansPerSecond
             val targetHoodAngle = Constants.HOODANGLE_INTERPOLATOR.calculate(dis)!!
 
             // set the positions/velocities to the motors
             Shooter.flywheelMaster.velocity = targetFlywheelVelocity
-            Shooter.hoodDistance = (targetHoodAngle / 10).centimeters
+            Shooter.hoodAngle = targetHoodAngle.degrees
 
             // if the turret is on target
             if (Turret.readyToShoot && Shooter.flywheelMaster.velocityError < Constants.SHOOTER_VELOCITY_TOLERANCE && Shooter.hood.atSetpoint) {

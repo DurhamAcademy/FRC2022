@@ -63,6 +63,7 @@
         "Robot": {
           "arrows": false
         },
+        "image": "/Users/22staples/FRC2022/Rapid React Field.png",
         "traj": {
           "arrowSize": 0,
           "arrows": false,
@@ -88,6 +89,9 @@
   },
   "NetworkTables": {
     "LiveWindow": {
+      "Turret": {
+        "open": true
+      },
       "Ungrouped": {
         "Solenoid[0,0]": {
           "open": true

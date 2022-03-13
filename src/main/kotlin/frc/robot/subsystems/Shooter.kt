@@ -4,14 +4,12 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
-import frc.kyberlib.math.filters.Differentiator
+import frc.kyberlib.math.randomizer
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.servo.KLinearActuator
 import frc.kyberlib.simulation.Simulatable
@@ -19,6 +17,9 @@ import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.subsystems.Turret.targetVisible
+import kotlin.math.acos
+import kotlin.math.cos
+import kotlin.math.sqrt
 
 
 /**
@@ -42,17 +43,20 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 //        radius = Constants.FLYWHEEL_RADIUS
         motorType = DCMotor.getNEO(2)
         addFeedforward(ff)
+        kP = 0.1058
         currentLimit = 50
     }
 
-    var outputVelocity
-        get() = flywheelMaster.velocity.toTangentialVelocity(Constants.BALL_DIAMETER - Constants.SHOOTER_COMPRESSION)
-        set(value) {
-            flywheelMaster.velocity = value.toAngularVelocity(Constants.BALL_DIAMETER - Constants.SHOOTER_COMPRESSION)
-        }
-    var timeOfFlight = 1.seconds
-
-    var targetVelocity = 0.0.rpm
+//    var outputVelocity
+//        get() = flywheelMaster.velocity.toTangentialVelocity(Constants.BALL_DIAMETER - Constants.SHOOTER_COMPRESSION)
+//        set(value) {
+//            flywheelMaster.velocity = value.toAngularVelocity(Constants.BALL_DIAMETER - Constants.SHOOTER_COMPRESSION)
+//        }
+//    var timeOfFlight = 1.seconds
+//
+    var targetVelocity
+        get() = flywheelMaster.velocitySetpoint
+        set(value) { flywheelMaster.velocity = targetVelocity}
 
 
     // additional motors that copy the main
@@ -65,39 +69,33 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     // Servo that sets the hood angle
     val hood = KLinearActuator(1, 100, 18.0)
-    val hood2 = KLinearActuator(2, 100, 18.0)
+    private val hood2 = KLinearActuator(2, 100, 18.0)
 
-//    val flywheelDiff = Differentiator()
-    val flywheelPID = PIDController(0.1058, 0.0, 0.0)
-
-    private fun controlLoop() {
-
-        val actualVelocity = flywheelMaster.velocity.rpm / 60
-
-        val pidOut = flywheelPID.calculate(actualVelocity, targetVelocity.rpm / 60)
-        val ffOut = ff.calculate(targetVelocity.rpm / 60)
-        flywheelMaster.voltage = pidOut + ffOut
-
-
-
-        SmartDashboard.putNumber("ERROR RPM", flywheelPID.positionError * 60)
-        SmartDashboard.putNumber("TARGET", targetVelocity.rpm)
-        SmartDashboard.putNumber("ACTUAL", flywheelMaster.velocity.rpm)
-        SmartDashboard.putNumber("PID", pidOut)
-        SmartDashboard.putNumber("FF", ffOut)
-    }
-
-    var hoodDistance: Length
-        get() = (hood.estimatedPosition * 10).centimeters
+    private var hoodDistance: Length
+        get() = hood.position
         set(value) {
-            hood.targetPosition = value.centimeters * 10
-            hood2.targetPosition = value.centimeters * 10
+            hood.position = value
+            hood2.position = value
+        }
+
+    //https://www.mathsisfun.com/algebra/trig-cosine-law.html
+    // c2 = a2 + b2 − 2ab cos(C)
+    private const val A = 6.085  // flywheel axis to servo axis
+    private const val A2 = A*A
+    private const val B = 10.016  // flywheel axis to servo end
+    private const val B2 = B*B
+    private const val D = 2 * A * B
+    private const val theta = 0.0
+    var hoodAngle: Angle
+        get() = acos((-hoodDistance.inches * hoodDistance.inches + A2 + B2)/D).radians
+        set(value) {
+            hoodDistance = sqrt(A2 + B2 - D * cos(theta + value.radians)).inches
         }
 
     // how far from the center of the hub the robot is (based on limelight)
     private val distanceFilter = LinearFilter.movingAverage(8)
     val targetDistance: Length? 
-        get() = if (Game.sim) RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+        get() = if (Game.sim) RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters + randomizer.nextGaussian().inches
                 else if (!targetVisible) null
                 else 2.feet + distanceFilter.calculate((
                 (Constants.UPPER_HUB_HEIGHT - 1.inches - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
@@ -108,7 +106,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     override fun periodic() {
         debugDashboard()
-        controlLoop()
+        flywheelMaster.updateVoltage()
     }
 
     override fun debugValues(): Map<String, Any?> {

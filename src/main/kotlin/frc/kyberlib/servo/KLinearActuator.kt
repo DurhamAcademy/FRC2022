@@ -2,7 +2,8 @@ package frc.kyberlib.servo
 
 import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.wpilibj.Servo
-import kotlin.math.abs
+import frc.kyberlib.math.units.extensions.Length
+import frc.kyberlib.math.units.extensions.millimeters
 
 /**
  * A PWM linear actuator.
@@ -17,7 +18,7 @@ class KLinearActuator(
     port: Int,
     val length: Int,
     travelSpeed: Double,
-    initialPosition: Double = 0.0,
+    initialPosition: Length = 0.millimeters,
     minMs: Double = 1.0,
     maxMs: Double = 2.0
 ) {
@@ -29,30 +30,28 @@ class KLinearActuator(
     }
 
     // rate limiter for estimating current actuator position
-    private val rateLimit = SlewRateLimiter(travelSpeed, initialPosition)
+    private val rateLimit = SlewRateLimiter(travelSpeed, initialPosition.millimeters)
 
     /**
      * Target actuator length, in mm
      */
-    var targetPosition: Double = initialPosition
+    var position: Length = initialPosition
         set(value) {
             // command the servo to new target position
-            servo.position = value / length
+            servo.position = value.millimeters / length
             // update the position estimate
-            estimatedPosition = rateLimit.calculate(value)
+            field = rateLimit.calculate(value.millimeters).millimeters
             // update backing field
-            field = value
+            setpoint = value
         }
 
-    /**
-     * Estimate of where the actuator currently is, in mm
-     */
-    var estimatedPosition: Double = initialPosition
-        private set
+    var setpoint: Length = initialPosition
 
+    val error: Length
+        get() = position - setpoint
     /**
      * True if the actuator's estimated position has converged on the target position.
      */
     val atSetpoint: Boolean
-        get() = abs(targetPosition - estimatedPosition) < 2.0
+        get() = error.absoluteValue.millimeters < 2.0
 }
