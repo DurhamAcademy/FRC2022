@@ -5,7 +5,6 @@ import frc.kyberlib.math.Interpolator
 import frc.kyberlib.math.units.MassConversions
 import frc.kyberlib.math.units.Translation2d
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.simulation.field.KField2d
 
 /**
  * This file holds all important constants throughout the project
@@ -73,9 +72,8 @@ object Constants {
 
     // ------ Turret ------ //
     val TURRET_GEAR_RATIO: Double = 10.0 * (215.0 / 18.0)  // 10 is vp and second is pulley ratio
-    const val NOT_FOUND_WAIT = 0.05
-    const val LOST_WAIT = 500.0
-    const val SMART_LOSS = true
+    const val NOT_FOUND_WAIT = 0.2
+    const val SMART_LOSS = false
 
     const val SHOOTER_AQUISITION_TIME = 0.2
     val TURRET_TOLERANCE = 3.degrees // how close the heading must be to fire
@@ -85,7 +83,7 @@ object Constants {
     val HUB_POSITION = Translation2d(324.inches, 162.inches)
     val FIELD_SIZE = Translation2d(648.inches, 324.inches)
     val UPPER_HUB_HEIGHT = 8.feet + 8.inches
-    val START_POSE: Pose2d = Pose2d(HUB_POSITION - Translation2d(3.meters, 0.meters), 90.degrees.w)//Pose2d(8.5.meters, 1.9.meters, (-90).degrees)
+    val START_POSE: Pose2d = Pose2d(HUB_POSITION - Translation2d(3.meters, 0.meters), 0.degrees.w)//Pose2d(8.5.meters, 1.9.meters, (-90).degrees)
 
     val LOW_RUNG_HEIGHT = 4.feet + .75.inches
     val MID_RUNG_HEIGHT = 5.feet + .25.inches

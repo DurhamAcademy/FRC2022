@@ -4,21 +4,18 @@ import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpilibj2.command.Subsystem
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.TrackingMode
-import frc.kyberlib.auto.trajectory.KTrajectory
-import frc.kyberlib.auto.trajectory.TrajectoryManager
-import frc.kyberlib.command.Debug
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.commands.Emote
-import frc.robot.commands.climb.Climb
 import frc.robot.commands.intake.Flush
 import frc.robot.commands.intake.Intake
 import frc.robot.commands.shooter.FlywheelTest
 import frc.robot.commands.shooter.ForceShoot
 import frc.robot.commands.shooter.Shoot
-import frc.robot.commands.turret.LockTurret
+import frc.robot.commands.turret.FreezeTurret
 import frc.robot.subsystems.Drivetrain
 import frc.robot.controls.ControlSchema2022
 import frc.robot.controls.DefaultControls
@@ -46,13 +43,21 @@ object RobotContainer {
     }
     val controlScheme = DefaultControls.apply {
         INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
-        SHOOT.whileActiveOnce(FlywheelTest)
-//        FORCE_SHOT.whileActiveOnce(ForceShoot)
-//        EJECT.whileActiveOnce(Intake)
+        SHOOT.whileActiveOnce(Shoot)
+        FORCE_SHOT.whileActiveOnce(ForceShoot)
+//        EJECT.whileActiveOnce(Eject)
         FLUSH.whileActiveOnce(Flush)
-//        LOCK_TURRET.toggleWhenActive(LockTurret)
+        LOCK_TURRET.toggleWhenActive(FreezeTurret)
 //        CLIMB_MODE.toggleWhenActive(Climb)
-//        EMOTE.whileActiveOnce(Emote)
+        EMOTE.whileActiveOnce(Emote)
+        FLYWHEEL_INCREASE.whenActive {
+            Shooter.shooterMult += .01
+            emptySet<Subsystem>()
+        }
+        FLYWHEEL_DECREASE.whenActive {
+            Shooter.shooterMult -= .01
+            emptySet<Subsystem>()
+        }
     }
 
     val autoChooser = SendableChooser<String>().apply {

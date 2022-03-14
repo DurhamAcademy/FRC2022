@@ -8,6 +8,7 @@ import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.meters
+import frc.kyberlib.math.units.string
 import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.commands.drive.AutoDrive
@@ -37,8 +38,14 @@ class Robot : KRobot() {
 
     override fun teleopPeriodic() {
 //        SmartDashboard.putBoolean("hall", RobotContainer.turretLimit.get())
-        SmartDashboard.putNumber("gyro", RobotContainer.gyro.heading.degrees)
-        Shooter.targetDistance?.meters?.let { SmartDashboard.putNumber("distance", it) }
+        if(Game.real) {
+            SmartDashboard.putNumber("gyro", RobotContainer.gyro.heading.degrees)
+            SmartDashboard.putBoolean("visible", Turret.targetVisible)
+            SmartDashboard.putBoolean("shooter ready", Shooter.ready)
+            SmartDashboard.putBoolean("turret ready", Turret.ready)
+            Turret.targetDistance?.meters?.let { SmartDashboard.putNumber("distance", it) }
+            SmartDashboard.putString("pose", RobotContainer.navigation.pose.string)
+        }
     }
 
     override fun autonomousInit() {
@@ -58,15 +65,15 @@ class Robot : KRobot() {
             else command.addCommands(AutoDrive(TrajectoryManager[it]!!))
         }
         if (!f.readLines().contains("Shot")) FullAutoFire().schedule()
-        if (Game.sim) {
-            var pose = zeroPose
-            for(it in f.readLines()) {
-                if(it != "Shot") pose = TrajectoryManager[it]!!.initialPose
-                break
-            }
-            RobotContainer.navigation.pose = pose
 
+        // resets our position assuming we are in the right spot
+        var pose = zeroPose
+        for(it in f.readLines()) {
+            if(it != "Shot") pose = TrajectoryManager[it]!!.initialPose
+            break
         }
+
+        RobotContainer.navigation.pose = pose
         return command
     }
 
