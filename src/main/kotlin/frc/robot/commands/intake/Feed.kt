@@ -1,9 +1,11 @@
 package frc.robot.commands.intake
 
 import edu.wpi.first.wpilibj2.command.CommandBase
+import frc.kyberlib.math.units.extensions.rpm
 import frc.robot.RobotContainer
 import frc.robot.subsystems.ConveyorStatus
 import frc.robot.subsystems.Conveyor
+import frc.robot.subsystems.Shooter
 
 object Feed : CommandBase() {
     init {
@@ -16,5 +18,5 @@ object Feed : CommandBase() {
         Conveyor.feeder.percent = 0.9
     }
 
-    override fun isFinished(): Boolean = !RobotContainer.controlScheme.SHOOT.get()
+    override fun isFinished(): Boolean = Shooter.stopped
 }

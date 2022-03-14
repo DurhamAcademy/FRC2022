@@ -3,7 +3,6 @@ package frc.robot.commands.shooter
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
-import frc.kyberlib.math.units.extensions.centimeters
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.math.units.extensions.radiansPerSecond
@@ -27,22 +26,16 @@ object ForceShoot : CommandBase() {
     override fun execute() {
         Debug.log("Force Shoot", "execute", level=DebugFilter.Low)
 
-        if (false && Turret.targetVisible && Shooter.flywheelMaster.percent > 0.1) {
-            val dis = if (Turret.targetVisible) Shooter.targetDistance!!.meters else Shoot.prevDistance
-            val parallelSpeed = Drivetrain.polarSpeeds.dr
-            Shoot.prevDistance = dis
-
-            // calculate values given the current distance from the hub
-            val targetFlywheelVelocity = Constants.FLYWHEEL_INTERPOLATOR.calculate(dis)!!.radiansPerSecond
-            val targetHoodAngle = Constants.HOODANGLE_INTERPOLATOR.calculate(dis)!!
-
-            // set the positions/velocities to the motors
-            Shooter.flywheelMaster.velocity = targetFlywheelVelocity
-            Shooter.hoodAngle = targetHoodAngle.degrees
+        if (Shooter.ready) {
+            Shooter.update()
         }
         else {
-            Shooter.flywheelMaster.percent = 0.5
+            Shooter.flywheel.percent = 0.5
         }
+    }
+
+    override fun end(interrupted: Boolean) {
+        Shooter.stop()
     }
 
 }

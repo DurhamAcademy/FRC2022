@@ -164,7 +164,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     }
 
     private val anglePid = PIDController(0.5, 0.0, 0.0)
-    fun fieldOrientedDrive(speed: LinearVelocity, direction: Angle) {
+    fun fieldOrientedDrive(speed: LinearVelocity, direction: Angle) { // ignore this: I got bored on a flight
         val dTheta = RobotContainer.navigation.heading - direction + 90.degrees // fixme
         val vx = dTheta.cos
         drive(ChassisSpeeds(vx, 1.0, anglePid.calculate(dTheta.radians)))
@@ -181,8 +181,8 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     override fun periodic() {
         debugDashboard()
         RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
-        if((Constants.NAVIGATION_CORRECTION || Constants.DUMB_NAVIGATION) && Turret.targetVisible)  {
-            val distance = Shooter.targetDistance ?: return
+        if(Constants.NAVIGATION_CORRECTION || Constants.DUMB_NAVIGATION)  {
+            val distance = Turret.targetDistance ?: return
             val offset = Turret.visionOffset ?: return
             val angle = offset + Turret.fieldRelativeAngle + 180.degrees
             polarCoordinates = PolarPose(distance, angle, offset)

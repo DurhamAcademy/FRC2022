@@ -42,38 +42,17 @@ object AimTurret : CommandBase() {
     override fun execute() {
         Debug.log("Aim", "execute", level=DebugFilter.Low)
 
-//        if(!Turret.targetVisible && Turret.turretError.absoluteValue < 40) {
-//            if(lostTimer.get() == 0.0) lostTimer.start()
-//        } else {
-//            lostTimer.reset()
-//            lostTimer.stop()
-//
-//            Turret.setTurretAngle(Turret.turret.position + ((if(Turret.visionOffset!!.absoluteValue > 0.5.degrees) Turret.visionOffset else 0.0.degrees)!!))
-//        }
-
-
-
 //         if the limelight is a target
         if (Turret.targetVisible) {
             found()
-//
 //             perp zoom correction
 //            val perpSpeed = Drivetrain.polarSpeeds.dTheta.toTangentialVelocity(Drivetrain.polarCoordinates.r)
-//
             val goalOrientation = Turret.visionOffset ?: return
             Turret.fieldRelativeAngle = Turret.fieldRelativeAngle + goalOrientation
         }
         else {
 //            Turret.turret.stop()
             notFoundTimer.start()
-//             wait for awhile to make sure the target is lost
-            if (notFoundTimer.hasElapsed(Constants.NOT_FOUND_WAIT)) {
-                Turret.status = TURRET_STATUS.NOT_FOUND
-                lostTimer.start()
-
-//                 look towards where the hub should be
-                Turret.fieldRelativeAngle = RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k
-            }
         }
     }
 
@@ -84,5 +63,5 @@ object AimTurret : CommandBase() {
     /**
      * If you don't find the target after awhile go back to seek turret (looking everywhere).
      */
-    override fun isFinished(): Boolean = lostTimer.hasElapsed(Constants.LOST_WAIT)
+    override fun isFinished(): Boolean = notFoundTimer.hasElapsed(Constants.NOT_FOUND_WAIT)
 }

@@ -9,7 +9,10 @@ import frc.robot.subsystems.Turret
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
+import frc.kyberlib.math.units.extensions.k
+import frc.kyberlib.math.units.towards
 import frc.robot.Constants
+import frc.robot.RobotContainer
 
 /**
  * Spin turret in circle. This command should never really be necessary if we odometry good
@@ -33,10 +36,6 @@ object SeekTurret : CommandBase() {
     private var direction = 1.0
     private val timer = Timer()
     override fun execute() {
-        return
-
-//        Turret.setTurretAngle(0.0)
-
 //        if (Turret.targetVisible) {
 //            if(timer.get() <= 0.0001)
 //                timer.start()
@@ -64,10 +63,11 @@ object SeekTurret : CommandBase() {
             acquisitionTimer.stop()
             acquisitionTimer.reset()
 
-            // sweeps menacingly
-            Turret.turret.percent = 0.1 * direction
-            if(Turret.turret.position < Turret.turret.minPosition!! + 5.degrees) direction = 1.0
-            else if(Turret.turret.position > Turret.turret.maxPosition!! - 5.degrees) direction = -1.0
+            // sweeps menacingly - test this
+            Turret.fieldRelativeAngle = RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k
+//            Turret.turret.percent = 0.1 * direction
+//            if(Turret.turret.position < Turret.turret.minPosition!! + 5.degrees) direction = 1.0
+//            else if(Turret.turret.position > Turret.turret.maxPosition!! - 5.degrees) direction = -1.0
         }
 
         // if you are sure you see the target

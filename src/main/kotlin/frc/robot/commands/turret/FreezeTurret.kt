@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.subsystems.TURRET_STATUS
 import frc.robot.subsystems.Turret
 
-object LockTurret : CommandBase() {
+object FreezeTurret : CommandBase() {
     init {
         addRequirements(Turret)
     }

@@ -18,36 +18,25 @@ object Shoot : CommandBase() {
     init {
         addRequirements(Shooter)
     }
-
-    var prevDistance = 1.0
-
     override fun execute() {
         Debug.log("Shoot", "execute", level=DebugFilter.Low)
         // check if shooter should spin up
         if ((Turret.targetVisible || Shooter.status == ShooterStatus.SHOT)) {
-            val dis = Shooter.targetDistance?.meters
 //            val parallelSpeed = Drivetrain.polarSpeeds.dr
-            prevDistance = dis ?: prevDistance
             // calculate values given the current distance from the hub
             // top rpm: 5676 RPM
             // top theorectical out velocity = 144.1704 m/s
             // top useful out velocity = 12.7 m/s
             // min useful = 6.4516 m/s
             // tof(angle) =
-            val targetFlywheelVelocity = Constants.FLYWHEEL_INTERPOLATOR.calculate(prevDistance)!!.radiansPerSecond
-            val targetHoodAngle = Constants.HOODANGLE_INTERPOLATOR.calculate(prevDistance)!!
-
-            // set the positions/velocities to the motors
-            Shooter.flywheelMaster.velocity = targetFlywheelVelocity
-            Shooter.hoodAngle = targetHoodAngle.degrees
+            Shooter.update()
 
             // if the turret is on target
-            if (Turret.readyToShoot && Shooter.flywheelMaster.velocityError < Constants.SHOOTER_VELOCITY_TOLERANCE && Shooter.hood.atSetpoint) {
+            if (Turret.ready && Shooter.ready) {
                 Shooter.status = ShooterStatus.SHOT
                 Feed.schedule()
             } 
             else {
-                Idle.execute()
                 RobotContainer.controller.rumble = 0.5
                 Shooter.status = ShooterStatus.SPINUP
             }
@@ -56,7 +45,6 @@ object Shoot : CommandBase() {
 
     override fun end(interrupted: Boolean) {
         Debug.log("Shoot", "idle", level=DebugFilter.Low)
-        Shooter.flywheelMaster.stop()
-        Shooter.status = ShooterStatus.IDLE
+        Shooter.stop()
     }
 }

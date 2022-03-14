@@ -38,7 +38,7 @@ object Conveyor : SubsystemBase(), Debug {
     }
 
     init {
-//        defaultCommand = Idle
+        defaultCommand = Idle
     }
 
     override fun periodic() {
