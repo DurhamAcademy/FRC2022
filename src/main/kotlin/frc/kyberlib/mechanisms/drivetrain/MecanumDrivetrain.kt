@@ -10,12 +10,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Debug
 import frc.kyberlib.math.units.debugValues
-import frc.kyberlib.math.units.extensions.KRotation
-import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.metersPerSecond
-import frc.kyberlib.math.units.zeroPose
+import frc.kyberlib.math.units.extensions.w
 import frc.kyberlib.motorcontrol.KMotorController
-import frc.kyberlib.sensors.gyros.KGyro
 
 /**
  * Pre-made Drivetrain for MecanumWheels.
@@ -34,13 +31,13 @@ abstract class MecanumDrivetrain : KDrivetrain, SubsystemBase(), Debug {
 
     // controls
     private val kinematics = MecanumDriveKinematics(locations[0], locations[1], locations[2], locations[3])
-    private val odometry = MecanumDriveOdometry(kinematics, Navigator.instance!!.heading)
+    private val odometry = MecanumDriveOdometry(kinematics, Navigator.instance!!.heading.w)
 
     // useful info
     private val mecanumDriveWheelSpeeds
         get() = MecanumDriveWheelSpeeds(frontLeft.linearVelocity.metersPerSecond, frontRight.linearVelocity.metersPerSecond, backLeft.linearVelocity.metersPerSecond, backRight.linearVelocity.metersPerSecond)
     var pose: Pose2d
-        set(value) { odometry.resetPosition(value, Navigator.instance!!.heading) }
+        set(value) { odometry.resetPosition(value, Navigator.instance!!.heading.w) }
         get() = odometry.poseMeters
     var heading
         get() = Navigator.instance!!.heading
@@ -56,7 +53,7 @@ abstract class MecanumDrivetrain : KDrivetrain, SubsystemBase(), Debug {
     fun drive(speeds: ChassisSpeeds, fieldRelative: Boolean = false) {
         if (fieldRelative) {
             // field relative means x, y of the field instead of forward, side from the robot
-            val adjusted = ChassisSpeeds.fromFieldRelativeSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, Navigator.instance!!.heading)
+            val adjusted = ChassisSpeeds.fromFieldRelativeSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, Navigator.instance!!.heading.w)
             drive(kinematics.toWheelSpeeds(adjusted))
         }
         else drive(kinematics.toWheelSpeeds(speeds))
@@ -72,7 +69,7 @@ abstract class MecanumDrivetrain : KDrivetrain, SubsystemBase(), Debug {
     }
 
     override fun periodic() {
-        odometry.update(Navigator.instance!!.heading, mecanumDriveWheelSpeeds)
+        odometry.update(Navigator.instance!!.heading.w, mecanumDriveWheelSpeeds)
     }
 
     override fun debugValues(): Map<String, Any?> {

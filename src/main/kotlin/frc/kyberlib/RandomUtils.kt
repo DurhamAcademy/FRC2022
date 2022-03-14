@@ -10,7 +10,7 @@ import kotlin.math.absoluteValue
  * Executes string as command in terminal
  * @param workingDir the directory the terminal will be located
  */
-fun String.runCommand(workingDir: File) {
+fun String.runCommand(workingDir: File) {  // this doesn't work for some reason
     try {
         val parts = this.split("\\s".toRegex())
         val proc = ProcessBuilder(*parts.toTypedArray()).apply {

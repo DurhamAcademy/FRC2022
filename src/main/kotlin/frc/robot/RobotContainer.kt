@@ -1,21 +1,22 @@
 package frc.robot
 
+import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpilibj2.command.Subsystem
 import frc.kyberlib.auto.Navigator
-import frc.kyberlib.auto.trajectory.KTrajectory
-import frc.kyberlib.auto.trajectory.TrajectoryManager
-import frc.kyberlib.command.Debug
+import frc.kyberlib.auto.TrackingMode
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.commands.intake.Eject
 import frc.robot.commands.Emote
-import frc.robot.commands.climb.Climb
+import frc.robot.commands.intake.Flush
 import frc.robot.commands.intake.Intake
+import frc.robot.commands.shooter.FlywheelTest
 import frc.robot.commands.shooter.ForceShoot
 import frc.robot.commands.shooter.Shoot
-import frc.robot.commands.turret.LockTurret
+import frc.robot.commands.turret.FreezeTurret
 import frc.robot.subsystems.Drivetrain
 import frc.robot.controls.ControlSchema2022
 import frc.robot.controls.DefaultControls
@@ -32,7 +33,7 @@ object RobotContainer {
     val limelight = PhotonCamera("gloworm")
     val turretLimit = DigitalInput(0)
 
-    val navigation = Navigator(gyro, Constants.START_POSE)
+    val navigation = Navigator(gyro, Constants.START_POSE, trackingMode = if(Constants.NAVIGATION_CORRECTION) TrackingMode.Fancy else if (Constants.DUMB_NAVIGATION) TrackingMode.DumbBoth else TrackingMode.Fast)
 
     val controller = KXboxController(0)
 
@@ -41,25 +42,29 @@ object RobotContainer {
         addOption("RocketLeague", RocketLeague)
         SmartDashboard.putData("control system", this)
     }
-    val controlScheme = schemaChooser.selected!!.apply {
-        INTAKE.whileActiveOnce(Intake)
+    val controlScheme = DefaultControls.apply {
+        INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
         SHOOT.whileActiveOnce(Shoot)
         FORCE_SHOT.whileActiveOnce(ForceShoot)
-        EJECT.whileActiveOnce(Eject)
-//        FLUSH.whileActiveOnce(Intake)
-        LOCK_TURRET.toggleWhenActive(LockTurret)
-        CLIMB_MODE.toggleWhenActive(Climb)
+//        EJECT.whileActiveOnce(Eject)
+        FLUSH.whileActiveOnce(Flush)
+        LOCK_TURRET.toggleWhenActive(FreezeTurret)
+//        CLIMB_MODE.toggleWhenActive(Climb)
         EMOTE.whileActiveOnce(Emote)
+        FLYWHEEL_INCREASE.whenActive {
+            Shooter.shooterMult += .01
+            emptySet<Subsystem>()
+        }
+        FLYWHEEL_DECREASE.whenActive {
+            Shooter.shooterMult -= .01
+            emptySet<Subsystem>()
+        }
     }
 
-    val autoChooser = SendableChooser<KTrajectory>().apply {
-        val options = TrajectoryManager.routines
-        if (options == null) {
-            Debug.log("Auto Chooser", "no auto paths found")
-        } else {
-            for (path in TrajectoryManager.routines!!) 1+1
-//                addOption(path, KTrajectory.load(path))
-        }
+    val autoChooser = SendableChooser<String>().apply {
+//        val options = TrajectoryManager.routines
+//        for (path in options) addOption(path, path)
+        setDefaultOption("Default", "Default")
         SmartDashboard.putData("auto", this)
     }
 // QUOTE: I dont need a christmas tree, i need a robot. -Cherith

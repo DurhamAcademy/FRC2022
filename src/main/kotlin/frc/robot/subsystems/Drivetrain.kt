@@ -4,6 +4,7 @@ import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.Nat
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.LinearQuadraticRegulator
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.estimator.KalmanFilter
 import edu.wpi.first.math.geometry.Pose2d
@@ -27,6 +28,7 @@ import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.milli
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
+import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
@@ -41,27 +43,31 @@ import frc.robot.commands.drive.Drive
  */
 object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     // motors
-    val leftMaster = KSparkMax(10).apply {
+    val leftMaster = KSparkMax(12).apply {
         identifier = "leftMaster"
         reversed = true
+        brakeMode = true
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
-    val rightMaster  = KSparkMax(12).apply {
+    val rightMaster  = KSparkMax(13).apply {
         identifier = "rightMaster"
         reversed = false
+        brakeMode = true
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
-    private val leftFollower  = KSparkMax(11).apply {
+    private val leftFollower  = KSparkMax(15).apply {
         identifier = "leftFollow"
         reversed = false
+        brakeMode = true
         currentLimit = 40
         follow(leftMaster)
     }
-    private val rightFollower = KSparkMax(13).apply {
+    private val rightFollower = KSparkMax(10).apply {
         identifier = "rightFollow"
         currentLimit = 40
+        brakeMode = true
         reversed = false
         follow(rightMaster)
     }
@@ -85,7 +91,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     private var polarCoordinates
         get() = RobotContainer.navigation.pose.polar(Constants.HUB_POSITION)
         set(value) {
-            pose = Pose2d(value.cartesian(Constants.HUB_POSITION).translation, RobotContainer.navigation.heading)
+            pose = Pose2d(value.cartesian(Constants.HUB_POSITION).translation, RobotContainer.navigation.heading.w)
         }
     val polarSpeeds
         get() = chassisSpeeds.polar(RobotContainer.navigation.pose.polar(Constants.HUB_POSITION))
@@ -104,7 +110,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
                 brakeMode = true
                 gearRatio = Constants.DRIVE_GEAR_RATIO
                 radius = Constants.WHEEL_RADIUS
-                currentLimit = 40
+//                currentLimit = 40
 
                 kP = Constants.DRIVE_P
                 kI = Constants.DRIVE_I
@@ -157,6 +163,13 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         }
     }
 
+    private val anglePid = PIDController(0.5, 0.0, 0.0)
+    fun fieldOrientedDrive(speed: LinearVelocity, direction: Angle) { // ignore this: I got bored on a flight
+        val dTheta = RobotContainer.navigation.heading - direction + 90.degrees // fixme
+        val vx = dTheta.cos
+        drive(ChassisSpeeds(vx, 1.0, anglePid.calculate(dTheta.radians)))
+    }
+
     fun stop() {
         leftMaster.stop()
         rightMaster.stop()
@@ -166,12 +179,13 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
-//        debugDashboard()
+        debugDashboard()
         RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
-        if(Constants.NAVIGATION_CORRECTION && Turret.targetVisible)  {  // TODO: test
-            val distance = Shooter.targetDistance!!
-            val angle = Turret.visionOffset!! + Turret.fieldRelativeAngle + 180.degrees
-            polarCoordinates = PolarPose(distance, angle, Turret.visionOffset!!)
+        if(Constants.NAVIGATION_CORRECTION || Constants.DUMB_NAVIGATION)  {
+            val distance = Turret.targetDistance ?: return
+            val offset = Turret.visionOffset ?: return
+            val angle = offset + Turret.fieldRelativeAngle + 180.degrees
+            polarCoordinates = PolarPose(distance, angle, offset)
         }
     }
 
@@ -200,7 +214,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     fun betterDrivetrainSystem(): LinearSystem<N2, N2, N2> {  // todo: implement these into the builtin
 //        return LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka)
         val kVAngular = angularFeedforward.kv// * 2.0 / Constants.TRACK_WIDTH
-        val kAAngular = angularFeedforward.ka //* 2.0 / Constants.TRACK_WIDTH
+        val kAAngular = angularFeedforward.ka// * 2.0 / Constants.TRACK_WIDTH
         val A1: Double = 0.5 * -(leftFF.kv / leftFF.ka + kVAngular / kAAngular)
         val A2: Double = 0.5 * -(rightFF.kv / rightFF.ka - kVAngular / kAAngular)
         val B1: Double = 0.5 * (1.0 / leftFF.ka + 1.0 / kAAngular)

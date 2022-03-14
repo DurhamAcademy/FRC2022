@@ -1,18 +1,26 @@
 package frc.robot.subsystems
 
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.filter.Debouncer
+import edu.wpi.first.math.filter.Debouncer.DebounceType
 import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
+import frc.kyberlib.math.randomizer
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.motorcontrol.KMotorController
-import frc.kyberlib.motorcontrol.KSimulatedESC
+import frc.kyberlib.motorcontrol.rev.KSparkMax
+import frc.kyberlib.motorcontrol.servo.KLinearServo
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
 import frc.robot.RobotContainer
-import frc.robot.subsystems.Turret.targetVisible
+import frc.robot.commands.shooter.Shoot
+import kotlin.math.acos
+import kotlin.math.cos
+import kotlin.math.sqrt
 
 
 /**
@@ -20,60 +28,90 @@ import frc.robot.subsystems.Turret.targetVisible
  */
 object Shooter : SubsystemBase(), Debug, Simulatable {
     var status = ShooterStatus.IDLE
+//    override val priority: DebugFilter = DebugFilter.Max
+    private val ff = SimpleMotorFeedforward(0.99858 / TAU, 0.19517 / TAU, 0.0256 / TAU)
 
     // main motor attached to the flywheel
-    val flywheelMaster = KSimulatedESC(31).apply {
+    val flywheel = KSparkMax(31).apply {
         identifier = "flywheel"
-        radius = Constants.FLYWHEEL_RADIUS
         motorType = DCMotor.getNEO(2)
-        kP = 0.0002
-
-        val system = flywheelSystem(Constants.FLYWHEEL_MOMENT_OF_INERTIA)
-        val loop = KMotorController.StateSpace.systemLoop(system, 3.0, 0.01, 3.0)
-        setupSim(system)
-        if(Constants.doStateSpace)
-            stateSpaceControl(loop)
+        addFeedforward(ff)
+        kP = 0.258 / TAU
+        currentLimit = 50
+        if(Game.sim) setupSim(ff)
     }
-//    val flywheelControl = Flywheel(flywheelMaster, Constants.FLYWHEEL_MOMENT_OF_INERTIA, 0.02)
+
+    private val readyDebouncer = Debouncer(0.2, DebounceType.kBoth)
+    private val shortReady
+        get() = hood.atSetpoint && flywheel.velocity < Constants.SHOOTER_VELOCITY_TOLERANCE && flywheel.velocitySetpoint > 1.radiansPerSecond
+    val ready: Boolean
+        get() = readyDebouncer.calculate(shortReady)
+    val stopped
+        get() = flywheel.percent == 0.0
+
+//    var outputVelocity
+//        get() = flywheel.velocity.toTangentialVelocity(Constants.BALL_DIAMETER - Constants.SHOOTER_COMPRESSION)
+//        set(value) {
+//            flywheel.velocity = value.toAngularVelocity(Constants.BALL_DIAMETER - Constants.SHOOTER_COMPRESSION)
+//        }
+//    var timeOfFlight = 1.seconds
+//
+    var shooterMult = 1.0
+    var targetVelocity
+        get() = flywheel.velocitySetpoint
+        set(value) { flywheel.velocity = value * shooterMult}
+
+
     // additional motors that copy the main
-    private val flywheel2 = KSimulatedESC(32).apply {
+    private val flywheel2 = KSparkMax(32).apply {
         identifier = "flywheel2"
-        follow(flywheelMaster)
+        reversed = true
+        currentLimit = 50
+        follow(flywheel)
     }
 
     // Servo that sets the hood angle
-    val hood = KSimulatedESC(1).apply {
-        identifier = "hood"
-    }
+    private val hood = KLinearServo(8, 100, 18.0.millimetersPerSecond)
+    private val hood2 = KLinearServo(9, 100, 18.0.millimetersPerSecond)
 
-    var hoodAngle: Angle
+    var hoodDistance: Length
         get() = hood.position
         set(value) {
             hood.position = value
+            hood2.position = value
         }
 
-    // how far from the center of the hub the robot is (based on limelight)
-    private val distanceFilter = LinearFilter.movingAverage(8)
-    val targetDistance: Length? 
-        get() = if (Game.sim) RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
-                else if (!targetVisible) null
-                else 2.feet + distanceFilter.calculate((
-                (Constants.UPPER_HUB_HEIGHT - 1.inches - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
+    //https://www.mathsisfun.com/algebra/trig-cosine-law.html
+    // c2 = a2 + b2 − 2ab cos(C)
+    private const val A = 6.085  // flywheel axis to servo axis
+    private const val A2 = A*A
+    private const val B = 10.016  // flywheel axis to servo end
+    private const val B2 = B*B
+    private const val D = 2 * A * B
+    private val theta = 24.5476.degrees.radians
+    private val startLength = 6.61.inches
+    var hoodAngle: Angle
+        get() = acos((-hoodDistance.inches * hoodDistance.inches + A2 + B2)/D).radians
+        set(value) {
+            hoodDistance = sqrt(A2 + B2 - D * cos(theta + value.radians)).inches - startLength
+        }
 
-    // motor controlling top roller speed
-    val topShooter = KSimulatedESC(33).apply {
-        identifier = "top1"
-        kP = 10.0
-        kD = 2.0
-        motorType = DCMotor.getNeo550(2)
-        val system = flywheelSystem(0.00001)
-        if (Constants.doStateSpace) stateSpaceControl(system, 3.0, 0.01, 8.0)
-        setupSim(system)
+    fun update() {
+        val dis = Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+        flywheelUpdate(dis)
+        hoodUpdate(dis)
     }
-    private val topFollower = KSimulatedESC(34).apply {
-        identifier = "top2"
-        follow(topShooter)
-        reversed = true
+    private fun hoodUpdate(dis: Length) {
+        hoodDistance = Constants.HOODANGLE_INTERPOLATOR.calculate(dis.meters).millimeters
+    }
+    private fun flywheelUpdate(dis: Length) {
+        targetVelocity = Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
+    }
+
+    fun stop() {
+        targetVelocity = 0.rpm
+        flywheel.stop()
+        status = ShooterStatus.IDLE
     }
 
     init {
@@ -82,20 +120,20 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     override fun periodic() {
         debugDashboard()
+        Turret.targetDistance?.let { hoodUpdate(it) }
     }
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
-            "flywheel" to flywheelMaster,
-            "top Shooter" to topShooter,
+            "flywheel" to flywheel,
             "hood" to hood,
-            "distance" to targetDistance
+            "distance" to Turret.targetDistance
         )
     }
 
     override fun simUpdate(dt: Time) {
 //        flywheelControl.simUpdate(dt)
-        hood.simPosition = hood.positionSetpoint
+//        hood.simPosition = hood.positionSetpoint
 //        topShooter.simVelocity = topShooter.velocitySetpoint
     }
 }

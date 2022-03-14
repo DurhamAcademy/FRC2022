@@ -9,15 +9,17 @@ import frc.kyberlib.math.units.*
 typealias LinearVelocity = KUnit<Div<Meter, Second>>
 
 // number -> linearVelocity
-val Number.metersPerSecond get() = this.meters / 1.seconds
-val Number.feetPerSecond get() = this.feet / 1.seconds
-val Number.milesPerHour get() = this.miles / 1.hours
+val Number.metersPerSecond inline get() = this.meters / 1.seconds
+val Number.millimetersPerSecond inline get() = this.millimeters / 1.seconds
+val Number.feetPerSecond inline get() = this.feet / 1.seconds
+val Number.milesPerHour inline get() = this.miles / 1.hours
 
 // LinearVelocity -> double
-val LinearVelocity.metersPerSecond get() = value
-val LinearVelocity.feetPerSecond get() = value / LengthConversions.feetToMeters
-val LinearVelocity.milesPerHour get() = value / (LengthConversions.milesToFeet * LengthConversions.feetToMeters / (TimeConversions.hoursToMinutes * TimeConversions.minutesToSeconds))
-fun LinearVelocity.toAngularVelocity(radius: Length) = (value / radius.value).radiansPerSecond
+val LinearVelocity.metersPerSecond inline get() = value
+val LinearVelocity.millimetersPerSecond inline get() = value * 1000.0
+val LinearVelocity.feetPerSecond inline get() = value / LengthConversions.feetToMeters
+val LinearVelocity.milesPerHour inline get() = value / (LengthConversions.milesToFeet * LengthConversions.feetToMeters / (TimeConversions.hoursToMinutes * TimeConversions.minutesToSeconds))
+fun LinearVelocity.toAngularVelocity(radius: Length) = AngularVelocity(value / radius.value)
 
 operator fun LinearVelocity.div(radius: Length): AngularVelocity = this.toAngularVelocity(radius)
 operator fun LinearVelocity.times(time: Time): Length = Length(this.metersPerSecond * time.seconds)

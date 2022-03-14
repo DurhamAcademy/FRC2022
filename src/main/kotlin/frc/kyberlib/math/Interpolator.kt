@@ -1,6 +1,7 @@
 package frc.kyberlib.math
 
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.LogMode
 
 /**
@@ -8,19 +9,20 @@ import frc.kyberlib.command.LogMode
  */
 class Interpolator(private val data: Map<Double, Double>) {
 
+    operator fun get(x: Double) = calculate(x)
     /**
      * Approximate the value of x using the stored Data
      * @param x the value to use
      * @return an estimated y output
      */
-    fun calculate(x: Double): Double? {
+    fun calculate(x: Double): Double {
 
         val nextHighest = getNext(x)
         val nextLowest = getPrevious(x)
 
-        if(nextHighest == null || nextLowest == null) {
-            Debug.log("Interpolator", "Caclculated value: $x is outside of range", LogMode.WARN)
-            return if (nextHighest == null) nextLowest!!.value else nextHighest.value
+        if(nextHighest == null || nextLowest == null) { // if outside range
+            Debug.log("Interpolator", "Calculated value: $x is outside of range", LogMode.WARN, DebugFilter.Low)
+            return nextHighest?.value ?: nextLowest!!.value
         }
         else if(nextHighest.value == nextLowest.value) return nextLowest.value
 

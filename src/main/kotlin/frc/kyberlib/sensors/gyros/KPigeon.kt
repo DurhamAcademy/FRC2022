@@ -2,13 +2,13 @@ package frc.kyberlib.sensors.gyros
 
 import com.ctre.phoenix.sensors.PigeonIMU
 import frc.kyberlib.command.Game
-import frc.kyberlib.math.units.extensions.KRotation
+import frc.kyberlib.math.units.extensions.Angle
 import frc.kyberlib.math.units.extensions.degrees
 
 class KPigeon(port: Int) :  KGyro {
     val internal = if (Game.real) PigeonIMU(port) else null
 
-    override var heading: KRotation = 0.degrees
+    override var heading: Angle = 0.degrees
         get() =
             if (real) internal!!.fusedHeading.degrees
             else field

@@ -1,6 +1,5 @@
 package frc.kyberlib.math.units
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
@@ -14,7 +13,7 @@ import kotlin.math.sqrt
 // Pose2d
 val Pose2d.string: String
     get() = "pose(${this.x}, ${this.y}, ${this.rotation.degrees})"
-fun Pose2d(x: Length, y:Length, rotation: Angle): Pose2d = Pose2d(x.meters, y.meters, rotation)
+fun Pose2d(x: Length, y:Length, rotation: Angle): Pose2d = Pose2d(x.meters, y.meters, rotation.w)
 val Pose2d.transform: Transform2d
     get() = this.minus(zeroPose)
 val Pose2d.debugValues: Map<String, Any?>
@@ -23,7 +22,7 @@ val Pose2d.debugValues: Map<String, Any?>
         "y (m)" to y,
         "theta (rad)" to rotation.radians
     )
-val zeroPose = Pose2d(0.0, 0.0, 0.degrees)
+val zeroPose = Pose2d(0.0, 0.0, 0.degrees.w)
 
 // Translation2d
 val Translation2d.string: String

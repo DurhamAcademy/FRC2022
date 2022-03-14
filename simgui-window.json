@@ -6,8 +6,8 @@
       "style": "0",
       "userScale": "2",
       "width": "1440",
-      "xpos": "114",
-      "ypos": "258"
+      "xpos": "0",
+      "ypos": "23"
     }
   },
   "Window": {
@@ -32,7 +32,7 @@
       "Size": "592,322"
     },
     "###/SmartDashboard/climb sim": {
-      "Collapsed": "0",
+      "Collapsed": "1",
       "Pos": "7,141",
       "Size": "513,557"
     },
@@ -52,13 +52,13 @@
       "Size": "235,169"
     },
     "###Joysticks": {
-      "Collapsed": "0",
-      "Pos": "334,19",
-      "Size": "796,240"
+      "Collapsed": "1",
+      "Pos": "322,48",
+      "Size": "436,147"
     },
     "###Keyboard 1 Settings": {
       "Collapsed": "1",
-      "Pos": "337,38",
+      "Pos": "325,19",
       "Size": "300,560"
     },
     "###NetworkTables": {
@@ -102,9 +102,9 @@
       "Size": "169,238"
     },
     "###System Joysticks": {
-      "Collapsed": "0",
+      "Collapsed": "1",
       "Pos": "115,31",
-      "Size": "192,218"
+      "Size": "111,152"
     },
     "###Timing": {
       "Collapsed": "1",

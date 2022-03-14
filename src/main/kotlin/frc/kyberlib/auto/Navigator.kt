@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.auto.trajectory.KTrajectoryConfig
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.Game
 import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.milli
@@ -38,7 +39,7 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose, private v
     /**
      * A probability calculator to guess where the robot is from odometer and vision updates
      */
-    private val poseEstimator = DifferentialDrivePoseEstimator(gyro.heading, startPose,
+    private val poseEstimator = DifferentialDrivePoseEstimator(gyro.heading.w, startPose,
         MatBuilder(N5.instance, N1.instance).fill(0.02, 0.02, 0.01, 0.02, 0.02),
         MatBuilder(N3.instance, N1.instance).fill(0.02, 0.01, 0.01),
         MatBuilder(N3.instance, N1.instance).fill(0.1, 0.1, 0.01))
@@ -64,22 +65,22 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose, private v
     var pose: Pose2d  // the location and direction of the robot
         get() = if(!useOdometry) poseEstimator.estimatedPosition else odometry.poseMeters
         set(value) {
-            if(!useOdometry) poseEstimator.resetPosition(value, heading)
-            else odometry.resetPosition(value, heading)
+            if(!useOdometry) poseEstimator.resetPosition(value, heading.w)
+            else odometry.resetPosition(value, heading.w)
             KField2d.robotPose = value
         }
     val position: Translation2d  // the estimated location of the robot
         get() = pose.translation
     private val odometry = DifferentialDriveOdometry(Constants.START_POSE.rotation).apply {
-        resetPosition(startPose, heading)
+        resetPosition(startPose, heading.w)
     }
 
     /**
      * Update position based on estimated motion
      */
     fun update(speeds: DifferentialDriveWheelSpeeds, leftPosition: Length, rightPosition: Length) {  // estimate motion
-        if (!useOdometry) poseEstimator.update(heading, speeds, leftPosition.meters, rightPosition.meters)
-        else odometry.update(gyro.heading, leftPosition.meters, rightPosition.meters)
+        if (!useOdometry) poseEstimator.update(heading.w, speeds, leftPosition.meters, rightPosition.meters)
+        else odometry.update(gyro.heading.w, leftPosition.meters, rightPosition.meters)
     }
     /**
      * Update position based on a different position guess
@@ -91,7 +92,7 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose, private v
         SmartDashboard.putString("global pose", globalPosition.string)
         when(trackingMode) {
             TrackingMode.Fancy -> poseEstimator.addVisionMeasurement(globalPosition, time.milliseconds)
-            TrackingMode.DumbBoth -> odometry.resetPosition(globalPosition, heading)
+            TrackingMode.DumbBoth -> if(Game.OPERATED) odometry.resetPosition(globalPosition, heading.w)
             else -> log("Global position updates not configured", LogMode.WARN)
         }
     }

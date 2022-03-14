@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.Time
 import frc.kyberlib.math.units.extensions.degrees
@@ -19,7 +19,6 @@ import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.kyberlib.simulation.Simulatable
-import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
 import kotlin.math.absoluteValue
 
@@ -27,20 +26,18 @@ import kotlin.math.absoluteValue
  * Mechanism representing the actuators for climbing
  */
 object Climber : SubsystemBase(), Debug, Simulatable {
-    override val priority: DebugLevel = DebugLevel.LowPriority
     var status = ClimberStatus.IDLE
 
-    /**left climb arm pneumatic (lifts the climb arms)*/
-    private val leftStatic = KSolenoid(0, fake = true).apply {
+    // pneumatics that lift the climb arms
+    private val leftStatic = KSolenoid(0, 1, fake = true).apply {
         identifier = "left static"
     }
-    /**right climb arm pneumatic (lifts the climb arms)*/
-    private val rightStatic = KSolenoid(1, fake = true).apply {
+    private val rightStatic = KSolenoid(6, 7, fake = true).apply {
         identifier = "right static"
     }
 
-    /**Arm feed foreward.*/
-    private val armFF = ArmFeedforward(3.0, 2.0, 5.0, 8.0)
+    private val armFF = ArmFeedforward(3.0, 2.0, 5.0, 8.0)  // this is completely bs
+
     val leftExtendable = KSimulatedESC(40).apply {
         identifier = "leftArm"
         gearRatio = Constants.EXTENDABLE_ROTATION_GEAR_RATIO
@@ -58,7 +55,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         minPosition = 0.degrees
         maxPosition = 90.degrees
         resetPosition(22.5.degrees)
-        if(Game.sim) setupSim(armFF)
+//        if(Game.sim) setupSim(armFF)
         voltage = 0.0
     }
     val rightExtendable = KSimulatedESC(41).apply {
@@ -86,7 +83,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
         motorType = DCMotor.getNEO(1)
-        if(Game.sim) setupSim(winchFF)
+//        if(Game.sim) setupSim(winchFF)
         }
     /** (right) winches that pull the robot up */
     val rightWinch = KSimulatedESC(43).apply {
@@ -151,7 +148,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     init {
         if (Game.sim) {
             SmartDashboard.putData("climb sim", sim)
-            Simulation.instance.include(this)
+//            Simulation.instance.include(this)
         }
     }
     override fun simUpdate(dt: Time) {

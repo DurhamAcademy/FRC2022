@@ -3,11 +3,8 @@ package frc.robot
 import edu.wpi.first.math.geometry.Pose2d
 import frc.kyberlib.math.Interpolator
 import frc.kyberlib.math.units.MassConversions
-import frc.kyberlib.math.units.Pose2d
 import frc.kyberlib.math.units.Translation2d
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.math.units.zeroPose
-import frc.kyberlib.simulation.field.KField2d
 
 /**
  * This file holds all important constants throughout the project
@@ -23,19 +20,19 @@ object Constants {
 
     // ------ Drivetrain ------ //
     // pids
-    const val DRIVE_P = 0.5
+    const val DRIVE_P = 0.0//0.5
     const val DRIVE_I = 0.0
     const val DRIVE_D = 0.0
 
 
     // feed forwards
-    const val DRIVE_KS_R = 0.28923
-    const val DRIVE_KV_R = 2.6081
-    const val DRIVE_KA_R = 0.16727
+    const val DRIVE_KS_R = 0.17852
+    const val DRIVE_KV_R = 2.4334
+    const val DRIVE_KA_R = 0.18434
 
-    const val DRIVE_KS_L = 0.26653
-    const val DRIVE_KV_L = 2.5835
-    const val DRIVE_KA_L = 0.472
+    const val DRIVE_KS_L = 0.21143
+    const val DRIVE_KV_L = 2.422
+    const val DRIVE_KA_L = 0.64234
 
     // drivetrain setup
     const val TRACK_WIDTH = 0.72246
@@ -46,27 +43,28 @@ object Constants {
     const val DUMB_NAVIGATION = false
 
     // ------ Intake ------ //
-    const val INTAKE_PERCENT = 0.5
+    const val INTAKE_PERCENT = 0.8
 
     // ------ Shooter ------ //
-    val LIMELIGHT_HEIGHT: Length = 23.216.inches
-    val LIMELIGHT_ANGLE: Angle = 50.degrees
+    val LIMELIGHT_HEIGHT: Length = 25.inches
+    val LIMELIGHT_ANGLE: Angle = 40.degrees
+
+    val SHOOTER_COMPRESSION = 1.25.inches
 
     // TODO: test shots
     val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf(
-        100.inches.meters to 3.0,
-        200.inches.meters to 5.0,
-        300.inches.meters to 7.0
-    ))
-    val TOPWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf(
-        100.inches.meters to 1.0,
-        200.inches.meters to 2.0,
-        300.inches.meters to 3.0
+        1.98 to 1300.0,
+        2.9 to 1425.0,
+        3.825 to 1550.0,
+        4.74 to 1600.0,
+        5.67 to 2000.0
     ))
     val HOODANGLE_INTERPOLATOR: Interpolator = Interpolator(mapOf(
-        100.inches.meters to 80.0,
-        200.inches.meters to 60.0,
-        300.inches.meters to 4.0
+        1.98 to 15.0,
+        2.9 to 38.0,
+        3.825 to 45.0,
+        4.74 to 55.0,
+        5.67 to 80.0
     ))
 
     val SHOOTER_VELOCITY_TOLERANCE = 50.rpm
@@ -75,7 +73,6 @@ object Constants {
     // ------ Turret ------ //
     val TURRET_GEAR_RATIO: Double = 10.0 * (215.0 / 18.0)  // 10 is vp and second is pulley ratio
     const val NOT_FOUND_WAIT = 0.2
-    const val LOST_WAIT = 2.0
     const val SMART_LOSS = false
 
     const val SHOOTER_AQUISITION_TIME = 0.2
@@ -86,7 +83,7 @@ object Constants {
     val HUB_POSITION = Translation2d(324.inches, 162.inches)
     val FIELD_SIZE = Translation2d(648.inches, 324.inches)
     val UPPER_HUB_HEIGHT = 8.feet + 8.inches
-    val START_POSE: Pose2d = Pose2d(8.5.meters, 1.9.meters, (-90).degrees)
+    val START_POSE: Pose2d = Pose2d(HUB_POSITION - Translation2d(3.meters, 0.meters), 0.degrees.w)//Pose2d(8.5.meters, 1.9.meters, (-90).degrees)
 
     val LOW_RUNG_HEIGHT = 4.feet + .75.inches
     val MID_RUNG_HEIGHT = 5.feet + .25.inches
@@ -101,4 +98,5 @@ object Constants {
     const val CLIMB_MOMENT_OF_INERTIA = 0.10571
     const val TOP_ROLLER_MOMENT_OF_INERTIA = 0.00001
     const val FLYWHEEL_MOMENT_OF_INERTIA = 0.00064 // kg * m^2
+    val BALL_DIAMETER = 9.5.inches
 }

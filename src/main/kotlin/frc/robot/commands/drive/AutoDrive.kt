@@ -11,11 +11,10 @@ import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.pathing.Pathfinder
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.string
 import frc.kyberlib.simulation.field.KField2d
-import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Debug
-
+import frc.kyberlib.math.units.extensions.w
 
 
 /**
@@ -32,7 +31,7 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
         }
     }
     val simple = true
-    constructor(position: Translation2d) : this(Pose2d(position, 0.degrees)) {
+    constructor(position: Translation2d) : this(Pose2d(position, 0.degrees.w)) {
         rotationInvariant = true
     }
 
@@ -67,7 +66,7 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
     override fun execute() {
         val targetPose = trajectory.sample(timer.get())
         val targetSpeed = calculator.calculate(Navigator.instance!!.pose, targetPose)
-        Debug.log("AutoDrive", "going to $targetPose, @ targetSpeed m/s", level=DebugLevel.LowPriority)
+        Debug.log("AutoDrive", "going to $targetPose, @ targetSpeed m/s", level=DebugFilter.Low)
 //        println("pose: ${Navigator.instance!!.pose.string}, expected: ${trajectory.sample(timer.get()).poseMeters.string}")
         Drivetrain.drive(targetSpeed)
 //        trajectory = PathPlanner.updateTrajectory(trajectory) - this should be necesary until moving obstabcles

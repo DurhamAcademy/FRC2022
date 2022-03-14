@@ -6,6 +6,7 @@ import frc.kyberlib.math.units.LengthConversions.inchesToFeet
 import frc.kyberlib.math.units.LengthConversions.milesToFeet
 import frc.kyberlib.math.units.Meter
 import frc.kyberlib.math.units.centi
+import frc.kyberlib.math.units.milli
 
 
 /**
@@ -13,24 +14,19 @@ import frc.kyberlib.math.units.centi
  * Should not be created directly. Use the number extensions instead.
  */
 typealias Length = KUnit<Meter>
-
-internal fun Distance(value: Double): Length {
-    val unit = Length(value)
-    unit.units = "Meters"
-    return unit
-}
-
 // Number -> length
-val Number.meters get() = Distance(this.toDouble())
-val Number.centimeters get() = Distance(this.centi)
-val Number.miles get() = Distance(this.toDouble() * milesToFeet * feetToMeters)
-val Number.feet get() = Distance(this.toDouble() * feetToMeters)
-val Number.inches get() = Distance(this.toDouble() * inchesToFeet * feetToMeters)
+val Number.meters inline get() = Length(this.toDouble())
+val Number.centimeters inline get() = Length(this.centi)
+val Number.millimeters inline get() = Length(this.toDouble() / 1000.0)
+val Number.miles inline get() = Length(this.toDouble() * milesToFeet * feetToMeters)
+val Number.feet inline get() = Length(this.toDouble() * feetToMeters)
+val Number.inches inline get() = Length(this.toDouble() * inchesToFeet * feetToMeters)
 
 // length -> Number
-val Length.meters get() = value
-val Length.centimeters get() = value / 1.centi
-val Length.miles get() = value / feetToMeters / milesToFeet
-val Length.feet get() = value / feetToMeters
-val Length.inches get() = value / (inchesToFeet * feetToMeters)
+val Length.meters inline get() = value
+val Length.centimeters inline get() = value / 1.centi
+val Length.millimeters inline get() = value * 1000.0
+val Length.miles inline get() = value / feetToMeters / milesToFeet
+val Length.feet inline get() = value / feetToMeters
+val Length.inches inline get() = value / (inchesToFeet * feetToMeters)
 fun Length.toAngle(radius: Length) = (value / radius.value).radians

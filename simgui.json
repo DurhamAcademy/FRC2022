@@ -63,6 +63,7 @@
         "Robot": {
           "arrows": false
         },
+        "image": "/Users/22staples/FRC2022/Rapid React Field.png",
         "traj": {
           "arrowSize": 0,
           "arrows": false,
@@ -88,6 +89,9 @@
   },
   "NetworkTables": {
     "LiveWindow": {
+      "Turret": {
+        "open": true
+      },
       "Ungrouped": {
         "Solenoid[0,0]": {
           "open": true
@@ -97,7 +101,8 @@
         "Climber": {
           "open": true
         }
-      }
+      },
+      "open": true
     },
     "SmartDashboard": {
       "Climber": {
@@ -109,11 +114,7 @@
         }
       },
       "Drivetrain": {
-        "open": true,
-        "rightMaster": {
-          "open": true
-        },
-        "speed": {
+        "pose": {
           "open": true
         }
       },
@@ -140,6 +141,7 @@
         }
       },
       "Turret": {
+        "open": true,
         "turret": {
           "open": true
         }
@@ -272,7 +274,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Turret/turret error (degrees)"
+              "id": "NT:/SmartDashboard//Turret/turret error"
             }
           ]
         },
@@ -296,7 +298,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Turret/turret/Angular Velocity (Radians  per  Seconds)"
+              "id": "NT:/SmartDashboard//Turret/turret/Angular Velocity"
             },
             {
               "color": [
@@ -305,7 +307,7 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Turret/turret/setpoint (degrees)"
+              "id": "NT:/SmartDashboard//Turret/turret/Angular Position"
             },
             {
               "color": [
@@ -314,7 +316,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Turret/turret/Angular Position (degrees)"
+              "id": "NT:/SmartDashboard//Turret/turret/setpoint"
             }
           ]
         }
@@ -326,7 +328,7 @@
     "Plot <2>": {
       "plots": [
         {
-          "height": -37,
+          "height": -29,
           "series": [
             {
               "color": [
@@ -335,7 +337,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Shooter/hood/Angular Position (degrees)"
+              "id": "NT:/SmartDashboard//Shooter/flywheel/Angular Velocity"
             },
             {
               "color": [
@@ -344,16 +346,21 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Shooter/flywheel/Angular Velocity (Radians  per  Seconds)"
-            },
+              "id": "NT:/SmartDashboard//Shooter/flywheel/setpoint"
+            }
+          ]
+        },
+        {
+          "height": -29,
+          "series": [
             {
               "color": [
-                0.3333333432674408,
-                0.658823549747467,
-                0.4078431725502014,
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Shooter/top Shooter/Angular Velocity (Radians  per  Seconds)"
+              "id": "NT:/SmartDashboard//Shooter/hood/position"
             }
           ]
         }

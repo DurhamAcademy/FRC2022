@@ -7,7 +7,7 @@ import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.math.trajectory.TrajectoryGenerator
 import edu.wpi.first.math.trajectory.TrajectoryUtil
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugLevel
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.LogMode
 import java.io.File
 
@@ -28,16 +28,7 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
          * Load a trajectory from a file
          * @throws NoSuchFileException if it is an invalid trajectory
          */
-        fun load(name: String): KTrajectory {
-            val wpiTrajectory: Trajectory = if (TrajectoryManager.paths!!.contains(name)) TrajectoryManager.getPath(name)
-                                else if (TrajectoryManager.routines!!.contains(name)) TrajectoryManager.getAuto(name)
-                                else {
-                                    Debug.log("KTrajectory", "Couldn't load trajectory $name.", level = DebugLevel.HighPriority, mode = LogMode.WARN)
-                                    Trajectory()
-                                }
-//            val config = KTrajectoryConfig.load(configFile)
-            return KTrajectory(name, wpiTrajectory)
-        }
+        fun load(name: String): KTrajectory = TrajectoryManager[name]!!
 
         private fun generateTrajectory(startPose2d: Pose2d, waypoints: MutableList<Translation2d>, newConfig: KTrajectoryConfig?): Trajectory {
             val config = putConfig(newConfig)
@@ -86,7 +77,7 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
      * @param debug print the process
      */
     fun save(debug: Boolean = false) {
-        val trajFolder = File(TrajectoryManager.TRAJECTORY_PATH)
+        val trajFolder = TrajectoryManager.TRAJECTORY_PATH.toFile()
         if (!trajFolder.exists()) {
             println("Main trajectory directory does not exist, creating...")
             trajFolder.mkdir()
