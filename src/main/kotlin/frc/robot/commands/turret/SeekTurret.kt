@@ -1,14 +1,9 @@
 package frc.robot.commands.turret
 
 import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
-import frc.robot.subsystems.Shooter
-import frc.robot.subsystems.TURRET_STATUS
+import frc.robot.subsystems.TurretStatus
 import frc.robot.subsystems.Turret
-import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.k
 import frc.kyberlib.math.units.towards
 import frc.robot.Constants
@@ -28,7 +23,7 @@ object SeekTurret : CommandBase() {
      * Update status to indicated turret is lost
      */
     override fun initialize() {
-        Turret.status = TURRET_STATUS.LOST
+        Turret.status = TurretStatus.LOST
         timer.reset()
         timer.start()
     }
@@ -78,7 +73,7 @@ object SeekTurret : CommandBase() {
     }
 
     override fun end(interrupted: Boolean) {
-        if (!interrupted) Turret.status = TURRET_STATUS.ADJUSTING
+        if (!interrupted) Turret.status = TurretStatus.ADJUSTING
         Turret.turret.stop()
     }
 }

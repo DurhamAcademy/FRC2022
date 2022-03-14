@@ -1,20 +1,22 @@
 package frc.robot.commands.intake
 
 import edu.wpi.first.wpilibj2.command.CommandBase
+import frc.kyberlib.math.units.extensions.rotationsPerSecond
 import frc.robot.subsystems.Conveyor
 import frc.robot.subsystems.Shooter
 
 object Eject : CommandBase() {
-    /// TODO: 2/25/22 add Eject Code
+    init {
+        addRequirements(Shooter)
+    }
     override fun initialize() {
-        addRequirements(Shooter, Conveyor)
-        beforeStarting(LoadEject)
+        Shooter.targetVelocity = 7.rotationsPerSecond
     }
 
+
     override fun execute() {
-        Shooter.updateVoltage()
-        Conveyor.feeder.voltage = 0.9
-        Conveyor.indexer.voltage = 0.35
+        Shooter.update()
+        if(Shooter.ready) Feed.schedule()
     }
 
     override fun end(interrupted: Boolean) {

@@ -9,6 +9,12 @@ import frc.robot.commands.intake.Idle
 
 
 /**
+ * State of the hopper. Used for LEDs and other dependencies
+ */
+enum class ConveyorStatus {
+    EMPTY, SINGLE_GOOD, FULL_GOOD, BAD, FEEDING, IDLE, OFF
+}
+/**
  * Controls all aspects of the hopper.
  * Waiting for design to be finalized before code is added
  */
@@ -32,8 +38,8 @@ object Conveyor : SubsystemBase(), Debug {
 
     @Suppress("unused")
     fun off() {
-        status = CONVEYOR_STATUS.OFF
-        conveyor.velocity = 0.rpm
+        status = ConveyorStatus.OFF
+        conveyor.stop()
     }
     init {
         defaultCommand = Idle

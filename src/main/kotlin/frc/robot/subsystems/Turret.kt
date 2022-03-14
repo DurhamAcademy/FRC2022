@@ -14,7 +14,6 @@ import frc.kyberlib.command.Game
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.randomizer
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.math.units.string
 import frc.kyberlib.math.units.towards
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KMotorController.StateSpace.systemLoop
@@ -25,15 +24,19 @@ import frc.robot.RobotContainer
 import frc.robot.commands.turret.SeekTurret
 import org.photonvision.targeting.PhotonPipelineResult
 import org.photonvision.targeting.PhotonTrackedTarget
-import kotlin.math.PI
-import kotlin.math.absoluteValue
 
 
+/**
+ * Status of what the turret is doing
+ */
+enum class TurretStatus {
+    LOCKED, ADJUSTING, FROZEN, NOT_FOUND, LOST
+}
 /**
  * Controls the turret
  */
 object Turret : SubsystemBase(), Debug {
-    var status = TURRET_STATUS.LOST
+    var status = TurretStatus.LOST
 
     // characterization of the turret
     private val feedforward = SimpleMotorFeedforward(0.57083, 1.2168, 0.036495)
@@ -52,8 +55,7 @@ object Turret : SubsystemBase(), Debug {
 
         val headingDiff = Differentiator()
 
-        val pid2020 = ProfiledPIDController(30.0, 2.0, 5.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
-            setTolerance(Constants.TURRET_DEADBAND.radians)
+        val pid2020 = ProfiledPIDController(30.0, 5.0, 5.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
             setIntegratorRange(-3.0, 3.0)
         }  // these constraints are not tested on real
         val oldControls = { it: KMotorController ->
@@ -104,7 +106,7 @@ object Turret : SubsystemBase(), Debug {
 //            SmartDashboard.putNumber("mov", -movementComp.degreesPerSecond)
 //            SmartDashboard.putNumber("tar", targetVelocity.degreesPerSecond)
             val v = feedforward.calculate(targetVelocity.radiansPerSecond)// + it.PID.calculate(velocityError.radiansPerSecond)
-            if (offset < Constants.TURRET_TOLERANCE) status = TURRET_STATUS.LOCKED
+            if (offset < Constants.TURRET_TOLERANCE) status = TurretStatus.LOCKED
             v
         }
 
@@ -168,7 +170,7 @@ object Turret : SubsystemBase(), Debug {
 
 
     val ready: Boolean
-        get() = turret.positionError < Constants.TURRET_TOLERANCE || status == TURRET_STATUS.LOCKED
+        get() = turret.positionError < Constants.TURRET_TOLERANCE || status == TurretStatus.LOCKED
 
     override fun periodic() {
         debugDashboard()

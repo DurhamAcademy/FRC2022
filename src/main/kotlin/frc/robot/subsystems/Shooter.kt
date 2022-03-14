@@ -24,6 +24,13 @@ import kotlin.math.sqrt
 
 
 /**
+ * Current status of the shooter mechanism
+ */
+enum class ShooterStatus {
+    IDLE, SPINUP, LOW_READY, HIGH_READY, SHOT, FORCE_SHOT
+}
+
+/**
  * Encapsulates all the things relevant to shooting the ball
  */
 object Shooter : SubsystemBase(), Debug, Simulatable {

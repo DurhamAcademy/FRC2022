@@ -22,6 +22,14 @@ import frc.kyberlib.simulation.Simulatable
 import frc.robot.Constants
 import kotlin.math.absoluteValue
 
+
+/**
+ * Modes for what the climber is doing. Useful for LEDs and other dependencies
+ */
+enum class ClimberStatus {
+    IDLE, ACTIVE, RISING, FALLING
+}
+
 /**
  * Mechanism representing the actuators for climbing
  */

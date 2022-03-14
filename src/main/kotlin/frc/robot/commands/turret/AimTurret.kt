@@ -5,15 +5,8 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
-import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.extensions.k
-import frc.kyberlib.math.units.extensions.radians
-import frc.kyberlib.math.units.towards
 import frc.robot.Constants
-import frc.robot.RobotContainer
-import frc.robot.subsystems.TURRET_STATUS
 import frc.robot.subsystems.Turret
-import kotlin.math.absoluteValue
 
 /**
  * Keeps the turret aimed at the target
