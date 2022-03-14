@@ -22,6 +22,7 @@ import frc.kyberlib.simulation.Simulatable
 import frc.robot.Constants
 import kotlin.math.absoluteValue
 
+
 /**
  * Modes for what the climber is doing. Useful for LEDs and other dependencies
  */
@@ -44,6 +45,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     }
 
     private val armFF = ArmFeedforward(3.0, 2.0, 5.0, 8.0)  // this is completely bs
+
     val leftExtendable = KSimulatedESC(40).apply {
         identifier = "leftArm"
         gearRatio = Constants.EXTENDABLE_ROTATION_GEAR_RATIO
@@ -77,8 +79,9 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         resetPosition(22.5.degrees)
     }
 
-    // winches that pull the robot up
+    /** (right) winches that pull the robot up */
     private val winchFF = SimpleMotorFeedforward(1.0, 10.0, 5.0)
+    /** (left) winches that pull the robot up */
     val leftWinch = KSimulatedESC(42).apply {
         identifier = "left winch"
         radius = Constants.WINCH_RADIUS
@@ -90,6 +93,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         motorType = DCMotor.getNEO(1)
 //        if(Game.sim) setupSim(winchFF)
         }
+    /** (right) winches that pull the robot up */
     val rightWinch = KSimulatedESC(43).apply {
         identifier = "right winch"
         radius = Constants.WINCH_RADIUS
@@ -101,7 +105,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         motorType = DCMotor.getNEO(1)
     }
 
-    // public variable to get/set whether the arms are lifted
+    /** public variable to get/set whether the arms are lifted */
     var staticsLifted
         get() = leftStatic.extended
         set(value) {

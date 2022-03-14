@@ -25,8 +25,4 @@ object Intake : CommandBase() {
        Intaker.deployed = false
        Intaker.intakeMotor.stop()
     }
-
-    override fun isFinished(): Boolean {
-        return false;
-    }
 }

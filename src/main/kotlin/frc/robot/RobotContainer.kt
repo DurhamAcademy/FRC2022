@@ -9,6 +9,7 @@ import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.TrackingMode
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
+import frc.robot.commands.intake.Eject
 import frc.robot.commands.Emote
 import frc.robot.commands.intake.Flush
 import frc.robot.commands.intake.Intake
@@ -66,7 +67,7 @@ object RobotContainer {
         setDefaultOption("Default", "Default")
         SmartDashboard.putData("auto", this)
     }
-
+// QUOTE: I dont need a christmas tree, i need a robot. -Cherith
 //    val leds = KLEDStrip(0, 103).apply {
 //        val length = 103
 //        val coral = Color(255, 93, 115)

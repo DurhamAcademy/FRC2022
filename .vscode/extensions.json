@@ -1,5 +1,6 @@
 {
     "recommendations": [
+        "jgclark.vscode-todo-highlight"
         "brenek.kotlin-for-frc",
         "fwcd.kotlin",
         "mathiasfrohlich.kotlin",

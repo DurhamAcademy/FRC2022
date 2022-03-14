@@ -7,14 +7,13 @@ import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.robot.commands.intake.Idle
 
+
 /**
  * State of the hopper. Used for LEDs and other dependencies
  */
 enum class ConveyorStatus {
-    FEEDING, IDLE, EJECTING, FLUSHING,
-    EMPTY, SINGLE_GOOD, FULL_GOOD, BAD  // these aren't to be used until we have color sensors
+    EMPTY, SINGLE_GOOD, FULL_GOOD, BAD, FEEDING, IDLE, OFF
 }
-
 /**
  * Controls all aspects of the hopper.
  * Waiting for design to be finalized before code is added
@@ -37,6 +36,11 @@ object Conveyor : SubsystemBase(), Debug {
 //        currentLimit = 20
     }
 
+    @Suppress("unused")
+    fun off() {
+        status = ConveyorStatus.OFF
+        conveyor.stop()
+    }
     init {
         defaultCommand = Idle
     }
