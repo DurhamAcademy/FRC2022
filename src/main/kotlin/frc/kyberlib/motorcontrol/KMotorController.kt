@@ -22,6 +22,7 @@ import frc.kyberlib.math.sign
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
+import frc.robot.Constants
 import kotlin.math.absoluteValue
 
 typealias GearRatio = Double
@@ -55,6 +56,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     var updateRate: Time = KRobot.period.seconds  // builtin notifier system
         set(value) {
             field = value
+            PID = ProfiledPIDController(kP, kI, kD, constraints, value.seconds)
             if (field != KRobot.period.seconds) updateNotifier.startPeriodic(value.seconds)
             else updateNotifier.stop()
         }
@@ -142,7 +144,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     open var kIRange = 0.0
         set(value) {
             field = value
-            PID.setIntegratorRange(0.0, value)
+            PID.setIntegratorRange(-value, value)
         }
 
     /**
@@ -161,7 +163,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
                 ControlMode.VELOCITY -> {
                     val ff = if (linearConfigured) feedforward.calculate(linearVelocitySetpoint.metersPerSecond)///, linearVelocitySetpoint.metersPerSecond, updateRate.seconds)
                                 else feedforward.calculate(velocitySetpoint.radiansPerSecond)//, velocitySetpoint.radiansPerSecond, updateRate.seconds)
-                    val pid = PID.calculate(velocity.radiansPerSecond, velocitySetpoint.radiansPerSecond)
+                    val pid = PID.calculate(velocity.radiansPerSecond, velocitySetpoint.radiansPerSecond)  // todo: check constraints on that you want S profile on velocity control
                     ff + pid
                 }
                 ControlMode.POSITION -> {
@@ -180,12 +182,12 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         customControl = {
             when (controlMode) {
                 ControlMode.POSITION -> {
-                    val ff = feedforward.calculate(position.radians, PID.calculate(positionError.radians))
+                    val ff = feedforward.calculate(position.radians, PID.calculate(position.radians, positionSetpoint.radians))
                     ff
                 }
                 ControlMode.VELOCITY -> {
                     val ff = feedforward.calculate(position.radians, velocity.radiansPerSecond)
-                    val pid = PID.calculate(velocityError.radiansPerSecond)
+                    val pid = PID.calculate(velocity.radiansPerSecond, velocitySetpoint.radiansPerSecond)
                     ff + pid
                 }
                 else -> 0.0
@@ -202,12 +204,12 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             when (controlMode) {
                 ControlMode.POSITION -> {
                     val ff = feedforward.calculate(0.0)
-                    val pid = PID.calculate(linearPositionError.meters)
+                    val pid = PID.calculate(linearPosition.meters, linearPositionSetpoint.meters)
                     ff + pid
                 }
                 ControlMode.VELOCITY -> {
                     val ff = feedforward.calculate(linearVelocity.metersPerSecond)
-                    val pid = PID.calculate(linearVelocityError.metersPerSecond)
+                    val pid = PID.calculate(linearVelocity.metersPerSecond, linearVelocitySetpoint.metersPerSecond)
                     ff + pid
                 }
                 else -> 0.0
@@ -668,14 +670,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         return LinearSystemId.identifyDrivetrainSystem(ff.kv, ff.ka, kvAngular, kaAngular, trackWidth.meters)
     }
     /**
-     * Takes a moment of intertia and estimates the ff values that would be generated
-     */
-    fun estimateFF(momentOfInertia: Double){
-        val ka = (motorType!!.rOhms * momentOfInertia) / (gearRatio * motorType!!.KtNMPerAmp)
-        val kv = -gearRatio * gearRatio * motorType!!.KtNMPerAmp / (motorType!!.KvRadPerSecPerVolt * motorType!!.rOhms * momentOfInertia) * -ka
-        println("kv: $kv, ka: $ka")
-    }
-    /**
      * Set or retrieve the estimated torque the motor is generating
      * @throws MotorUnconfigured if you have not set motor type
      */
@@ -873,3 +867,15 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
 
 object LinearUnconfigured : Exception("You must set the wheel radius before using linear values")
 object MotorUnconfigured : Exception("You must set motor type before using linear sytems")
+
+/**
+ * Takes a moment of intertia and estimates the ff values that would be generated
+ */
+internal fun estimateFF(motorType: DCMotor, gearRatio: Double, momentOfInertia: Double){
+    val ka = (motorType.rOhms * momentOfInertia) / (gearRatio * motorType.KtNMPerAmp)
+    val kv = -gearRatio * gearRatio * motorType.KtNMPerAmp / (motorType.KvRadPerSecPerVolt * motorType.rOhms * momentOfInertia) * -ka
+    println("kv: $kv, ka: $ka")
+}
+fun main() {
+    estimateFF(DCMotor.getNeo550(1), Constants.TURRET_GEAR_RATIO, 0.123787)
+}

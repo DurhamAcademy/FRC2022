@@ -37,8 +37,6 @@ value class KUnit<T>(val value: Double) : Comparable<KUnit<T>> {
 // combining separate units
 operator fun <T : KUnitKey, U : KUnitKey> KUnit<T>.times(other: KUnit<U>): KUnit<Mul<T, U>>  = KUnit<Mul<T, U>>(value * other.value)
 operator fun <T : KUnitKey, U : KUnitKey> KUnit<T>.div(other: KUnit<U>): KUnit<Div<T, U>> = KUnit<Div<T, U>>(value / other.value)
-internal inline fun <reified R: KUnitKey> test(unit: KUnit<R>): String = R::class.java.simpleName
-
 @JvmName("stringDiv")
 inline fun <reified T : KUnitKey, reified U : KUnitKey> KUnit<Div<T, U>>.string(): String  = "$value ${T::class.java.simpleName}s per ${U::class.java.simpleName}"
 @JvmName("stringMul")
@@ -51,23 +49,21 @@ inline fun <reified T : KUnitKey, reified U : KUnitKey> KUnit<Div<T, U>>.units()
 inline fun <reified T : KUnitKey, reified U : KUnitKey> KUnit<Mul<T, U>>.units(): String  = "${T::class.java.simpleName} ${U::class.java.simpleName}s"
 inline fun <reified T: KUnitKey> KUnit<T>.units(): String = "${T::class.java.simpleName}s"
 
-object KUnitTests {
-    @JvmStatic
-    fun main(args: Array<String>) {
-        val map = mapOf<String, Any?>(
-            "position" to 5.meters,
-            "velocity" to 10.metersPerSecond
-        )
-        map.forEach{
-            println(it.value)
-            println(it.key)
-        }
-        println(45.degrees.string())
-        println(45.radiansPerSecond.units())
-        println((5.seconds * 10.seconds).units())
-        println(180.degrees.toCircumference(1.meters))
-        println(1.meters.toAngle(1.meters))
-        println(1.metersPerSecond.toAngularVelocity(1.meters))
-        println(1.radiansPerSecond)
+
+fun main(args: Array<String>) {
+    val map = mapOf<String, Any?>(
+        "position" to 5.meters,
+        "velocity" to 10.metersPerSecond
+    )
+    map.forEach{
+        println(it.value)
+        println(it.key)
     }
+    println(45.degrees.string())
+    println(45.radiansPerSecond.units())
+    println((5.seconds * 10.seconds).units())
+    println(180.degrees.toCircumference(1.meters))
+    println(1.meters.toAngle(1.meters))
+    println(1.metersPerSecond.toAngularVelocity(1.meters))
+    println(1.radiansPerSecond)
 }

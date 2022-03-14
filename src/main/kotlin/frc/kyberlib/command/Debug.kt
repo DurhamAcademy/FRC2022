@@ -25,7 +25,6 @@ enum class LogMode {
 enum class DebugFilter {
     Low, Normal, High, Max
 }
-typealias DebugLevel = DebugFilter
 /**
  * Inheritable class that grants multiple types of debugging
  */
