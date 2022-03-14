@@ -38,6 +38,15 @@ object TrajectoryManager {
         return TrajectoryUtil.fromPathweaverJson(TRAJECTORY_PATH.resolve("$name.wpilib.json"))
     }
     operator fun get(s: String) = trajectories[s]
-    internal val routines = AUTO_PATH.toFile().list()!!
-    internal val paths = TRAJECTORY_PATH.toFile().list()!!.map { it.removeSuffix(".wpilib.json") }
+    private val routines = AUTO_PATH.toFile().list()!!
+    private val paths = TRAJECTORY_PATH.toFile().list()!!.map { it.removeSuffix(".wpilib.json") }
+}
+
+// ftp://roborio-TEAM-frc.local/home/lvuser/deploy/
+
+object TrajectoryUtility {
+    fun getTrajectory(name: String): Trajectory {
+        val path = Filesystem.getDeployDirectory().toPath().resolve("$name.wpilib.json")
+        return TrajectoryUtil.fromPathweaverJson(path)
+    }
 }
