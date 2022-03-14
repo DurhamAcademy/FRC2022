@@ -1,10 +1,13 @@
-package frc.kyberlib.servo
+package frc.kyberlib.motorcontrol.servo
 
 import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.wpilibj.Servo
 import frc.kyberlib.command.Debug
 import frc.kyberlib.math.units.extensions.Length
+import frc.kyberlib.math.units.extensions.LinearVelocity
+import frc.kyberlib.math.units.extensions.metersPerSecond
 import frc.kyberlib.math.units.extensions.millimeters
+import frc.kyberlib.motorcontrol.PWMRegristry
 
 /**
  * A PWM linear actuator.
@@ -15,14 +18,18 @@ import frc.kyberlib.math.units.extensions.millimeters
  * @param minMs minimum length PWM pulse width, in ms
  * @param maxMs maximum length PWM pulse width, in ms
  */
-class KLinearActuator(
+class KLinearServo(
     port: Int,
     val length: Int,
-    travelSpeed: Double,
+    travelSpeed: LinearVelocity,
     initialPosition: Length = 0.millimeters,
     minMs: Double = 1.0,
     maxMs: Double = 2.0
 ) : Debug {
+    override val identifier: String = "Linear Servo $port"
+    init {
+        PWMRegristry[identifier] = port
+    }
 
     // the actual hardware servo being controlled
     private val servo = Servo(port).apply {
@@ -31,7 +38,7 @@ class KLinearActuator(
     }
 
     // rate limiter for estimating current actuator position
-    private val rateLimit = SlewRateLimiter(travelSpeed, initialPosition.millimeters)
+    private val rateLimit = SlewRateLimiter(travelSpeed.metersPerSecond * 1000.0, initialPosition.millimeters)
 
     /**
      * Target actuator length, in mm
