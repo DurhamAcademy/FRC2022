@@ -16,11 +16,9 @@
           "incKey": 68
         },
         {
-          "decKey": 87,
           "incKey": 83
         },
         {
-          "decKey": 69,
           "decayRate": 0.0,
           "incKey": 82,
           "keyRate": 0.009999999776482582
@@ -59,30 +57,41 @@
           "incKey": 264
         },
         {
-          "decKey": 55,
-          "incKey": 56
+          "incKey": 81
         },
         {
-          "decKey": 53,
-          "incKey": 54
+          "incKey": 80
         },
         {
           "decKey": 263,
           "incKey": 262
+        },
+        {
+          "decKey": 56,
+          "incKey": 55
         }
       ],
-      "axisCount": 5,
-      "buttonCount": 6,
+      "axisCount": 6,
+      "buttonCount": 8,
       "buttonKeys": [
         65,
         66,
         88,
         89,
-        49,
-        50,
-        -1
+        87,
+        79,
+        78,
+        77
       ],
-      "povCount": 0
+      "povConfig": [
+        {
+          "key0": 73,
+          "key180": 75,
+          "key270": 74,
+          "key90": 76
+        }
+      ],
+      "povCount": 1
     },
     {
       "axisCount": 2,
@@ -104,10 +113,6 @@
     }
   ],
   "robotJoysticks": [
-    {
-      "guid": "78696e70757401000000000000000000",
-      "useGamepad": true
-    },
     {
       "guid": "Keyboard1"
     }
