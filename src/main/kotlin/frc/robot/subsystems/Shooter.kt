@@ -7,6 +7,7 @@ import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.randomizer
 import frc.kyberlib.math.units.extensions.*
@@ -35,7 +36,8 @@ enum class ShooterStatus {
  */
 object Shooter : SubsystemBase(), Debug, Simulatable {
     var status = ShooterStatus.IDLE
-    val ff = SimpleMotorFeedforward(0.99858, 0.18517, 0.0256)
+    override val priority: DebugFilter = DebugFilter.Max
+    val ff = SimpleMotorFeedforward(0.99858 / TAU, 0.19517 / TAU, 0.0256 / TAU)
 
     // main motor attached to the flywheel
     val flywheelMaster = KSparkMax(31).apply {
@@ -43,7 +45,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 //        radius = Constants.FLYWHEEL_RADIUS
         motorType = DCMotor.getNEO(2)
         addFeedforward(ff)
-        kP = 0.1058
+        kP = 0.258 / TAU
         currentLimit = 50
     }
 
@@ -56,7 +58,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 //
     var targetVelocity
         get() = flywheelMaster.velocitySetpoint
-        set(value) { flywheelMaster.velocity = targetVelocity}
+        set(value) { flywheelMaster.velocity = value}
 
 
     // additional motors that copy the main
@@ -68,10 +70,10 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     // Servo that sets the hood angle
-    val hood = KLinearActuator(1, 100, 18.0)
-    private val hood2 = KLinearActuator(2, 100, 18.0)
+    val hood = KLinearActuator(8, 100, 18.0)
+    private val hood2 = KLinearActuator(9, 100, 18.0)
 
-    private var hoodDistance: Length
+    var hoodDistance: Length
         get() = hood.position
         set(value) {
             hood.position = value
@@ -85,7 +87,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     private const val B = 10.016  // flywheel axis to servo end
     private const val B2 = B*B
     private const val D = 2 * A * B
-    private const val theta = 0.0
+    private val theta = 24.5476.degrees.radians
     var hoodAngle: Angle
         get() = acos((-hoodDistance.inches * hoodDistance.inches + A2 + B2)/D).radians
         set(value) {
@@ -96,9 +98,8 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     private val distanceFilter = LinearFilter.movingAverage(8)
     val targetDistance: Length? 
         get() = if (Game.sim) RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters + randomizer.nextGaussian().inches
-                else if (!targetVisible) null
-                else 2.feet + distanceFilter.calculate((
-                (Constants.UPPER_HUB_HEIGHT - 1.inches - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + Turret.visionPitch!!).tan).inches).inches
+                else Turret.visionPitch?.let { 2.feet + distanceFilter.calculate((
+                (Constants.UPPER_HUB_HEIGHT - 1.inches - Constants.LIMELIGHT_HEIGHT) / (Constants.LIMELIGHT_ANGLE + it).tan).inches).inches}
 
     init {
         if(Game.sim) Simulation.instance.include(this)
@@ -112,7 +113,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
             "flywheel" to flywheelMaster,
-            "hood" to hoodDistance,
+            "hood" to hood,
             "distance" to targetDistance
         )
     }

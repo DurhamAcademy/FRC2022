@@ -19,7 +19,7 @@ class Interpolator(private val data: Map<Double, Double>) {
         val nextLowest = getPrevious(x)
 
         if(nextHighest == null || nextLowest == null) {
-            Debug.log("Interpolator", "Calculated value: $x is outside of range", LogMode.WARN)
+            Debug.log("Interpolator", "Calculated value: $x is outside of range", LogMode.WARN, )
             return if (nextHighest == null) nextLowest!!.value else nextHighest.value
         }
         else if(nextHighest.value == nextLowest.value) return nextLowest.value

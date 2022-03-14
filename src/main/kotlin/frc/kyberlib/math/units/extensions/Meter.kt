@@ -17,7 +17,7 @@ typealias Length = KUnit<Meter>
 // Number -> length
 val Number.meters inline get() = Length(this.toDouble())
 val Number.centimeters inline get() = Length(this.centi)
-val Number.millimeters inline get() = Length(this.milli)
+val Number.millimeters inline get() = Length(this.toDouble() / 1000.0)
 val Number.miles inline get() = Length(this.toDouble() * milesToFeet * feetToMeters)
 val Number.feet inline get() = Length(this.toDouble() * feetToMeters)
 val Number.inches inline get() = Length(this.toDouble() * inchesToFeet * feetToMeters)
@@ -25,7 +25,7 @@ val Number.inches inline get() = Length(this.toDouble() * inchesToFeet * feetToM
 // length -> Number
 val Length.meters inline get() = value
 val Length.centimeters inline get() = value / 1.centi
-val Length.millimeters inline get() = value / 1.milli
+val Length.millimeters inline get() = value * 1000.0
 val Length.miles inline get() = value / feetToMeters / milesToFeet
 val Length.feet inline get() = value / feetToMeters
 val Length.inches inline get() = value / (inchesToFeet * feetToMeters)

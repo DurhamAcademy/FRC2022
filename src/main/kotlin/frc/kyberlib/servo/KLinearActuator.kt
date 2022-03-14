@@ -2,6 +2,7 @@ package frc.kyberlib.servo
 
 import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.wpilibj.Servo
+import frc.kyberlib.command.Debug
 import frc.kyberlib.math.units.extensions.Length
 import frc.kyberlib.math.units.extensions.millimeters
 
@@ -21,7 +22,7 @@ class KLinearActuator(
     initialPosition: Length = 0.millimeters,
     minMs: Double = 1.0,
     maxMs: Double = 2.0
-) {
+) : Debug {
 
     // the actual hardware servo being controlled
     private val servo = Servo(port).apply {
@@ -54,4 +55,8 @@ class KLinearActuator(
      */
     val atSetpoint: Boolean
         get() = error.absoluteValue.millimeters < 2.0
+
+    override fun debugValues(): Map<String, Any?> {
+        return mapOf("position" to position.millimeters, "setpoint" to setpoint.millimeters)
+    }
 }

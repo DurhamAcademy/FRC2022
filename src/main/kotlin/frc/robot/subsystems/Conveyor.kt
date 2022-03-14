@@ -3,6 +3,7 @@ package frc.robot.subsystems
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
+import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.robot.commands.intake.Idle
 
@@ -37,7 +38,7 @@ object Conveyor : SubsystemBase(), Debug {
     }
 
     init {
-        defaultCommand = Idle
+//        defaultCommand = Idle
     }
 
     override fun periodic() {

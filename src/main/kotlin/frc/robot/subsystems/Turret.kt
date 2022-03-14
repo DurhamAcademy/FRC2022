@@ -50,10 +50,12 @@ object Turret : SubsystemBase(), Debug {
     private val visionFilter: LinearFilter = LinearFilter.movingAverage(10)
     private val positionFilter = MedianFilter(5)
     // actual turret motors
-    val turret = KSimulatedESC(11).apply {
+    val turret = KSparkMax(11).apply {
         identifier = "turret"
-        kP = 1.2
+        kP = .8
         kD = 0.01
+        minPosition = 0.degrees
+        maxPosition = 360.degrees
         maxAcceleration = 2.radiansPerSecond
         maxVelocity = 3.radiansPerSecond
         gearRatio = Constants.TURRET_GEAR_RATIO
@@ -65,28 +67,36 @@ object Turret : SubsystemBase(), Debug {
             setTolerance(Constants.TURRET_DEADBAND.radians)
             setIntegratorRange(-1.0, 1.0)
          }
+
+        val pid2020 = ProfiledPIDController(30.0, 2.0, 5.0, TrapezoidProfile.Constraints(2.0, 0.8)).apply {
+            setTolerance(Constants.TURRET_DEADBAND.radians)
+            setIntegratorRange(-3.0, 3.0)
+        }
         val headingDiff = Differentiator()
         customControl = {
-            val polarSpeeds = Drivetrain.polarSpeeds
-            val movementComp = -polarSpeeds.dTheta
+
+//            val polarSpeeds = Drivetrain.polarSpeeds
+//            val movementComp = -polarSpeeds.dTheta
 //            val chassisComp = headingDiff.calculate(Navigator.instance!!.heading.radians).radiansPerSecond
-            val chassisComp = polarSpeeds.dOrientation
+//            val chassisComp = polarSpeeds.dOrientation
             val setpoint = clampSafePosition(it.positionSetpoint)
-            val offset = it.position - setpoint
-            val offsetCorrection = offsetCorrector.calculate(offset.radians).radiansPerSecond
-            val targetVelocity = offsetCorrection - chassisComp - movementComp * 0.0
+//            val offset = it.position - setpoint
+            pid2020.calculate(position.rotations, setpoint.rotations)
+//            val offsetCorrection = offsetCorrector.calculate(it.position.value, setpoint.value).radiansPerSecond
+//            val targetVelocity = offsetCorrection - chassisComp - movementComp * 0.0
 //            loop.nextR = VecBuilder.fill(targetVelocity.radiansPerSecond)  // r = reference (setpoint)
 //            loop.correct(VecBuilder.fill(velocity.radiansPerSecond))  // update with empirical
 //            loop.predict(0.02)  // math
 //            val v = loop.getU(0)  // input
-            SmartDashboard.putNumber("off", offsetCorrection.degreesPerSecond)
-            SmartDashboard.putNumber("chas", -chassisComp.degreesPerSecond)
-            SmartDashboard.putNumber("mov", -movementComp.degreesPerSecond)
-            SmartDashboard.putNumber("tar", targetVelocity.degreesPerSecond)
-            val velocityError = it.velocity - targetVelocity
-            val v = feedforward.calculate(targetVelocity.radiansPerSecond)// + it.PID.calculate(velocityError.radiansPerSecond)
-            if (offset < Constants.TURRET_TOLERANCE) status = TURRET_STATUS.LOCKED
-            v.zeroIf { v.absoluteValue < 1.0  }
+//            SmartDashboard.putNumber("off", offsetCorrection.degreesPerSecond)
+//            SmartDashboard.putNumber("chas", -chassisComp.degreesPerSecond)
+//            SmartDashboard.putNumber("mov", -movementComp.degreesPerSecond)
+//            SmartDashboard.putNumber("tar", targetVelocity.degreesPerSecond)
+//            val velocityError = it.velocity - targetVelocity
+//            val v = feedforward.calculate(targetVelocity.radiansPerSecond)// + it.PID.calculate(velocityError.radiansPerSecond)
+//            if (offset < Constants.TURRET_TOLERANCE) status = TURRET_STATUS.LOCKED
+//            v
+//            v.zeroIf { v.absoluteValue < 0.5  }
         }
 
         if(Game.sim) setupSim(feedforward)
@@ -123,12 +133,11 @@ object Turret : SubsystemBase(), Debug {
         turret.resetPosition()
     }
 
-    private val latestResult: PhotonPipelineResult?
-        get() = RobotContainer.limelight.latestResult
+    private var latestResult: PhotonPipelineResult? = null
     val targetVisible: Boolean 
         get() = (Game.sim && visionOffset != null) || (latestResult != null && latestResult!!.hasTargets() && visionOffset != null)
     private val target: PhotonTrackedTarget?
-        get() = latestResult?.bestTarget
+        get() = latestResult?.let { if(it.hasTargets()) it.bestTarget else null  }
 
     val visionOffset: Angle?
         get() = if (Game.real) target?.yaw?.let { visionFilter.calculate(-it).degrees }
@@ -146,9 +155,11 @@ object Turret : SubsystemBase(), Debug {
 
     override fun periodic() {
         debugDashboard()
-        SmartDashboard.putNumber("tangle", turret.position.degrees)
-        SmartDashboard.putNumber("voff", visionOffset?.degrees ?: 0.0)
-        SmartDashboard.putBoolean("hall", RobotContainer.turretLimit.get())
+        latestResult = RobotContainer.limelight.latestResult
+        turret.updateVoltage()
+//        SmartDashboard.putNumber("tangle", turret.position.degrees)
+//        SmartDashboard.putNumber("voff", visionOffset?.degrees ?: 0.0)
+//        SmartDashboard.putBoolean("hall", RobotContainer.turretLimit.get())
     }
 
     override fun simulationPeriodic() {

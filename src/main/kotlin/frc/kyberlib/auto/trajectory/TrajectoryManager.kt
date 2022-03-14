@@ -10,8 +10,8 @@ import java.io.File
  * Central location to store trajectories
  */
 object TrajectoryManager {
-    val TRAJECTORY_PATH: String = Filesystem.getDeployDirectory().path + "/Pathweaver/output"
-    val AUTO_PATH = Filesystem.getDeployDirectory().path + "/Pathweaver/Autos"
+    val TRAJECTORY_PATH = Filesystem.getDeployDirectory().toPath().resolve("Pathweaver/output")
+    val AUTO_PATH = Filesystem.getDeployDirectory().toPath().resolve("Pathweaver/Autos")
     val trajectories = mutableMapOf<String, KTrajectory>()
 
     fun load() {
@@ -35,9 +35,9 @@ object TrajectoryManager {
 
     fun getPath(name: String): Trajectory {
         val jsonFile = File("$TRAJECTORY_PATH/$name.wpilib.json")
-        return TrajectoryUtil.deserializeTrajectory(jsonFile.readText())
+        return TrajectoryUtil.fromPathweaverJson(TRAJECTORY_PATH.resolve("$name.wpilib.json"))
     }
     operator fun get(s: String) = trajectories[s]
-    internal val routines = File(AUTO_PATH).list()!!
-    internal val paths = File(TRAJECTORY_PATH).list()!!.map { it.removeSuffix(".wpilib.json") }
+    internal val routines = AUTO_PATH.toFile().list()!!
+    internal val paths = TRAJECTORY_PATH.toFile().list()!!.map { it.removeSuffix(".wpilib.json") }
 }

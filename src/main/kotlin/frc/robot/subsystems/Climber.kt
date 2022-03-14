@@ -36,14 +36,14 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     var status = ClimberStatus.IDLE
 
     // pneumatics that lift the climb arms
-    private val leftStatic = KSolenoid(4, 5, fake = true).apply {
+    private val leftStatic = KSolenoid(0, 1, fake = true).apply {
         identifier = "left static"
     }
     private val rightStatic = KSolenoid(6, 7, fake = true).apply {
         identifier = "right static"
     }
 
-    private val armFF = ArmFeedforward(3.0, 2.0, 5.0, 8.0)
+    private val armFF = ArmFeedforward(3.0, 2.0, 5.0, 8.0)  // this is completely bs
     val leftExtendable = KSimulatedESC(40).apply {
         identifier = "leftArm"
         gearRatio = Constants.EXTENDABLE_ROTATION_GEAR_RATIO

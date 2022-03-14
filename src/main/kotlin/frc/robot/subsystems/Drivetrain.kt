@@ -181,10 +181,11 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     override fun periodic() {
         debugDashboard()
         RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
-        if((Constants.NAVIGATION_CORRECTION || Constants.DUMB_NAVIGATION) && Turret.targetVisible)  {  // TODO: test
-            val distance = Shooter.targetDistance!!
-            val angle = Turret.visionOffset!! + Turret.fieldRelativeAngle + 180.degrees
-            polarCoordinates = PolarPose(distance, angle, Turret.visionOffset!!)
+        if((Constants.NAVIGATION_CORRECTION || Constants.DUMB_NAVIGATION) && Turret.targetVisible)  {
+            val distance = Shooter.targetDistance ?: return
+            val offset = Turret.visionOffset ?: return
+            val angle = offset + Turret.fieldRelativeAngle + 180.degrees
+            polarCoordinates = PolarPose(distance, angle, offset)
         }
     }
 

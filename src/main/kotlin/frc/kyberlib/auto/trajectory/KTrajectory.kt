@@ -77,7 +77,7 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
      * @param debug print the process
      */
     fun save(debug: Boolean = false) {
-        val trajFolder = File(TrajectoryManager.TRAJECTORY_PATH)
+        val trajFolder = TrajectoryManager.TRAJECTORY_PATH.toFile()
         if (!trajFolder.exists()) {
             println("Main trajectory directory does not exist, creating...")
             trajFolder.mkdir()

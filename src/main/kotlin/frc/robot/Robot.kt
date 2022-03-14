@@ -7,16 +7,14 @@ import frc.kyberlib.auto.trajectory.TrajectoryManager
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
 import frc.kyberlib.math.units.extensions.degrees
+import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.commands.drive.AutoDrive
 import frc.robot.commands.shooter.AutoShot
 import frc.robot.commands.shooter.FullAutoFire
 import frc.robot.commands.turret.ZeroTurret
-import frc.robot.subsystems.Climber
-import frc.robot.subsystems.Drivetrain
-import frc.robot.subsystems.Intaker
-import frc.robot.subsystems.Turret
+import frc.robot.subsystems.*
 import java.io.File
 
 class Robot : KRobot() {
@@ -34,12 +32,13 @@ class Robot : KRobot() {
 
     override fun enabledInit() {
         ZeroTurret.schedule(false) // don't uncomment this until the Hall sensor is added or bad things might happen
-//        Turret.turret.resetPosition(0.degrees)  // remove this when you add zeroTurret back in
+        RobotContainer.navigation.pose = Constants.START_POSE
     }
 
     override fun teleopPeriodic() {
 //        SmartDashboard.putBoolean("hall", RobotContainer.turretLimit.get())
         SmartDashboard.putNumber("gyro", RobotContainer.gyro.heading.degrees)
+        Shooter.targetDistance?.meters?.let { SmartDashboard.putNumber("distance", it) }
     }
 
     override fun autonomousInit() {

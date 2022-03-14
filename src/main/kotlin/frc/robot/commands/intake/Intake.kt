@@ -16,7 +16,6 @@ object Intake : CommandBase() {
 
     override fun initialize() {
         Debug.log("Intake", "start", level=DebugFilter.Low)
-        println("intaking")
         Intaker.deployed = true
         Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
     }

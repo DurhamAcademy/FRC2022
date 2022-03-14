@@ -1,8 +1,8 @@
 {
-  "teamNumber" : 0,
-  "connectionType" : "DHCP",
-  "staticIp" : "",
-  "hostname" : "photonvision",
+  "teamNumber" : 6502,
+  "connectionType" : "Static",
+  "staticIp" : "10.65.2.11",
+  "hostname" : "limelight",
   "runNTServer" : false,
   "shouldManage" : false
 }

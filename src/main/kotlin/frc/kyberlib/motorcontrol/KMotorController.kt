@@ -161,11 +161,11 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
                 ControlMode.VELOCITY -> {
                     val ff = if (linearConfigured) feedforward.calculate(linearVelocitySetpoint.metersPerSecond)///, linearVelocitySetpoint.metersPerSecond, updateRate.seconds)
                                 else feedforward.calculate(velocitySetpoint.radiansPerSecond)//, velocitySetpoint.radiansPerSecond, updateRate.seconds)
-                    val pid = PID.calculate(velocityError.radiansPerSecond)
+                    val pid = PID.calculate(velocity.radiansPerSecond, velocitySetpoint.radiansPerSecond)
                     ff + pid
                 }
                 ControlMode.POSITION -> {
-                    val pid = PID.calculate(it.positionError.radians)
+                    val pid = PID.calculate(position.radians, positionSetpoint.radians)
                     pid
                 }
                 else -> 0.0
