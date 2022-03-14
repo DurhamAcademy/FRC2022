@@ -40,7 +40,7 @@ class DifferentialSwerveModule(location: Translation2d, wheelRadius: Length,
         bottomMotor.customControl = { it: KMotorController -> differentialControl(it) }
     }
 
-    override var rotation: Angle  // todo why isnt this angle
+    override var rotation: Angle
         get() {
             val top = topMotor.position.normalized
             val bottom = bottomMotor.position.normalized

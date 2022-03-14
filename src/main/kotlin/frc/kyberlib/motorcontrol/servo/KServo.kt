@@ -8,9 +8,15 @@ import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.*
 import java.lang.UnsupportedOperationException
 
-// todo: add documentation
+
 /**
  * Handles a position servo
+ * @param port the id the servo is plugging into the rio
+ * @param length the max readable value (angle)
+ * @param travelSpeed the estimated velocity that the server goes. Used for position estimatioon
+ * @param initialPosition where the servo starts upon enabled. Used for position estimation
+ * @param minMs the minimum milliseconds that the servo reads as valid signal
+ * @param maxMs the maximum milliseconds that the servo reads as valid signal
  */
 class KServo(port: Int,
              val length: Int,
@@ -18,6 +24,9 @@ class KServo(port: Int,
              initialPosition: Angle = 0.degrees,
              minMs: Double = 1.0,
              maxMs: Double = 2.0) : Debug {
+    /**
+     * The actual servo native object
+     */
     private val servo = Servo(port).apply {
         // set PWM bounds of the servo
         setBounds(maxMs, 0.01 + (maxMs + minMs) / 2, (maxMs + minMs) / 2, -0.01 + (maxMs + minMs) / 2, minMs)
@@ -30,9 +39,8 @@ class KServo(port: Int,
     // rate limiter for estimating current actuator position
     private val rateLimit = SlewRateLimiter(travelSpeed.value, initialPosition.value)
 
-
     /**
-     * Target actuator length, in mm
+     * The position of the motor. In order for estimated to work, this should update frequently
      */
     var position: Angle = initialPosition
         set(value) {
@@ -44,8 +52,14 @@ class KServo(port: Int,
             setpoint = value
         }
 
+    /**
+     * Where the servo is trying to get to
+     */
     var setpoint: Angle = initialPosition
 
+    /**
+     * Guess of how far off the servo is from setpoint
+     */
     val error: Angle
         get() = position - setpoint
     /**

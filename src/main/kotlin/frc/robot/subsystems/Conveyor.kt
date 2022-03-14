@@ -24,7 +24,7 @@ object Conveyor : SubsystemBase(), Debug {
     val conveyor = KSparkMax(21).apply {
         identifier = "conveyor"
         reversed = true
-//        currentLimit = 20
+        currentLimit = 20
         gearRatio = 1/5.0
     }
 
@@ -33,7 +33,7 @@ object Conveyor : SubsystemBase(), Debug {
     val feeder = KSparkMax(30).apply {
         identifier = "feeder"
         gearRatio = 1/5.0
-//        currentLimit = 20
+        currentLimit = 20
     }
 
     @Suppress("unused")

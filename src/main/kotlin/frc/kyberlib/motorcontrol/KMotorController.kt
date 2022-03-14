@@ -16,6 +16,7 @@ import edu.wpi.first.networktables.NTSendableBuilder
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.simulation.LinearSystemSim
+import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand
 import frc.kyberlib.command.*
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.sign
@@ -150,7 +151,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     /**
      * Builtin PID controller for motor
      */
-    var PID = ProfiledPIDController(0.0, 0.0, 0.0, constraints)  // what does the profile do?
+    var PID = ProfiledPIDController(0.0, 0.0, 0.0, constraints)
 
     /**
      * Builtin control that will combine feedforward with the PID.

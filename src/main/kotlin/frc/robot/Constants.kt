@@ -51,7 +51,6 @@ object Constants {
 
     val SHOOTER_COMPRESSION = 1.25.inches
 
-    // TODO: test shots
     val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf(
         1.98 to 1300.0,
         2.9 to 1425.0,

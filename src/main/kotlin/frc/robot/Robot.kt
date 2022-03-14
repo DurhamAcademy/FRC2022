@@ -51,7 +51,6 @@ class Robot : KRobot() {
     override fun autonomousInit() {
         Intaker.deployed = true
         Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
-        // todo: make the chooser work
         val auto = loadRoutine(RobotContainer.autoChooser.selected)//RobotContainer.autoChooser.selected!!)
         auto.schedule()
         autoCommand = auto

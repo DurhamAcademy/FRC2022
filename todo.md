@@ -1,5 +1,7 @@
 # In Sim
-- turret sim not be trash
+- mess around with making velocity control not be garbage
+- figure out how ProfiledPIDController actually works
+- mess with KMotorController constraints on velocity control
 
 # With robot
 - turret recalibration

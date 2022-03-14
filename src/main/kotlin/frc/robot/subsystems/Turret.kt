@@ -15,6 +15,7 @@ import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.randomizer
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.towards
+import frc.kyberlib.math.zeroIf
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KMotorController.StateSpace.systemLoop
 import frc.kyberlib.motorcontrol.rev.KSparkMax
@@ -57,7 +58,7 @@ object Turret : SubsystemBase(), Debug {
 
         val pid2020 = ProfiledPIDController(30.0, 5.0, 5.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
             setIntegratorRange(-3.0, 3.0)
-        }  // these constraints are not tested on real
+        }
         val oldControls = { it: KMotorController ->
             val setpoint = clampSafePosition(it.positionSetpoint)
             pid2020.calculate(position.rotations, setpoint.rotations)
@@ -66,8 +67,8 @@ object Turret : SubsystemBase(), Debug {
         val posLoop = systemLoop(positionSystem(feedforward), 3.0, 0.1, 2.degrees.value, 10.degreesPerSecond.value)
         val posSS = { it: KMotorController ->
             val setpoint = clampSafePosition(it.positionSetpoint)
-            posLoop.nextR = VecBuilder.fill(1.0, 1.0)  // r = reference (setpoint)
-            posLoop.correct(VecBuilder.fill(1.0))  // update with empirical
+            posLoop.nextR = VecBuilder.fill(positionSetpoint.radians, velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
+            posLoop.correct(VecBuilder.fill(position.radians))  // update with empirical
             posLoop.predict(0.02)  // math
             val v = posLoop.getU(0)  // input
             v
@@ -101,16 +102,27 @@ object Turret : SubsystemBase(), Debug {
             val offset = it.position - setpoint
             val offsetCorrection = offsetCorrector.calculate(position.value, setpoint.value).radiansPerSecond
             val targetVelocity = offsetCorrection - chassisComp - movementComp
-//            SmartDashboard.putNumber("off", offsetCorrection.degreesPerSecond)
-//            SmartDashboard.putNumber("chas", -chassisComp.degreesPerSecond)
-//            SmartDashboard.putNumber("mov", -movementComp.degreesPerSecond)
-//            SmartDashboard.putNumber("tar", targetVelocity.degreesPerSecond)
             val v = feedforward.calculate(targetVelocity.radiansPerSecond)// + it.PID.calculate(velocityError.radiansPerSecond)
             if (offset < Constants.TURRET_TOLERANCE) status = TurretStatus.LOCKED
             v
         }
 
-        customControl = oldControls
+        val garbage = ProfiledPIDController(20.0, 2.0, 5.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
+            setIntegratorRange(-3.0, 3.0)
+        }  // these constraints are not tested on real
+        val notGarbage = { it: KMotorController ->
+            val polarSpeeds = Drivetrain.polarSpeeds
+            val movementComp = -polarSpeeds.dTheta
+            val chassisComp = polarSpeeds.dOrientation
+            val setpoint = clampSafePosition(it.positionSetpoint)
+            val offsetCorrection = garbage.calculate(position.rotations, setpoint.rotations)
+            val targetVelocity = - chassisComp - movementComp
+            val velComp = feedforward.calculate(targetVelocity.radiansPerSecond) + it.PID.calculate(position.rotations, positionSetpoint.rotations).zeroIf { it < 0.2 }
+            val v = velComp + offsetCorrection
+            v
+        }
+
+        customControl = notGarbage
 
         if(Game.sim) setupSim(feedforward)
     }
@@ -166,8 +178,7 @@ object Turret : SubsystemBase(), Debug {
     private val distanceFilter = LinearFilter.movingAverage(8)
     val targetDistance: Length?
         get() = if (Game.sim) RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters + randomizer.nextGaussian().inches
-                else visionPitch?.let { pitch -> 2.feet + distanceFilter.calculate((Constants.UPPER_HUB_HEIGHT.inches - 1 - Constants.LIMELIGHT_HEIGHT.inches) / (Constants.LIMELIGHT_ANGLE + pitch).tan).inches}  // todo: make sure I didn't brake the math
-
+                else visionPitch?.let { pitch -> 2.feet + distanceFilter.calculate((Constants.UPPER_HUB_HEIGHT.inches - 1 - Constants.LIMELIGHT_HEIGHT.inches) / (Constants.LIMELIGHT_ANGLE + pitch).tan).inches}  // this could be wrong
 
     val ready: Boolean
         get() = turret.positionError < Constants.TURRET_TOLERANCE || status == TurretStatus.LOCKED
