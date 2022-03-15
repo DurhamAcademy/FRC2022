@@ -1,12 +1,14 @@
 package frc.kyberlib.motorcontrol
 
-import frc.kyberlib.command.Game
-import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.extensions.Angle
+import frc.kyberlib.math.units.extensions.AngularVelocity
+import frc.kyberlib.math.units.extensions.degrees
+import frc.kyberlib.math.units.extensions.rpm
 
 /**
  * Raw simulated motor.
  */
-class KSimulatedESC(name: Any) : KMotorController() {  // potentially remove this and make abstra
+class KSimulatedESC(name: Any) : KMotorController() {  // potentially remove this and make abstract
     override var rawPosition: Angle = 0.degrees
 
     override var rawVelocity: AngularVelocity = 0.rpm

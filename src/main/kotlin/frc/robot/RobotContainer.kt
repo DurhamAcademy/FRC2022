@@ -57,18 +57,6 @@ object RobotContainer {
         LOCK_TURRET.toggleWhenActive(FreezeTurret)
 //        CLIMB_MODE.toggleWhenActive(Climb)
         EMOTE.whileActiveOnce(Emote)
-        FLYWHEEL_INCREASE.whenActive {
-            Shooter.shooterMult += .01
-            emptySet<Subsystem>()
-        }
-        FLYWHEEL_DECREASE.whenActive {
-            Shooter.shooterMult -= .01
-            emptySet<Subsystem>()
-        }
-        COMPRESSOR_TOGGLE.whileActiveOnce {
-            if(KSolenoid.compressor.enabled()) KSolenoid.compressor.disable() else KSolenoid.compressor.enableDigital()
-            emptySet<Subsystem>()
-        }
     }
 
     val autoChooser = SendableChooser<String>().apply {

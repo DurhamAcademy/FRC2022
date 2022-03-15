@@ -89,6 +89,9 @@
   },
   "NetworkTables": {
     "LiveWindow": {
+      "Drivetrain": {
+        "open": true
+      },
       "Turret": {
         "open": true
       },
@@ -101,8 +104,7 @@
         "Climber": {
           "open": true
         }
-      },
-      "open": true
+      }
     },
     "SmartDashboard": {
       "Climber": {

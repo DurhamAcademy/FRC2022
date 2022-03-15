@@ -18,8 +18,4 @@ abstract class ControlSchema2022 {
     abstract val CLIMB_MODE: Trigger
 
     abstract val EMOTE: Trigger
-
-    abstract val FLYWHEEL_INCREASE: Trigger
-    abstract val FLYWHEEL_DECREASE: Trigger
-    abstract val COMPRESSOR_TOGGLE: Trigger
 }

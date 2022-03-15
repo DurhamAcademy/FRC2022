@@ -58,17 +58,9 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     val stopped
         get() = flywheel.percent == 0.0
 
-//    var outputVelocity
-//        get() = flywheel.velocity.toTangentialVelocity(Constants.BALL_DIAMETER - Constants.SHOOTER_COMPRESSION)
-//        set(value) {
-//            flywheel.velocity = value.toAngularVelocity(Constants.BALL_DIAMETER - Constants.SHOOTER_COMPRESSION)
-//        }
-//    var timeOfFlight = 1.seconds
-//
-    var shooterMult = 1.0
     var targetVelocity
         get() = flywheel.velocitySetpoint
-        set(value) { flywheel.velocity = value * shooterMult}
+        set(value) { flywheel.velocity = value * SmartDashboard.getNumber("shooterMult", 1.0)}
 
 
     // additional motors that copy the main

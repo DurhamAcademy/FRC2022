@@ -869,6 +869,8 @@ internal fun estimateFF(motorType: DCMotor, gearRatio: Double, momentOfInertia: 
     val kv = -gearRatio * gearRatio * motorType.KtNMPerAmp / (motorType.KvRadPerSecPerVolt * motorType.rOhms * momentOfInertia) * -ka
     println("kv: $kv, ka: $ka")
 }
+
+
 fun main() {
     estimateFF(DCMotor.getNeo550(1), Constants.TURRET_GEAR_RATIO, 0.123787)
 }
