@@ -1,13 +1,14 @@
 # In Sim
+- add manual commands
+- voltage ramp
+- reset pose
+- mess with position control on KMotor
 - mess around with making velocity control not be garbage
-- figure out how ProfiledPIDController actually works
 - mess with KMotorController constraints on velocity control
 
 # With robot
-- turret recalibration
-- test angle controls
-- Shooter test values
-    - use Trevor spreadsheet (see Software channel)
+- flywheel pids (graph)
+- check long term odometry
 - Auto paths
   - mess with filesystem
 
