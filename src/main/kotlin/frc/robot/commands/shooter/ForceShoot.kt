@@ -3,11 +3,7 @@ package frc.robot.commands.shooter
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
-import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.extensions.meters
-import frc.kyberlib.math.units.extensions.radiansPerSecond
-import frc.robot.Constants
-import frc.robot.commands.intake.Feed
+import frc.kyberlib.pneumatics.KSolenoid
 import frc.robot.subsystems.*
 
 /**
@@ -18,8 +14,11 @@ object ForceShoot : CommandBase() {
         addRequirements(Shooter, Conveyor)
     }
 
+    private var reenableCompressor = true
     override fun initialize() {
-        Feed.schedule()
+        reenableCompressor = KSolenoid.compressor.enabled()
+        KSolenoid.compressor.disable()
+        Conveyor.feed()
         Shooter.status = ShooterStatus.FORCE_SHOT
     }
 
@@ -36,6 +35,8 @@ object ForceShoot : CommandBase() {
 
     override fun end(interrupted: Boolean) {
         Shooter.stop()
+        Conveyor.stop()
+        if(reenableCompressor) KSolenoid.compressor.enableDigital()
     }
 
 }

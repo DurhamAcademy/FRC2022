@@ -20,7 +20,6 @@ object Flush : CommandBase() {
         timer.reset()
         Intaker.deployed = true
         Intaker.intakeMotor.percent = -Constants.INTAKE_PERCENT
-        Conveyor.conveyor.voltage = -10.0
     }
 
     override fun execute() {
@@ -31,7 +30,7 @@ object Flush : CommandBase() {
         Debug.log("Intake", "end", level= DebugFilter.Low)
         Intaker.deployed = false
         Intaker.intakeMotor.stop()
-        Conveyor.conveyor.stop()
+        Conveyor.stop()
     }
 
     override fun isFinished(): Boolean {

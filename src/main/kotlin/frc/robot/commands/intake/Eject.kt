@@ -7,19 +7,20 @@ import frc.robot.subsystems.Shooter
 
 object Eject : CommandBase() {
     init {
-        addRequirements(Shooter)
+        addRequirements(Shooter, Conveyor)
     }
     override fun initialize() {
         Shooter.targetVelocity = 7.rotationsPerSecond
+        Conveyor.feed()
     }
 
 
     override fun execute() {
         Shooter.update()
-        if(Shooter.ready) Feed.schedule()
     }
 
     override fun end(interrupted: Boolean) {
         Shooter.stop()
+        Conveyor.stop()
     }
 }

@@ -36,10 +36,20 @@ object Conveyor : SubsystemBase(), Debug {
         currentLimit = 20
     }
 
-    @Suppress("unused")
-    fun off() {
+    fun feed() {
+        status = ConveyorStatus.FEEDING
+        feeder.percent = 0.9
+        conveyor.percent = 0.8
+    }
+    fun idle() {
+        status = ConveyorStatus.IDLE
+        feeder.percent = -0.1
+        conveyor.percent = -0.0
+    }
+    fun stop() {
         status = ConveyorStatus.OFF
         conveyor.stop()
+        feeder.stop()
     }
     init {
         defaultCommand = Idle

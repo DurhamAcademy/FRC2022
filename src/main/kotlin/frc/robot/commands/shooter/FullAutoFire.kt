@@ -2,13 +2,6 @@ package frc.robot.commands.shooter
 
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Game
-import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.extensions.meters
-import frc.kyberlib.math.units.extensions.radiansPerSecond
-import frc.robot.Constants
-import frc.robot.RobotContainer
-import frc.robot.commands.intake.Feed
-import frc.robot.commands.intake.Idle
 import frc.robot.subsystems.Conveyor
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.ShooterStatus
@@ -31,10 +24,11 @@ class FullAutoFire : CommandBase() {
             // if the turret is on target
             if (Turret.ready && Shooter.ready) {
                 Shooter.status = ShooterStatus.SHOT
-                Feed.schedule()
+                Conveyor.feed()
             }
             else {
                 Shooter.status = ShooterStatus.SPINUP
+                Conveyor.stop()
             }
         }
     }

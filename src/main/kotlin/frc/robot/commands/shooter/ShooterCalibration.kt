@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.pneumatics.KSolenoid
-import frc.robot.commands.intake.Feed
 import frc.robot.subsystems.Conveyor
 import frc.robot.subsystems.Shooter
 
@@ -15,7 +14,9 @@ object ShooterCalibration : CommandBase() {
         SmartDashboard.putNumber("hood degrees", 5.0)
     }
 
+    private var reenableCompressor = true
     override fun initialize() {
+        reenableCompressor = KSolenoid.compressor.enabled()
         KSolenoid.compressor.disable()
     }
 
@@ -27,16 +28,15 @@ object ShooterCalibration : CommandBase() {
 
         if(Shooter.ready) {
 //            Feed.schedule()
-            Conveyor.feeder.percent = 0.9
-            Conveyor.conveyor.percent = 0.8
+            Conveyor.feed()
         }
 
     }
 
     override fun end(interrupted: Boolean) {
         Shooter.stop()
-        Conveyor.feeder.percent = 0.0
-        Conveyor.conveyor.percent = 0.0
+        Conveyor.stop()
+        if(reenableCompressor) KSolenoid.compressor.enableDigital()
     }
 
     override fun isFinished(): Boolean = false
