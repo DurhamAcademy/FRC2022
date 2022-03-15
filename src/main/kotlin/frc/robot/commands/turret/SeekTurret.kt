@@ -43,6 +43,6 @@ object SeekTurret : CommandBase() {
 
     override fun end(interrupted: Boolean) {
         if (!interrupted) Turret.status = TurretStatus.ADJUSTING
-        Turret.turret.stop()
+//        Turret.turret.stop()
     }
 }

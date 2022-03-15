@@ -46,87 +46,24 @@ object Turret : SubsystemBase(), Debug {
     // actual turret motors
     val turret = KSparkMax(11).apply {
         identifier = "turret"
-        kP = .8
-        kD = 0.01
         gearRatio = Constants.TURRET_GEAR_RATIO
         motorType = DCMotor.getNeo550(1)
+        brakeMode = true
 
         val headingDiff = Differentiator()
 
-        val pid2020 = ProfiledPIDController(20.0, 4.0, 0.0, TrapezoidProfile.Constraints(3.0, 1.0)).apply {
-            setIntegratorRange(-3.0, 3.0)
-        }
-        val oldControls = { it: KMotorController ->
-            position = clampSafePosition(it.positionSetpoint)
-            pid2020.calculate(position.rotations, positionSetpoint.rotations)
-        }
-
-        val posLoop = systemLoop(positionSystem(feedforward), 3.0, 0.1, 2.degrees.value, 10.degreesPerSecond.value)
-        val posSS = { it: KMotorController ->
-            position = clampSafePosition(positionSetpoint)
-            posLoop.nextR = VecBuilder.fill(positionSetpoint.radians, velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
-            posLoop.correct(VecBuilder.fill(position.radians))  // update with empirical
-            posLoop.predict(0.02)  // math
-            val v = posLoop.getU(0)  // input
-            v
-        }
-
-        val offsetCorrector = ProfiledPIDController(10.0, 1.0, 0.0, TrapezoidProfile.Constraints(10.0, 5.0)).apply {
-            setIntegratorRange(-1.0, 1.0)
-        }
-        val velLoop = systemLoop(velocitySystem(feedforward), 3.0, 0.1, 10.degreesPerSecond.value, 10.0)
-        val velSS = {it: KMotorController ->
-            val polarSpeeds = Drivetrain.polarSpeeds
-            val movementComp = -polarSpeeds.dTheta
-//            val chassisComp = headingDiff.calculate(Navigator.instance!!.heading.radians).radiansPerSecond
-            val chassisComp = polarSpeeds.dOrientation
-            val setpoint = clampSafePosition(it.positionSetpoint)
-            val offsetCorrection = offsetCorrector.calculate(it.position.value, setpoint.value).radiansPerSecond
-            val targetVelocity = offsetCorrection - chassisComp - movementComp * 0.0
-            velLoop.nextR = VecBuilder.fill(targetVelocity.radiansPerSecond)  // r = reference (setpoint)
-            velLoop.correct(VecBuilder.fill(velocity.radiansPerSecond))  // update with empirical
-            velLoop.predict(0.02)  // math
-            val v = velLoop.getU(0)  // input
-            v
-        }
-
-        val velocityControls = { it: KMotorController ->
-            val polarSpeeds = Drivetrain.polarSpeeds
-            val movementComp = -polarSpeeds.dTheta
-            val chassisComp = polarSpeeds.dOrientation
-            position = clampSafePosition(it.positionSetpoint)
-            val offset = it.position - positionSetpoint
-            val offsetCorrection = offsetCorrector.calculate(position.value, positionSetpoint.value).radiansPerSecond
-            val targetVelocity = offsetCorrection - chassisComp - movementComp
-            val v = feedforward.calculate(targetVelocity.radiansPerSecond)// + it.PID.calculate(velocityError.radiansPerSecond)
-            if (offset < Constants.TURRET_TOLERANCE) status = TurretStatus.LOCKED
-            v.zeroIf { it < 0.5 }
-        }
-
-        val garbage = ProfiledPIDController(70.0, 8.0, 0.0, TrapezoidProfile.Constraints(3.0, 1.0)).apply {
-            setIntegratorRange(-6.0, 6.0)
+        PID = ProfiledPIDController(70.0, 2.0, 0.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
+            setIntegratorRange(-2.0, 2.0)
         }  // these constraints are not tested on real
-        val notGarbage = { it: KMotorController ->
-            val polarSpeeds = Drivetrain.polarSpeeds
-            val movementComp = -polarSpeeds.dTheta
-            val chassisComp = polarSpeeds.dOrientation
-            position = clampSafePosition(it.positionSetpoint)
-            val offsetCorrection = garbage.calculate(position.rotations, positionSetpoint.rotations)
-            val targetVelocity = (- chassisComp - movementComp).radiansPerSecond.zeroIf { it < 0.2 }
-            val velComp = feedforward.calculate(targetVelocity) + it.PID.calculate(position.rotations, positionSetpoint.rotations)
-            val v = velComp + offsetCorrection
-            v
-        }
 
         val new = { it: KMotorController ->
-            val rot = -headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.3.seconds
+            val rot = -headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.1.seconds
             position = clampSafePosition(it.positionSetpoint + rot)
 
-            val offsetCorrection = garbage.calculate(position.rotations, positionSetpoint.rotations)
-            val ff = feedforward.calculate(it.PID.setpoint.velocity.rotationsPerSecond.radiansPerSecond)
-            ff + offsetCorrection
+            val offsetCorrection = PID.calculate(position.rotations, positionSetpoint.rotations)
+            val ff = feedforward.calculate(PID.setpoint.velocity.rotationsPerSecond.radiansPerSecond)
+            (ff + offsetCorrection)//.coerceIn(-4.0, 4.0)
         }
-
         customControl = new
 
         if(Game.sim) setupSim(feedforward)
@@ -148,7 +85,7 @@ object Turret : SubsystemBase(), Debug {
      * Makes an angle safe for the electronics to not get tangled
      */
     private fun clampSafePosition(angle: Angle): Angle {
-        return (angle + 15.degrees).normalized - 15.degrees
+        return (angle + 25.degrees).normalized - 25.degrees
     }
 
     /**
@@ -182,7 +119,7 @@ object Turret : SubsystemBase(), Debug {
                 else visionPitch?.let { pitch -> 2.feet + distanceFilter.calculate((Constants.UPPER_HUB_HEIGHT.inches - 1 - Constants.LIMELIGHT_HEIGHT.inches) / (Constants.LIMELIGHT_ANGLE + pitch).tan).inches}  // this could be wrong
 
     val ready: Boolean
-        get() = turret.positionError.absoluteValue < Constants.TURRET_TOLERANCE || status == TurretStatus.FROZEN
+        get() = (targetVisible && visionOffset!!.absoluteValue < Constants.TURRET_TOLERANCE) || Game.sim || status == TurretStatus.FROZEN
 
     fun reset() {
         distanceFilter.reset()

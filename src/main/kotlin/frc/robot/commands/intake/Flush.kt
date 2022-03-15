@@ -18,12 +18,13 @@ object Flush : CommandBase() {
     override fun initialize() {
         Debug.log("Intake", "start", level= DebugFilter.Low)
         timer.reset()
+        timer.start()
         Intaker.deployed = true
         Intaker.intakeMotor.percent = -Constants.INTAKE_PERCENT
     }
 
     override fun execute() {
-        Conveyor.conveyor.percent = if(timer.hasElapsed(.5)) -.9 else .2
+        Conveyor.conveyor.percent = if(timer.hasElapsed(.1)) -.9 else .2
     }
 
     override fun end(interrupted: Boolean) {

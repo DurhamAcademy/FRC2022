@@ -29,6 +29,10 @@ class Robot : KRobot() {
         Climber.rightWinch.resetPosition(0.degrees)
     }
 
+    override fun robotPeriodic() {
+        RobotContainer.leds.update()
+    }
+
     override fun disabledInit() {
         Drivetrain.stop()
     }

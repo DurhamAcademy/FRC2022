@@ -38,7 +38,7 @@ enum class ShooterStatus {
 object Shooter : SubsystemBase(), Debug, Simulatable {
     var status = ShooterStatus.IDLE
     override val priority: DebugFilter = DebugFilter.Max
-    private val ff = SimpleMotorFeedforward(0.2062, 0.028532, 0.0052967)
+    private val ff = SimpleMotorFeedforward(0.2062, 0.029032, 0.0052967)
 
     // main motor attached to the flywheel
     val flywheel = KSparkMax(31).apply {
@@ -111,7 +111,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     val speedPoly = Polynomial(37.43917, -119.05297, 1501.93519)
     private fun flywheelUpdate(dis: Length) {
         val interpolated = speedPoly.eval(dis.value).rpm.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
-        val fudge = 100.rpm * (Turret.turret.position.absoluteValue / 2.0).sin
+        val fudge = SmartDashboard.getNumber("back fudge", 100.0).rpm * (Turret.turret.position.absoluteValue / 2.0).sin
         targetVelocity = interpolated + fudge
     }
 
@@ -127,7 +127,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     override fun periodic() {
         debugDashboard()
-        Turret.targetDistance?.let { hoodUpdate(it) }
+//        Turret.targetDistance?.let { hoodUpdate(it) }
     }
 
     override fun debugValues(): Map<String, Any?> {

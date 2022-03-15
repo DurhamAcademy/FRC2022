@@ -17,8 +17,8 @@ object LostTurret : CommandBase() {
     private var direction = 1.0
     override fun execute() {
         Turret.turret.percent = 0.1 * direction
-        if(Turret.turret.position < Turret.turret.minPosition!! + 5.degrees) direction = 1.0
-        else if(Turret.turret.position > Turret.turret.maxPosition!! - 5.degrees) direction = -1.0
+        if(Turret.turret.position < Turret.turret.minPosition + 5.degrees) direction = 1.0
+        else if(Turret.turret.position > Turret.turret.maxPosition - 5.degrees) direction = -1.0
     }
 
     override fun end(interrupted: Boolean) {

@@ -36,7 +36,7 @@ object ShooterCalibration : CommandBase() {
     override fun end(interrupted: Boolean) {
         Shooter.stop()
         Conveyor.stop()
-        if(reenableCompressor) KSolenoid.compressor.enableDigital()
+//        if(reenableCompressor) KSolenoid.compressor.enableDigital()
     }
 
     override fun isFinished(): Boolean = false
