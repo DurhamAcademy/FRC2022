@@ -15,7 +15,7 @@ import frc.robot.subsystems.*
  */
 object ForceShoot : CommandBase() {
     init {
-        addRequirements(Shooter)
+        addRequirements(Shooter, Conveyor)
     }
 
     override fun initialize() {

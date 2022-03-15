@@ -9,12 +9,11 @@ import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.TrackingMode
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.sensors.gyros.KPigeon
-import frc.robot.commands.intake.Eject
 import frc.robot.commands.Emote
 import frc.robot.commands.intake.Flush
 import frc.robot.commands.intake.Intake
-import frc.robot.commands.shooter.FlywheelTest
 import frc.robot.commands.shooter.ForceShoot
+import frc.robot.commands.shooter.ShooterCalibration
 import frc.robot.commands.shooter.Shoot
 import frc.robot.commands.turret.FreezeTurret
 import frc.robot.subsystems.Drivetrain

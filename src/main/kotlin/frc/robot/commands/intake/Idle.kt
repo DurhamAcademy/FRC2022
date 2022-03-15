@@ -12,6 +12,6 @@ object Idle : CommandBase() {  // todo: think about Idle also spinning intake
     override fun initialize() {
         Conveyor.status = ConveyorStatus.IDLE
         Conveyor.feeder.percent = -0.1
-        Conveyor.conveyor.percent = -0.1
+        Conveyor.conveyor.percent = -0.0
     }
 }

@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.subsystems.TurretStatus
 import frc.robot.subsystems.Turret
 import frc.kyberlib.math.units.extensions.k
+import frc.kyberlib.math.units.extensions.rotations
 import frc.kyberlib.math.units.towards
 import frc.robot.Constants
 import frc.robot.RobotContainer
@@ -23,6 +24,7 @@ object SeekTurret : CommandBase() {
      * Update status to indicated turret is lost
      */
     override fun initialize() {
+        Turret.turret.PID.reset(Turret.turret.position.rotations)
         Turret.status = TurretStatus.LOST
         timer.reset()
         timer.start()

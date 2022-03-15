@@ -3,15 +3,20 @@ package frc.robot.commands.shooter
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.pneumatics.KSolenoid
 import frc.robot.commands.intake.Feed
 import frc.robot.subsystems.Conveyor
 import frc.robot.subsystems.Shooter
 
-object FlywheelTest : CommandBase() {
+object ShooterCalibration : CommandBase() {
     init {
-        addRequirements(Shooter)
+        addRequirements(Shooter, Conveyor)
         SmartDashboard.putNumber("flywheel rpm", 0.0)
         SmartDashboard.putNumber("hood degrees", 5.0)
+    }
+
+    override fun initialize() {
+        KSolenoid.compressor.disable()
     }
 
     override fun execute() {
@@ -21,13 +26,17 @@ object FlywheelTest : CommandBase() {
         Shooter.hoodDistance = SmartDashboard.getNumber("hood degrees", 0.0).millimeters
 
         if(Shooter.ready) {
-            Feed.schedule()
+//            Feed.schedule()
+            Conveyor.feeder.percent = 0.9
+            Conveyor.conveyor.percent = 0.8
         }
 
     }
 
     override fun end(interrupted: Boolean) {
         Shooter.stop()
+        Conveyor.feeder.percent = 0.0
+        Conveyor.conveyor.percent = 0.0
     }
 
     override fun isFinished(): Boolean = false

@@ -14,7 +14,7 @@ object Feed : CommandBase() {
 
     override fun initialize() {
         Conveyor.status = ConveyorStatus.FEEDING
-        Conveyor.conveyor.percent = 0.5
+        Conveyor.conveyor.percent = 0.8
         Conveyor.feeder.percent = 0.9
     }
 

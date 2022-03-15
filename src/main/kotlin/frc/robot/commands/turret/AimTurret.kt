@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
+import frc.kyberlib.math.units.extensions.rotations
 import frc.robot.Constants
 import frc.robot.subsystems.Turret
 
@@ -22,6 +23,7 @@ object AimTurret : CommandBase() {
     private val directionFilter = MedianFilter(5)
 
     override fun initialize() {
+        Turret.turret.PID.reset(Turret.turret.position.rotations)
         found()
     }
 

@@ -8,7 +8,9 @@ import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
+import frc.kyberlib.math.Polynomial
 import frc.kyberlib.math.randomizer
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.rev.KSparkMax
@@ -35,22 +37,22 @@ enum class ShooterStatus {
  */
 object Shooter : SubsystemBase(), Debug, Simulatable {
     var status = ShooterStatus.IDLE
-//    override val priority: DebugFilter = DebugFilter.Max
-    private val ff = SimpleMotorFeedforward(0.99858 / TAU, 0.19517 / TAU, 0.0256 / TAU)
+    override val priority: DebugFilter = DebugFilter.Max
+    private val ff = SimpleMotorFeedforward(0.2062, 0.028532, 0.0052967)
 
     // main motor attached to the flywheel
     val flywheel = KSparkMax(31).apply {
         identifier = "flywheel"
         motorType = DCMotor.getNEO(2)
         addFeedforward(ff)
-        kP = 0.258 / TAU
+        kP = 0.032434
         currentLimit = 50
         if(Game.sim) setupSim(ff)
     }
 
-    private val readyDebouncer = Debouncer(0.2, DebounceType.kBoth)
+    private val readyDebouncer = Debouncer(0.1, DebounceType.kBoth)
     private val shortReady
-        get() = hood.atSetpoint && flywheel.velocity < Constants.SHOOTER_VELOCITY_TOLERANCE && flywheel.velocitySetpoint > 1.radiansPerSecond
+        get() = hood.atSetpoint && flywheel.velocityError.absoluteValue < Constants.SHOOTER_VELOCITY_TOLERANCE && flywheel.velocitySetpoint > 1.radiansPerSecond
     val ready: Boolean
         get() = readyDebouncer.calculate(shortReady)
     val stopped
@@ -108,11 +110,15 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         flywheelUpdate(dis)
         hoodUpdate(dis)
     }
+
+    val hoodPoly = Polynomial(-.85458, 5.64695, 3.87906, -1.29395)
     private fun hoodUpdate(dis: Length) {
-        hoodDistance = Constants.HOODANGLE_INTERPOLATOR.calculate(dis.meters).millimeters
+        hoodDistance = hoodPoly.eval(dis.value).millimeters//Constants.HOODANGLE_INTERPOLATOR.calculate(dis.meters).millimeters
     }
+
+    val speedPoly = Polynomial(37.43917, -119.05297, 1501.93519)
     private fun flywheelUpdate(dis: Length) {
-        targetVelocity = Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
+        targetVelocity = speedPoly.eval(dis.value).rpm.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
     }
 
     fun stop() {

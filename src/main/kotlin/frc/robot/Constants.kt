@@ -52,18 +52,26 @@ object Constants {
     val SHOOTER_COMPRESSION = 1.25.inches
 
     val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf(
-        1.98 to 1300.0,
-        2.9 to 1425.0,
-        3.825 to 1550.0,
-        4.74 to 1600.0,
-        5.67 to 2000.0
+        1.7 to 1400.0,
+        2.09375 to 1440.0,
+        2.4875 to 1420.0,
+        2.88125 to 1470.0,
+        3.275 to 1500.0,
+        3.66875 to 1600.0,
+        4.0625 to 1610.0,
+        4.45625 to 1730.0,
+        4.85 to 1800.0
     ))
     val HOODANGLE_INTERPOLATOR: Interpolator = Interpolator(mapOf(
-        1.98 to 15.0,
-        2.9 to 38.0,
-        3.825 to 45.0,
-        4.74 to 55.0,
-        5.67 to 80.0
+        1.7 to 15.0,
+        2.09375 to 28.0,
+        2.4875 to 30.0,
+        2.88125 to 36.0,
+        3.275 to 40.0,
+        3.66875 to 45.0,
+        4.0625 to 50.0,
+        4.45625 to 50.0,
+        4.85 to 50.0
     ))
 
     val SHOOTER_VELOCITY_TOLERANCE = 50.rpm
@@ -74,15 +82,16 @@ object Constants {
     const val NOT_FOUND_WAIT = 0.2
     const val SMART_LOSS = false
 
-    const val SHOOTER_AQUISITION_TIME = 0.2
+    const val SHOOTER_AQUISITION_TIME = 0.1
     val TURRET_TOLERANCE = 3.degrees // how close the heading must be to fire
     val TURRET_DEADBAND = 2.degrees  // when the turret stops adjusting
+
 
     // ------ Game Pieces ------ //
     val HUB_POSITION = Translation2d(324.inches, 162.inches)
     val FIELD_SIZE = Translation2d(648.inches, 324.inches)
     val UPPER_HUB_HEIGHT = 8.feet + 8.inches
-    val START_POSE: Pose2d = Pose2d(HUB_POSITION - Translation2d(3.meters, 0.meters), 0.degrees.w)//Pose2d(8.5.meters, 1.9.meters, (-90).degrees)
+    val START_POSE: Pose2d = Pose2d(HUB_POSITION - Translation2d(3.meters, 0.1.meters), 0.degrees.w)//Pose2d(8.5.meters, 1.9.meters, (-90).degrees)
 
     val LOW_RUNG_HEIGHT = 4.feet + .75.inches
     val MID_RUNG_HEIGHT = 5.feet + .25.inches

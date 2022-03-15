@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.auto.trajectory.KTrajectoryConfig
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.*
@@ -29,6 +30,7 @@ enum class TrackingMode {
  * Class to store and update robot navigation information
  */
 class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose, private val trackingMode: TrackingMode) : Debug {
+    override val priority: DebugFilter = DebugFilter.Max
     companion object { var instance: Navigator? = null }
     private val useOdometry = trackingMode != TrackingMode.Fancy
     init {
@@ -60,7 +62,7 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose, private v
     // ----- public variables ----- //
     // location
     var heading: Angle  // what direction the robot is facing
-        get() = gyro.heading
+        get() = odometry.poseMeters.rotation.k
         set(value) {gyro.heading = value}
     var pose: Pose2d  // the location and direction of the robot
         get() = if(!useOdometry) poseEstimator.estimatedPosition else odometry.poseMeters
@@ -71,8 +73,8 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose, private v
         }
     val position: Translation2d  // the estimated location of the robot
         get() = pose.translation
-    private val odometry = DifferentialDriveOdometry(Constants.START_POSE.rotation).apply {
-        resetPosition(startPose, heading.w)
+    private val odometry = DifferentialDriveOdometry(gyro.heading.w).apply {
+        resetPosition(startPose, gyro.heading.w)
     }
 
     /**

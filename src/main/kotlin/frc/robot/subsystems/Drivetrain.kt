@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
 import frc.kyberlib.math.PolarPose
@@ -43,6 +44,7 @@ import frc.robot.commands.drive.Drive
  */
 object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     // motors
+    override val priority: DebugFilter = DebugFilter.Max
     val leftMaster = KSparkMax(12).apply {
         identifier = "leftMaster"
         reversed = true
@@ -180,6 +182,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
      */
     override fun periodic() {
         debugDashboard()
+        KField2d.robotPose = RobotContainer.navigation.pose
         RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
         if(Constants.NAVIGATION_CORRECTION || Constants.DUMB_NAVIGATION)  {
             val distance = Turret.targetDistance ?: return
