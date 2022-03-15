@@ -114,6 +114,7 @@
         }
       },
       "Drivetrain": {
+        "open": true,
         "pose": {
           "open": true
         }
@@ -136,6 +137,7 @@
         "hood": {
           "open": true
         },
+        "open": true,
         "top Shooter": {
           "open": true
         }
@@ -328,7 +330,7 @@
     "Plot <2>": {
       "plots": [
         {
-          "height": -29,
+          "height": 205,
           "series": [
             {
               "color": [
@@ -351,7 +353,7 @@
           ]
         },
         {
-          "height": -29,
+          "height": 205,
           "series": [
             {
               "color": [

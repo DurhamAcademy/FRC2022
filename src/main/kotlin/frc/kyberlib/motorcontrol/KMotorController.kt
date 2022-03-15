@@ -16,7 +16,6 @@ import edu.wpi.first.networktables.NTSendableBuilder
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.simulation.LinearSystemSim
-import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand
 import frc.kyberlib.command.*
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.sign
@@ -33,7 +32,7 @@ typealias BrakeMode = Boolean
  * Types of encoders that may be used
  */
 enum class EncoderType {
-    NONE, NEO_HALL, QUADRATURE
+    NEO_HALL, QUADRATURE
 }
 
 /**
@@ -43,10 +42,6 @@ enum class ControlMode {
     VELOCITY, POSITION, VOLTAGE, NULL
 }
 
-/**
- * Stores data about an encoder. [reversed] means the encoder reading goes + when the motor is applied - voltage.
- */
-data class KEncoderConfig(val cpr: Int, val type: EncoderType, val reversed: Boolean = false)
 /**
  * A more advanced motor control with feedback control.
  */
@@ -81,19 +76,19 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         get() = constraints.maxVelocity.radiansPerSecond
         set(value) { constraints = TrapezoidProfile.Constraints(value.radiansPerSecond, constraints.maxVelocity) }
     /**
-     * The max angular acceleation the motor can have
+     * The max angular acceleration the motor can have
      */
     open var maxAcceleration: AngularVelocity
         get() = constraints.maxAcceleration.radiansPerSecond
         set(value) { constraints = TrapezoidProfile.Constraints(constraints.maxVelocity, value.radiansPerSecond) }
-    open var maxPosition: Angle? = null
-    var maxLinearPosition: Length?
-        get() = maxPosition?.let { rotationToLinear(it) }
-        set(value) {maxPosition = if (value == null) value else linearToRotation(value)}
-    open var minPosition: Angle? = null
-    var minLinearPosition: Length?
-        get() = minPosition?.let { rotationToLinear(it) }
-        set(value) {minPosition = if (value == null) value else linearToRotation(value)}
+    open var maxPosition: Angle = Angle(Double.POSITIVE_INFINITY)
+    var maxLinearPosition: Length
+        get() = rotationToLinear(maxPosition)
+        set(value) {maxPosition = linearToRotation(value)}
+    open var minPosition: Angle = Angle(Double.NEGATIVE_INFINITY)
+    var minLinearPosition: Length
+        get() = rotationToLinear(minPosition)
+        set(value) {minPosition = linearToRotation(value)}
     /**
      * The max linear velocity the motor can have
      */
@@ -163,7 +158,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             when (controlMode) {
                 ControlMode.VELOCITY -> {
                     val ff = if (linearConfigured) feedforward.calculate(linearVelocitySetpoint.metersPerSecond)///, linearVelocitySetpoint.metersPerSecond, updateRate.seconds)
-                                else feedforward.calculate(velocitySetpoint.radiansPerSecond)//, velocitySetpoint.radiansPerSecond, updateRate.seconds)
+                            else feedforward.calculate(velocitySetpoint.radiansPerSecond)//, velocitySetpoint.radiansPerSecond, updateRate.seconds)
                     val pid = PID.calculate(velocity.radiansPerSecond, velocitySetpoint.radiansPerSecond)  // todo: check constraints on that you want S profile on velocity control
                     ff + pid
                 }
@@ -243,7 +238,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      */
     var customControl: ((motor: KMotorController) -> Voltage)? = null
     /**
-     * Locks recursive calls to customControl from inside of customControl
+     * Locks recursive calls to customControl from inside customControl
      */
     private var customControlLock = false
 
@@ -303,11 +298,8 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      */
     var positionSetpoint: Angle = 0.rotations
         private set(value) {
-            var clamped = value
-            if (minPosition != null) clamped = value.value.coerceAtLeast(minPosition!!.value).radians
-            if (maxPosition != null) clamped = value.value.coerceAtMost(maxPosition!!.value).radians
-            field = clamped
-            if(!closedLoopConfigured && real) rawPosition = clamped
+            field = value.coerceIn(minPosition, maxPosition)
+            if(!closedLoopConfigured && real) rawPosition = field
             else if (!customControlLock) updateVoltage()
         }
     /**
@@ -365,7 +357,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      */
     fun updateVoltage() {
         if (!isFollower && customControl != null && controlMode != ControlMode.VOLTAGE) {
-            customControlLock = true  // todo: if custom control crashes, this might be permenantly locked
+            customControlLock = true  // todo: if custom control crashes, this might be permanently locked
             safeSetVoltage(customControl!!(this))
             customControlLock = false
         }
@@ -455,7 +447,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             map.putAll(mapOf(
             "Angular Position" to position,
             "Angular Velocity" to velocity,
-            // "Angular Acceleration (rad per s per s)" to acceleration.radiansPerSecond  // temporary (here for testing)
+            // "Angular Acceleration (rad per s^2)" to acceleration.radiansPerSecond  // temporary (here for testing)
         ))
         if (controlMode == ControlMode.POSITION) {
             if (linearConfigured)
@@ -487,7 +479,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
 
     // ----- sim ---- //
     /**
-     * Settable variabe describing velocity according to whatever simulation
+     * Settable variable describing velocity according to whatever simulation
      */
     var simVelocity: AngularVelocity = 0.rpm
         set(value) {
@@ -495,7 +487,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             field = value
         }
     /**
-     * Settable variabe describing velocity according to whatever simulation
+     * Settable variable describing velocity according to whatever simulation
      */
     var simPosition: Angle = 0.degrees
         set(value) {
@@ -795,7 +787,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         /**
          * A Linear Quadractic Regulator takes a system and the cost of state error and voltage error and creates an optimal adjustment scheme.
          * @param plant system to model the motor
-         * @param tolerance how far of from the desired state is acceptables
+         * @param velocityTolerance how far of from the desired state is acceptables
          * @param voltageTolerance what is the max acceptable voltage. Default to battery voltage (12.0)
          * @return a LQR that will optimize the control system for your plant
          */

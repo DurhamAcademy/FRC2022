@@ -34,19 +34,19 @@ class KSparkMax(private val canId: CANId, brushedMotor: Boolean = false, type: E
     }
     private val _pid = spark.pidController
 
-    override var minPosition: Angle? = null
+    override var minPosition: Angle = super.minPosition
         set(value) {
             field = value
-            if (value != null && real) {
+            if (real) {
                 val direction = if (reversed) CANSparkMax.SoftLimitDirection.kForward else CANSparkMax.SoftLimitDirection.kReverse
                 spark.setSoftLimit(direction, (value.rotations * gearRatio.invertIf { reversed }).toFloat())
             }
         }
 
-    override var maxPosition: Angle? = null
+    override var maxPosition: Angle = super.maxPosition
         set(value) {
             field = value
-            if (value != null && real) {
+            if (real) {
                 val direction = if (reversed) CANSparkMax.SoftLimitDirection.kReverse else CANSparkMax.SoftLimitDirection.kForward
                 spark.setSoftLimit(direction, (value.rotations * gearRatio.invertIf { reversed }).toFloat())
             }

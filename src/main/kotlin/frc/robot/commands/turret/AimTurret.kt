@@ -17,21 +17,8 @@ object AimTurret : CommandBase() {
         addRequirements(Turret)
     }
 
-    private val notFoundTimer = Timer()  // timer counting how long without vision target seen
-    private val lostTimer = Timer()  // timer after how long not finding it at the expected location
-
-    private val directionFilter = MedianFilter(5)
-
     override fun initialize() {
-        Turret.turret.PID.reset(Turret.turret.position.rotations)
-        found()
-    }
-
-    private fun found() {
-        notFoundTimer.reset()
-        notFoundTimer.stop()
-        lostTimer.reset()
-        lostTimer.stop()
+        Turret.reset()
     }
 
     override fun execute() {
@@ -39,15 +26,10 @@ object AimTurret : CommandBase() {
 
 //         if the limelight is a target
         if (Turret.targetVisible) {
-            found()
 //             perp zoom correction
 //            val perpSpeed = Drivetrain.polarSpeeds.dTheta.toTangentialVelocity(Drivetrain.polarCoordinates.r)
             val goalOrientation = Turret.visionOffset ?: return
             Turret.fieldRelativeAngle = Turret.fieldRelativeAngle + goalOrientation
-        }
-        else {
-//            Turret.turret.stop()
-            notFoundTimer.start()
         }
     }
 
@@ -58,5 +40,5 @@ object AimTurret : CommandBase() {
     /**
      * If you don't find the target after awhile go back to seek turret (looking everywhere).
      */
-    override fun isFinished(): Boolean = notFoundTimer.hasElapsed(Constants.NOT_FOUND_WAIT)
+    override fun isFinished(): Boolean = Turret.lost
 }

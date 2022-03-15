@@ -3,8 +3,8 @@ package frc.robot.subsystems
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.math.filter.LinearFilter
-import edu.wpi.first.math.filter.MedianFilter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.TrapezoidProfile
@@ -19,7 +19,6 @@ import frc.kyberlib.math.units.towards
 import frc.kyberlib.math.zeroIf
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KMotorController.StateSpace.systemLoop
-import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
@@ -44,16 +43,11 @@ object Turret : SubsystemBase(), Debug {
 
     // characterization of the turret
     private val feedforward = SimpleMotorFeedforward(0.22832, 1.1432, 0.045857)
-    // some filters
-//    private val visionFilter: LinearFilter = LinearFilter.movingAverage(1)
-//    private val positionFilter = MedianFilter(5)
     // actual turret motors
     val turret = KSparkMax(11).apply {
         identifier = "turret"
         kP = .8
         kD = 0.01
-//        maxAcceleration = 2.radiansPerSecond
-//        maxVelocity = 3.radiansPerSecond
         gearRatio = Constants.TURRET_GEAR_RATIO
         motorType = DCMotor.getNeo550(1)
 
@@ -77,8 +71,7 @@ object Turret : SubsystemBase(), Debug {
             v
         }
 
-        val offsetCorrector = ProfiledPIDController(3.0, 0.0, 0.0002, TrapezoidProfile.Constraints(3.0, 1.0)).apply {
-            setTolerance(Constants.TURRET_DEADBAND.radians)
+        val offsetCorrector = ProfiledPIDController(10.0, 1.0, 0.0, TrapezoidProfile.Constraints(10.0, 5.0)).apply {
             setIntegratorRange(-1.0, 1.0)
         }
         val velLoop = systemLoop(velocitySystem(feedforward), 3.0, 0.1, 10.degreesPerSecond.value, 10.0)
@@ -101,9 +94,9 @@ object Turret : SubsystemBase(), Debug {
             val polarSpeeds = Drivetrain.polarSpeeds
             val movementComp = -polarSpeeds.dTheta
             val chassisComp = polarSpeeds.dOrientation
-            val setpoint = clampSafePosition(it.positionSetpoint)
-            val offset = it.position - setpoint
-            val offsetCorrection = offsetCorrector.calculate(position.value, setpoint.value).radiansPerSecond
+            position = clampSafePosition(it.positionSetpoint)
+            val offset = it.position - positionSetpoint
+            val offsetCorrection = offsetCorrector.calculate(position.value, positionSetpoint.value).radiansPerSecond
             val targetVelocity = offsetCorrection - chassisComp - movementComp
             val v = feedforward.calculate(targetVelocity.radiansPerSecond)// + it.PID.calculate(velocityError.radiansPerSecond)
             if (offset < Constants.TURRET_TOLERANCE) status = TurretStatus.LOCKED
@@ -154,11 +147,8 @@ object Turret : SubsystemBase(), Debug {
     /**
      * Makes an angle safe for the electronics to not get tangled
      */
-    fun clampSafePosition(angle: Angle): Angle {
-//        return  if(angle.value.between(minAngle.value, maxAngle.value)) angle
-//                else if (angle.normalized.value.between(minAngle.value, maxAngle.value)) angle.normalized
-//                else angle.coerceIn(minAngle, maxAngle)
-        return (angle + 15.degrees).normalized - 15.degrees//positionFilter.calculate(angle.normalized.value).radians
+    private fun clampSafePosition(angle: Angle): Angle {
+        return (angle + 15.degrees).normalized - 15.degrees
     }
 
     /**
@@ -171,6 +161,7 @@ object Turret : SubsystemBase(), Debug {
     private var latestResult: PhotonPipelineResult? = null
     var targetVisible: Boolean = false
         private set
+    var lost = false
     private var target: PhotonTrackedTarget? = null
     val visionOffset: Angle?
         get() = if (Game.real) target?.yaw?.let { -it.degrees }
@@ -178,8 +169,6 @@ object Turret : SubsystemBase(), Debug {
                     var off = (RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k - fieldRelativeAngle + randomizer.nextGaussian().degrees * 0.0)
                     off = off.normalized
                     if (off > 0.5.rotations) off -= 1.rotations
-//                    println("robot: ${fieldRelativeAngle.string()}, towards: ${RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k.string()}")
-//                    println(off.string())
                     if(off.absoluteValue < 20.degrees) off.degrees.degrees else null
 //                    off
                 }
@@ -195,20 +184,25 @@ object Turret : SubsystemBase(), Debug {
     val ready: Boolean
         get() = turret.positionError.absoluteValue < Constants.TURRET_TOLERANCE || status == TurretStatus.FROZEN
 
+    fun reset() {
+        distanceFilter.reset()
+        turret.PID.reset(turret.position.rotations, turret.velocity.rotationsPerSecond)
+    }
+
+    private val lostDebouncer = Debouncer(0.1, Debouncer.DebounceType.kBoth)
     override fun periodic() {
         debugDashboard()
         if(Game.real) {
             latestResult = RobotContainer.limelight.latestResult
             targetVisible = latestResult != null && latestResult!!.hasTargets()
+            lost = !lostDebouncer.calculate(targetVisible)
             target = latestResult?.let { if(it.hasTargets()) it.bestTarget else null  }
         }
         else {
             targetVisible = visionOffset != null
+            lost = !lostDebouncer.calculate(targetVisible)
         }
-//        turret.updateVoltage()
-//        SmartDashboard.putNumber("tangle", turret.position.degrees)
-//        SmartDashboard.putNumber("voff", visionOffset?.degrees ?: 0.0)
-//        SmartDashboard.putBoolean("hall", RobotContainer.turretLimit.get())
+        turret.updateVoltage()
     }
 
     override fun simulationPeriodic() {

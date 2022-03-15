@@ -14,10 +14,6 @@ class TestTurret : CommandBase() {
         Debug.log("TT", "start")
     }
 
-    override fun execute() {
-        Turret.turret.updateVoltage()
-    }
-
     override fun end(interrupted: Boolean) {
         Debug.log("TT", "end")
         Turret.turret.stop()

@@ -16,7 +16,7 @@ object ZeroTurret: CommandBase() {
     }
 
     override fun execute() {
-        Turret.turret.percent = -0.1
+        Turret.turret.percent = -0.2
         Debug.log("turretLimit", RobotContainer.turretLimit.get().toString(), level = DebugFilter.Low)
     }
 

@@ -34,7 +34,7 @@ class Robot : KRobot() {
     }
 
     override fun enabledInit() {
-        ZeroTurret.schedule(false) // don't uncomment this until the Hall sensor is added or bad things might happen
+        ZeroTurret.schedule(false)
         reset(Constants.START_POSE)
     }
 
@@ -42,9 +42,13 @@ class Robot : KRobot() {
     }
 
     private fun reset(pose: Pose2d) {
-        Drivetrain.leftMaster.resetPosition(0.meters)
-        Drivetrain.rightMaster.resetPosition(0.meters)
-//        RobotContainer.gyro.heading = pose.rotation.k
+        if(Game.real) {
+            Drivetrain.leftMaster.resetPosition(0.meters)
+            Drivetrain.rightMaster.resetPosition(0.meters)
+        }
+        else {
+            RobotContainer.gyro.heading = pose.rotation.k
+        }
         RobotContainer.navigation.pose = pose
     }
 
