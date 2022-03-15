@@ -118,11 +118,13 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     val speedPoly = Polynomial(37.43917, -119.05297, 1501.93519)
     private fun flywheelUpdate(dis: Length) {
-        targetVelocity = speedPoly.eval(dis.value).rpm.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
+        val interpolated = speedPoly.eval(dis.value).rpm.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
+        val fudge = 100.rpm * (Turret.turret.position.absoluteValue / 2.0).sin
+        targetVelocity = interpolated + fudge
     }
 
     fun stop() {
-        targetVelocity = 0.rpm
+         targetVelocity = 0.rpm
         flywheel.stop()
         status = ShooterStatus.IDLE
     }
