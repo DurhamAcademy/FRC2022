@@ -22,7 +22,7 @@ object TrajectoryManager {
     }
 
     private fun getAuto(name: String): Trajectory {
-        val file =  File("$AUTO_PATH/$name")
+        val file =  AUTO_PATH.resolve(name).toFile()
 
         var traj = Trajectory()
         file.readLines().forEach {
@@ -33,20 +33,11 @@ object TrajectoryManager {
         return traj
     }
 
-    private fun getPath(name: String): Trajectory {
-//        val jsonFile = File("$TRAJECTORY_PATH/$name.wpilib.json")
-        return TrajectoryUtil.fromPathweaverJson(TRAJECTORY_PATH.resolve("$name.wpilib.json"))
-    }
+    private fun getPath(name: String): Trajectory = TrajectoryUtil.fromPathweaverJson(TRAJECTORY_PATH.resolve("$name.wpilib.json"))
+
     operator fun get(s: String) = trajectories[s]
-    private val routines = AUTO_PATH.toFile().list()!!
-    private val paths = TRAJECTORY_PATH.toFile().list()!!.map { it.removeSuffix(".wpilib.json") }
+    val routines = AUTO_PATH.toFile().list()!!
+    val paths = TRAJECTORY_PATH.toFile().list()!!.map { it.removeSuffix(".wpilib.json") }
 }
 
 // ftp://roborio-TEAM-frc.local/home/lvuser/deploy/
-
-object TrajectoryUtility {
-    fun getTrajectory(name: String): Trajectory {
-        val path = Filesystem.getDeployDirectory().toPath().resolve("PathWeaver/output/$name.wpilib.json")
-        return TrajectoryUtil.fromPathweaverJson(path)
-    }
-}
