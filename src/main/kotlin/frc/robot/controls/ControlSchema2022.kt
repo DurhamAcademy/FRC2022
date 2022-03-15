@@ -21,4 +21,5 @@ abstract class ControlSchema2022 {
 
     abstract val FLYWHEEL_INCREASE: Trigger
     abstract val FLYWHEEL_DECREASE: Trigger
+    abstract val COMPRESSOR_TOGGLE: Trigger
 }

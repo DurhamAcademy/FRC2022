@@ -41,4 +41,5 @@ object RocketLeague : ControlSchema2022() {
 
     override val FLYWHEEL_DECREASE: Trigger = xbox.leftBumper
     override val FLYWHEEL_INCREASE: Trigger = xbox.rightBumper
+    override val COMPRESSOR_TOGGLE: Trigger = xbox.xButton
 }

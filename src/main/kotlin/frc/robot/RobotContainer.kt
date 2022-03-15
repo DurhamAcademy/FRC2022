@@ -7,11 +7,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Subsystem
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.TrackingMode
+import frc.kyberlib.auto.trajectory.TrajectoryManager
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.lighting.KLEDRegion
 import frc.kyberlib.lighting.KLEDStrip
 import frc.kyberlib.lighting.animations.AnimationPulse
 import frc.kyberlib.lighting.animations.AnimationSilon
+import frc.kyberlib.pneumatics.KSolenoid
 import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.commands.Emote
 import frc.robot.commands.intake.Flush
@@ -63,11 +65,15 @@ object RobotContainer {
             Shooter.shooterMult -= .01
             emptySet<Subsystem>()
         }
+        COMPRESSOR_TOGGLE.whileActiveOnce {
+            if(KSolenoid.compressor.enabled()) KSolenoid.compressor.disable() else KSolenoid.compressor.enableDigital()
+            emptySet<Subsystem>()
+        }
     }
 
     val autoChooser = SendableChooser<String>().apply {
-//        val options = TrajectoryManager.routines
-//        for (path in options) addOption(path, path)
+        val options = TrajectoryManager.routines
+        for (path in options) addOption(path, path)
         setDefaultOption("Default", "Default")
         SmartDashboard.putData("auto", this)
     }

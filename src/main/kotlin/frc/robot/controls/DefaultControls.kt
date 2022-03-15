@@ -35,4 +35,5 @@ object DefaultControls : ControlSchema2022() {
 
     override val FLYWHEEL_DECREASE: Trigger = xbox.downDPad
     override val FLYWHEEL_INCREASE: Trigger = xbox.upDPad
+    override val COMPRESSOR_TOGGLE: Trigger = xbox.bButton
 }
