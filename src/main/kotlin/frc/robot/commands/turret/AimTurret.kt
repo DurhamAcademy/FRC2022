@@ -30,8 +30,8 @@ object AimTurret : CommandBase() {
 //             perp zoom correction
 //            val perpSpeed = Drivetrain.polarSpeeds.dTheta.toTangentialVelocity(Drivetrain.polarCoordinates.r)
             var goalOrientation = Turret.visionOffset ?: return
-            if(goalOrientation.absoluteValue < 0.5.degrees) goalOrientation = 0.degrees
-            Turret.turret.position = Turret.turret.position + goalOrientation
+            if(goalOrientation.absoluteValue < 1.degrees) goalOrientation = 0.degrees
+            Turret.turret.position = Turret.turret.position + goalOrientation * 0.7
         }
         else {
             Turret.turret.position = Turret.fieldRelativeAngle

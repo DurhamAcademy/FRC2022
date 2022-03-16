@@ -42,7 +42,7 @@ object Turret : SubsystemBase(), Debug {
     var isZeroed = false
 
     // characterization of the turret
-    private val feedforward = SimpleMotorFeedforward(0.0, 1.1432, 0.045857) // 0.22832
+    private val feedforward = SimpleMotorFeedforward(0.05, 1.1432, 0.045857) // 0.22832
     // actual turret motors
     val turret = KSparkMax(11).apply {
         identifier = "turret"
@@ -53,7 +53,9 @@ object Turret : SubsystemBase(), Debug {
 
         val headingDiff = Differentiator()
 
-        PID = ProfiledPIDController(20.0, 0.0, 1.0, TrapezoidProfile.Constraints(2.0, 1.5)).apply {
+//        val loop = stateSpaceControl(positionSystem(feedforward), 3.0, .1, 2.degrees.value,1.0,4.0)
+
+        PID = ProfiledPIDController(40.0, 3.0, 0.0, TrapezoidProfile.Constraints(1.0, 1.0)).apply {
             setIntegratorRange(-2.0, 2.0)
         }  // these constraints are not tested on real
 
@@ -131,7 +133,7 @@ object Turret : SubsystemBase(), Debug {
         turret.PID.reset(turret.position.rotations, turret.velocity.rotationsPerSecond)
     }
 
-    private val lostDebouncer = Debouncer(0.1, Debouncer.DebounceType.kBoth)
+    private val lostDebouncer = Debouncer(0.2, Debouncer.DebounceType.kBoth)
     override fun periodic() {
         debugDashboard()
         if(Game.real) {
