@@ -2,23 +2,29 @@ package frc.robot
 
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.wpilibj.DigitalInput
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.TrackingMode
 import frc.kyberlib.auto.trajectory.TrajectoryManager
+import frc.kyberlib.command.Game
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.lighting.KLEDRegion
 import frc.kyberlib.lighting.KLEDStrip
-import frc.kyberlib.lighting.animations.AnimationCylon
+import frc.kyberlib.lighting.animations.*
 import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.commands.Emote
 import frc.robot.commands.intake.Eject
 import frc.robot.commands.intake.Flush
 import frc.robot.commands.intake.Intake
+import frc.robot.commands.shooter.ForceShoot
 import frc.robot.commands.shooter.ShooterCalibration
 import frc.robot.commands.shooter.Shoot
+import frc.robot.commands.turret.AimTurret
 import frc.robot.commands.turret.FreezeTurret
+import frc.robot.commands.turret.SeekTurret
+import frc.robot.commands.turret.ZeroTurret
 import frc.robot.subsystems.Drivetrain
 import frc.robot.controls.ControlSchema2022
 import frc.robot.controls.DefaultControls
@@ -50,7 +56,7 @@ object RobotContainer {
     val controlScheme = DefaultControls.apply {
         INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
         SHOOT.whileActiveOnce(Shoot)
-        FORCE_SHOT.whileActiveOnce(ShooterCalibration)
+        FORCE_SHOT.whileActiveOnce(ForceShoot)
         EJECT.whileActiveOnce(Eject)
         FLUSH.whileActiveOnce(Flush)
         LOCK_TURRET.toggleWhenActive(FreezeTurret)
@@ -67,7 +73,14 @@ object RobotContainer {
 // QUOTE: I dont need a christmas tree, i need a robot. -Cherith
     val leds = KLEDStrip(0, 14).apply {
         val coral = Color(255, 93, 115)
-        this += KLEDRegion(AnimationCylon(coral, 3, 20),0, 14)
+        this += KLEDRegion(AnimationCylon(Color.RED, 5, 20),0, 14)
+        this += KLEDRegion(AnimationSolid(Color.BLUE), 0, 14) {Turret.currentCommand == ZeroTurret}
+        this += KLEDRegion(AnimationSolid(Color(100,86,150)), 0, 14) {Turret.currentCommand == SeekTurret}
+        this += KLEDRegion(AnimationSolid(Color.GREEN), 0, 14) {Turret.currentCommand == AimTurret}
+        this += KLEDRegion(AnimationRain(Color.GREEN, 2, 10), 0, 14, false) {Turret.ready}
+        this += KLEDRegion(AnimationSolid(Color.YELLOW), 0, 14, false) {Shooter.status == ShooterStatus.SPINUP}
+        this += KLEDRegion(AnimationRain(Color.YELLOW, 2, 10), 0, 14, false) {Shooter.ready}
+        this += KLEDRegion(AnimationRGBRain( .5, 2, 10), 0, 14, false) {Shooter.status == ShooterStatus.SHOT}
     }
 
     init {

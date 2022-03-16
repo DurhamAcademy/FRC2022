@@ -1,6 +1,5 @@
 package frc.robot.subsystems
 
-import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.Debouncer
@@ -8,17 +7,15 @@ import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.TrapezoidProfile
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.randomizer
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.towards
-import frc.kyberlib.math.zeroIf
 import frc.kyberlib.motorcontrol.KMotorController
-import frc.kyberlib.motorcontrol.KMotorController.StateSpace.systemLoop
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
@@ -39,20 +36,24 @@ enum class TurretStatus {
  */
 object Turret : SubsystemBase(), Debug {
     var status = TurretStatus.LOST
-    override val priority: DebugFilter = DebugFilter.Max
+//    override val priority: DebugFilter = DebugFilter.Max
+    val visionFilter = LinearFilter.singlePoleIIR(.07, .02)
+
+    var isZeroed = false
 
     // characterization of the turret
-    private val feedforward = SimpleMotorFeedforward(0.22832, 1.1432, 0.045857)
+    private val feedforward = SimpleMotorFeedforward(0.0, 1.1432, 0.045857) // 0.22832
     // actual turret motors
     val turret = KSparkMax(11).apply {
         identifier = "turret"
         gearRatio = Constants.TURRET_GEAR_RATIO
         motorType = DCMotor.getNeo550(1)
         brakeMode = true
+        currentLimit = 15
 
         val headingDiff = Differentiator()
 
-        PID = ProfiledPIDController(70.0, 2.0, 0.0, TrapezoidProfile.Constraints(3.0, 2.0)).apply {
+        PID = ProfiledPIDController(20.0, 0.0, 1.0, TrapezoidProfile.Constraints(2.0, 1.5)).apply {
             setIntegratorRange(-2.0, 2.0)
         }  // these constraints are not tested on real
 
@@ -60,9 +61,12 @@ object Turret : SubsystemBase(), Debug {
             val rot = -headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.1.seconds
             position = clampSafePosition(it.positionSetpoint + rot)
 
+            SmartDashboard.putNumber("error", positionError.degrees)
+            SmartDashboard.putNumber("set", positionSetpoint.degrees)
             val offsetCorrection = PID.calculate(position.rotations, positionSetpoint.rotations)
             val ff = feedforward.calculate(PID.setpoint.velocity.rotationsPerSecond.radiansPerSecond)
-            (ff + offsetCorrection)//.coerceIn(-4.0, 4.0)
+            debugDashboard()
+            if(isZeroed) (ff + offsetCorrection) else 0.0//.coerceIn(-4.0, 4.0)
         }
         customControl = new
 
@@ -85,7 +89,7 @@ object Turret : SubsystemBase(), Debug {
      * Makes an angle safe for the electronics to not get tangled
      */
     private fun clampSafePosition(angle: Angle): Angle {
-        return (angle + 25.degrees).normalized - 25.degrees
+        return (angle + 45.degrees).normalized - 45.degrees
     }
 
     /**
@@ -93,6 +97,7 @@ object Turret : SubsystemBase(), Debug {
      */
     fun zeroTurret() {  // zeros the robot position to looking straight aheead
         turret.resetPosition()
+        isZeroed = true
     }
 
     private var latestResult: PhotonPipelineResult? = null
@@ -101,7 +106,7 @@ object Turret : SubsystemBase(), Debug {
     var lost = false
     private var target: PhotonTrackedTarget? = null
     val visionOffset: Angle?
-        get() = if (Game.real) target?.yaw?.let { -it.degrees }
+        get() = if (Game.real) target?.yaw?.let { visionFilter.calculate(-it).degrees }
                 else {
                     var off = (RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k - fieldRelativeAngle + randomizer.nextGaussian().degrees * 0.0)
                     off = off.normalized

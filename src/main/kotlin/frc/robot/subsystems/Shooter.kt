@@ -37,8 +37,8 @@ enum class ShooterStatus {
  */
 object Shooter : SubsystemBase(), Debug, Simulatable {
     var status = ShooterStatus.IDLE
-    override val priority: DebugFilter = DebugFilter.Max
-    private val ff = SimpleMotorFeedforward(0.2062, 0.029032, 0.0052967)
+//    override val priority: DebugFilter = DebugFilter.Max
+    private val ff = SimpleMotorFeedforward(0.2062, 0.0315032, 0.0052967)
 
     // main motor attached to the flywheel
     val flywheel = KSparkMax(31).apply {
@@ -46,11 +46,13 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         motorType = DCMotor.getNEO(2)
         addFeedforward(ff)
         kP = 0.032434
-        currentLimit = 50
+//        kI = 0.001
+        currentLimit = 40
+        brakeMode = false
         if(Game.sim) setupSim(ff)
     }
 
-    private val readyDebouncer = Debouncer(0.1, DebounceType.kBoth)
+    private val readyDebouncer = Debouncer(0.2, DebounceType.kBoth)
     private val shortReady
         get() = hood.atSetpoint && flywheel.velocityError.absoluteValue < Constants.SHOOTER_VELOCITY_TOLERANCE && flywheel.velocitySetpoint > 1.radiansPerSecond
     val ready: Boolean
@@ -110,13 +112,13 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     val speedPoly = Polynomial(37.43917, -119.05297, 1501.93519)
     private fun flywheelUpdate(dis: Length) {
-        val interpolated = speedPoly.eval(dis.value).rpm.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
+        val interpolated = speedPoly.eval(dis.value).rpm//.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
         val fudge = SmartDashboard.getNumber("back fudge", 100.0).rpm * (Turret.turret.position.absoluteValue / 2.0).sin
-        targetVelocity = interpolated + fudge
+        targetVelocity = (interpolated + fudge) / 2.0
     }
 
     fun stop() {
-         targetVelocity = 0.rpm
+        targetVelocity = 0.rpm
         flywheel.stop()
         status = ShooterStatus.IDLE
     }
@@ -126,8 +128,9 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     override fun periodic() {
-        debugDashboard()
-//        Turret.targetDistance?.let { hoodUpdate(it) }
+//        debugDashboard()
+        SmartDashboard.putNumber("fly error", flywheel.velocityError.rpm)
+        Turret.targetDistance?.let { hoodUpdate(it) }
     }
 
     override fun debugValues(): Map<String, Any?> {

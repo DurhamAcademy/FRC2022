@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
+import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.rotations
 import frc.robot.Constants
 import frc.robot.subsystems.Turret
@@ -28,7 +29,8 @@ object AimTurret : CommandBase() {
         if (Turret.targetVisible) {
 //             perp zoom correction
 //            val perpSpeed = Drivetrain.polarSpeeds.dTheta.toTangentialVelocity(Drivetrain.polarCoordinates.r)
-            val goalOrientation = Turret.visionOffset ?: return
+            var goalOrientation = Turret.visionOffset ?: return
+            if(goalOrientation.absoluteValue < 0.5.degrees) goalOrientation = 0.degrees
             Turret.turret.position = Turret.turret.position + goalOrientation
         }
         else {

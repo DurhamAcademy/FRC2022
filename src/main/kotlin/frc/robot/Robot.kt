@@ -35,6 +35,7 @@ class Robot : KRobot() {
 
     override fun disabledInit() {
         Drivetrain.stop()
+        Turret.isZeroed = false
     }
 
     override fun enabledInit() {

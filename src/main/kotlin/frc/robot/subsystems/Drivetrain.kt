@@ -44,7 +44,7 @@ import frc.robot.commands.drive.Drive
  */
 object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     // motors
-    override val priority: DebugFilter = DebugFilter.Max
+//    override val priority: DebugFilter = DebugFilter.Max
     val leftMaster = KSparkMax(12).apply {
         identifier = "leftMaster"
         reversed = true
@@ -102,7 +102,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     // setup motors
     private val leftFF = SimpleMotorFeedforward(Constants.DRIVE_KS_L, Constants.DRIVE_KV_L, Constants.DRIVE_KA_L)
     private val rightFF = SimpleMotorFeedforward(Constants.DRIVE_KS_R, Constants.DRIVE_KV_R, Constants.DRIVE_KA_R)
-    private val angularFeedforward = SimpleMotorFeedforward(0.90868, 2.7143, 0.14424)
+    private val angularFeedforward = SimpleMotorFeedforward(0.6382, 2.7318, 0.32016)
     init {
         defaultCommand = Drive
 
@@ -182,7 +182,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
      */
     override fun periodic() {
         debugDashboard()
-        KField2d.robotPose = RobotContainer.navigation.pose
+//        KField2d.robotPose = RobotContainer.navigation.pose
         RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
         if(Constants.NAVIGATION_CORRECTION || Constants.DUMB_NAVIGATION)  {
             val distance = Turret.targetDistance ?: return

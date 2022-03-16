@@ -30,7 +30,7 @@ enum class DebugFilter {
  */
 interface Debug {
     companion object {
-        var debugging = true
+        var debugging = false
         var loggingLevel = if(Game.real) DebugFilter.High else DebugFilter.Normal
 
         fun log(identifier:String, text: String, mode: LogMode = LogMode.PRINT, level: DebugFilter = DebugFilter.Normal, stacktrace: Boolean = false) {
