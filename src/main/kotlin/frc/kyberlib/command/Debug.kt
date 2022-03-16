@@ -30,8 +30,8 @@ enum class DebugFilter {
  */
 interface Debug {
     companion object {
-        var debugging = false
-        var loggingLevel = if(Game.real) DebugFilter.High else DebugFilter.Normal
+        private const val debugging = false
+        private val loggingLevel = if(Game.real) DebugFilter.High else DebugFilter.Normal
 
         fun log(identifier:String, text: String, mode: LogMode = LogMode.PRINT, level: DebugFilter = DebugFilter.Normal, stacktrace: Boolean = false) {
             if (level < loggingLevel || !debugging) return
@@ -83,7 +83,6 @@ interface Debug {
     fun log(message: String = debugString, logMode: LogMode = LogMode.PRINT, level: DebugFilter = priority) {
         val isError = logMode == LogMode.ERROR
         Companion.log(identifier, message, logMode, level, stacktrace = isError)
-        if (isError) throw AssertionError("Check the log for assertion")
     }
 
     /**

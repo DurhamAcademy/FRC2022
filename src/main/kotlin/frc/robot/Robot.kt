@@ -46,17 +46,6 @@ class Robot : KRobot() {
     override fun teleopInit() {
     }
 
-    private fun reset(pose: Pose2d) {
-        if(Game.real) {
-            Drivetrain.leftMaster.resetPosition(0.meters)
-            Drivetrain.rightMaster.resetPosition(0.meters)
-        }
-        else {
-            RobotContainer.gyro.heading = pose.rotation.k
-        }
-        RobotContainer.navigation.pose = pose
-    }
-
     override fun teleopPeriodic() {
 //        SmartDashboard.putBoolean("hall", RobotContainer.turretLimit.get())
         if(Game.real) {
@@ -77,7 +66,18 @@ class Robot : KRobot() {
         autoCommand = auto
     }
 
-    fun loadRoutine(routine: String): SequentialCommandGroup {
+    private fun reset(pose: Pose2d) {
+        if(Game.real) {
+            Drivetrain.leftMaster.resetPosition(0.meters)
+            Drivetrain.rightMaster.resetPosition(0.meters)
+        }
+        else {
+            RobotContainer.gyro.heading = pose.rotation.k
+        }
+        RobotContainer.navigation.pose = pose
+    }
+
+    private fun loadRoutine(routine: String): SequentialCommandGroup {
         val command = SequentialCommandGroup()
         val f = File("${TrajectoryManager.AUTO_PATH}/$routine")
         f.readLines().forEach {

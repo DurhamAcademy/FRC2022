@@ -41,7 +41,7 @@ abstract class MecanumDrivetrain : KDrivetrain, SubsystemBase(), Debug {
         get() = odometry.poseMeters
     var heading
         get() = Navigator.instance!!.heading
-        set(value) {Navigator.instance!!.heading = value}
+        set(value) {}//Navigator.instance!!.heading = value}
     override val chassisSpeeds: ChassisSpeeds
         get() = kinematics.toChassisSpeeds(mecanumDriveWheelSpeeds)
 

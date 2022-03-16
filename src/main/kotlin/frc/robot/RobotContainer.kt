@@ -43,7 +43,7 @@ object RobotContainer {
     val limelight = PhotonCamera("gloworm")
     val turretLimit = DigitalInput(0)
 
-    val navigation = Navigator(gyro, Constants.START_POSE, trackingMode = if(Constants.NAVIGATION_CORRECTION) TrackingMode.Fancy else if (Constants.DUMB_NAVIGATION) TrackingMode.DumbBoth else TrackingMode.Fast)
+    val navigation = Navigator(gyro, Constants.START_POSE)
 
     val controller = KXboxController(0)
     val op = OperatorControls()
@@ -53,7 +53,7 @@ object RobotContainer {
         addOption("RocketLeague", RocketLeague)
         SmartDashboard.putData("control system", this)
     }
-    val controlScheme = DefaultControls.apply {
+    var controlScheme = schemaChooser.selected.apply {  // fixme
         INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
         SHOOT.whileActiveOnce(Shoot)
         FORCE_SHOT.whileActiveOnce(ForceShoot)

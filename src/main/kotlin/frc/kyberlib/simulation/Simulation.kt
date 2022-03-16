@@ -15,7 +15,10 @@ class Simulation : SubsystemBase() {
             get() { return if(internal == null) Simulation() else internal!! }
         private var internal: Simulation? = null
     }
-    init { internal = this }
+    init {
+        assert(Game.sim)
+        internal = this
+    }
 
     private val sims = ArrayList<Simulatable>()
 

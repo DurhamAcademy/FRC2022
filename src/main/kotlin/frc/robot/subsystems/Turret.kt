@@ -37,7 +37,7 @@ enum class TurretStatus {
 object Turret : SubsystemBase(), Debug {
     var status = TurretStatus.LOST
 //    override val priority: DebugFilter = DebugFilter.Max
-    val visionFilter = LinearFilter.singlePoleIIR(.07, .02)
+    private val visionFilter: LinearFilter = LinearFilter.singlePoleIIR(.07, .02)
 
     var isZeroed = false
 
@@ -124,7 +124,7 @@ object Turret : SubsystemBase(), Debug {
                 else visionPitch?.let { pitch -> 2.feet + distanceFilter.calculate((Constants.UPPER_HUB_HEIGHT.inches - 1 - Constants.LIMELIGHT_HEIGHT.inches) / (Constants.LIMELIGHT_ANGLE + pitch).tan).inches}  // this could be wrong
 
     val ready: Boolean
-        get() = (targetVisible && visionOffset!!.absoluteValue < Constants.TURRET_TOLERANCE) || Game.sim || status == TurretStatus.FROZEN
+        get() = Game.sim || (targetVisible && visionOffset!!.absoluteValue < Constants.TURRET_TOLERANCE) || status == TurretStatus.FROZEN
 
     fun reset() {
         distanceFilter.reset()

@@ -181,15 +181,15 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
-        debugDashboard()
+//        debugDashboard()
 //        KField2d.robotPose = RobotContainer.navigation.pose
         RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
-        if(Constants.NAVIGATION_CORRECTION || Constants.DUMB_NAVIGATION)  {
-            val distance = Turret.targetDistance ?: return
-            val offset = Turret.visionOffset ?: return
-            val angle = offset + Turret.fieldRelativeAngle + 180.degrees
-            polarCoordinates = PolarPose(distance, angle, offset)
-        }
+//        if(Constants.NAVIGATION_CORRECTION || Constants.DUMB_NAVIGATION)  {
+//            val distance = Turret.targetDistance ?: return
+//            val offset = Turret.visionOffset ?: return
+//            val angle = offset + Turret.fieldRelativeAngle + 180.degrees
+//            polarCoordinates = PolarPose(distance, angle, offset)
+//        }
     }
 
     override fun simulationPeriodic() {
@@ -246,7 +246,8 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         leftMaster.simLinearVelocity = driveSim.leftVelocityMetersPerSecond.metersPerSecond
         rightMaster.simLinearPosition = driveSim.rightPositionMeters.meters
         rightMaster.simLinearVelocity = driveSim.rightVelocityMetersPerSecond.metersPerSecond
-        Navigator.instance!!.heading = driveSim.heading.k
+        RobotContainer.gyro.heading = driveSim.heading.k
+//        RobotContainer.navigation.pose = driveSim.pose
 //        Navigator.instance!!.heading += chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond * dt
     }
 

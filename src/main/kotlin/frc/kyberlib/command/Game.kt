@@ -8,10 +8,8 @@ import frc.kyberlib.math.units.extensions.seconds
 import frc.kyberlib.math.units.micro
 
 object Game {
-    val real
-        get() = RobotBase.isReal()
-    val sim
-        get() = RobotBase.isSimulation()
+    val real = RobotBase.isReal()
+    val sim = RobotBase.isSimulation()
 
     val enabled
         get() = RobotState.isEnabled()

@@ -24,6 +24,7 @@ import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
+import frc.robot.RobotContainer
 
 /**
  * Pre-made DifferentialDrive Robot.
@@ -90,7 +91,7 @@ abstract class DifferentialDriveTrain: SubsystemBase(), Simulatable, KDrivetrain
         leftMaster.simLinearVelocity = driveSim.leftVelocityMetersPerSecond.metersPerSecond
         rightMaster.simLinearPosition = driveSim.rightPositionMeters.meters
         rightMaster.simLinearVelocity = driveSim.rightVelocityMetersPerSecond.metersPerSecond
-        Navigator.instance!!.heading = driveSim.heading.k
+//        RobotContainer = driveSim.heading.k
     }
 
     private val driveSystem: LinearSystem<N2, N2, N2>

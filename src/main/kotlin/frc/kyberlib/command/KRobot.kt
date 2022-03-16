@@ -46,13 +46,10 @@ open class KRobot() {
         }
 
         override fun disabledExit() {
-            Debug.log("Robot", "disabled periodic", level=DebugFilter.Low)
-            this@KRobot.disabledExit()
+            Debug.log("Robot", "enable init", level=DebugFilter.Low)
+            this@KRobot.enabledInit()
         }
-
         override fun autonomousInit() {
-            if (!enabled) enabledInit()
-            enabled = true
             Debug.log("Robot", "auto init", level=DebugFilter.Low)
             TrajectoryManager.load()
             this@KRobot.autonomousInit()
@@ -137,8 +134,6 @@ open class KRobot() {
      * Ran continuously when the robot is disabled
      */
     open fun disabledPeriodic() {}
-
-    open fun disabledExit() {}
 
     /**
      * Ran once when robot enters auto or teleop, but not both
