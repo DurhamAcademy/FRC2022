@@ -97,7 +97,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     private const val B2 = B * B
     private const val D = 2 * A * B
     private val theta = 24.5476.degrees.radians
-    private val startLength = 6.61.inches
+    private val startLength = 6.75.inches
     var hoodAngle: Angle
         get() = acos((-hoodDistance.inches * hoodDistance.inches + A2 + B2) / D).radians
         set(value) {

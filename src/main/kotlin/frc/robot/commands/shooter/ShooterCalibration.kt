@@ -27,7 +27,7 @@ object ShooterCalibration : CommandBase() {
         // 0 - 3000 rpm limits
 //        Shooter.update()
         Shooter.targetVelocity = SmartDashboard.getNumber(rpmString, 0.0).rpm
-        Shooter.hoodDistance = SmartDashboard.getNumber(hoodString, 0.0).millimeters
+        Shooter.hoodAngle = SmartDashboard.getNumber(hoodString, 0.0).degrees
 
         if(Shooter.ready) {
 //            Feed.schedule()
