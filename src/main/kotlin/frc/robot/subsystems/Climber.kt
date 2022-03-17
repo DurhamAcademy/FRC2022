@@ -166,8 +166,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
 
     init {
         if (Game.sim) {
-            SmartDashboard.putData("climb sim", sim)
-//            Simulation.instance.include(this)
+//            SmartDashboard.putData("climb sim", sim)
         }
     }
 

@@ -72,7 +72,7 @@ class Robot : KRobot() {
             Drivetrain.rightMaster.resetPosition(0.meters)
         }
         else {
-            RobotContainer.gyro.heading = pose.rotation.k
+//            RobotContainer.gyro.heading = pose.rotation.k
         }
         RobotContainer.navigation.pose = pose
     }

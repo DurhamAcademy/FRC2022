@@ -10,16 +10,19 @@ object ManualDrive : CommandBase() {
         addRequirements(Drivetrain)
     }
 
+    const val fwdString = "fwd"
+    const val turnString = "turn"
+
     override fun initialize() {
-        SmartDashboard.putNumber("fwd", 0.0)
-        SmartDashboard.putNumber("turn", 0.0)
+        SmartDashboard.putNumber(fwdString, 0.0)
+        SmartDashboard.putNumber(turnString, 0.0)
     }
 
     override fun execute() {
         Drivetrain.drive(ChassisSpeeds(
-            SmartDashboard.getNumber("fwd", 0.0),
+            SmartDashboard.getNumber(fwdString, 0.0),
             0.0,
-            SmartDashboard.getNumber("turn", 0.0)
+            SmartDashboard.getNumber(turnString, 0.0)
         ))
     }
 

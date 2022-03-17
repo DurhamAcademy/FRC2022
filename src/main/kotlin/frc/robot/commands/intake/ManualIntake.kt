@@ -5,18 +5,17 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.subsystems.Intaker
 
 object ManualIntake : CommandBase() {
+    const val deploymentString = "deployed"
+    const val intakeString = "intake percent"
     init {
         addRequirements(Intaker)
-    }
-
-    override fun initialize() {
-        SmartDashboard.putBoolean("deployed", Intaker.deployed)
-        SmartDashboard.putNumber("intake percent", 0.0)
+        SmartDashboard.putBoolean(deploymentString, Intaker.deployed)
+        SmartDashboard.putNumber(intakeString, 0.0)
     }
 
     override fun execute() {
-        Intaker.deployed = SmartDashboard.getBoolean("deployed", Intaker.deployed)
-        Intaker.intakeMotor.percent = SmartDashboard.getNumber("intake percent", 0.0)
+        Intaker.deployed = SmartDashboard.getBoolean(deploymentString, Intaker.deployed)
+        Intaker.intakeMotor.percent = SmartDashboard.getNumber(intakeString, 0.0)
     }
 
     override fun end(interrupted: Boolean) {

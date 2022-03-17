@@ -8,10 +8,13 @@ import frc.robot.subsystems.Conveyor
 import frc.robot.subsystems.Shooter
 
 object ShooterCalibration : CommandBase() {
+
+    const val rpmString = "flywheel rpm"
+    const val hoodString = "hood degrees"
     init {
         addRequirements(Shooter, Conveyor)
-        SmartDashboard.putNumber("flywheel rpm", 0.0)
-        SmartDashboard.putNumber("hood degrees", 5.0)
+        SmartDashboard.putNumber(rpmString, 0.0)
+        SmartDashboard.putNumber(hoodString, 5.0)
     }
 
     private var reenableCompressor = true
@@ -23,8 +26,8 @@ object ShooterCalibration : CommandBase() {
     override fun execute() {
         // 0 - 3000 rpm limits
 //        Shooter.update()
-        Shooter.targetVelocity = SmartDashboard.getNumber("flywheel rpm", 0.0).rpm
-        Shooter.hoodDistance = SmartDashboard.getNumber("hood degrees", 0.0).millimeters
+        Shooter.targetVelocity = SmartDashboard.getNumber(rpmString, 0.0).rpm
+        Shooter.hoodDistance = SmartDashboard.getNumber(hoodString, 0.0).millimeters
 
         if(Shooter.ready) {
 //            Feed.schedule()
@@ -36,7 +39,7 @@ object ShooterCalibration : CommandBase() {
     override fun end(interrupted: Boolean) {
         Shooter.stop()
         Conveyor.stop()
-//        if(reenableCompressor) KSolenoid.compressor.enableDigital()
+        if(reenableCompressor) KSolenoid.compressor.enableDigital()
     }
 
     override fun isFinished(): Boolean = false

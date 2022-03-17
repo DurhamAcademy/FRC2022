@@ -21,7 +21,7 @@ open class KSolenoid(fwd: Int, back: Int, private val fake: Boolean = false) : D
     override var identifier: String = "Pneumatic$fwd"
     private val solenoid: DoubleSolenoid = hub.makeDoubleSolenoid(fwd, back)
     var extended: Boolean = false
-        get() = if (Game.real || fake) field else solenoid.get() == DoubleSolenoid.Value.kForward
+        get() = if (Game.sim || fake) field else solenoid.get() == DoubleSolenoid.Value.kForward
         set(value) {if(Game.sim || fake) field = value else solenoid.set(if(value) DoubleSolenoid.Value.kForward else DoubleSolenoid.Value.kReverse)}
 
     override fun debugValues(): Map<String, Any?> {

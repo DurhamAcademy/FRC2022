@@ -15,6 +15,7 @@ import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.randomizer
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.towards
+import frc.kyberlib.math.zeroIf
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.field.KField2d
@@ -23,6 +24,7 @@ import frc.robot.RobotContainer
 import frc.robot.commands.turret.SeekTurret
 import org.photonvision.targeting.PhotonPipelineResult
 import org.photonvision.targeting.PhotonTrackedTarget
+import kotlin.math.absoluteValue
 
 
 /**
@@ -67,9 +69,24 @@ object Turret : SubsystemBase(), Debug {
             SmartDashboard.putNumber("set", positionSetpoint.degrees)
             val offsetCorrection = PID.calculate(position.rotations, positionSetpoint.rotations)
             val ff = feedforward.calculate(PID.setpoint.velocity.rotationsPerSecond.radiansPerSecond)
-            debugDashboard()
             if(isZeroed) (ff + offsetCorrection) else 0.0//.coerceIn(-4.0, 4.0)
         }
+
+        val good = { it: KMotorController ->
+            position = clampSafePosition(positionSetpoint)
+            val polarSpeeds = Drivetrain.polarSpeeds
+            val movementComp = -polarSpeeds.dTheta
+            val chassisComp = polarSpeeds.dOrientation
+            val offsetCorrection = PID.calculate(positionSetpoint.rotations).rotationsPerSecond * feedforward.kv
+            val targetVelocity = offsetCorrection - chassisComp - movementComp * 0.0
+            SmartDashboard.putNumber("off", offsetCorrection.degreesPerSecond)
+            SmartDashboard.putNumber("chas", -chassisComp.degreesPerSecond)
+            SmartDashboard.putNumber("mov", -movementComp.degreesPerSecond)
+            SmartDashboard.putNumber("tar", targetVelocity.degreesPerSecond)
+            val v = feedforward.calculate(targetVelocity.radiansPerSecond)// + it.PID.calculate(velocityError.radiansPerSecond)
+            v.zeroIf { v.absoluteValue < 1.0  }
+        }
+
         customControl = new
 
         if(Game.sim) setupSim(feedforward)

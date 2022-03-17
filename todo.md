@@ -1,14 +1,14 @@
 # In Sim
-- add manual commands
-- voltage ramp
+- add operator controls
 - reset pose
-- mess with position control on KMotor
-- mess around with making velocity control not be garbage
-- mess with KMotorController constraints on velocity control
 
 # With robot
-- flywheel pids (graph)
-- check long term odometry
+- test velocity controlled turret
+- acceleration calculations
+- back compensation
+- hood angle
+- linear velocity
+- reset position (think about maybe with button)
 - Auto paths
   - mess with filesystem
 

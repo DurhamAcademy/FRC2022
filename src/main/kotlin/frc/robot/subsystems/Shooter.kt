@@ -135,7 +135,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     override fun periodic() {
-//        debugDashboard()
+        debugDashboard()
         SmartDashboard.putNumber("fly error", flywheel.velocityError.rpm)
         Turret.targetDistance?.let { hoodUpdate(it) }
     }

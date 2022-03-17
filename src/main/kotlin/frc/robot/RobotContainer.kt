@@ -44,13 +44,8 @@ object RobotContainer {
 
     val controller = KXboxController(0)
     val op = OperatorControls()
-
-    private val schemaChooser = SendableChooser<ControlSchema2022>().apply {
-        setDefaultOption("Default", DefaultControls)
-        addOption("RocketLeague", RocketLeague)
-        SmartDashboard.putData("control system", this)
-    }
-    var controlScheme = RocketLeague.apply {  // fixme
+    
+    var controlScheme = DefaultControls.apply {  // fixme
         INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
         SHOOT.whileActiveOnce(Shoot)
         FORCE_SHOT.whileActiveOnce(ForceShoot)

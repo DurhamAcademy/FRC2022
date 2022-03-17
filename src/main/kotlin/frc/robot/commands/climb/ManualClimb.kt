@@ -5,24 +5,26 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.subsystems.Climber
 
 object ManualClimb : CommandBase() {
+    const val leftWinchString = "left winch volt"
+    const val rightWinchString = "right winch volt"
+    const val leftRotString = "left winch volt"
+    const val rightRotString = "right winch volt"
+    const val staticString = "statics"
     init {
         addRequirements(Climber)
-    }
-
-    override fun initialize() {
-        SmartDashboard.putNumber("left winch v", 0.0)
-        SmartDashboard.putNumber("right winch v", 0.0)
-        SmartDashboard.putNumber("left rot v", 0.0)
-        SmartDashboard.putNumber("right rot v", 0.0)
-        SmartDashboard.putBoolean("static", false)
+        SmartDashboard.putNumber(leftWinchString, 0.0)
+        SmartDashboard.putNumber(rightWinchString, 0.0)
+        SmartDashboard.putNumber(leftRotString, 0.0)
+        SmartDashboard.putNumber(rightRotString, 0.0)
+        SmartDashboard.putBoolean(staticString, false)
     }
 
     override fun execute() {
-        Climber.leftWinch.voltage = SmartDashboard.getNumber("left winch v", 0.0)
-        Climber.rightWinch.voltage = SmartDashboard.getNumber("right winch v", 0.0)
-        Climber.leftExtendable.voltage = SmartDashboard.getNumber("left rot v", 0.0)
-        Climber.rightExtendable.voltage = SmartDashboard.getNumber("right rot v", 0.0)
-        Climber.staticsLifted = SmartDashboard.getBoolean("static", false)
+        Climber.leftWinch.voltage = SmartDashboard.getNumber(leftWinchString, 0.0)
+        Climber.rightWinch.voltage = SmartDashboard.getNumber(rightWinchString, 0.0)
+        Climber.leftExtendable.voltage = SmartDashboard.getNumber(leftRotString, 0.0)
+        Climber.rightExtendable.voltage = SmartDashboard.getNumber(rightRotString, 0.0)
+        Climber.staticsLifted = SmartDashboard.getBoolean(staticString, false)
     }
 
     override fun end(interrupted: Boolean) {
