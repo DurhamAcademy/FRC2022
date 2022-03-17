@@ -1,12 +1,11 @@
 package frc.kyberlib.input.controller
 
 import edu.wpi.first.wpilibj.GenericHID
-import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
-import frc.kyberlib.input.KAxis
-import frc.kyberlib.input.KController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.kyberlib.command.Debug
+import frc.kyberlib.input.KAxis
+import frc.kyberlib.input.KController
 
 /**
  * Represents a standard Xbox Controller
@@ -17,8 +16,8 @@ class KXboxController(port: Int) : KController(port), Debug {
     val leftX = KAxis { joystick.getRawAxis(0) }
     val leftY = KAxis { joystick.getRawAxis(1) }
 
-    val rightX = KAxis{ joystick.getRawAxis(4) }
-    val rightY = KAxis{ joystick.getRawAxis(5) }
+    val rightX = KAxis { joystick.getRawAxis(4) }
+    val rightY = KAxis { joystick.getRawAxis(5) }
 
     val aButton = JoystickButton(joystick, 1)
     val bButton = JoystickButton(joystick, 2)

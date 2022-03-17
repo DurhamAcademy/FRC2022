@@ -3,7 +3,6 @@ package frc.robot.subsystems
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.pneumatics.KSolenoid
 
@@ -22,10 +21,12 @@ object Intaker : SubsystemBase(), Debug {
             leftIntakeDeploy.extended = value
             rightIntakeDeploy.extended = value
         }
+
     // motor controlling the intake speed
     val intakeMotor = KSparkMax(20).apply {
         identifier = "intake"
         kP = 1.0
+        currentLimit = 40
         motorType = DCMotor.getNeo550(1)
     }
 

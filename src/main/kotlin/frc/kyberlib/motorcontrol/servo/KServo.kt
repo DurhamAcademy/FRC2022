@@ -1,12 +1,13 @@
 package frc.kyberlib.motorcontrol.servo
 
 import edu.wpi.first.math.filter.SlewRateLimiter
-import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.Servo
 import frc.kyberlib.command.Debug
-import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.motorcontrol.*
-import java.lang.UnsupportedOperationException
+import frc.kyberlib.math.units.extensions.Angle
+import frc.kyberlib.math.units.extensions.AngularVelocity
+import frc.kyberlib.math.units.extensions.degrees
+import frc.kyberlib.math.units.extensions.radians
+import frc.kyberlib.motorcontrol.PWMRegristry
 
 
 /**
@@ -18,12 +19,14 @@ import java.lang.UnsupportedOperationException
  * @param minMs the minimum milliseconds that the servo reads as valid signal
  * @param maxMs the maximum milliseconds that the servo reads as valid signal
  */
-class KServo(port: Int,
-             val length: Int,
-             travelSpeed: AngularVelocity,
-             initialPosition: Angle = 0.degrees,
-             minMs: Double = 1.0,
-             maxMs: Double = 2.0) : Debug {
+class KServo(
+    port: Int,
+    val length: Int,
+    travelSpeed: AngularVelocity,
+    initialPosition: Angle = 0.degrees,
+    minMs: Double = 1.0,
+    maxMs: Double = 2.0
+) : Debug {
     /**
      * The actual servo native object
      */
@@ -32,6 +35,7 @@ class KServo(port: Int,
         setBounds(maxMs, 0.01 + (maxMs + minMs) / 2, (maxMs + minMs) / 2, -0.01 + (maxMs + minMs) / 2, minMs)
     }
     override var identifier: String = "Servo$port"
+
     init {
         PWMRegristry[identifier] = port
     }
@@ -62,6 +66,7 @@ class KServo(port: Int,
      */
     val error: Angle
         get() = position - setpoint
+
     /**
      * True if the actuator's estimated position has converged on the target position.
      */

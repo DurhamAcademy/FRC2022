@@ -5,7 +5,6 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
-import kotlin.random.Random
 
 val Double.rtf: Double get() = (this * 10000).roundToInt() / 10000.0
 
@@ -22,7 +21,7 @@ fun Double.round(decimals: Int): Double {
     return BigDecimal(this).setScale(decimals, RoundingMode.HALF_EVEN).toDouble()
 }
 
-fun Double.zeroIf(condition: (it: Double) -> Boolean) = if (condition(this)) 0.0 else this 
+fun Double.zeroIf(condition: (it: Double) -> Boolean) = if (condition(this)) 0.0 else this
 
 
 val Int.even: Boolean
@@ -34,13 +33,18 @@ val Int.odd: Boolean
 val Number.sign
     get() = this.toDouble() / this.toDouble().absoluteValue
 
-fun Number.between(low: Number, high: Number) = this.toDouble() >= low.toDouble()  && this.toDouble() <= high.toDouble()
+fun Number.between(low: Number, high: Number) = this.toDouble() >= low.toDouble() && this.toDouble() <= high.toDouble()
 
 val randomizer = java.util.Random()
 
 
 @JvmName("toDiv")
-inline infix fun <reified T : KUnitKey, reified U : KUnitKey> String.to(value: KUnit<Mul<T, U>>): Pair<String, Number>  = "$this (${value.units()})" to value.value
+inline infix fun <reified T : KUnitKey, reified U : KUnitKey> String.to(value: KUnit<Mul<T, U>>): Pair<String, Number> =
+    "$this (${value.units()})" to value.value
+
 @JvmName("toMul")
-inline infix fun <reified T : KUnitKey, reified U : KUnitKey> String.to(value: KUnit<Div<T, U>>): Pair<String, Number>  = "$this (${value.units()})" to value.value
-inline infix fun <reified T: KUnitKey> String.to(value: KUnit<T>): Pair<String, Number> = "$this (${value.units()})" to value.value
+inline infix fun <reified T : KUnitKey, reified U : KUnitKey> String.to(value: KUnit<Div<T, U>>): Pair<String, Number> =
+    "$this (${value.units()})" to value.value
+
+inline infix fun <reified T : KUnitKey> String.to(value: KUnit<T>): Pair<String, Number> =
+    "$this (${value.units()})" to value.value

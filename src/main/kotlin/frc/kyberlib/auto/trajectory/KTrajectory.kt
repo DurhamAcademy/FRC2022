@@ -7,19 +7,34 @@ import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.math.trajectory.TrajectoryGenerator
 import edu.wpi.first.math.trajectory.TrajectoryUtil
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugFilter
-import frc.kyberlib.command.LogMode
 import java.io.File
 
 /**
  * Wrapper class of standard trajectory that allows for more generation options, saving / loading, and hashing
  */
 class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory(trajectory.states), Debug {
-    constructor(name: String, waypoints: List<Pose2d>, config: KTrajectoryConfig? = null) : this(name, generateTrajectory(waypoints, config))
+    constructor(name: String, waypoints: List<Pose2d>, config: KTrajectoryConfig? = null) : this(
+        name,
+        generateTrajectory(waypoints, config)
+    )
 
-    constructor(name: String, startPose2d: Pose2d, waypoints: Collection<Translation2d>, config: KTrajectoryConfig? = null) : this(name, generateTrajectory(startPose2d, waypoints.toMutableList(), config))  // check if .toMutableList maintains order
+    constructor(
+        name: String,
+        startPose2d: Pose2d,
+        waypoints: Collection<Translation2d>,
+        config: KTrajectoryConfig? = null
+    ) : this(
+        name,
+        generateTrajectory(startPose2d, waypoints.toMutableList(), config)
+    )  // check if .toMutableList maintains order
 
-    constructor(name: String, startPose2d: Pose2d, waypoints: Collection<Translation2d>, endPose2d: Pose2d, config: KTrajectoryConfig? = null) : this(name, generateTrajectory(startPose2d, waypoints.toMutableList(), endPose2d, config))
+    constructor(
+        name: String,
+        startPose2d: Pose2d,
+        waypoints: Collection<Translation2d>,
+        endPose2d: Pose2d,
+        config: KTrajectoryConfig? = null
+    ) : this(name, generateTrajectory(startPose2d, waypoints.toMutableList(), endPose2d, config))
 
     companion object {
         var generalConfig: KTrajectoryConfig? = null
@@ -30,7 +45,11 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
          */
         fun load(name: String): KTrajectory = TrajectoryManager[name]!!
 
-        private fun generateTrajectory(startPose2d: Pose2d, waypoints: MutableList<Translation2d>, newConfig: KTrajectoryConfig?): Trajectory {
+        private fun generateTrajectory(
+            startPose2d: Pose2d,
+            waypoints: MutableList<Translation2d>,
+            newConfig: KTrajectoryConfig?
+        ): Trajectory {
             val config = putConfig(newConfig)
             val endpoint = waypoints.removeLast()
             val finalDelta = endpoint.minus(waypoints.last())
@@ -42,7 +61,13 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
                 config
             )
         }
-        private fun generateTrajectory(startPose2d: Pose2d, waypoints: MutableList<Translation2d>, endPose2d: Pose2d, newConfig: KTrajectoryConfig?): Trajectory {
+
+        private fun generateTrajectory(
+            startPose2d: Pose2d,
+            waypoints: MutableList<Translation2d>,
+            endPose2d: Pose2d,
+            newConfig: KTrajectoryConfig?
+        ): Trajectory {
             val config = putConfig(newConfig)
             return TrajectoryGenerator.generateTrajectory(
                 startPose2d,
@@ -51,6 +76,7 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
                 config
             )
         }
+
         private fun generateTrajectory(waypoints: List<Pose2d>, newConfig: KTrajectoryConfig?): Trajectory {
             val config = putConfig(newConfig)
             return TrajectoryGenerator.generateTrajectory(waypoints, config)
@@ -65,7 +91,7 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
          */
         private fun putConfig(config: KTrajectoryConfig?): KTrajectoryConfig {
             if (config == null) {
-                assert(generalConfig != null) {"You must either provide a config or initialize the KTrajectory.config"}
+                assert(generalConfig != null) { "You must either provide a config or initialize the KTrajectory.config" }
                 return generalConfig!!
             }
             return config

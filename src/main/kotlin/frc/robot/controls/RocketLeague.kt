@@ -15,7 +15,7 @@ object RocketLeague : ControlSchema2022() {
 
         // throttle
         leftTrigger.apply {
-            maxVal = - 12.0
+            maxVal = -12.0
             expo = 20.0
             deadband = 0.2
         }
@@ -36,6 +36,8 @@ object RocketLeague : ControlSchema2022() {
     override val EJECT: Trigger = xbox.leftMenu
     override val FLUSH: Trigger = xbox.rightMenu
     override val LOCK_TURRET: Trigger = xbox.downDPad
-    override val CLIMB_MODE: Trigger = xbox.upDPad
+    override val ZERO_TURRET: Trigger = xbox.upDPad
+
+    override val CLIMB_MODE: Trigger = xbox.xButton
     override val EMOTE: Trigger = xbox.leftDPad
 }

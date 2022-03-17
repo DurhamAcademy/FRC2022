@@ -1,14 +1,13 @@
 package frc.kyberlib.simulation.field
 
 import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.math.trajectory.Trajectory
-import edu.wpi.first.math.trajectory.TrajectoryGenerator
+import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
-import frc.robot.Constants
 import frc.kyberlib.math.units.extensions.Length
 import frc.kyberlib.math.units.extensions.feet
 import frc.kyberlib.math.units.extensions.meters
+import frc.robot.Constants
 
 /**
  * Updated Field class to implement new behaviours.

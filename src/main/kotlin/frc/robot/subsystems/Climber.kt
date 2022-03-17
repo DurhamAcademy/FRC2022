@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.Time
 import frc.kyberlib.math.units.extensions.degrees
@@ -56,7 +55,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
 //        kI = 0.2
 //        addFeedforward(armFF)
         customControl = { bangBang(it) }
-        if(Constants.doStateSpace) {
+        if (Constants.doStateSpace) {
             val loop = KMotorController.StateSpace.systemLoop(armSystem(armFF), 3.0, .01, 3.degrees.value, 10.0)
             stateSpaceControl(loop)
         }
@@ -81,6 +80,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
 
     /** (right) winches that pull the robot up */
     private val winchFF = SimpleMotorFeedforward(1.0, 10.0, 5.0)
+
     /** (left) winches that pull the robot up */
     val leftWinch = KSimulatedESC(42).apply {
         identifier = "left winch"
@@ -92,7 +92,8 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         maxLinearPosition = 30.inches
         motorType = DCMotor.getNEO(1)
 //        if(Game.sim) setupSim(winchFF)
-        }
+    }
+
     /** (right) winches that pull the robot up */
     val rightWinch = KSimulatedESC(43).apply {
         identifier = "right winch"
@@ -139,7 +140,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
      * @return voltage represented as double
      */
     fun bangBang(motor: KMotorController): Double {
-        return if(motor.positionError.degrees.absoluteValue < 2.0) 0.0
+        return if (motor.positionError.degrees.absoluteValue < 2.0) 0.0
         else if (motor.positionError.value < 0.0) 10.0
         else -10.0
     }
@@ -147,11 +148,21 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     /**
      * In progress simulation of the climb
      */
-    private val sim = Mechanism2d((Constants.MID2HIGH + Constants.HIGH2TRAVERSE).meters, Constants.TRAVERSAL_RUNG_HEIGHT.meters)
+    private val sim =
+        Mechanism2d((Constants.MID2HIGH + Constants.HIGH2TRAVERSE).meters, Constants.TRAVERSAL_RUNG_HEIGHT.meters)
     private val extendPivot = sim.getRoot("extendable pivot", 0.0, 8.inches.value)
     private val staticPivot = sim.getRoot("static pivot", 0.0, 15.5.inches.value)
-    private val extendable = extendPivot.append(MechanismLigament2d("extenable", 35.inches.value + leftWinch.position.value, 22.5, 1.0, Color8Bit(255, 0, 0)))
-    private val static = staticPivot.append(MechanismLigament2d("static", 31.inches.value, 0.0, 1.0, Color8Bit(255, 255, 0)))
+    private val extendable = extendPivot.append(
+        MechanismLigament2d(
+            "extenable",
+            35.inches.value + leftWinch.position.value,
+            22.5,
+            1.0,
+            Color8Bit(255, 0, 0)
+        )
+    )
+    private val static =
+        staticPivot.append(MechanismLigament2d("static", 31.inches.value, 0.0, 1.0, Color8Bit(255, 255, 0)))
 
     init {
         if (Game.sim) {
@@ -159,10 +170,11 @@ object Climber : SubsystemBase(), Debug, Simulatable {
 //            Simulation.instance.include(this)
         }
     }
+
     override fun simUpdate(dt: Time) {
         extendable.length = (35.inches.value + leftWinch.position.value)
         extendable.angle = leftExtendable.position.degrees
-        static.angle = if(staticsLifted) 90.0 else 0.0
+        static.angle = if (staticsLifted) 90.0 else 0.0
     }
 
     override fun periodic() {

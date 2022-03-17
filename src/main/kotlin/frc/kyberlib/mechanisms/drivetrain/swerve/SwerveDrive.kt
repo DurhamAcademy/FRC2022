@@ -9,14 +9,15 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.math.trajectory.TrapezoidProfile
-import edu.wpi.first.math.trajectory.constraint.SwerveDriveKinematicsConstraint
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand
 import frc.kyberlib.command.Debug
 import frc.kyberlib.math.units.debugValues
-import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.extensions.Angle
+import frc.kyberlib.math.units.extensions.degrees
+import frc.kyberlib.math.units.extensions.feetPerSecond
+import frc.kyberlib.math.units.extensions.w
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
-import frc.kyberlib.mechanisms.drivetrain.swerve.SwerveDrive
 import frc.kyberlib.sensors.gyros.KGyro
 
 /**
@@ -25,10 +26,14 @@ import frc.kyberlib.sensors.gyros.KGyro
  * @param swerveModules are used to physically move the robot
  * @param constraints optional value that regulates how the robot can move
  */
-class SwerveDrive(private val gyro: KGyro,
-                  private vararg val swerveModules: SwerveModule,
-                  private val constraints: TrapezoidProfile.Constraints = TrapezoidProfile.Constraints(10.feetPerSecond.value, 10.feetPerSecond.value)
-                        ) : SubsystemBase(), KDrivetrain, Debug {
+class SwerveDrive(
+    private val gyro: KGyro,
+    private vararg val swerveModules: SwerveModule,
+    private val constraints: TrapezoidProfile.Constraints = TrapezoidProfile.Constraints(
+        10.feetPerSecond.value,
+        10.feetPerSecond.value
+    )
+) : SubsystemBase(), KDrivetrain, Debug {
     // controls
     private val kinematics = SwerveDriveKinematics(*swerveModules.map { it.location }.toTypedArray())
     private val odometry = SwerveDriveOdometry(kinematics, 0.degrees.w)
@@ -38,16 +43,22 @@ class SwerveDrive(private val gyro: KGyro,
 
     var states
         get() = swerveModules.map { it.state }
-        set(value) {swerveModules.zip(value).forEach { it.first.state = it.second }}
+        set(value) {
+            swerveModules.zip(value).forEach { it.first.state = it.second }
+        }
 
     override val chassisSpeeds: ChassisSpeeds
-        get() =  kinematics.toChassisSpeeds(*states.toTypedArray())
+        get() = kinematics.toChassisSpeeds(*states.toTypedArray())
     var heading: Angle
         get() = gyro.heading
-        set(value) { gyro.heading = value }
+        set(value) {
+            gyro.heading = value
+        }
     var pose: Pose2d
         get() = odometry.poseMeters
-        set(value) { odometry.resetPosition(value, heading.w) }
+        set(value) {
+            odometry.resetPosition(value, heading.w)
+        }
 
     override fun drive(speeds: ChassisSpeeds) {
         drive(speeds, true)
@@ -60,10 +71,14 @@ class SwerveDrive(private val gyro: KGyro,
      */
     fun drive(speeds: ChassisSpeeds, fieldOriented: Boolean = true) {
         if (fieldOriented) {
-            val fieldSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, gyro.heading.minus(fieldHeading).w)
+            val fieldSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                speeds.vxMetersPerSecond,
+                speeds.vyMetersPerSecond,
+                speeds.omegaRadiansPerSecond,
+                gyro.heading.minus(fieldHeading).w
+            )
             drive(*kinematics.toSwerveModuleStates(fieldSpeeds))
-        }
-        else drive(speeds)
+        } else drive(speeds)
     }
 
     /**

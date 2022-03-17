@@ -2,7 +2,6 @@ package frc.kyberlib.motorcontrol
 
 import edu.wpi.first.networktables.NTSendable
 import edu.wpi.first.networktables.NTSendableBuilder
-import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotController
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
@@ -19,10 +18,14 @@ abstract class KBasicMotorController : NTSendable, Debug {
         val allMotors = mutableListOf<KBasicMotorController>()
     }
 
-    init { addReferences() }
+    init {
+        addReferences()
+    }
+
     private fun addReferences() {
         allMotors.add(this)
     }
+
     protected val followPeriodic = 0.1.seconds
     var controlMode = ControlMode.NULL
     // ------ configs ----- //
@@ -55,6 +58,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
         voltage = v
         controlMode = prevMode
     }
+
     /**
      * What percent output is currently being applied?
      */
@@ -63,7 +67,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
         set(value) {
             val adjusted = value.invertIf { reversed }
             controlMode = ControlMode.VOLTAGE
-            for(follower in followers) follower.percent = adjusted
+            for (follower in followers) follower.percent = adjusted
             if (real) rawPercent = adjusted else field = value
         }
 
@@ -79,17 +83,20 @@ abstract class KBasicMotorController : NTSendable, Debug {
     var voltage: Voltage
         inline get() = percent * vbus
         set(value) {
-            val norm = value.coerceIn(-maxVoltage , maxVoltage)
+            val norm = value.coerceIn(-maxVoltage, maxVoltage)
             percent = (norm / vbus)
         }
 
     /**
      * The voltage available to the motor
      */
-    val vbus = if (real) RobotController.getBatteryVoltage() else 12.0
+    val vbus
+        get() = if (real) RobotController.getBatteryVoltage() else 12.0
 
     var maxVoltage: Voltage = vbus
-        set(value) {field = value.coerceIn(0.0, vbus)}
+        set(value) {
+            field = value.coerceIn(0.0, vbus)
+        }
 
     /**
      * True if this motor is following another.
@@ -130,15 +137,13 @@ abstract class KBasicMotorController : NTSendable, Debug {
      */
     override fun initSendable(builder: NTSendableBuilder) {
         builder.setSmartDashboardType("Encoder")
-        builder.addStringProperty("Control Type", {controlMode.name}, null)
-        builder.addDoubleProperty("Voltage", this::voltage) { if(it != voltage) this.voltage = it }
+        builder.addStringProperty("Control Type", { controlMode.name }, null)
+        builder.addDoubleProperty("Voltage", this::voltage) { if (it != voltage) this.voltage = it }
     }
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
-            "Voltage" to voltage,
-            "brake mode" to brakeMode,
-            "reversed" to reversed
+            "Voltage" to voltage
         )
     }
 

@@ -6,7 +6,6 @@ import frc.kyberlib.math.units.LengthConversions.inchesToFeet
 import frc.kyberlib.math.units.LengthConversions.milesToFeet
 import frc.kyberlib.math.units.Meter
 import frc.kyberlib.math.units.centi
-import frc.kyberlib.math.units.milli
 
 
 /**
@@ -14,6 +13,7 @@ import frc.kyberlib.math.units.milli
  * Should not be created directly. Use the number extensions instead.
  */
 typealias Length = KUnit<Meter>
+
 // Number -> length
 val Number.meters inline get() = Length(this.toDouble())
 val Number.centimeters inline get() = Length(this.centi)

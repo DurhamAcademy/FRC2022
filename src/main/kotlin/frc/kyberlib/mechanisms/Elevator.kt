@@ -2,10 +2,9 @@ package frc.kyberlib.mechanisms
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.math.units.extensions.Length
 import frc.kyberlib.math.units.extensions.feet
-import frc.kyberlib.math.units.extensions.meters
+import frc.kyberlib.motorcontrol.KMotorController
 
 /**
  * Simple pre-made system that will control an elevator. Control by setting the position.
@@ -19,6 +18,7 @@ class Elevator(vararg val motors: KMotorController, radius: Length, initialPosit
         this.radius = radius
         resetPosition(initialPosition)
     }
+
     init {
         for (info in motors.withIndex()) {
             if (info.index > 0) info.value.follow(master)

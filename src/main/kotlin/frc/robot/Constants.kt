@@ -40,7 +40,7 @@ object Constants {
     const val DRIVE_GEAR_RATIO = 62.0 / 10.0
 
     // ------ Intake ------ //
-    const val INTAKE_PERCENT = 0.8
+    const val INTAKE_PERCENT = 0.6
 
     // ------ Shooter ------ //
     val LIMELIGHT_HEIGHT: Length = 25.inches

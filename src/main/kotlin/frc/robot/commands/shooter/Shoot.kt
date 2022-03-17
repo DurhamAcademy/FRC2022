@@ -5,7 +5,6 @@ import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.robot.RobotContainer
-import frc.robot.commands.intake.Idle
 import frc.robot.subsystems.*
 
 
@@ -24,7 +23,7 @@ object Shoot : CommandBase() {
     }
 
     override fun execute() {
-        Debug.log("Shoot", "execute", level=DebugFilter.Low)
+        Debug.log("Shoot", "execute", level = DebugFilter.Low)
         // check if shooter should spin up
         if ((Turret.targetVisible || Shooter.status == ShooterStatus.SHOT)) {
 //            val parallelSpeed = Drivetrain.polarSpeeds.dr
@@ -36,8 +35,7 @@ object Shoot : CommandBase() {
                 Conveyor.status = ConveyorStatus.FEEDING
                 Conveyor.feed()
                 RobotContainer.controller.rumble = 0.0
-            } 
-            else {
+            } else {
                 RobotContainer.controller.rumble = 0.5
                 Shooter.status = ShooterStatus.SPINUP
                 Conveyor.stop()
@@ -46,11 +44,11 @@ object Shoot : CommandBase() {
     }
 
     override fun end(interrupted: Boolean) {
-        Debug.log("Shoot", "idle", level=DebugFilter.Low)
+        Debug.log("Shoot", "idle", level = DebugFilter.Low)
         Shooter.stop()
         Conveyor.stop()
         RobotContainer.controller.rumble = 0.0
-        if (reenableCompressor) KSolenoid.compressor.enableDigital()
+        if (reenableCompressor || true) KSolenoid.compressor.enableDigital()
 
     }
 }

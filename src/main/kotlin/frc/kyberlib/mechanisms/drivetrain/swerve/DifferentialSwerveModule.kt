@@ -2,12 +2,9 @@ package frc.kyberlib.mechanisms.drivetrain.swerve
 
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
-import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.motorcontrol.GearRatio
 import frc.kyberlib.motorcontrol.KMotorController
-import kotlin.math.PI
 
 /**
  * Untested Class to control differential swerve module.
@@ -16,9 +13,10 @@ import kotlin.math.PI
  * @param topMotor the first motor of the dif swerve
  * @param bottomMotor the second motor of the dif swerve
  */
-class DifferentialSwerveModule(location: Translation2d, wheelRadius: Length,
-                               private val topMotor: KMotorController, private val bottomMotor: KMotorController
-                                        ) : SwerveModule(location) {
+class DifferentialSwerveModule(
+    location: Translation2d, wheelRadius: Length,
+    private val topMotor: KMotorController, private val bottomMotor: KMotorController
+) : SwerveModule(location) {
 
     private val rotationPID = PIDController(0.07, 0.00, 0.01)
     private val feedforward = SimpleMotorFeedforward(0.0, 0.0, 0.0)

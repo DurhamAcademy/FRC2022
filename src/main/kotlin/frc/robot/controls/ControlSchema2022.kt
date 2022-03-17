@@ -15,6 +15,7 @@ abstract class ControlSchema2022 {
     abstract val FLUSH: Trigger
 
     abstract val LOCK_TURRET: Trigger
+    abstract val ZERO_TURRET: Trigger
     abstract val CLIMB_MODE: Trigger
 
     abstract val EMOTE: Trigger

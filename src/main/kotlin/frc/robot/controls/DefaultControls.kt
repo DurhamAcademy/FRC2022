@@ -30,6 +30,7 @@ object DefaultControls : ControlSchema2022() {
     override val EJECT: Trigger = xbox.leftDPad
     override val FLUSH: Trigger = xbox.rightDPad
     override val LOCK_TURRET: Trigger = xbox.leftMenu
+    override val ZERO_TURRET: Trigger = xbox.bButton
     override val CLIMB_MODE: Trigger = xbox.rightMenu
     override val EMOTE: Trigger = xbox.aButton
 }

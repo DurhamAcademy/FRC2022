@@ -2,7 +2,6 @@ package frc.robot.commands.shooter
 
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.CommandBase
-import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.robot.subsystems.*
 
@@ -30,8 +29,7 @@ class AutoShot : CommandBase() {
                 shootingTimer.start()
                 Shooter.status = ShooterStatus.SHOT
                 Conveyor.feed()
-            }
-            else {
+            } else {
                 Shooter.status = ShooterStatus.SPINUP
                 Conveyor.stop()
             }
@@ -39,7 +37,7 @@ class AutoShot : CommandBase() {
     }
 
     override fun end(interrupted: Boolean) {
-        if(reenableCompressor) KSolenoid.compressor.enableDigital()
+        if (reenableCompressor) KSolenoid.compressor.enableDigital()
     }
 
     override fun isFinished(): Boolean = shootingTimer.hasElapsed(2.0)

@@ -2,7 +2,6 @@ package frc.kyberlib
 
 import java.io.File
 import java.io.IOException
-import kotlin.math.absoluteValue
 
 // random misc functions
 
@@ -19,8 +18,7 @@ fun String.runCommand(workingDir: File) {  // this doesn't work for some reason
             redirectError(ProcessBuilder.Redirect.PIPE)
         }
         proc.start()
-    }
-    catch(e: IOException) {
+    } catch (e: IOException) {
         e.printStackTrace()
     }
 }

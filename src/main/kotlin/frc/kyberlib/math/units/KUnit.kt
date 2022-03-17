@@ -1,6 +1,5 @@
 package frc.kyberlib.math.units
 
-import frc.kyberlib.command.Debug
 import frc.kyberlib.math.epsilonEquals
 import frc.kyberlib.math.units.extensions.*
 import kotlin.math.absoluteValue
@@ -35,19 +34,31 @@ value class KUnit<T>(val value: Double) : Comparable<KUnit<T>> {
 }
 
 // combining separate units
-operator fun <T : KUnitKey, U : KUnitKey> KUnit<T>.times(other: KUnit<U>): KUnit<Mul<T, U>>  = KUnit<Mul<T, U>>(value * other.value)
-operator fun <T : KUnitKey, U : KUnitKey> KUnit<T>.div(other: KUnit<U>): KUnit<Div<T, U>> = KUnit<Div<T, U>>(value / other.value)
+operator fun <T : KUnitKey, U : KUnitKey> KUnit<T>.times(other: KUnit<U>): KUnit<Mul<T, U>> =
+    KUnit<Mul<T, U>>(value * other.value)
+
+operator fun <T : KUnitKey, U : KUnitKey> KUnit<T>.div(other: KUnit<U>): KUnit<Div<T, U>> =
+    KUnit<Div<T, U>>(value / other.value)
+
 @JvmName("stringDiv")
-inline fun <reified T : KUnitKey, reified U : KUnitKey> KUnit<Div<T, U>>.string(): String  = "$value ${T::class.java.simpleName}s per ${U::class.java.simpleName}"
+inline fun <reified T : KUnitKey, reified U : KUnitKey> KUnit<Div<T, U>>.string(): String =
+    "$value ${T::class.java.simpleName}s per ${U::class.java.simpleName}"
+
 @JvmName("stringMul")
-inline fun <reified T : KUnitKey, reified U : KUnitKey> KUnit<Mul<T, U>>.string(): String  = "$value ${T::class.java.simpleName} ${U::class.java.simpleName}s"
-inline fun <reified T: KUnitKey> KUnit<T>.string(): String = "$value ${T::class.java.simpleName}s"
+inline fun <reified T : KUnitKey, reified U : KUnitKey> KUnit<Mul<T, U>>.string(): String =
+    "$value ${T::class.java.simpleName} ${U::class.java.simpleName}s"
+
+inline fun <reified T : KUnitKey> KUnit<T>.string(): String = "$value ${T::class.java.simpleName}s"
 
 @JvmName("unitsDiv")
-inline fun <reified T : KUnitKey, reified U : KUnitKey> KUnit<Div<T, U>>.units(): String  = "${T::class.java.simpleName}s per ${U::class.java.simpleName}"
+inline fun <reified T : KUnitKey, reified U : KUnitKey> KUnit<Div<T, U>>.units(): String =
+    "${T::class.java.simpleName}s per ${U::class.java.simpleName}"
+
 @JvmName("unitsMul")
-inline fun <reified T : KUnitKey, reified U : KUnitKey> KUnit<Mul<T, U>>.units(): String  = "${T::class.java.simpleName} ${U::class.java.simpleName}s"
-inline fun <reified T: KUnitKey> KUnit<T>.units(): String = "${T::class.java.simpleName}s"
+inline fun <reified T : KUnitKey, reified U : KUnitKey> KUnit<Mul<T, U>>.units(): String =
+    "${T::class.java.simpleName} ${U::class.java.simpleName}s"
+
+inline fun <reified T : KUnitKey> KUnit<T>.units(): String = "${T::class.java.simpleName}s"
 
 
 fun main(args: Array<String>) {
@@ -55,7 +66,7 @@ fun main(args: Array<String>) {
         "position" to 5.meters,
         "velocity" to 10.metersPerSecond
     )
-    map.forEach{
+    map.forEach {
         println(it.value)
         println(it.key)
     }

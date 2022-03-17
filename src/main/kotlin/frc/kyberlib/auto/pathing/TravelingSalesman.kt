@@ -1,11 +1,9 @@
 package frc.kyberlib.auto.pathing
 
 
-import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.wpilibj.Timer
 import frc.kyberlib.math.odd
-import java.util.*
-import kotlin.collections.ArrayList
 
 
 // https://github.com/ReadyPlayer2/TSP
@@ -22,17 +20,23 @@ typealias Route = ArrayList<Waypoint>
  */
 class TravelingSalesman(
     private val waypoints: MutableList<Translation2d>,
-    private val startPosition: Waypoint? = null, private val endPosition: Waypoint? = null)
-{
-    constructor(vararg waypoints: Translation2d, startPosition: Waypoint? = null, endPosition: Waypoint? = null) : this(waypoints.toMutableList(), startPosition, endPosition)
+    private val startPosition: Waypoint? = null, private val endPosition: Waypoint? = null
+) {
+    constructor(vararg waypoints: Translation2d, startPosition: Waypoint? = null, endPosition: Waypoint? = null) : this(
+        waypoints.toMutableList(),
+        startPosition,
+        endPosition
+    )
+
     /**
      * Calculate the shortest route by trying every combination O(n!)
      */
     fun bruteForce(): Route {
         // Calculate
-        permute(isBruteForce =  true)
+        permute(isBruteForce = true)
         return findShortestPermutation(permutations)
     }
+
     /**
      * Calculates shortest route using nearest neighbour algorithm
      */
@@ -54,6 +58,7 @@ class TravelingSalesman(
         if (endPosition != null) route.add(endPosition)
         return route
     }
+
     /**
      * Calculates the shortest route using branch and bound algorithm
      */
@@ -71,9 +76,10 @@ class TravelingSalesman(
         // O(n^2 * 2^n)
         return Route(dynamicRecursive(waypoints.toTypedArray()).first.toMutableList())
     }
+
     private fun dynamicRecursive(points: Array<Waypoint?>): Pair<Array<Waypoint?>, Double> {
         if (points.size == 2) return Pair(points, points.first()!!.getDistance(points.last()))
-        var bestRoute = arrayOfNulls<Waypoint>(points.size-1);
+        var bestRoute = arrayOfNulls<Waypoint>(points.size - 1);
         var shortestPath = Double.MAX_VALUE
         points.forEach {
             val pointsCopy = points.toMutableList()
@@ -158,14 +164,17 @@ class TravelingSalesman(
 
     private var permutationMin = Double.MAX_VALUE
     private val permutations = ArrayList<Route>()
+
     /**
      * Generates all permutations in lexicographic order
      *
      * @param r: optional starting route, defaults to empty
      * @param isBruteForce: whether to try all options or only better options, defaults to false
      */
-    private fun permute(r: Route = if (startPosition != null) Route(listOf(startPosition)) else Route(),
-                        isBruteForce: Boolean = false) {
+    private fun permute(
+        r: Route = if (startPosition != null) Route(listOf(startPosition)) else Route(),
+        isBruteForce: Boolean = false
+    ) {
         val maxSize = if (startPosition == null) waypoints.size else waypoints.size + 1
 //        println("Max: $maxSize, size: ${r.size}")
         if (r.size != maxSize) {
@@ -179,21 +188,18 @@ class TravelingSalesman(
                 if (isBruteForce) {
                     // Recursive call
                     permute(newRoute, isBruteForce)
-                }
-                else {
+                } else {
                     // If a complete route has not yet been created keep permuting
                     if (permutations.isEmpty()) {
                         // Recursive call
                         permute(newRoute, isBruteForce)
-                    }
-                    else if (cost(newRoute) < permutationMin) {
+                    } else if (cost(newRoute) < permutationMin) {
                         // Current route cost is less than the best so far so keep permuting
                         permute(newRoute, isBruteForce)
                     }
                 }
             }
-        }
-        else {
+        } else {
             if (endPosition != null) r.add(endPosition)
             permutations.add(r)
             if (!isBruteForce && cost(r) < permutationMin) {
@@ -217,8 +223,8 @@ class TravelingSalesman(
      */
     private fun cost(route: Route): Double {
         var sum = 0.0
-        for (i in 0 until route.size-1) {
-            sum += route[i].getDistance(route[i+1])
+        for (i in 0 until route.size - 1) {
+            sum += route[i].getDistance(route[i + 1])
         }
         return sum
     }
@@ -226,7 +232,6 @@ class TravelingSalesman(
 
 internal class MinimalSpanningTree(verts: ArrayList<Waypoint>) {
 }
-
 
 
 /**

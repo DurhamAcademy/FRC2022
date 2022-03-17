@@ -24,7 +24,6 @@ import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
-import frc.robot.RobotContainer
 
 /**
  * Pre-made DifferentialDrive Robot.
@@ -33,7 +32,7 @@ import frc.robot.RobotContainer
  * @param configs information about the physical desciption of this drivetrain
  * @param gyro KGyro to provide heading information
  */
-abstract class DifferentialDriveTrain: SubsystemBase(), Simulatable, KDrivetrain, Debug {
+abstract class DifferentialDriveTrain : SubsystemBase(), Simulatable, KDrivetrain, Debug {
 
     abstract val leftMaster: KMotorController
     abstract val rightMaster: KMotorController
@@ -42,13 +41,17 @@ abstract class DifferentialDriveTrain: SubsystemBase(), Simulatable, KDrivetrain
     abstract val leftFF: SimpleMotorFeedforward
     abstract val rightFF: SimpleMotorFeedforward
     abstract val angularFeedforward: SimpleMotorFeedforward
+
     // control values
     private val kinematics = DifferentialDriveKinematics(trackWidth.meters)
 
     override val chassisSpeeds: ChassisSpeeds
         get() = kinematics.toChassisSpeeds(wheelSpeeds)
     val wheelSpeeds
-        get() = DifferentialDriveWheelSpeeds(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond)
+        get() = DifferentialDriveWheelSpeeds(
+            leftMaster.linearVelocity.metersPerSecond,
+            rightMaster.linearVelocity.metersPerSecond
+        )
 
     // drive functions
     override fun drive(speeds: ChassisSpeeds) {
@@ -65,8 +68,9 @@ abstract class DifferentialDriveTrain: SubsystemBase(), Simulatable, KDrivetrain
     }
 
     init {
-        if(Game.sim) setupSim()
+        if (Game.sim) setupSim()
     }
+
     private lateinit var driveSim: DifferentialDrivetrainSim
     fun setupSim() {
         driveSim = DifferentialDrivetrainSim( // Create a linear system from our characterization gains.

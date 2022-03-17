@@ -4,9 +4,6 @@ import frc.kyberlib.math.units.KUnit
 import frc.kyberlib.math.units.Second
 import frc.kyberlib.math.units.TimeConversions
 import frc.kyberlib.math.units.milli
-import kotlin.time.*
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * KUnit representing time.

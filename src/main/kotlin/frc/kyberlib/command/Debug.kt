@@ -1,11 +1,9 @@
 package frc.kyberlib.command
 
+import edu.wpi.first.networktables.NTSendable
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.networktables.NTSendable
-import frc.kyberlib.math.units.*
-import frc.kyberlib.math.units.extensions.Angle
-import frc.kyberlib.math.units.extensions.degrees
+import frc.kyberlib.math.units.KUnit
 
 /**
  * Types of ways to print to the output (driverstation)
@@ -25,15 +23,22 @@ enum class LogMode {
 enum class DebugFilter {
     Low, Normal, High, Max
 }
+
 /**
  * Inheritable class that grants multiple types of debugging
  */
 interface Debug {
     companion object {
-        private const val debugging = false
-        private val loggingLevel = if(Game.real) DebugFilter.High else DebugFilter.Normal
+        private const val debugging = true
+        private val loggingLevel = if (Game.real) DebugFilter.High else DebugFilter.Normal
 
-        fun log(identifier:String, text: String, mode: LogMode = LogMode.PRINT, level: DebugFilter = DebugFilter.Normal, stacktrace: Boolean = false) {
+        fun log(
+            identifier: String,
+            text: String,
+            mode: LogMode = LogMode.PRINT,
+            level: DebugFilter = DebugFilter.Normal,
+            stacktrace: Boolean = false
+        ) {
             if (level < loggingLevel || !debugging) return
             val output = "[$identifier] $text"
             when (mode) {
@@ -94,7 +99,8 @@ interface Debug {
             val stringBuilder = StringBuilder()
             stringBuilder.append("$identifier - ")
             for (info in map) {
-                val string = if (info.value is Debug) "(${(info.value as Debug).debugString})" else info.value.toString()
+                val string =
+                    if (info.value is Debug) "(${(info.value as Debug).debugString})" else info.value.toString()
                 stringBuilder.append("${info.key}: ${string}, ")
             }
             return stringBuilder.toString()
@@ -106,11 +112,13 @@ interface Debug {
      */
     val identifier: String
         get() = javaClass.simpleName
+
     /**
      * What level this should be debugged at. Allows for quick changing of how much information the console shows
      */
     val priority: DebugFilter
         get() = DebugFilter.Normal
+
     /**
      * Function that retrieves the values that need to be debugged
      * @return map of string (name) to value. Numbers, Booleans, and NTSendables are displayed as such

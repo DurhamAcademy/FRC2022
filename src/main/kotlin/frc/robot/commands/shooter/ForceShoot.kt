@@ -16,7 +16,7 @@ object ForceShoot : CommandBase() {
 
     private var reenableCompressor = true
     override fun initialize() {
-        reenableCompressor = KSolenoid.compressor.enabled()
+//        reenableCompressor = KSolenoid.compressor.enabled()
         KSolenoid.compressor.disable()
         Conveyor.feed()
         Shooter.status = ShooterStatus.FORCE_SHOT
@@ -36,7 +36,7 @@ object ForceShoot : CommandBase() {
     override fun end(interrupted: Boolean) {
         Shooter.stop()
         Conveyor.stop()
-        if(reenableCompressor) KSolenoid.compressor.enableDigital()
+        KSolenoid.compressor.enableDigital()
     }
 
 }

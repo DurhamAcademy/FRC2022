@@ -15,21 +15,17 @@ import edu.wpi.first.math.numbers.N2
 import edu.wpi.first.math.system.LinearSystem
 import edu.wpi.first.math.system.LinearSystemLoop
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.math.system.plant.LinearSystemId
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
-import frc.kyberlib.math.PolarPose
 import frc.kyberlib.math.polar
 import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.milli
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
-import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
@@ -52,14 +48,14 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
-    val rightMaster  = KSparkMax(13).apply {
+    val rightMaster = KSparkMax(13).apply {
         identifier = "rightMaster"
         reversed = false
         brakeMode = true
         currentLimit = 40
         motorType = DCMotor.getNEO(2)
     }
-    private val leftFollower  = KSparkMax(15).apply {
+    private val leftFollower = KSparkMax(15).apply {
         identifier = "leftFollow"
         reversed = false
         brakeMode = true
@@ -76,13 +72,21 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     private val motors = arrayOf(leftMaster, rightMaster)
 
     // values
-    val kinematics = DifferentialDriveKinematics(Constants.TRACK_WIDTH)  // calculator to make drivetrain move is the desired directions
+    val kinematics =
+        DifferentialDriveKinematics(Constants.TRACK_WIDTH)  // calculator to make drivetrain move is the desired directions
     override var chassisSpeeds: ChassisSpeeds  // variable representing the direction we want the robot to move
         get() = kinematics.toChassisSpeeds(wheelSpeeds)
-        set(value) { drive(value) }
+        set(value) {
+            drive(value)
+        }
     var wheelSpeeds: DifferentialDriveWheelSpeeds  // variable representing the speed of each side of the drivetrain
-        get() = DifferentialDriveWheelSpeeds(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond)
-        set(value) { drive(value) }
+        get() = DifferentialDriveWheelSpeeds(
+            leftMaster.linearVelocity.metersPerSecond,
+            rightMaster.linearVelocity.metersPerSecond
+        )
+        set(value) {
+            drive(value)
+        }
     var pose
         get() = RobotContainer.navigation.pose
         set(value) {
@@ -103,6 +107,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     private val leftFF = SimpleMotorFeedforward(Constants.DRIVE_KS_L, Constants.DRIVE_KV_L, Constants.DRIVE_KA_L)
     private val rightFF = SimpleMotorFeedforward(Constants.DRIVE_KS_R, Constants.DRIVE_KV_R, Constants.DRIVE_KA_R)
     private val angularFeedforward = SimpleMotorFeedforward(0.6382, 2.7318, 0.32016)
+
     init {
         defaultCommand = Drive
 
@@ -128,7 +133,10 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     /**
      * Drive the robot at the provided speeds
      */
-    override fun drive(speeds: ChassisSpeeds) { drive(kinematics.toWheelSpeeds(speeds)) }
+    override fun drive(speeds: ChassisSpeeds) {
+        drive(kinematics.toWheelSpeeds(speeds))
+    }
+
     val driveSystem = betterDrivetrainSystem()
     val loop = LinearSystemLoop(
         driveSystem,
@@ -148,15 +156,24 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         Game.batteryVoltage,
         KRobot.period
     )
+
     /**
      * Drive the robot at the provided speeds
      */
     fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) {
         leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
         rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
-        if(Constants.doStateSpace) {
-            loop.nextR = VecBuilder.fill(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond)  // r = reference (setpoint)
-            loop.correct(VecBuilder.fill(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond))  // update with empirical
+        if (Constants.doStateSpace) {
+            loop.nextR = VecBuilder.fill(
+                wheelSpeeds.leftMetersPerSecond,
+                wheelSpeeds.rightMetersPerSecond
+            )  // r = reference (setpoint)
+            loop.correct(
+                VecBuilder.fill(
+                    leftMaster.linearVelocity.metersPerSecond,
+                    rightMaster.linearVelocity.metersPerSecond
+                )
+            )  // update with empirical
             loop.predict(KRobot.period)  // math
             val leftVoltage = loop.getU(0)  // input
             val rightVoltage = loop.getU(1)
@@ -181,9 +198,14 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
+        RobotContainer.navigation.odometry.update(
+            RobotContainer.gyro.heading.w,
+            leftMaster.linearPosition.meters,
+            rightMaster.linearPosition.meters
+        )
 //        debugDashboard()
 //        KField2d.robotPose = RobotContainer.navigation.pose
-        RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
+//        RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
 //        if(Constants.NAVIGATION_CORRECTION || Constants.DUMB_NAVIGATION)  {
 //            val distance = Turret.targetDistance ?: return
 //            val offset = Turret.visionOffset ?: return
@@ -232,12 +254,15 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     }
 
     init {
-        if(Game.sim) setupSim()
+        if (Game.sim) setupSim()
     }
+
     override fun simUpdate(dt: Time) {
         // update the sim with new inputs
-        val leftVolt = leftMaster.voltage//.invertIf { leftMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
-        val rightVolt = rightMaster.voltage//.invertIf { rightMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
+        val leftVolt =
+            leftMaster.voltage//.invertIf { leftMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
+        val rightVolt =
+            rightMaster.voltage//.invertIf { rightMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
         driveSim.setInputs(leftVolt, rightVolt)
         driveSim.update(dt.seconds)
 //

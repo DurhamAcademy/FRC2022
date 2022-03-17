@@ -26,6 +26,7 @@ object Game {
 
     val brownedOut
         get() = RobotController.isBrownedOut()
+
     val CAN
         get() = RobotController.getCANStatus()
     val batteryVoltage
@@ -35,5 +36,6 @@ object Game {
         get() = RobotController.getFPGATime().micro.seconds
 
     val alliance: DriverStation.Alliance = DriverStation.getAlliance()
+
     val game: String = DriverStation.getGameSpecificMessage()
 }
