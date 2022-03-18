@@ -36,9 +36,12 @@ enum class ShooterStatus {
  * Encapsulates all the things relevant to shooting the ball
  */
 object Shooter : SubsystemBase(), Debug, Simulatable {
+    var inRange: Boolean = false
+        private set
+
     var status = ShooterStatus.IDLE
     override val priority: DebugFilter = DebugFilter.Max
-    private val ff = SimpleMotorFeedforward(0.2062, 0.02540032, 0.0052967)
+    private val ff = SimpleMotorFeedforward(0.38267, 0.02468, 0.0019498)
     var time = Game.time
 
     // main motor attached to the flywheel
@@ -65,8 +68,9 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 //            val nextVoltage = loop.getU(0)  // input
 //            nextVoltage + ff.ks.invertIf { velocitySetpoint < 0.rpm }// + .15
 //        }
-        kP = 0.025434
-        kI = 0.001
+        kP = 0.0080434
+        kI = 0.0001
+
         currentLimit = 50
         brakeMode = false
         if (Game.sim) setupSim(ff)
@@ -91,6 +95,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     private val flywheel2 = KSparkMax(32).apply {
         identifier = "flywheel2"
         reversed = true
+        brakeMode = false
         currentLimit = 50
         follow(flywheel)
     }
@@ -128,21 +133,29 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         hoodUpdate(dis)
     }
 
-    val hoodPoly = Polynomial(-.85458, 5.64695, 3.87906, -1.29395)
+    val hoodPoly = Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..5.5)
     private fun hoodUpdate(dis: Length) {
-        hoodDistance =
-            hoodPoly.eval(dis.value).millimeters//Constants.HOODANGLE_INTERPOLATOR.calculate(dis.meters).millimeters
+        val hood = hoodPoly.eval(dis.value)
+        if (hood == null) {
+            inRange = false
+        } else {
+            inRange = true
+            hoodDistance = hood.millimeters//Constants.HOODANGLE_INTERPOLATOR.calculate(dis.meters).millimeters
+        }
     }
 
     val speedPoly = Polynomial(37.43917, -119.05297, 1501.93519)
     private fun flywheelUpdate(dis: Length) {
         val interpolated =
-            speedPoly.eval(dis.value).rpm//.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
-        val fudge = interpolated * (1 + SmartDashboard.getNumber(
-            "back fudge",
-            0.06
-        )) * (Turret.turret.position / 2.0).sin.absoluteValue
-        targetVelocity = fudge
+            speedPoly.eval(dis.value) //.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
+
+        if (interpolated != null) {
+            val fudge = 1 + (SmartDashboard.getNumber(
+                "back fudge",
+                0.03
+            )) * (Turret.turret.position / 2.0).sin.absoluteValue
+            targetVelocity = interpolated.rpm * fudge
+        }
     }
 
     fun stop() {

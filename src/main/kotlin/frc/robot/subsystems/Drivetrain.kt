@@ -16,6 +16,7 @@ import edu.wpi.first.math.system.LinearSystem
 import edu.wpi.first.math.system.LinearSystemLoop
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Debug
@@ -206,6 +207,10 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
             rightMaster.linearPosition.meters
         )
         debugDashboard()
+
+        SmartDashboard.putNumber("l_error", leftMaster.linearVelocityError.value)
+        SmartDashboard.putNumber("r_error", rightMaster.linearVelocityError.value)
+
 //        KField2d.robotPose = RobotContainer.navigation.pose
 //        RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
         if (Game.OPERATED && Turret.isZeroed) {
