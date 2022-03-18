@@ -64,7 +64,7 @@ abstract class DifferentialDriveTrain : SubsystemBase(), Simulatable, KDrivetrai
     }
 
     override fun periodic() {
-        Navigator.instance!!.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
+        Navigator.instance!!.update(leftMaster.linearPosition, rightMaster.linearPosition)
     }
 
     init {

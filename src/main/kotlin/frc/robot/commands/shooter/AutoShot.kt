@@ -2,6 +2,7 @@ package frc.robot.commands.shooter
 
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.CommandBase
+import frc.kyberlib.command.Game
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.robot.subsystems.*
 
@@ -12,6 +13,8 @@ class AutoShot : CommandBase() {
 
     private var reenableCompressor = true
     override fun initialize() {
+        Intaker.intakeMotor.stop()
+        Intaker.deployed = false
         reenableCompressor = KSolenoid.compressor.enabled()
         KSolenoid.compressor.disable()
         shootingTimer.reset()
@@ -38,6 +41,14 @@ class AutoShot : CommandBase() {
 
     override fun end(interrupted: Boolean) {
         if (reenableCompressor) KSolenoid.compressor.enableDigital()
+        Shooter.stop()
+        if (Game.AUTO) {
+            Conveyor.conveyor.percent = 0.1
+            Conveyor.feeder.percent = -0.1
+        } else {
+            Intaker.deployed = false
+            Intaker.intakeMotor.stop()
+        }
     }
 
     override fun isFinished(): Boolean = shootingTimer.hasElapsed(2.0)

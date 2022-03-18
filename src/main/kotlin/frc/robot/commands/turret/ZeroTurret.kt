@@ -1,18 +1,22 @@
 package frc.robot.commands.turret
 
 import edu.wpi.first.wpilibj2.command.CommandBase
-import frc.robot.RobotContainer
-import frc.robot.subsystems.Turret
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
+import frc.robot.RobotContainer
+import frc.robot.subsystems.Turret
 
 /**
  * Called at the beginning of the match to get the absolute encoding of the turret
  */
-object ZeroTurret: CommandBase() {
+object ZeroTurret : CommandBase() {
     init {
         addRequirements(Turret)
+    }
+
+    override fun initialize() {
+        Turret.isZeroed = false
     }
 
     override fun execute() {
@@ -23,6 +27,7 @@ object ZeroTurret: CommandBase() {
     override fun end(interrupted: Boolean) {
         Debug.log("turretLimit", "zeroed")
         Turret.zeroTurret()
+        Turret.isZeroed = true
         Turret.turret.stop()
     }
 

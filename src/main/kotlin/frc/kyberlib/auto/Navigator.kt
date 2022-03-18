@@ -15,12 +15,16 @@ import frc.kyberlib.simulation.field.KField2d
 enum class TrackingMode {
     Fast, Fancy, DumbBoth
 }
+
 /**
  * Class to store and update robot navigation information
  */
 class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
-//    override val priority: DebugFilter = DebugFilter.Max
-    companion object { var instance: Navigator? = null }
+    //    override val priority: DebugFilter = DebugFilter.Max
+    companion object {
+        var instance: Navigator? = null
+    }
+
     init {
         instance = this
 //        gyro.heading = startPose.rotation.k
@@ -37,15 +41,25 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
     /**
      * A object with restrictions on how the robot will move
      */
-    private var pathingConfig = KTrajectoryConfig(5.metersPerSecond, 5.metersPerSecond).apply { KTrajectory.generalConfig = this }
+    private var pathingConfig =
+        KTrajectoryConfig(5.metersPerSecond, 5.metersPerSecond).apply { KTrajectory.generalConfig = this }
 
     fun applyMovementRestrictions(velocity: LinearVelocity, maxAcceleration: LinearVelocity) {
         pathingConfig = KTrajectoryConfig(velocity, maxAcceleration).apply { addConstraints(pathingConfig.constraints) }
         KTrajectory.generalConfig = pathingConfig
     }
-    fun applyKinematics(kinematics: DifferentialDriveKinematics) { pathingConfig.setKinematics(kinematics) }
-    fun applyKinematics(kinematics: MecanumDriveKinematics) { pathingConfig.setKinematics(kinematics) }
-    fun applyKinematics(kinematics: SwerveDriveKinematics) { pathingConfig.setKinematics(kinematics) }
+
+    fun applyKinematics(kinematics: DifferentialDriveKinematics) {
+        pathingConfig.setKinematics(kinematics)
+    }
+
+    fun applyKinematics(kinematics: MecanumDriveKinematics) {
+        pathingConfig.setKinematics(kinematics)
+    }
+
+    fun applyKinematics(kinematics: SwerveDriveKinematics) {
+        pathingConfig.setKinematics(kinematics)
+    }
 
     // ----- public variables ----- //
     // location
@@ -57,7 +71,7 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
             odometry.resetPosition(value, gyro.heading.w)
 //            else poseEstimator.resetPosition(value, heading.w)
 
-            if(Game.sim)KField2d.robotPose = value
+            if (Game.sim) KField2d.robotPose = value
         }
     val position: Translation2d  // the estimated location of the robot
         get() = pose.translation
@@ -72,6 +86,16 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
         odometry.update(gyro.heading.w, leftPosition.meters, rightPosition.meters)
 //        else poseEstimator.update(heading.w, speeds, leftPosition.meters, rightPosition.meters)
     }
+
+
+    /**
+     * Update position based on estimated motion
+     */
+    fun update(leftPosition: Length, rightPosition: Length) {  // estimate motion
+        odometry.update(gyro.heading.w, leftPosition.meters, rightPosition.meters)
+//        else poseEstimator.update(heading.w, speeds, leftPosition.meters, rightPosition.meters)
+    }
+
     /**
      * Update position based on a different position guess
      *
@@ -79,6 +103,7 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
      * @param time the time of the detection
      */
     fun update(globalPosition: Pose2d, time: Time) {  // apply global position update
+        odometry.resetPosition(globalPosition, gyro.heading.w)
 //        when(trackingMode) {
 //            TrackingMode.Fancy -> poseEstimator.addVisionMeasurement(globalPosition, time.milliseconds)
 //            TrackingMode.DumbBoth -> if(Game.OPERATED) odometry.resetPosition(globalPosition, heading.w)

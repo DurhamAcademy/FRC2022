@@ -1,5 +1,10 @@
 {
   "HALProvider": {
+    "Addressable LEDs": {
+      "window": {
+        "visible": true
+      }
+    },
     "Solenoids": {
       "0": {
         "header": {
@@ -63,7 +68,7 @@
         "Robot": {
           "arrows": false
         },
-        "image": "/Users/22staples/FRC2022/Rapid React Field.png",
+        "image": "C:\\Users\\frc6502\\robot-code\\FRC2022\\Rapid React Field.png",
         "traj": {
           "arrowSize": 0,
           "arrows": false,
@@ -332,7 +337,7 @@
     "Plot <2>": {
       "plots": [
         {
-          "height": 205,
+          "height": -29,
           "series": [
             {
               "color": [
@@ -355,7 +360,7 @@
           ]
         },
         {
-          "height": 205,
+          "height": -29,
           "series": [
             {
               "color": [

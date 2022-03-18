@@ -11,12 +11,14 @@ import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.Polynomial
 import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.motorcontrol.servo.KLinearServo
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
 import frc.robot.RobotContainer
+import frc.robot.commands.shooter.ShooterCalibration
 import kotlin.math.absoluteValue
 import kotlin.math.acos
 import kotlin.math.cos
@@ -37,20 +39,35 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     var status = ShooterStatus.IDLE
     override val priority: DebugFilter = DebugFilter.Max
     private val ff = SimpleMotorFeedforward(0.2062, 0.02540032, 0.0052967)
+    var time = Game.time
 
     // main motor attached to the flywheel
     val flywheel = KSparkMax(31).apply {
         identifier = "flywheel"
         motorType = DCMotor.getNEO(2)
         addFeedforward(ff)
-        stateSpaceControl(velocitySystem(ff), 3.0, 2.0, 5.0, 12.0)
-        val base = customControl
-        customControl = {
-            base!!(it) + ff.ks
-        }
-        kP = 0.022434
-//        kI = 0.001
-        currentLimit = 40
+        val loop = KMotorController.StateSpace.systemLoop(
+            velocitySystem(ff),
+            180.rpm.rotationsPerSecond,
+            6.rpm.radiansPerSecond,
+            50.rpm.radiansPerSecond,
+            10.0
+        )
+//        customControl = {
+//            val v = ff.calculate(velocity.value, velocitySetpoint.value, .02)
+//            time = Game.time
+//            v
+//        }
+//        customControl = {
+//            loop.nextR = VecBuilder.fill(it.velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
+//            loop.correct(VecBuilder.fill(it.velocity.radiansPerSecond))  // update with empirical
+//            loop.predict(updateRate.seconds)  // math
+//            val nextVoltage = loop.getU(0)  // input
+//            nextVoltage + ff.ks.invertIf { velocitySetpoint < 0.rpm }// + .15
+//        }
+        kP = 0.025434
+        kI = 0.001
+        currentLimit = 50
         brakeMode = false
         if (Game.sim) setupSim(ff)
     }
@@ -66,7 +83,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     var targetVelocity
         get() = flywheel.velocitySetpoint
         set(value) {
-            flywheel.velocity = value * SmartDashboard.getNumber("shooterMult", 1.0)
+            flywheel.velocity = value * SmartDashboard.getNumber("shooterMult", .5)
         }
 
 
@@ -85,6 +102,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     var hoodDistance: Length
         get() = hood.position
         set(value) {
+            SmartDashboard.putNumber("hood dis", value.millimeters)
             hood.position = value
             hood2.position = value
         }
@@ -96,7 +114,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     private const val B = 10.016  // flywheel axis to servo end
     private const val B2 = B * B
     private const val D = 2 * A * B
-    private val theta = 24.5476.degrees.radians
+    private val theta = 24.258.degrees.radians
     private val startLength = 6.61.inches
     var hoodAngle: Angle
         get() = acos((-hoodDistance.inches * hoodDistance.inches + A2 + B2) / D).radians
@@ -120,8 +138,11 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     private fun flywheelUpdate(dis: Length) {
         val interpolated =
             speedPoly.eval(dis.value).rpm//.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
-        val fudge = SmartDashboard.getNumber("back fudge", 100.0).rpm * (Turret.turret.position / 2.0).sin.absoluteValue
-        targetVelocity = (interpolated + fudge)
+        val fudge = interpolated * (1 + SmartDashboard.getNumber(
+            "back fudge",
+            0.06
+        )) * (Turret.turret.position / 2.0).sin.absoluteValue
+        targetVelocity = fudge
     }
 
     fun stop() {
@@ -137,7 +158,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     override fun periodic() {
         debugDashboard()
         SmartDashboard.putNumber("fly error", flywheel.velocityError.rpm)
-        Turret.targetDistance?.let { hoodUpdate(it) }
+        if (currentCommand != ShooterCalibration) Turret.targetDistance?.let { hoodUpdate(it) }
     }
 
     override fun debugValues(): Map<String, Any?> {
