@@ -213,7 +213,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
 
 //        KField2d.robotPose = RobotContainer.navigation.pose
 //        RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
-        if (Game.OPERATED && Turret.isZeroed) {
+        if (false && Game.OPERATED && Turret.isZeroed) {
             val distance = Turret.targetDistance ?: return
             val offset = Turret.visionOffset ?: return
             val angle = offset + Turret.fieldRelativeAngle + 180.degrees

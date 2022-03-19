@@ -17,7 +17,7 @@ object Eject : CommandBase() {
 
 
     override fun execute() {
-        Shooter.flywheel.percent = 0.25
+        Shooter.flywheel.percent = 0.33
 //        Shooter.update()
     }
 

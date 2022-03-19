@@ -68,7 +68,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 //            val nextVoltage = loop.getU(0)  // input
 //            nextVoltage + ff.ks.invertIf { velocitySetpoint < 0.rpm }// + .15
 //        }
-        kP = 0.0080434
+        kP = 0.0120434
         kI = 0.0001
 
         currentLimit = 50
