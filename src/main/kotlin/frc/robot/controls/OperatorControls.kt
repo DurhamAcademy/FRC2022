@@ -15,6 +15,7 @@ class OperatorControls {
     private val compressorString = "compressor enabled"
 
     init {
+        SmartDashboard.putBoolean("nav updates", false)
         SmartDashboard.putNumber(multString, 1.0)
         SmartDashboard.putNumber(fudgeString, .06)
         SmartDashboard.putBoolean(compressorString, true)
