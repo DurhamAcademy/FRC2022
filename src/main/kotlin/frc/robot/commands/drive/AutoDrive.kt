@@ -7,8 +7,6 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.auto.Navigator
-import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
@@ -67,16 +65,15 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
     override fun execute() {
         val targetPose = trajectory.sample(timer.get())
         val targetSpeed = calculator.calculate(Navigator.instance!!.pose, targetPose)
-        Debug.log("AutoDrive", "going to $targetPose, @ targetSpeed m/s", level = DebugFilter.Low)
-        SmartDashboard.putNumber("tx", targetPose.poseMeters.x)
-        SmartDashboard.putNumber("ty", targetPose.poseMeters.y)
-        SmartDashboard.putNumber("tT", targetPose.poseMeters.rotation.degrees)
-        SmartDashboard.putNumber("ax", RobotContainer.navigation.position.x)
-        SmartDashboard.putNumber("ay", RobotContainer.navigation.position.y)
-        SmartDashboard.putNumber("aT", RobotContainer.navigation.heading.degrees)
 
-        SmartDashboard.putNumber("error_x", RobotContainer.navigation.position.x - targetPose.poseMeters.x)
-        SmartDashboard.putNumber("error_y", RobotContainer.navigation.position.y - targetPose.poseMeters.y)
+//        if (trajectory.totalTimeSeconds - timer.get() < 0.3) {
+//            Shooter.update()
+//        }
+//        Shooter.update()
+
+        val pos = RobotContainer.navigation.position
+        SmartDashboard.putNumber("error_x", pos.x - targetPose.poseMeters.x)
+        SmartDashboard.putNumber("error_y", pos.y - targetPose.poseMeters.y)
         SmartDashboard.putNumber(
             "error_th",
             RobotContainer.navigation.heading.degrees - targetPose.poseMeters.rotation.degrees
