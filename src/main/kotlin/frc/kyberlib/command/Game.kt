@@ -18,7 +18,7 @@ object Game {
     val AUTO
         get() = RobotState.isAutonomous()
     val OPERATED
-        get() = RobotState.isAutonomous()
+        get() = RobotState.isTeleop()
     val TEST
         get() = RobotState.isTest()
     val STOPPED

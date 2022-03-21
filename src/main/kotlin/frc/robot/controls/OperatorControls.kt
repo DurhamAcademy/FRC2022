@@ -15,8 +15,9 @@ class OperatorControls {
     private val compressorString = "compressor enabled"
 
     init {
+        SmartDashboard.putBoolean("nav updates", false)
         SmartDashboard.putNumber(multString, 1.0)
-        SmartDashboard.putNumber(fudgeString, 100.0)
+        SmartDashboard.putNumber(fudgeString, .06)
         SmartDashboard.putBoolean(compressorString, true)
         SmartDashboard.putBoolean("ManualTurret", false)
         SmartDashboard.putBoolean("ManualShooter", false)
@@ -24,17 +25,22 @@ class OperatorControls {
         SmartDashboard.putBoolean("ManualIntake", false)
         SmartDashboard.putBoolean(compressorString, true)
     }
-    val COMPRESSOR_ENABLED = Trigger{SmartDashboard.getBoolean(compressorString, true)}.whenActive {
-        KSolenoid.compressor.enabled()
+
+    val COMPRESSOR_ENABLED = Trigger { SmartDashboard.getBoolean(compressorString, true) }.whenActive {
+        KSolenoid.compressor.enableDigital()
+        println("enable compress")
         emptySet<Subsystem>()
     }.whenInactive {
         KSolenoid.compressor.disable()
+        println("disable compress")
         emptySet<Subsystem>()
     }
-    // compressor toggle
+
     // disable subsystems
     // manual subsystems
-    val MANUAL_TURRET = Trigger{SmartDashboard.getBoolean("ManualTurret", false)}.whileActiveOnce(ManualTurret)
-    val MANUAL_SHOOTER = Trigger{SmartDashboard.getBoolean("ManualShooter", false)}.whileActiveOnce(ShooterCalibration)
-    val MANUAL_CONVEYOR = Trigger{SmartDashboard.getBoolean("ManualConveyor", false)}.whileActiveOnce(ManualConveyor)
-    val MANUAL_INTAKE = Trigger{SmartDashboard.getBoolean("ManualIntake", false)}.whileActiveOnce(ManualIntake) }
+    val MANUAL_TURRET = Trigger { SmartDashboard.getBoolean("ManualTurret", false) }.whileActiveOnce(ManualTurret)
+    val MANUAL_SHOOTER =
+        Trigger { SmartDashboard.getBoolean("ManualShooter", false) }.whileActiveOnce(ShooterCalibration)
+    val MANUAL_CONVEYOR = Trigger { SmartDashboard.getBoolean("ManualConveyor", false) }.whileActiveOnce(ManualConveyor)
+    val MANUAL_INTAKE = Trigger { SmartDashboard.getBoolean("ManualIntake", false) }.whileActiveOnce(ManualIntake)
+}

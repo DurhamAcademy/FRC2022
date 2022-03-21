@@ -5,13 +5,18 @@ import kotlin.math.pow
 /**
  * Representation and calculator of a polynomial
  */
-class Polynomial(vararg val coeffs: Double, val variableName: Char = 'x') {
+class Polynomial(
+    vararg val coeffs: Double,
+    val variableName: Char = 'x',
+    private val domain: ClosedFloatingPointRange<Double>? = null
+) {
     val degree = coeffs.size
 
     /**
      * Solve the polynomial for the given value
      */
-    fun eval(x: Double): Double {
+    fun eval(x: Double): Double? {
+        if (domain != null && x !in domain) return null
         var total = 0.0
         for (i in coeffs.indices) {
             total += coeffs[i] * x.pow(coeffs.size - i - 1)

@@ -16,11 +16,14 @@ import edu.wpi.first.math.system.LinearSystem
 import edu.wpi.first.math.system.LinearSystemLoop
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
+import frc.kyberlib.math.PolarPose
 import frc.kyberlib.math.polar
 import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
@@ -40,7 +43,7 @@ import frc.robot.commands.drive.Drive
  */
 object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     // motors
-//    override val priority: DebugFilter = DebugFilter.Max
+    override val priority: DebugFilter = DebugFilter.Max
     val leftMaster = KSparkMax(12).apply {
         identifier = "leftMaster"
         reversed = true
@@ -203,15 +206,19 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
             leftMaster.linearPosition.meters,
             rightMaster.linearPosition.meters
         )
-//        debugDashboard()
+        debugDashboard()
+
+        SmartDashboard.putNumber("l_error", leftMaster.linearVelocityError.value)
+        SmartDashboard.putNumber("r_error", rightMaster.linearVelocityError.value)
+
 //        KField2d.robotPose = RobotContainer.navigation.pose
 //        RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
-//        if(Constants.NAVIGATION_CORRECTION || Constants.DUMB_NAVIGATION)  {
-//            val distance = Turret.targetDistance ?: return
-//            val offset = Turret.visionOffset ?: return
-//            val angle = offset + Turret.fieldRelativeAngle + 180.degrees
-//            polarCoordinates = PolarPose(distance, angle, offset)
-//        }
+        if (SmartDashboard.getBoolean("nav updates", false) && Game.OPERATED && Turret.isZeroed) {
+            val distance = Turret.targetDistance ?: return
+            val offset = Turret.visionOffset ?: return
+            val angle = offset + Turret.fieldRelativeAngle + 180.degrees
+            polarCoordinates = PolarPose(distance, angle, offset)
+        }
     }
 
     override fun simulationPeriodic() {

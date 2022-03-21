@@ -33,8 +33,8 @@ class KXboxController(port: Int) : KController(port), Debug {
     val pressedLeftStick = JoystickButton(joystick, 9)
     val pressedRightStick = JoystickButton(joystick, 10)
 
-    val leftMenu = JoystickButton(joystick, 8)
-    val rightMenu = JoystickButton(joystick, 7)
+    val leftMenu = JoystickButton(joystick, 7)
+    val rightMenu = JoystickButton(joystick, 8)
 
     private val DPad
         get() = joystick.pov  // up = 0, 45º increments clockwise, none = -1

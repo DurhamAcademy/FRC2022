@@ -38,7 +38,7 @@ object Shoot : CommandBase() {
             } else {
                 RobotContainer.controller.rumble = 0.5
                 Shooter.status = ShooterStatus.SPINUP
-                Conveyor.stop()
+                Conveyor.prepare()
             }
         }
     }

@@ -11,6 +11,7 @@ import frc.kyberlib.math.units.extensions.*
  */
 object Constants {
     const val doStateSpace = false
+
     // ------ Climb ------ //
     val WINCH_RADIUS: Length = 0.6.inches
     const val EXTENDABLE_ROTATION_GEAR_RATIO = 250.0
@@ -20,7 +21,7 @@ object Constants {
 
     // ------ Drivetrain ------ //
     // pids
-    const val DRIVE_P = 0.08//0.5
+    const val DRIVE_P = 0.03
     const val DRIVE_I = 0.0
     const val DRIVE_D = 0.0
 
@@ -35,7 +36,7 @@ object Constants {
     const val DRIVE_KA_L = 0.15796
 
     // drivetrain setup
-    const val TRACK_WIDTH = 0.65
+    const val TRACK_WIDTH = 0.64
     val WHEEL_RADIUS = 2.inches
     const val DRIVE_GEAR_RATIO = 62.0 / 10.0
 
@@ -48,28 +49,32 @@ object Constants {
 
     val SHOOTER_COMPRESSION = 1.25.inches
 
-    val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(mapOf(
-        1.7 to 1400.0,
-        2.09375 to 1440.0,
-        2.4875 to 1420.0,
-        2.88125 to 1470.0,
-        3.275 to 1500.0,
-        3.66875 to 1600.0,
-        4.0625 to 1610.0,
-        4.45625 to 1730.0,
-        4.85 to 1800.0
-    ))
-    val HOODANGLE_INTERPOLATOR: Interpolator = Interpolator(mapOf(
-        1.7 to 15.0,
-        2.09375 to 28.0,
-        2.4875 to 30.0,
-        2.88125 to 36.0,
-        3.275 to 40.0,
-        3.66875 to 45.0,
-        4.0625 to 50.0,
-        4.45625 to 50.0,
-        4.85 to 50.0
-    ))
+    val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(
+        mapOf(
+            1.7 to 1400.0,
+            2.09375 to 1440.0,
+            2.4875 to 1420.0,
+            2.88125 to 1470.0,
+            3.275 to 1500.0,
+            3.66875 to 1600.0,
+            4.0625 to 1610.0,
+            4.45625 to 1730.0,
+            4.85 to 1800.0
+        )
+    )
+    val HOODANGLE_INTERPOLATOR: Interpolator = Interpolator(
+        mapOf(
+            1.7 to 15.0,
+            2.09375 to 28.0,
+            2.4875 to 30.0,
+            2.88125 to 36.0,
+            3.275 to 40.0,
+            3.66875 to 45.0,
+            4.0625 to 50.0,
+            4.45625 to 50.0,
+            4.85 to 50.0
+        )
+    )
 
     val SHOOTER_VELOCITY_TOLERANCE = 50.rpm
     val FLYWHEEL_RADIUS = 2.inches
@@ -88,7 +93,10 @@ object Constants {
     val HUB_POSITION = Translation2d(324.inches, 162.inches)
     val FIELD_SIZE = Translation2d(648.inches, 324.inches)
     val UPPER_HUB_HEIGHT = 8.feet + 8.inches
-    val START_POSE: Pose2d = Pose2d(HUB_POSITION - Translation2d(3.meters, 0.1.meters), 0.degrees.w)//Pose2d(8.5.meters, 1.9.meters, (-90).degrees)
+    val START_POSE: Pose2d = Pose2d(
+        HUB_POSITION - Translation2d(3.meters, 0.1.meters),
+        0.degrees.w
+    )//Pose2d(8.5.meters, 1.9.meters, (-90).degrees)
     val RESET_POSE = Pose2d(1.3, 1.3, 45.degrees.w) // center of our terminal
 
     val LOW_RUNG_HEIGHT = 4.feet + .75.inches

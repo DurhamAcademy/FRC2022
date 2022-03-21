@@ -2,7 +2,8 @@ package frc.robot.commands.shooter
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
-import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.extensions.degrees
+import frc.kyberlib.math.units.extensions.rpm
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.robot.subsystems.Conveyor
 import frc.robot.subsystems.Shooter
@@ -11,6 +12,7 @@ object ShooterCalibration : CommandBase() {
 
     const val rpmString = "flywheel rpm"
     const val hoodString = "hood degrees"
+
     init {
         addRequirements(Shooter, Conveyor)
         SmartDashboard.putNumber(rpmString, 0.0)
@@ -29,7 +31,7 @@ object ShooterCalibration : CommandBase() {
         Shooter.targetVelocity = SmartDashboard.getNumber(rpmString, 0.0).rpm
         Shooter.hoodAngle = SmartDashboard.getNumber(hoodString, 0.0).degrees
 
-        if(Shooter.ready) {
+        if (Shooter.ready) {
 //            Feed.schedule()
             Conveyor.feed()
         }
@@ -39,7 +41,7 @@ object ShooterCalibration : CommandBase() {
     override fun end(interrupted: Boolean) {
         Shooter.stop()
         Conveyor.stop()
-        if(reenableCompressor) KSolenoid.compressor.enableDigital()
+        if (reenableCompressor) KSolenoid.compressor.enableDigital()
     }
 
     override fun isFinished(): Boolean = false

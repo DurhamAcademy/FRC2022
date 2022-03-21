@@ -9,14 +9,16 @@ object Eject : CommandBase() {
     init {
         addRequirements(Shooter, Conveyor)
     }
+
     override fun initialize() {
-        Shooter.targetVelocity = 7.rotationsPerSecond
+        Shooter.targetVelocity = 4.rotationsPerSecond
         Conveyor.feed()
     }
 
 
     override fun execute() {
-        Shooter.update()
+        Shooter.flywheel.percent = 0.33
+//        Shooter.update()
     }
 
     override fun end(interrupted: Boolean) {

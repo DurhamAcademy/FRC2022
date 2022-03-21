@@ -38,8 +38,8 @@
     },
     "###Addressable LEDs": {
       "Collapsed": "0",
-      "Pos": "217,44",
-      "Size": "142,292"
+      "Pos": "593,57",
+      "Size": "142,194"
     },
     "###DIO": {
       "Collapsed": "0",
@@ -53,7 +53,7 @@
     },
     "###Joysticks": {
       "Collapsed": "1",
-      "Pos": "322,48",
+      "Pos": "782,19",
       "Size": "436,147"
     },
     "###Keyboard 1 Settings": {
@@ -87,7 +87,7 @@
       "Size": "839,693"
     },
     "###Plot <2>": {
-      "Collapsed": "0",
+      "Collapsed": "1",
       "Pos": "7,179",
       "Size": "831,499"
     },

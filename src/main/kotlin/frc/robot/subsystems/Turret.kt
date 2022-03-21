@@ -33,18 +33,21 @@ import kotlin.math.absoluteValue
 enum class TurretStatus {
     LOCKED, ADJUSTING, FROZEN, NOT_FOUND, LOST
 }
+
 /**
  * Controls the turret
  */
 object Turret : SubsystemBase(), Debug {
     var status = TurretStatus.LOST
-//    override val priority: DebugFilter = DebugFilter.Max
+
+    //    override val priority: DebugFilter = DebugFilter.Max
     private val visionFilter: LinearFilter = LinearFilter.singlePoleIIR(.07, .02)
 
     var isZeroed = false
 
     // characterization of the turret
     private val feedforward = SimpleMotorFeedforward(0.05, 1.1432, 0.045857) // 0.22832
+
     // actual turret motors
     val turret = KSparkMax(11).apply {
         identifier = "turret"
@@ -69,7 +72,7 @@ object Turret : SubsystemBase(), Debug {
             SmartDashboard.putNumber("set", positionSetpoint.degrees)
             val offsetCorrection = PID.calculate(position.rotations, positionSetpoint.rotations)
             val ff = feedforward.calculate(PID.setpoint.velocity.rotationsPerSecond.radiansPerSecond)
-            if(isZeroed) (ff + offsetCorrection) else 0.0//.coerceIn(-4.0, 4.0)
+            if (isZeroed) (ff + offsetCorrection) else 0.0//.coerceIn(-4.0, 4.0)
         }
 
         val good = { it: KMotorController ->
@@ -83,13 +86,14 @@ object Turret : SubsystemBase(), Debug {
             SmartDashboard.putNumber("chas", -chassisComp.degreesPerSecond)
             SmartDashboard.putNumber("mov", -movementComp.degreesPerSecond)
             SmartDashboard.putNumber("tar", targetVelocity.degreesPerSecond)
-            val v = feedforward.calculate(targetVelocity.radiansPerSecond)// + it.PID.calculate(velocityError.radiansPerSecond)
-            v.zeroIf { v.absoluteValue < 1.0  }
+            val v =
+                feedforward.calculate(targetVelocity.radiansPerSecond)// + it.PID.calculate(velocityError.radiansPerSecond)
+            v.zeroIf { v.absoluteValue < 1.0 }
         }
 
         customControl = new
 
-        if(Game.sim) setupSim(feedforward)
+        if (Game.sim) setupSim(feedforward)
     }
 
     // angle of the turret from top view
@@ -108,7 +112,7 @@ object Turret : SubsystemBase(), Debug {
      * Makes an angle safe for the electronics to not get tangled
      */
     private fun clampSafePosition(angle: Angle): Angle {
-        return (angle + 45.degrees).normalized - 45.degrees
+        return (angle + 30.degrees).normalized - 30.degrees
     }
 
     /**
@@ -116,7 +120,6 @@ object Turret : SubsystemBase(), Debug {
      */
     fun zeroTurret() {  // zeros the robot position to looking straight aheead
         turret.resetPosition()
-        isZeroed = true
     }
 
     private var latestResult: PhotonPipelineResult? = null
@@ -126,13 +129,14 @@ object Turret : SubsystemBase(), Debug {
     private var target: PhotonTrackedTarget? = null
     val visionOffset: Angle?
         get() = if (Game.real) target?.yaw?.let { visionFilter.calculate(-it).degrees }
-                else {
-                    var off = (RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k - fieldRelativeAngle + randomizer.nextGaussian().degrees * 0.0)
-                    off = off.normalized
-                    if (off > 0.5.rotations) off -= 1.rotations
-                    if(off.absoluteValue < 20.degrees) off.degrees.degrees else null
+        else {
+            var off =
+                (RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k - fieldRelativeAngle + randomizer.nextGaussian().degrees * 0.0)
+            off = off.normalized
+            if (off > 0.5.rotations) off -= 1.rotations
+            if (off.absoluteValue < 20.degrees) off.degrees.degrees else null
 //                    off
-                }
+        }
     private val visionPitch: Angle?
         get() = target?.pitch?.degrees
 
@@ -140,7 +144,7 @@ object Turret : SubsystemBase(), Debug {
     private val distanceFilter = LinearFilter.movingAverage(8)
     val targetDistance: Length?
         get() = if (Game.sim) RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters + randomizer.nextGaussian().inches
-                else visionPitch?.let { pitch -> 2.feet + distanceFilter.calculate((Constants.UPPER_HUB_HEIGHT.inches - 1 - Constants.LIMELIGHT_HEIGHT.inches) / (Constants.LIMELIGHT_ANGLE + pitch).tan).inches}  // this could be wrong
+        else visionPitch?.let { pitch -> 2.feet + distanceFilter.calculate((Constants.UPPER_HUB_HEIGHT.inches - 1 - Constants.LIMELIGHT_HEIGHT.inches) / (Constants.LIMELIGHT_ANGLE + pitch).tan).inches }  // this could be wrong
 
     val ready: Boolean
         get() = Game.sim || (targetVisible && visionOffset!!.absoluteValue < Constants.TURRET_TOLERANCE) || status == TurretStatus.FROZEN
@@ -152,18 +156,18 @@ object Turret : SubsystemBase(), Debug {
 
     private val lostDebouncer = Debouncer(0.2, Debouncer.DebounceType.kBoth)
     override fun periodic() {
+        SmartDashboard.putString("turret cmd", this.currentCommand?.name ?: "none")
         debugDashboard()
-        if(Game.real) {
+        if (Game.real) {
             latestResult = RobotContainer.limelight.latestResult
             targetVisible = latestResult != null && latestResult!!.hasTargets()
             lost = !lostDebouncer.calculate(targetVisible)
-            target = latestResult?.let { if(it.hasTargets()) it.bestTarget else null  }
-        }
-        else {
+            target = latestResult?.let { if (it.hasTargets()) it.bestTarget else null }
+        } else {
             targetVisible = visionOffset != null
             lost = !lostDebouncer.calculate(targetVisible)
         }
-        turret.updateVoltage()
+        if (status != TurretStatus.FROZEN) turret.updateVoltage()
     }
 
     override fun simulationPeriodic() {
