@@ -9,7 +9,7 @@ import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.Turret
 
-class StaticLock  : CommandBase() {
+class StaticLock : CommandBase() {
     init {
         addRequirements(Climber, Drivetrain, Turret, Shooter)
     }
@@ -21,12 +21,12 @@ class StaticLock  : CommandBase() {
 
     override fun execute() {
         Climber.updateMotors()
-        if (Climber.extension < 1.inches) {
-            Climber.staticsLifted = true
-            Climber.extension = 5.inches
-        } else if (Climber.extension < 20.inches) {
-            Climber.staticsLifted = false
-        }
+//        if (Climber.extension < 1.inches) {
+//            Climber.staticsLifted = true
+//            Climber.extension = 5.inches
+//        } else if (Climber.extension < 20.inches) {
+//            Climber.staticsLifted = false
+//        }
     }
 
     override fun isFinished(): Boolean = Climber.leftWinch.linearPositionError < 2.inches && Climber.staticsLifted
