@@ -63,14 +63,14 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         reversed = false
         brakeMode = true
         currentLimit = 40
-        follow(leftMaster)
+        spark.follow(leftMaster.spark, reversed)  // follow(leftMaster)
     }
     private val rightFollower = KSparkMax(10).apply {
         identifier = "rightFollow"
         currentLimit = 40
         brakeMode = true
         reversed = false
-        follow(rightMaster)
+        spark.follow(rightMaster.spark, reversed)  // follow(rightMaster)
     }
     private val motors = arrayOf(leftMaster, rightMaster)
 
@@ -95,6 +95,8 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         set(value) {
             val latency = RobotContainer.limelight.latestResult!!.latencyMillis.milli.seconds
             val detectionTime = Game.time - latency
+            leftMaster.resetPosition()
+            rightMaster.resetPosition()
             RobotContainer.navigation.update(value, detectionTime)
         }
     private var polarCoordinates

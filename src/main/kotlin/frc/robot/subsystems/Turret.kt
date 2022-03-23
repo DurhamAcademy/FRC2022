@@ -154,7 +154,7 @@ object Turret : SubsystemBase(), Debug {
         turret.PID.reset(turret.position.rotations, turret.velocity.rotationsPerSecond)
     }
 
-    private val lostDebouncer = Debouncer(0.2, Debouncer.DebounceType.kBoth)
+    private val lostDebouncer = Debouncer(0.5, Debouncer.DebounceType.kBoth)
     override fun periodic() {
         SmartDashboard.putString("turret cmd", this.currentCommand?.name ?: "none")
         debugDashboard()

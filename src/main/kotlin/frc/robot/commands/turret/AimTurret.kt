@@ -29,7 +29,7 @@ object AimTurret : CommandBase() {
             if (goalOrientation.absoluteValue < 1.degrees) goalOrientation = 0.degrees
             Turret.turret.position = Turret.turret.position + goalOrientation * 0.7
         } else {
-            Turret.turret.position = Turret.fieldRelativeAngle
+            Turret.turret.position = Turret.turret.position
         }
     }
 
