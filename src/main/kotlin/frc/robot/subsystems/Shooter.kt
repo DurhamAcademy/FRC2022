@@ -41,7 +41,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     var status = ShooterStatus.IDLE
     override val priority: DebugFilter = DebugFilter.Max
-    private val ff = SimpleMotorFeedforward(0.38267, 0.02468, 0.0019498)
+    private val ff = SimpleMotorFeedforward(0.38267, 0.02508, 0.0019498)
     var time = Game.time
 
     // main motor attached to the flywheel
@@ -68,7 +68,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 //            val nextVoltage = loop.getU(0)  // input
 //            nextVoltage + ff.ks.invertIf { velocitySetpoint < 0.rpm }// + .15
 //        }
-        kP = 0.0120434
+        kP = 0.0160434
         kI = 0.0001
 
         currentLimit = 50

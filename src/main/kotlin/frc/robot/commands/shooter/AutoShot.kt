@@ -35,6 +35,7 @@ class AutoShot : CommandBase() {
             } else {
                 Shooter.status = ShooterStatus.SPINUP
                 Conveyor.prepare()
+                Conveyor.feeder.percent = 0.0
             }
         }
     }
