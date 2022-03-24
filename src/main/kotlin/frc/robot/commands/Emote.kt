@@ -1,6 +1,51 @@
 package frc.robot.commands
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.CommandBase
+import frc.kyberlib.math.units.extensions.TAU
+import frc.kyberlib.math.units.extensions.degrees
+import frc.robot.subsystems.*
+import kotlin.math.sin
 
 object Emote : CommandBase() {
+    private val timer = Timer()
+
+    init {
+        addRequirements(Drivetrain, Climber, Turret, Shooter, Intaker)
+    }
+
+    private const val turnPeriod = 2.0
+    private const val turnMag = 1.0
+
+    private const val vroomPeriod = 10.0
+    private const val vroomDuration = 0.3
+    private const val vroomSpacing = 1.0
+    private const val vroomIntensity = 0.3
+
+    override fun initialize() {
+        timer.reset()
+        timer.start()
+        Climber.staticsLifted = true
+        Turret.turret.position = 0.degrees
+        Intaker.deployed = true
+    }
+
+    override fun execute() {
+        val t = timer.get()
+        Drivetrain.drive(ChassisSpeeds(0.0, 0.0, sin(t * TAU/ turnPeriod) * turnMag))
+
+        Turret.turret.updateVoltage()
+
+        val vroomTime = t.mod(vroomPeriod)
+        if (vroomTime in 0.0..vroomDuration || vroomTime in vroomDuration+ vroomSpacing..2*vroomDuration+ vroomSpacing)
+            Shooter.flywheel.percent = vroomIntensity
+        else Shooter.stop()
+    }
+
+    override fun end(interrupted: Boolean) {
+        Intaker.deployed = false
+        Climber.staticsLifted = false
+        Drivetrain.stop()
+    }
 }
