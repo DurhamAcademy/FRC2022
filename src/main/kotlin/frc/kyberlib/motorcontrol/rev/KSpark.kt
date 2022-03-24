@@ -8,7 +8,7 @@ import frc.kyberlib.motorcontrol.KBasicMotorController
 import frc.kyberlib.motorcontrol.PWMRegristry
 
 class KSpark(channel: Int) : KBasicMotorController() {
-    private val spark = Spark(channel)
+    val spark = Spark(channel)
     override var brakeMode: BrakeMode  = false  // this can't be set from code but by hitting button on spark you can change it
     override var identifier = "Spark$channel"
     init {

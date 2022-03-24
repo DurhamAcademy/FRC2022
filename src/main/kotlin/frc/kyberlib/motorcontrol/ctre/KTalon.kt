@@ -11,7 +11,7 @@ import frc.kyberlib.motorcontrol.KBasicMotorController
 import frc.kyberlib.motorcontrol.KMotorController
 
 class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation: Int = 2048) : KMotorController() {
-    internal val talon = BaseTalon(port, model)
+    val talon = BaseTalon(port, model)
     override var identifier: String = "$model ($port)"
     init {
         CANRegistry[identifier] = port
@@ -42,10 +42,15 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             talon.set(ControlMode.PercentOutput, value)
         }
 
+    val current
+        get() = talon.supplyCurrent
+
     override fun followTarget(kmc: KBasicMotorController) {
-        if(kmc is KTalon) talon.follow(kmc.talon, FollowerType.PercentOutput)
-        else if (kmc is KVictorSPX) talon.follow(kmc.victor)
-        else kmc.followers.add(this)
+        when (kmc) {
+            is KTalon -> talon.follow(kmc.talon, FollowerType.PercentOutput)
+            is KVictorSPX -> talon.follow(kmc.victor)
+            else -> kmc.followers.add(this)
+        }
     }
 
 

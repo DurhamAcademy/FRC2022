@@ -20,7 +20,7 @@ import frc.kyberlib.motorcontrol.PWMRegristry
  */
 class KLinearServo(
     port: Int,
-    val length: Int,
+    val length: Length,
     travelSpeed: LinearVelocity,
     initialPosition: Length = 0.millimeters,
     minMs: Double = 1.0,
@@ -46,7 +46,7 @@ class KLinearServo(
     var position: Length = initialPosition
         set(value) {
             // command the servo to new target position
-            servo.position = value.millimeters / length
+            servo.position = value / length
             // update the position estimate
             field = rateLimit.calculate(value.millimeters).millimeters
             // update backing field

@@ -9,7 +9,6 @@ import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.seconds
 
 typealias Voltage = Double
-// todo: voltage ramp rate
 /**
  * A basic motor controller. No closed-loop control
  */

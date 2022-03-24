@@ -20,6 +20,7 @@ import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
 import frc.kyberlib.command.LogMode
+import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.sign
 import frc.kyberlib.math.units.extensions.*
@@ -55,7 +56,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     var updateRate: Time = KRobot.period.seconds  // builtin notifier system
         set(value) {
             field = value
-            PID = ProfiledPIDController(kP, kI, kD, constraints, value.seconds)
+            PID = PIDController(kP, kI, kD, value.seconds)
             if (field != KRobot.period.seconds) updateNotifier.startPeriodic(value.seconds)
             else updateNotifier.stop()
         }
@@ -121,10 +122,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         }
 
     private var constraints = TrapezoidProfile.Constraints(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
-        set(value) {
-            field = value
-            PID.setConstraints(value)
-        }
 
     // ----- control schemes ---- //
     /**
@@ -172,7 +169,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     /**
      * Builtin PID controller for motor
      */
-    var PID = ProfiledPIDController(0.0, 0.0, 0.0, constraints)
+    var PID = PIDController(0.0, 0.0, 0.0)
 
     /**
      * Builtin control that will combine feedforward with the PID.
@@ -276,7 +273,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     /**
      * Locks recursive calls to customControl from inside customControl
      */
-    private var customControlLock = false
+    private var customControlLock = false  // this could brake but I don't think its been an issue so far
 
     // ----- motor state information ----- //
     /**
@@ -316,6 +313,12 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         set(value) {
             velocity = linearToRotation(value)
         }
+
+    private val accelerationCalculator = Differentiator()
+    var acceleration = 0.rpm
+    val linearAcceleration
+        get() = rotationToLinear(acceleration)
+
 
     // ----- error ---- //
     /**
@@ -408,7 +411,8 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      */
     fun updateVoltage() {
         if (!isFollower && customControl != null && controlMode != ControlMode.VOLTAGE) {
-            customControlLock = true  // todo: if custom control crashes, this might be permanently locked
+            acceleration = accelerationCalculator.calculate(velocity.value).radiansPerSecond
+            customControlLock = true
             safeSetVoltage(customControl!!(this))
             customControlLock = false
         }
@@ -560,6 +564,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         set(value) {
             assert(!real) { "This value should only be set from a simulation" }
             field = value
+            acceleration = accelerationCalculator.calculate(value.radiansPerSecond).radiansPerSecond
         }
 
     /**
