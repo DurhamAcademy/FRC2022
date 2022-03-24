@@ -46,7 +46,7 @@ object Turret : SubsystemBase(), Debug {
     var isZeroed = false
 
     // characterization of the turret
-    private val feedforward = SimpleMotorFeedforward(0.05, 1.1432, 0.045857) // 0.22832
+    private val feedforward = SimpleMotorFeedforward(0.22832, 1.1432, 0.045857) // 0.22832
 
     // actual turret motors
     val turret = KSparkMax(11).apply {
@@ -60,18 +60,20 @@ object Turret : SubsystemBase(), Debug {
 
 //        val loop = stateSpaceControl(positionSystem(feedforward), 3.0, .1, 2.degrees.value,1.0,4.0)
 
-        PID = ProfiledPIDController(40.0, 3.0, 0.0, TrapezoidProfile.Constraints(1.0, 1.0)).apply {
+        val controller = ProfiledPIDController(40.0, 3.0, 0.0, TrapezoidProfile.Constraints(1.0, 1.0)).apply {
             setIntegratorRange(-2.0, 2.0)
         }  // these constraints are not tested on real
 
         val new = { it: KMotorController ->
-            val rot = -headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.1.seconds
-            position = clampSafePosition(it.positionSetpoint + rot)
+            val polarSpeeds = Drivetrain.polarSpeeds
+            val rot = polarSpeeds.dTheta * 0.1.seconds//-headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.1.seconds
+            val mov = polarSpeeds.dOrientation * 0.0.seconds
+            position = clampSafePosition(it.positionSetpoint + rot + mov)
 
             SmartDashboard.putNumber("error", positionError.degrees)
             SmartDashboard.putNumber("set", positionSetpoint.degrees)
-            val offsetCorrection = PID.calculate(position.rotations, positionSetpoint.rotations)
-            val ff = feedforward.calculate(PID.setpoint.velocity.rotationsPerSecond.radiansPerSecond)
+            val offsetCorrection = controller.calculate(position.rotations, positionSetpoint.rotations)
+            val ff = feedforward.calculate(controller.setpoint.velocity.rotationsPerSecond.radiansPerSecond)
             if (isZeroed) (ff + offsetCorrection) else 0.0//.coerceIn(-4.0, 4.0)
         }
 
@@ -147,11 +149,11 @@ object Turret : SubsystemBase(), Debug {
         else visionPitch?.let { pitch -> 2.feet + distanceFilter.calculate((Constants.UPPER_HUB_HEIGHT.inches - 1 - Constants.LIMELIGHT_HEIGHT.inches) / (Constants.LIMELIGHT_ANGLE + pitch).tan).inches }  // this could be wrong
 
     val ready: Boolean
-        get() = Game.sim || (targetVisible && visionOffset!!.absoluteValue < Constants.TURRET_TOLERANCE) || status == TurretStatus.FROZEN
+        get() = Game.sim || (targetVisible && turret.positionError.absoluteValue < Constants.TURRET_TOLERANCE) || status == TurretStatus.FROZEN
 
     fun reset() {
         distanceFilter.reset()
-        turret.PID.reset(turret.position.rotations, turret.velocity.rotationsPerSecond)
+        turret.PID.reset()
     }
 
     private val lostDebouncer = Debouncer(0.5, Debouncer.DebounceType.kBoth)

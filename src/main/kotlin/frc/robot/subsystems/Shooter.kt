@@ -1,8 +1,10 @@
 package frc.robot.subsystems
 
+import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.math.filter.Debouncer.DebounceType
+import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -10,6 +12,7 @@ import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.Polynomial
+import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.rev.KSparkMax
@@ -48,7 +51,6 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     val flywheel = KSparkMax(31).apply {
         identifier = "flywheel"
         motorType = DCMotor.getNEO(2)
-        addFeedforward(ff)
         val loop = KMotorController.StateSpace.systemLoop(
             velocitySystem(ff),
             180.rpm.rotationsPerSecond,
@@ -56,20 +58,34 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
             50.rpm.radiansPerSecond,
             10.0
         )
-//        customControl = {
-//            val v = ff.calculate(velocity.value, velocitySetpoint.value, .02)
-//            time = Game.time
-//            v
-//        }
-//        customControl = {
-//            loop.nextR = VecBuilder.fill(it.velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
-//            loop.correct(VecBuilder.fill(it.velocity.radiansPerSecond))  // update with empirical
-//            loop.predict(updateRate.seconds)  // math
-//            val nextVoltage = loop.getU(0)  // input
-//            nextVoltage + ff.ks.invertIf { velocitySetpoint < 0.rpm }// + .15
-//        }
+
+        addFeedforward(ff)
+        val default = customControl!!
+        val fastSpinup = { it: KMotorController ->
+            if(velocitySetpoint < 10.rpm) 0.0
+            else if(velocityError < -100.rpm) 12.0
+            else default(it)
+        }
+
+        val inversion = { it: KMotorController ->
+            val v = ff.calculate(velocity.value, velocitySetpoint.value, .02)
+            time = Game.time
+            v
+        }
+
+        val state = { it: KMotorController ->
+            loop.nextR = VecBuilder.fill(velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
+            loop.correct(VecBuilder.fill(velocity.radiansPerSecond))  // update with empirical
+            loop.predict(updateRate.seconds)  // math
+            val nextVoltage = loop.getU(0)  // input
+            nextVoltage + ff.ks.invertIf { velocitySetpoint < 0.rpm }// + .15
+        }
+
+        //customControl = null  // builtin
+        kF = ff.kv
         kP = 0.0160434
-        kI = 0.0001
+//        kI = 0.0001
+        customControl = fastSpinup
 
         currentLimit = 50
         brakeMode = false
@@ -87,7 +103,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     var targetVelocity
         get() = flywheel.velocitySetpoint
         set(value) {
-            flywheel.velocity = value * SmartDashboard.getNumber("shooterMult", .5)
+            flywheel.velocity = value * SmartDashboard.getNumber("shooterMult", 1.0)
         }
 
 
@@ -101,8 +117,8 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     // Servo that sets the hood angle
-    private val hood = KLinearServo(8, 100, 18.0.millimetersPerSecond)
-    private val hood2 = KLinearServo(9, 100, 18.0.millimetersPerSecond)
+    private val hood = KLinearServo(8, 100.millimeters, 18.0.millimetersPerSecond)
+    private val hood2 = KLinearServo(9, 100.millimeters, 18.0.millimetersPerSecond)
 
     var hoodDistance: Length
         get() = hood.position
@@ -128,13 +144,23 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         }
 
     fun update() {
-        val dis = Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+        val dis = RobotContainer.navigation.position.getDistance(effectiveHubLocation).meters
         flywheelUpdate(dis)
         hoodUpdate(dis)
     }
 
-    val hoodPoly = Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..5.5)
-    private fun hoodUpdate(dis: Length) {
+    val effectiveHubLocation: Translation2d
+        get() {
+            val base = Constants.HUB_POSITION
+            if(!Constants.MOVEMENT_CORRECTION) return base
+            val fieldSpeeds = Drivetrain.fieldRelativeSpeeds
+            return base - Translation2d(fieldSpeeds.vxMetersPerSecond * timeOfFlight.value, fieldSpeeds.vyMetersPerSecond * timeOfFlight.value)
+        }
+
+    val timeOfFlight = 2.seconds  // todo: add lookup table
+
+    private val hoodPoly = Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..5.5)
+    fun hoodUpdate(dis: Length) {
         val hood = hoodPoly.eval(dis.value)
         if (hood == null) {
             inRange = false
@@ -144,8 +170,8 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         }
     }
 
-    val speedPoly = Polynomial(37.43917, -119.05297, 1501.93519)
-    private fun flywheelUpdate(dis: Length) {
+    private val speedPoly = Polynomial(37.43917, -119.05297, 1501.93519)
+    fun flywheelUpdate(dis: Length) {
         val interpolated =
             speedPoly.eval(dis.value) //.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
 

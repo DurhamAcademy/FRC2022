@@ -90,6 +90,31 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         set(value) {
             drive(value)
         }
+
+    /**
+     * Speeds relative to the field
+     */
+    val fieldRelativeSpeeds: ChassisSpeeds
+        get() {
+            val chassis = chassisSpeeds
+            val heading = RobotContainer.navigation.heading
+            return ChassisSpeeds(chassis.vxMetersPerSecond * heading.cos, chassis.vxMetersPerSecond * heading.sin, chassis.omegaRadiansPerSecond)
+        }
+
+    /**
+     * Get speeds relative to the hub.
+     *
+     * vx = speed towards the hub.
+     *
+     * vy = speed parallel to the hub.
+     */
+    val hubRelativeSpeeds: ChassisSpeeds
+        get() {
+            val polar = polarSpeeds
+            return ChassisSpeeds(polar.dr.value,
+                polar.dTheta.toTangentialVelocity(Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters).value,
+                polar.dOrientation.radiansPerSecond)
+        }
     var pose
         get() = RobotContainer.navigation.pose
         set(value) {
@@ -203,10 +228,8 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
-        RobotContainer.navigation.odometry.update(
-            RobotContainer.gyro.heading.w,
-            leftMaster.linearPosition.meters,
-            rightMaster.linearPosition.meters
+        RobotContainer.navigation.update(
+            wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition
         )
         debugDashboard()
 
@@ -230,7 +253,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
 
     // ignore this, it is sim and debug support
     private lateinit var driveSim: DifferentialDrivetrainSim
-    fun setupSim() {
+    private fun setupSim() {
         driveSim = DifferentialDrivetrainSim( // Create a linear system from our characterization gains.
             betterDrivetrainSystem(),
 //            LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka, Constants.TRACK_WIDTH),
@@ -245,7 +268,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         if (Game.sim) Simulation.instance.include(this)
     }
 
-    fun betterDrivetrainSystem(): LinearSystem<N2, N2, N2> {  // todo: implement these into the builtin
+    private fun betterDrivetrainSystem(): LinearSystem<N2, N2, N2> {  // todo: implement these into the builtin
 //        return LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka)
         val kVAngular = angularFeedforward.kv// * 2.0 / Constants.TRACK_WIDTH
         val kAAngular = angularFeedforward.ka// * 2.0 / Constants.TRACK_WIDTH
@@ -268,10 +291,8 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
 
     override fun simUpdate(dt: Time) {
         // update the sim with new inputs
-        val leftVolt =
-            leftMaster.voltage//.invertIf { leftMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
-        val rightVolt =
-            rightMaster.voltage//.invertIf { rightMaster.reversed }//.zeroIf{ it.absoluteValue < Constants.DRIVE_KS}
+        val leftVolt = leftMaster.voltage
+        val rightVolt = rightMaster.voltage
         driveSim.setInputs(leftVolt, rightVolt)
         driveSim.update(dt.seconds)
 //
@@ -281,8 +302,6 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         rightMaster.simLinearPosition = driveSim.rightPositionMeters.meters
         rightMaster.simLinearVelocity = driveSim.rightVelocityMetersPerSecond.metersPerSecond
         RobotContainer.gyro.heading = driveSim.heading.k
-//        RobotContainer.navigation.pose = driveSim.pose
-//        Navigator.instance!!.heading += chassisSpeeds.omegaRadiansPerSecond.radiansPerSecond * dt
     }
 
     override fun debugValues(): Map<String, Any?> {
