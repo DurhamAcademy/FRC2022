@@ -12,28 +12,30 @@ object Game {
     val sim = RobotBase.isSimulation()
 
     val enabled
-        get() = RobotState.isEnabled()
+        inline get() = RobotState.isEnabled()
     val disabled
-        get() = RobotState.isDisabled()
+        inline get() = RobotState.isDisabled()
     val AUTO
-        get() = RobotState.isAutonomous()
+        inline get() = RobotState.isAutonomous()
     val OPERATED
-        get() = RobotState.isTeleop()
+        inline get() = RobotState.isTeleop()
     val TEST
-        get() = RobotState.isTest()
+        inline get() = RobotState.isTest()
     val STOPPED
-        get() = RobotState.isEStopped()
+        inline get() = RobotState.isEStopped()
+    val COMPETITION
+        inline get() = DriverStation.isFMSAttached()
 
     val brownedOut
-        get() = RobotController.isBrownedOut()
+        inline get() = RobotController.isBrownedOut()
 
     val CAN
-        get() = RobotController.getCANStatus()
+        inline get() = RobotController.getCANStatus()
     val batteryVoltage
-        get() = RobotController.getBatteryVoltage()
+        inline get() = RobotController.getBatteryVoltage()
 
     val time
-        get() = RobotController.getFPGATime().micro.seconds
+        inline get() = RobotController.getFPGATime().micro.seconds
 
     val alliance: DriverStation.Alliance = DriverStation.getAlliance()
 

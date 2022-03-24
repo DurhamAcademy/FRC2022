@@ -31,6 +31,25 @@ data class PolarPose(val r: Length, val theta: Angle, val orientation: Angle) : 
 }
 
 data class PolarVelocity(val dr: LinearVelocity, val dTheta: AngularVelocity, val dOrientation: AngularVelocity) : Debug {
+    fun cartesian(pose: PolarPose): ChassisSpeeds {
+        val tangential = dTheta.toTangentialVelocity(pose.r)
+        val heading = pose.orientation
+        return ChassisSpeeds(
+            dr.metersPerSecond * heading.cos + tangential.metersPerSecond * heading.sin,
+            dr.metersPerSecond * heading.sin + tangential.metersPerSecond * heading.cos,
+            dOrientation.radiansPerSecond
+        )
+    }
+
+    fun cartesian(pose: Pose2d, origin: Translation2d): ChassisSpeeds {
+        val tangential = dTheta.toTangentialVelocity(pose.translation.getDistance(origin).meters)
+        val heading = pose.translation.towards(origin) - pose.rotation
+        return ChassisSpeeds(
+            dr.metersPerSecond * heading.cos + tangential.metersPerSecond * heading.sin,
+            dr.metersPerSecond * heading.sin + tangential.metersPerSecond * heading.cos,
+            dOrientation.radiansPerSecond
+        )
+    }
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
             "dR" to dr, "dTheta" to dTheta, "dOrientation" to dOrientation
