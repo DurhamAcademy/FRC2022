@@ -10,14 +10,16 @@ import frc.kyberlib.math.units.extensions.*
  * This file holds all important constants throughout the project
  */
 object Constants {
-    const val doStateSpace = false
+    const val doStateSpace = false  // todo remove this
 
-    // ------ Climb ------ //
-    val WINCH_RADIUS: Length = 0.6.inches
+    // ------ Climb ------ // todo: update these
+    val WINCH_RADIUS: Length = 0.5.inches
     const val EXTENDABLE_ROTATION_GEAR_RATIO = 250.0
-    const val WINCH_GEAR_RATIO = (62.0 / 12.0) * (34.0 / 18.0) * (54.0 / 36.0)
+    const val WINCH_GEAR_RATIO = (10.0 / 1.0) * (54.0 / 18.0)
 
     // ------ Conveyor ------ //
+    const val BALL_TRACKING = false
+    const val DRIVER_CAMERA = false
 
     // ------ Drivetrain ------ //
     // pids
@@ -46,8 +48,7 @@ object Constants {
     // ------ Shooter ------ //
     val LIMELIGHT_HEIGHT: Length = 25.inches
     val LIMELIGHT_ANGLE: Angle = 40.degrees
-
-    val SHOOTER_COMPRESSION = 1.25.inches
+    const val MOVEMENT_CORRECTION = true
 
     val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(
         mapOf(
@@ -76,17 +77,14 @@ object Constants {
         )
     )
 
+    val TIME_OF_FLIGHT_INTERPOLATOR = Interpolator(mapOf())
+
     val SHOOTER_VELOCITY_TOLERANCE = 50.rpm
-    val FLYWHEEL_RADIUS = 2.inches
 
     // ------ Turret ------ //
-    val TURRET_GEAR_RATIO: Double = 10.0 * (215.0 / 18.0)  // 10 is vp and second is pulley ratio
-    const val NOT_FOUND_WAIT = 0.2
-    const val SMART_LOSS = false
+    const val TURRET_GEAR_RATIO: Double = 10.0 * (215.0 / 18.0)  // 10 is vp and second is pulley ratio
 
-    const val SHOOTER_AQUISITION_TIME = 0.1
     val TURRET_TOLERANCE = 3.degrees // how close the heading must be to fire
-    val TURRET_DEADBAND = 2.degrees  // when the turret stops adjusting
 
 
     // ------ Game Pieces ------ //
@@ -96,7 +94,7 @@ object Constants {
     val START_POSE: Pose2d = Pose2d(
         HUB_POSITION - Translation2d(3.meters, 0.1.meters),
         0.degrees.w
-    )//Pose2d(8.5.meters, 1.9.meters, (-90).degrees)
+    )
     val RESET_POSE = Pose2d(1.3, 1.3, 45.degrees.w) // center of our terminal
 
     val LOW_RUNG_HEIGHT = 4.feet + .75.inches
