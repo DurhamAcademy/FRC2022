@@ -3,8 +3,14 @@ package frc.robot.subsystems
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
+import frc.kyberlib.command.Game
+import frc.kyberlib.math.units.extensions.milliseconds
 import frc.kyberlib.motorcontrol.rev.KSparkMax
+import frc.kyberlib.simulation.field.KField2d
+import frc.robot.Constants
+import frc.robot.RobotContainer
 import frc.robot.commands.intake.Idle
+import frc.robot.commands.intake.Intake
 
 
 /**
@@ -65,6 +71,23 @@ object Conveyor : SubsystemBase(), Debug {
 
     override fun periodic() {
 //        debugDashboard()
+        if(Constants.BALL_TRACKING) {
+            val result = RobotContainer.ballMonitor.latestResult
+            if (result != null) {
+                if(result.hasTargets()) {
+                    result.targets.forEach { ball ->
+                        KField2d.addGoal(
+                            RobotContainer.navigation.position.plus(ball.cameraToTarget.translation),
+                            Game.time - result.latencyMillis.milliseconds,
+                            "Ball",
+                            Intake
+                        )
+                    }
+                } else {
+                    // indicate nothing is seen
+                }
+            }
+        }
     }
 
     override fun debugValues(): Map<String, Any?> {

@@ -1,11 +1,14 @@
 package frc.robot
 
+import edu.wpi.first.cameraserver.CameraServer
+import edu.wpi.first.cscore.VideoMode
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.Navigator
+import frc.kyberlib.auto.TrackingMode
 import frc.kyberlib.auto.trajectory.TrajectoryManager
 import frc.kyberlib.command.Game
 import frc.kyberlib.input.controller.KXboxController
@@ -26,6 +29,7 @@ import frc.robot.commands.turret.AimTurret
 import frc.robot.commands.turret.FreezeTurret
 import frc.robot.commands.turret.SeekTurret
 import frc.robot.commands.turret.ZeroTurret
+import frc.robot.controls.DefaultControls
 import frc.robot.controls.OperatorControls
 import frc.robot.controls.RocketLeague
 import frc.robot.subsystems.*
@@ -39,14 +43,21 @@ object RobotContainer {
     // initialize sensors and inputs here
     val gyro = KPigeon(6)
     val limelight = PhotonCamera("gloworm")
+    val ballMonitor = PhotonCamera("balls")
+    init {
+        if(Game.real && Constants.DRIVER_CAMERA) {
+            val video = CameraServer.startAutomaticCapture()
+            video.videoMode = VideoMode(video.videoMode.pixelFormat, 640, 480, 30)
+        }
+    }
     val turretLimit = DigitalInput(0)
 
-    val navigation = Navigator(gyro, Constants.START_POSE)
+    val navigation = Navigator(gyro, Constants.START_POSE, trackingMode = TrackingMode.Fancy)
 
     val controller = KXboxController(0)
     val op = OperatorControls()
 
-    var controlScheme = RocketLeague.apply {  // fixme
+    var controlScheme = DefaultControls.apply {
         INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
         SHOOT.whileActiveOnce(Shoot)
         FORCE_SHOT.whileActiveOnce(ForceShoot)
