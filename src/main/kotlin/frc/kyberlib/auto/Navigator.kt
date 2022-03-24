@@ -1,16 +1,23 @@
 package frc.kyberlib.auto
 
+import edu.wpi.first.math.MatBuilder
+import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.*
+import edu.wpi.first.math.numbers.N1
+import edu.wpi.first.math.numbers.N3
+import edu.wpi.first.math.numbers.N5
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.auto.trajectory.KTrajectoryConfig
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.sensors.gyros.KGyro
 import frc.kyberlib.simulation.field.KField2d
+import frc.robot.subsystems.Drivetrain
 
 enum class TrackingMode {
     Fast, Fancy, DumbBoth
@@ -19,7 +26,7 @@ enum class TrackingMode {
 /**
  * Class to store and update robot navigation information
  */
-class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
+class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose, private val trackingMode: TrackingMode = TrackingMode.DumbBoth) : Debug {
     //    override val priority: DebugFilter = DebugFilter.Max
     companion object {
         var instance: Navigator? = null
@@ -30,13 +37,15 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
 //        gyro.heading = startPose.rotation.k
     }
 
+    private val useOdometry = trackingMode != TrackingMode.Fancy
+
     /**
      * A probability calculator to guess where the robot is from odometer and vision updates
      */
-//    private val poseEstimator = DifferentialDrivePoseEstimator(gyro.heading.w, startPose,
-//        MatBuilder(N5.instance, N1.instance).fill(0.02, 0.02, 0.01, 0.02, 0.02),
-//        MatBuilder(N3.instance, N1.instance).fill(0.02, 0.01, 0.01),
-//        MatBuilder(N3.instance, N1.instance).fill(0.1, 0.1, 0.01))
+    private val poseEstimator = DifferentialDrivePoseEstimator(gyro.heading.w, startPose,
+        MatBuilder(N5.instance, N1.instance).fill(0.02, 0.02, 0.01, 0.02, 0.02),
+        MatBuilder(N3.instance, N1.instance).fill(0.02, 0.01, 0.01),
+        MatBuilder(N3.instance, N1.instance).fill(0.1, 0.1, 0.01))
 
     /**
      * A object with restrictions on how the robot will move
@@ -64,17 +73,17 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
     // ----- public variables ----- //
     // location
     val heading: Angle  // what direction the robot is facing
-        get() = odometry.poseMeters.rotation.k
+        inline get() = pose.rotation.k
     var pose: Pose2d  // the location and direction of the robot
-        get() = odometry.poseMeters  // if(!useOdometry) poseEstimator.estimatedPosition else
+        get() = if(useOdometry) odometry.poseMeters else poseEstimator.estimatedPosition
         set(value) {
-            odometry.resetPosition(value, gyro.heading.w)
-//            else poseEstimator.resetPosition(value, heading.w)
+            if(useOdometry) odometry.resetPosition(value, gyro.heading.w)
+            else poseEstimator.resetPosition(value, gyro.heading.w)
 
             if (Game.sim) KField2d.robotPose = value
         }
     val position: Translation2d  // the estimated location of the robot
-        get() = pose.translation
+        inline get() = pose.translation
     val odometry = DifferentialDriveOdometry(gyro.heading.w).apply {
         resetPosition(startPose, gyro.heading.w)
     }
@@ -83,8 +92,8 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
      * Update position based on estimated motion
      */
     fun update(speeds: DifferentialDriveWheelSpeeds, leftPosition: Length, rightPosition: Length) {  // estimate motion
-        odometry.update(gyro.heading.w, leftPosition.meters, rightPosition.meters)
-//        else poseEstimator.update(heading.w, speeds, leftPosition.meters, rightPosition.meters)
+        if(useOdometry) odometry.update(gyro.heading.w, leftPosition.meters, rightPosition.meters)
+        else poseEstimator.update(gyro.heading.w, speeds, leftPosition.meters, rightPosition.meters)
     }
 
 
@@ -92,8 +101,8 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
      * Update position based on estimated motion
      */
     fun update(leftPosition: Length, rightPosition: Length) {  // estimate motion
-        odometry.update(gyro.heading.w, leftPosition.meters, rightPosition.meters)
-//        else poseEstimator.update(heading.w, speeds, leftPosition.meters, rightPosition.meters)
+        if(useOdometry) odometry.update(gyro.heading.w, leftPosition.meters, rightPosition.meters)
+        else poseEstimator.update(heading.w, Drivetrain.wheelSpeeds, leftPosition.meters, rightPosition.meters)
     }
 
     /**
@@ -103,12 +112,11 @@ class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
      * @param time the time of the detection
      */
     fun update(globalPosition: Pose2d, time: Time) {  // apply global position update
-        odometry.resetPosition(globalPosition, gyro.heading.w)
-//        when(trackingMode) {
-//            TrackingMode.Fancy -> poseEstimator.addVisionMeasurement(globalPosition, time.milliseconds)
-//            TrackingMode.DumbBoth -> if(Game.OPERATED) odometry.resetPosition(globalPosition, heading.w)
-//            else -> log("Global position updates not configured", LogMode.WARN)
-//        }
+        when(trackingMode) {
+            TrackingMode.Fancy -> poseEstimator.addVisionMeasurement(globalPosition, time.milliseconds)
+            TrackingMode.DumbBoth -> odometry.resetPosition(globalPosition, heading.w)
+            else -> log("Global position updates not configured", LogMode.WARN)
+        }
     }
 
     override fun debugValues(): Map<String, Any?> {

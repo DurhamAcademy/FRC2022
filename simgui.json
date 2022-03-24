@@ -1,6 +1,19 @@
 {
   "HALProvider": {
     "Addressable LEDs": {
+      "0": {
+        "columns": 14
+      },
+      "window": {
+        "visible": true
+      }
+    },
+    "PWM Outputs": {
+      "window": {
+        "visible": true
+      }
+    },
+    "RoboRIO": {
       "window": {
         "visible": true
       }
@@ -10,6 +23,9 @@
         "header": {
           "open": true
         }
+      },
+      "window": {
+        "visible": true
       }
     }
   },
@@ -68,7 +84,7 @@
         "Robot": {
           "arrows": false
         },
-        "image": "C:\\Users\\frc6502\\robot-code\\FRC2022\\Rapid React Field.png",
+        "image": "/Users/22staples/FRC2022/Rapid React Field.png",
         "traj": {
           "arrowSize": 0,
           "arrows": false,
@@ -121,7 +137,6 @@
         }
       },
       "Drivetrain": {
-        "open": true,
         "pose": {
           "open": true
         }
@@ -144,16 +159,17 @@
         "hood": {
           "open": true
         },
-        "open": true,
         "top Shooter": {
           "open": true
         }
       },
       "Turret": {
-        "open": true,
         "turret": {
           "open": true
         }
+      },
+      "auto": {
+        "open": true
       },
       "backend": {
         "Climber": {
@@ -167,6 +183,9 @@
       },
       "open": true,
       "solenoid3": {
+        "open": true
+      },
+      "turret": {
         "open": true
       }
     }
@@ -341,12 +360,12 @@
           "series": [
             {
               "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Shooter/flywheel/Angular Velocity"
+              "id": "NT:/SmartDashboard/fly error"
             },
             {
               "color": [
@@ -355,7 +374,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard//Shooter/flywheel/setpoint"
+              "id": "NT:/SmartDashboard/flywheel rpm"
             }
           ]
         },
