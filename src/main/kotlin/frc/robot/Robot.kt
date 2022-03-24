@@ -15,6 +15,7 @@ import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.commands.drive.AutoDrive
 import frc.robot.commands.shooter.AutoShot
+import frc.robot.commands.shooter.Dispose
 import frc.robot.commands.shooter.FullAutoFire
 import frc.robot.commands.turret.ZeroTurret
 import frc.robot.subsystems.*
@@ -86,8 +87,11 @@ class Robot : KRobot() {
         val command = SequentialCommandGroup()
         val f = File("${TrajectoryManager.AUTO_PATH}/$routine")
         f.readLines().forEach {
-            if (it == "Shot") command.addCommands(AutoShot())
-            else command.addCommands(AutoDrive(TrajectoryManager[it]!!))
+            when (it) {
+                "Shot" -> command.addCommands(AutoShot())
+                "Dispose" -> command.addCommands(Dispose)
+                else -> command.addCommands(AutoDrive(TrajectoryManager[it]!!))
+            }
         }
         if (!f.readLines().contains("Shot")) FullAutoFire().schedule()
 
