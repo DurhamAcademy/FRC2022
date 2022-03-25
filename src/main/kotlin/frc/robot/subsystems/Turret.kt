@@ -46,7 +46,7 @@ object Turret : SubsystemBase(), Debug {
     var isZeroed = false
 
     // characterization of the turret
-    private val feedforward = SimpleMotorFeedforward(0.22832, 1.1432, 0.045857) // 0.22832
+    private val feedforward = SimpleMotorFeedforward(0.05, 1.1432, 0.045857) // 0.22832
 
     // actual turret motors
     val turret = KSparkMax(11).apply {

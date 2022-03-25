@@ -14,7 +14,6 @@
   - driverstation image probaly needs to be updated first
 - disposal testing
   - ~50% chance this works
-- test pose estimator
 - time of flywheel table (~15 minutes)
 - shooting while moving
 

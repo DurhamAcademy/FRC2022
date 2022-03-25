@@ -77,7 +77,15 @@ object Constants {
         )
     )
 
-    val TIME_OF_FLIGHT_INTERPOLATOR = Interpolator(mapOf())
+    val TIME_OF_FLIGHT_INTERPOLATOR = Interpolator(mapOf(
+        2.5 to 1.0,
+        3.0 to 1.15,
+        3.5 to 1.15,
+        4.0 to 1.09,
+        4.5 to 1.32,
+        5.0 to 1.4,
+        5.5 to 1.52
+    ))
 
     val SHOOTER_VELOCITY_TOLERANCE = 50.rpm
 

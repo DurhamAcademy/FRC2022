@@ -45,10 +45,10 @@ object RobotContainer {
     val limelight = PhotonCamera("gloworm")
     val ballMonitor = PhotonCamera("balls")
     init {
-        if(Game.real && Constants.DRIVER_CAMERA) {
-            val video = CameraServer.startAutomaticCapture()
-            video.videoMode = VideoMode(video.videoMode.pixelFormat, 640, 480, 30)
-        }
+//        if(Game.real && false) { //Constants.DRIVER_CAMERA) {
+//            val video = CameraServer.startAutomaticCapture()
+//            video.videoMode = VideoMode(video.videoMode.pixelFormat, 640, 480, 30)
+//        }
     }
     val turretLimit = DigitalInput(0)
 
@@ -57,7 +57,7 @@ object RobotContainer {
     val controller = KXboxController(0)
     val op = OperatorControls()
 
-    var controlScheme = DefaultControls.apply {
+    var controlScheme = RocketLeague.apply {  // fixme
         INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
         SHOOT.whileActiveOnce(Shoot)
         FORCE_SHOT.whileActiveOnce(ForceShoot)
