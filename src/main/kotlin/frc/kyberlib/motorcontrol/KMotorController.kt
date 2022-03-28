@@ -503,6 +503,11 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         }
     }
 
+    private var tuning = false
+    fun tunable() {  // todo
+
+    }
+
     override fun debugValues(): Map<String, Any?> {
         val map = super.debugValues().toMutableMap()
         if (linearConfigured)

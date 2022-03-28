@@ -5,6 +5,7 @@ import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.k
+import frc.kyberlib.math.units.extensions.sin
 import frc.kyberlib.math.units.towards
 import frc.robot.RobotContainer
 import frc.robot.subsystems.Shooter
@@ -27,12 +28,13 @@ object AimTurret : CommandBase() {
 
 //         if the limelight is a target
         if (Turret.targetVisible) {
-//             perp zoom correction
-//            val perpSpeed = Drivetrain.polarSpeeds.dTheta.toTangentialVelocity(Drivetrain.polarCoordinates.r)
-//            var goalOrientation = Turret.visionOffset ?: return
-//            if (goalOrientation.absoluteValue < 1.degrees) goalOrientation = 0.degrees
-//            Turret.turret.position = Turret.turret.position + goalOrientation * 0.7
-            Turret.fieldRelativeAngle = RobotContainer.navigation.position.towards(Shooter.effectiveHubLocation).k
+            val curveCorrection = (RobotContainer.op.curveComp * Turret.turret.position.sin).degrees
+            if(RobotContainer.op.shootWhileMoving) {
+                Turret.fieldRelativeAngle = RobotContainer.navigation.position.towards(Shooter.effectiveHubLocation).k + curveCorrection
+            } else {
+                val goalOrientation = Turret.visionOffset!!
+                Turret.turret.position = Turret.turret.position + goalOrientation * 0.7 + curveCorrection
+            }
         } else {
             Turret.turret.position = Turret.turret.position
         }

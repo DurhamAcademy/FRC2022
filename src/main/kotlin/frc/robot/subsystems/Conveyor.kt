@@ -9,7 +9,7 @@ import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
 import frc.robot.RobotContainer
-import frc.robot.commands.intake.Idle
+import frc.robot.commands.conveyor.Idle
 import frc.robot.commands.intake.Intake
 
 

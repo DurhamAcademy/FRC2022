@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.*
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 
-open class KSolenoid(fwd: Int, back: Int, private val fake: Boolean = false) : Debug, NTSendable {
+class KSolenoid(fwd: Int, back: Int, private val fake: Boolean = false) : Debug, NTSendable {
     companion object {
         val allSolenoids = mutableListOf<KSolenoid>()
         val hub: PneumaticsBase = PneumaticsControlModule(1)

@@ -32,7 +32,7 @@ import kotlin.math.sqrt
  * Current status of the shooter mechanism
  */
 enum class ShooterStatus {
-    IDLE, SPINUP, LOW_READY, HIGH_READY, SHOT, FORCE_SHOT
+    IDLE, SPINUP, SHOT, FORCE_SHOT
 }
 
 /**
@@ -78,7 +78,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
             loop.correct(VecBuilder.fill(velocity.radiansPerSecond))  // update with empirical
             loop.predict(updateRate.seconds)  // math
             val nextVoltage = loop.getU(0)  // input
-            nextVoltage + ff.ks.invertIf { velocitySetpoint < 0.rpm }// + .15
+            nextVoltage + ff.ks.invertIf { velocitySetpoint < 0.rpm }
         }
 
         //customControl = null  // builtin
@@ -106,6 +106,14 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
             flywheel.velocity = value * SmartDashboard.getNumber("shooterMult", 1.0)
         }
 
+   val smartDis: Length
+        get() {
+            return if(RobotContainer.op.shootWhileMoving) {
+                RobotContainer.navigation.position.getDistance(effectiveHubLocation).meters
+            } else {
+                Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+            }
+        }
 
     // additional motors that copy the main
     private val flywheel2 = KSparkMax(32).apply {
@@ -144,9 +152,8 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         }
 
     fun update() {
-        val dis = RobotContainer.navigation.position.getDistance(effectiveHubLocation).meters
-        flywheelUpdate(dis)
-        hoodUpdate(dis)
+        flywheelUpdate(smartDis)
+        hoodUpdate(smartDis)
     }
 
     val effectiveHubLocation: Translation2d
@@ -157,7 +164,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
             return base - Translation2d(fieldSpeeds.vxMetersPerSecond * timeOfFlight.value, fieldSpeeds.vyMetersPerSecond * timeOfFlight.value)
         }
 
-    val timeOfFlight = 2.seconds  // todo: add lookup table
+    private val timeOfFlight = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(smartDis.meters).seconds
 
     private val hoodPoly = Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..5.5)
     fun hoodUpdate(dis: Length) {
@@ -197,14 +204,14 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     override fun periodic() {
         debugDashboard()
         SmartDashboard.putNumber("fly error", flywheel.velocityError.rpm)
-        if (currentCommand != ShooterCalibration) Turret.targetDistance?.let { hoodUpdate(it) }
+        if (currentCommand != ShooterCalibration) hoodUpdate(smartDis)
     }
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
             "flywheel" to flywheel,
             "hood" to hood,
-            "distance" to Turret.targetDistance
+            "distance" to smartDis
         )
     }
 

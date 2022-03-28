@@ -9,13 +9,12 @@ import frc.robot.subsystems.Conveyor
 import frc.robot.subsystems.Shooter
 
 object ShooterCalibration : CommandBase() {
-
-    const val rpmString = "flywheel rpm"
-    const val hoodString = "hood degrees"
+    private const val rpmString = "flywheel rpm"
+    private const val hoodString = "hood degrees"
 
     init {
         addRequirements(Shooter, Conveyor)
-        SmartDashboard.putNumber(rpmString, 0.0)
+        SmartDashboard.putNumber(rpmString, 1500.0)
         SmartDashboard.putNumber(hoodString, 5.0)
     }
 

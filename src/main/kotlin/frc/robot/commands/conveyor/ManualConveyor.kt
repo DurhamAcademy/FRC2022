@@ -1,16 +1,16 @@
-package frc.robot.commands.intake
+package frc.robot.commands.conveyor
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.subsystems.Conveyor
 
 object ManualConveyor : CommandBase() {
-    const val conveyorString = "conveyor percent"
-    const val feederString = "feeder percent"
+    private const val conveyorString = "conveyor percent"
+    private const val feederString = "feeder percent"
     init {
         addRequirements(Conveyor)
         SmartDashboard.putNumber(conveyorString, 0.0)
-        SmartDashboard.putNumber(feederString, 0.0)
+        SmartDashboard.putNumber(feederString, -0.5)
     }
 
     override fun execute() {

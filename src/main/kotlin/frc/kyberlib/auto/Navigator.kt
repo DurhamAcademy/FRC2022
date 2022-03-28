@@ -2,6 +2,7 @@ package frc.kyberlib.auto
 
 import edu.wpi.first.math.MatBuilder
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator
+import edu.wpi.first.math.estimator.KalmanFilterLatencyCompensator
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.*
@@ -26,7 +27,7 @@ enum class TrackingMode {
 /**
  * Class to store and update robot navigation information
  */
-class Navigator(private val gyro: KGyro, startPose: Pose2d = zeroPose, private val trackingMode: TrackingMode = TrackingMode.DumbBoth) : Debug {
+class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose, private val trackingMode: TrackingMode = TrackingMode.DumbBoth) : Debug {
     //    override val priority: DebugFilter = DebugFilter.Max
     companion object {
         var instance: Navigator? = null

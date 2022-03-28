@@ -10,6 +10,7 @@ abstract class ControlSchema2022 {
 
     abstract val SHOOT: Trigger
     abstract val FORCE_SHOT: Trigger
+    abstract val DISPOSE: Trigger
 
     abstract val EJECT: Trigger
     abstract val FLUSH: Trigger

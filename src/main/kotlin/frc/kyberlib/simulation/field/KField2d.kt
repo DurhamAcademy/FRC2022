@@ -5,6 +5,7 @@ import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
 import frc.kyberlib.math.units.extensions.Length
+import frc.kyberlib.math.units.extensions.Time
 import frc.kyberlib.math.units.extensions.feet
 import frc.kyberlib.math.units.extensions.meters
 import frc.robot.Constants
@@ -87,7 +88,7 @@ object KField2d : Field2d() {
      * @param time the time that the observation of the position was made
      * @param name the name of the type of goal
      */
-    fun addGoal(estimatedPosition: Translation2d, time: Double, name: String, uponArrival: Command? = null) {
+    fun addGoal(estimatedPosition: Translation2d, time: Time, name: String, uponArrival: Command? = null) {
         val similarGoals = goals.filter { it.name == name }
         if (similarGoals.any { it.position.getDistance(estimatedPosition) < sameDistance.value })  // this is bad and should probably be corrected before actually using
             return

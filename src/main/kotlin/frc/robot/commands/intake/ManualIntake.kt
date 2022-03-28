@@ -10,7 +10,7 @@ object ManualIntake : CommandBase() {
     init {
         addRequirements(Intaker)
         SmartDashboard.putBoolean(deploymentString, Intaker.deployed)
-        SmartDashboard.putNumber(intakeString, 0.0)
+        SmartDashboard.putNumber(intakeString, 0.8)
     }
 
     override fun execute() {

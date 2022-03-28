@@ -1,7 +1,5 @@
 package frc.robot
 
-import edu.wpi.first.cameraserver.CameraServer
-import edu.wpi.first.cscore.VideoMode
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.DriverStation
@@ -20,16 +18,17 @@ import frc.kyberlib.lighting.animations.AnimationPulse
 import frc.kyberlib.lighting.animations.AnimationSolid
 import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.commands.Emote
-import frc.robot.commands.intake.Eject
+import frc.robot.commands.climb.Climb
+import frc.robot.commands.conveyor.Eject
 import frc.robot.commands.intake.Flush
 import frc.robot.commands.intake.Intake
+import frc.robot.commands.shooter.Dispose
 import frc.robot.commands.shooter.ForceShoot
 import frc.robot.commands.shooter.Shoot
 import frc.robot.commands.turret.AimTurret
 import frc.robot.commands.turret.FreezeTurret
 import frc.robot.commands.turret.SeekTurret
 import frc.robot.commands.turret.ZeroTurret
-import frc.robot.controls.DefaultControls
 import frc.robot.controls.OperatorControls
 import frc.robot.controls.RocketLeague
 import frc.robot.subsystems.*
@@ -57,7 +56,7 @@ object RobotContainer {
     val controller = KXboxController(0)
     val op = OperatorControls()
 
-    var controlScheme = RocketLeague.apply {  // fixme
+    var controlScheme = RocketLeague.apply {
         INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
         SHOOT.whileActiveOnce(Shoot)
         FORCE_SHOT.whileActiveOnce(ForceShoot)
@@ -65,8 +64,9 @@ object RobotContainer {
         FLUSH.whileActiveOnce(Flush)
         LOCK_TURRET.toggleWhenActive(FreezeTurret)
         ZERO_TURRET.whenActive(ZeroTurret)
-//        CLIMB_MODE.toggleWhenActive(Climb)
+        CLIMB_MODE.toggleWhenActive(Climb)
         EMOTE.whileActiveOnce(Emote)
+        DISPOSE.whileActiveOnce(Dispose)
     }
 
     val autoChooser = SendableChooser<String>().apply {

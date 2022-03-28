@@ -48,30 +48,63 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         identifier = "leftMaster"
         reversed = true
         brakeMode = true
+        gearRatio = Constants.DRIVE_GEAR_RATIO
+        radius = Constants.WHEEL_RADIUS
         currentLimit = 40
+
+        kP = Constants.DRIVE_P
+        kI = Constants.DRIVE_I
+        kD = Constants.DRIVE_D
+        addFeedforward(leftFF)
         motorType = DCMotor.getNEO(2)
     }
     val rightMaster = KSparkMax(13).apply {
         identifier = "rightMaster"
         reversed = false
         brakeMode = true
+        gearRatio = Constants.DRIVE_GEAR_RATIO
+        radius = Constants.WHEEL_RADIUS
         currentLimit = 40
+
+        kP = Constants.DRIVE_P
+        kI = Constants.DRIVE_I
+        kD = Constants.DRIVE_D
+        addFeedforward(rightFF)
         motorType = DCMotor.getNEO(2)
     }
-    private val leftFollower = KSparkMax(15).apply {
+    val leftFollower = KSparkMax(15).apply {
         identifier = "leftFollow"
         reversed = false
         brakeMode = true
+        gearRatio = Constants.DRIVE_GEAR_RATIO
+        radius = Constants.WHEEL_RADIUS
+
+        kP = Constants.DRIVE_P
+        kI = Constants.DRIVE_I
+        kD = Constants.DRIVE_D
+        addFeedforward(leftFF)
         currentLimit = 40
+        motorType = DCMotor.getNEO(2)
         spark.follow(leftMaster.spark, reversed)  // follow(leftMaster)
     }
-    private val rightFollower = KSparkMax(10).apply {
+    val rightFollower = KSparkMax(10).apply {
         identifier = "rightFollow"
         currentLimit = 40
         brakeMode = true
         reversed = false
+        gearRatio = Constants.DRIVE_GEAR_RATIO
+        radius = Constants.WHEEL_RADIUS
+
+        kP = Constants.DRIVE_P
+        kI = Constants.DRIVE_I
+        kD = Constants.DRIVE_D
+        addFeedforward(rightFF)
+        motorType = DCMotor.getNEO(2)
         spark.follow(rightMaster.spark, reversed)  // follow(rightMaster)
     }
+
+    val driveInversion
+        get() = SmartDashboard.getBoolean("invert drive motors", false)
     private val motors = arrayOf(leftMaster, rightMaster)
 
     // values
@@ -140,22 +173,6 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
 
     init {
         defaultCommand = Drive
-
-        // setup controls for drive motors
-        for (motor in motors) {
-            motor.apply {
-                brakeMode = true
-                gearRatio = Constants.DRIVE_GEAR_RATIO
-                radius = Constants.WHEEL_RADIUS
-//                currentLimit = 40
-
-                kP = Constants.DRIVE_P
-                kI = Constants.DRIVE_I
-                kD = Constants.DRIVE_D
-            }
-        }
-        leftMaster.addFeedforward(leftFF)
-        rightMaster.addFeedforward(rightFF)
         Navigator.instance!!.applyMovementRestrictions(5.39.feetPerSecond, 2.metersPerSecond)
         Navigator.instance!!.applyKinematics(kinematics)
     }
@@ -191,24 +208,13 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
      * Drive the robot at the provided speeds
      */
     fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) {
-        leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
-        rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
-        if (Constants.doStateSpace) {
-            loop.nextR = VecBuilder.fill(
-                wheelSpeeds.leftMetersPerSecond,
-                wheelSpeeds.rightMetersPerSecond
-            )  // r = reference (setpoint)
-            loop.correct(
-                VecBuilder.fill(
-                    leftMaster.linearVelocity.metersPerSecond,
-                    rightMaster.linearVelocity.metersPerSecond
-                )
-            )  // update with empirical
-            loop.predict(KRobot.period)  // math
-            val leftVoltage = loop.getU(0)  // input
-            val rightVoltage = loop.getU(1)
-            leftMaster.voltage = leftVoltage
-            rightMaster.voltage = rightVoltage
+        if(!driveInversion) {
+            leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
+            rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
+        }
+        else {
+            leftFollower.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
+            rightFollower.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
         }
     }
 
@@ -238,7 +244,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
 
 //        KField2d.robotPose = RobotContainer.navigation.pose
 //        RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
-        if (SmartDashboard.getBoolean("nav updates", false) && Game.OPERATED && Turret.isZeroed) {
+        if (RobotContainer.op.smartNav && Game.OPERATED && Turret.isZeroed) {
             val distance = Turret.targetDistance ?: return
             val offset = Turret.visionOffset ?: return
             val angle = offset + Turret.fieldRelativeAngle + 180.degrees

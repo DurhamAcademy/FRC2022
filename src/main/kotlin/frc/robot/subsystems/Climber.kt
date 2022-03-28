@@ -2,6 +2,7 @@ package frc.robot.subsystems
 
 import edu.wpi.first.math.controller.ArmFeedforward
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
@@ -10,15 +11,14 @@ import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
-import frc.kyberlib.math.units.extensions.Time
-import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.extensions.inches
-import frc.kyberlib.math.units.extensions.meters
+import frc.kyberlib.math.filters.Differentiator
+import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.kyberlib.simulation.Simulatable
 import frc.robot.Constants
+import frc.robot.RobotContainer
 import kotlin.math.absoluteValue
 
 
@@ -178,6 +178,19 @@ object Climber : SubsystemBase(), Debug, Simulatable {
 
     override fun periodic() {
 //        debugDashboard()
+    }
+
+    private val swing = Differentiator()
+    /**
+     * Fun reaction wheel stuff. Optional, but cool if done
+     */
+    fun stabalize() {
+        if (leftWinch.linearPosition < 5.inches) return
+        val dTheta = swing.calculate(RobotContainer.gyro.pitch.radians).radiansPerSecond * -1.0  // note: pitch may be wrong
+        val dampeningConstant = RobotContainer.op.climbStabilization
+        Drivetrain.drive(DifferentialDriveWheelSpeeds( dTheta.value * dampeningConstant, dTheta.value * dampeningConstant))
+        Shooter.flywheel.torque = dTheta.value * dampeningConstant
+
     }
 
     override fun debugValues(): Map<String, Any?> {

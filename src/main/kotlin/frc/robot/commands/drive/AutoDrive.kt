@@ -24,7 +24,7 @@ import frc.robot.subsystems.Shooter
  * Automatically path and drive to a pose when called
  * @param targetPose the pose to drive to
  */
-class AutoDrive(var targetPose: Pose2d) : CommandBase() {
+class AutoDrive(var targetPose: Pose2d, private val intaking: Boolean = true) : CommandBase() {
     private var calculator = RamseteController(2.0, 0.7)  // these are the recommended values
     val simple = true
 
@@ -34,7 +34,7 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
 
     init {
         assert(KField2d.inField(targetPose.translation)) { "Invalid location selected. The robot tried to drive to ${targetPose.translation}, which is outside of the field" }
-        addRequirements(Drivetrain)
+        addRequirements(Drivetrain, Intaker)
     }
 
     private var rotationInvariant = false
@@ -51,8 +51,10 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
 //            else if (rotationInvariant) Pathfinder.pathTo(Navigator.instance!!.pose, targetPose.translation)
 //            else Pathfinder.pathTo(Navigator.instance!!.pose, targetPose)
             KField2d.trajectory = trajectory
-        Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
-        Intaker.deployed = true
+        if(intaking) {
+            Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
+            Intaker.deployed = true
+        }
         timer.start()
         timer.reset()
     }
@@ -80,6 +82,10 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
     }
 
     override fun end(interrupted: Boolean) {
+        if (intaking) {
+            Intaker.intakeMotor.stop()
+            Intaker.deployed = false
+        }
         Drivetrain.stop()
     }
 
