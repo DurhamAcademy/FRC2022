@@ -3,8 +3,13 @@ package frc.robot.commands.climb
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
+import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.inches
+import frc.kyberlib.math.units.extensions.radians
+import frc.kyberlib.math.units.extensions.radiansPerSecond
+import frc.robot.RobotContainer
+import frc.robot.subsystems.*
 import frc.robot.RobotContainer
 import frc.robot.commands.drive.Drive
 import frc.robot.subsystems.*
@@ -27,9 +32,6 @@ object Climb : CommandBase() {
         Turret.turret.position = 0.degrees
         Climber.staticsLifted = true
         Climber.status = ClimberStatus.ACTIVE
-
-        Climber.leftExtendable.position = 90.degrees
-        Climber.rightExtendable.position = 90.degrees
     }
 
     var hasFallen = false
@@ -40,10 +42,10 @@ object Climb : CommandBase() {
         Debug.log("Climb Command", "execute", level = DebugFilter.Low)
         Turret.turret.updateVoltage()
 
-        Climber.leftWinch.percent = RobotContainer.controller.leftY.value / RobotContainer.controller.leftY.maxVal
-        Climber.leftExtendable.percent = RobotContainer.controller.leftX.value / RobotContainer.controller.leftX.maxVal
-        Climber.rightWinch.percent = RobotContainer.controller.rightY.value / RobotContainer.controller.rightY.maxVal
-        Climber.rightExtendable.percent = RobotContainer.controller.rightX.value / RobotContainer.controller.rightX.maxVal
+        Climber.leftWinch.percent = RobotContainer.controller.leftY.raw()
+//        Climber.leftExtendable.percent = RobotContainer.controller.leftX.raw()
+        Climber.rightWinch.percent = RobotContainer.controller.rightY.raw()
+//        Climber.rightExtendable.percent = RobotContainer.controller.rightX.raw()
 
 
         // set the status of the robot based on what the winches are doing
