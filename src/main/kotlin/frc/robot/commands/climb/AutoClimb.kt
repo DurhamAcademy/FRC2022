@@ -23,9 +23,6 @@ object AutoClimb : CommandBase() {
         Turret.turret.position = 0.degrees
         Climber.staticsLifted = true
         Climber.status = ClimberStatus.ACTIVE
-
-        Climber.leftExtendable.position = 90.degrees
-        Climber.rightExtendable.position = 90.degrees
     }
 
     var risen = false

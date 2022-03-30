@@ -60,7 +60,7 @@ class KSparkMax(
             }
         }
 
-    override fun checkError(): Boolean = if (real) spark.getFault(CANSparkMax.FaultID.kCANTX) else false
+    override fun checkError(): Boolean = if (real) spark.getFault(CANSparkMax.FaultID.kCANRX) else false
 
     override var brakeMode = false
         get() = if (real) spark.idleMode == CANSparkMax.IdleMode.kBrake else field

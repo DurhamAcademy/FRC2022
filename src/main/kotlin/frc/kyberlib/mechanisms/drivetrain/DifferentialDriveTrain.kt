@@ -11,7 +11,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.math.numbers.N2
 import edu.wpi.first.math.system.LinearSystem
-import edu.wpi.first.math.system.LinearSystemLoop
+import frc.kyberlib.motorcontrol.statespace.LinearSystemLoop
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj2.command.SubsystemBase

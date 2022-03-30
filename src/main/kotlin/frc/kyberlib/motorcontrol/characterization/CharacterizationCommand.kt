@@ -14,7 +14,7 @@ import frc.kyberlib.math.units.extensions.rotationsPerSecond
 import frc.kyberlib.motorcontrol.KMotorController
 import kotlin.math.roundToLong
 
-class Characterization(private vararg val motors: KMotorController, private val drivetrain: Boolean = false) : CommandBase() {
+class CharacterizationCommand(private vararg val motors: KMotorController, private val drivetrain: Boolean = false) : CommandBase() {
     private var startTime = 0.0
     private var data: String = ""
 

@@ -1,11 +1,8 @@
 # In Sim
-- color sensors
 - reformat Shuffleboard (require driver-station)
-- mess around with NT Sendable  ** 
-  - ff & pid & statespace
-  - add sendable for each subsystem for tuning
-- check for anything wrong in kyberlib that could cause the issue
-- make debug better
+- make auto not awful **
+- profiled flywheel
+- augmented loop (pg 109 of textbook)
 
 
 # With robot
@@ -17,6 +14,7 @@
   - statespace
     - check how to use faster loop time
   - check changing tolerance
+  - add I term
 - flash other limelight
   - tune ball detection
 - test other turret controls

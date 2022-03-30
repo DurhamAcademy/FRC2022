@@ -132,11 +132,10 @@ object Turret : SubsystemBase(), Debug {
     val visionOffset: Angle?
         get() = if (Game.real) target?.yaw?.let { visionFilter.calculate(-it).degrees }
         else {
-            var off =
-                (RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k - fieldRelativeAngle + randomizer.nextGaussian().degrees * 0.0)
+            var off = (RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k - fieldRelativeAngle + randomizer.nextGaussian().degrees * 0.0)
             off = off.normalized
             if (off > 0.5.rotations) off -= 1.rotations
-            if (off.absoluteValue < 20.degrees) off.degrees.degrees else null
+            if (true || off.absoluteValue < 20.degrees) off.degrees.degrees else null
 //                    off
         }
     private val visionPitch: Angle?
@@ -166,7 +165,7 @@ object Turret : SubsystemBase(), Debug {
             lost = !lostDebouncer.calculate(targetVisible)
             target = latestResult?.let { if (it.hasTargets()) it.bestTarget else null }
         } else {
-            targetVisible = visionOffset != null
+            targetVisible = visionOffset!!.absoluteValue > 20.degrees
             lost = !lostDebouncer.calculate(targetVisible)
         }
         if (status != TurretStatus.FROZEN) turret.updateVoltage()

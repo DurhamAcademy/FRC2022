@@ -1,5 +1,11 @@
 package frc.robot.subsystems
 
+import com.revrobotics.ColorMatch
+import com.revrobotics.ColorSensorV3
+import edu.wpi.first.math.filter.Debouncer
+import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.I2C
+import edu.wpi.first.wpilibj.util.Color
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
@@ -69,9 +75,25 @@ object Conveyor : SubsystemBase(), Debug {
         defaultCommand = Idle
     }
 
+    private val colorSensorV3 = ColorSensorV3(I2C.Port.kOnboard)
+    private val allianceColor = if(Game.alliance == DriverStation.Alliance.Red) Color.kRed else Color.kBlue
+    private val enemyColor = if(Game.alliance == DriverStation.Alliance.Red) Color.kBlue else Color.kRed
+    private val matcher = ColorMatch().apply {
+        addColorMatch(allianceColor)
+        addColorMatch(enemyColor)
+    }
+    fun checkForBalls() {
+        val detection = colorSensorV3.color
+        val result = matcher.matchColor(detection)
+        result.let {
+            status =    if(result.color == allianceColor) ConveyorStatus.SINGLE_GOOD
+                        else ConveyorStatus.BAD
+        }
+    }
+
     override fun periodic() {
 //        debugDashboard()
-        if(Constants.BALL_TRACKING) {
+        if(RobotContainer.op.intakeCam) {
             val result = RobotContainer.ballMonitor.latestResult
             if (result != null) {
                 if(result.hasTargets()) {
@@ -88,6 +110,7 @@ object Conveyor : SubsystemBase(), Debug {
                 }
             }
         }
+        if(RobotContainer.op.autoShot) checkForBalls()
     }
 
     override fun debugValues(): Map<String, Any?> {

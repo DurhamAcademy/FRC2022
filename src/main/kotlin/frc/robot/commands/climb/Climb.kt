@@ -3,13 +3,8 @@ package frc.robot.commands.climb
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
-import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.inches
-import frc.kyberlib.math.units.extensions.radians
-import frc.kyberlib.math.units.extensions.radiansPerSecond
-import frc.robot.RobotContainer
-import frc.robot.subsystems.*
 import frc.robot.RobotContainer
 import frc.robot.commands.drive.Drive
 import frc.robot.subsystems.*
@@ -40,7 +35,7 @@ object Climb : CommandBase() {
      */
     override fun execute() {
         Debug.log("Climb Command", "execute", level = DebugFilter.Low)
-        Turret.turret.updateVoltage()
+        Turret.turret.position = 0.degrees
 
         Climber.leftWinch.percent = RobotContainer.controller.leftY.raw()
 //        Climber.leftExtendable.percent = RobotContainer.controller.leftX.raw()

@@ -21,11 +21,10 @@ import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
 import frc.robot.RobotContainer
+import frc.robot.commands.shooter.FireWhenReady
 import frc.robot.commands.shooter.ShooterCalibration
-import kotlin.math.absoluteValue
-import kotlin.math.acos
-import kotlin.math.cos
-import kotlin.math.sqrt
+import java.lang.Math.pow
+import kotlin.math.*
 
 
 /**
@@ -83,9 +82,9 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
         //customControl = null  // builtin
         kF = ff.kv
-        kP = 0.0160434
-//        kI = 0.0001
-        customControl = fastSpinup
+        kP = 0.0160434  // PIDController[3]
+//        kI = 0.0001  // todo: try adding this back
+//        customControl = fastSpinup
 
         currentLimit = 50
         brakeMode = false
@@ -106,10 +105,10 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
             flywheel.velocity = value * SmartDashboard.getNumber("shooterMult", 1.0)
         }
 
-   val smartDis: Length
+   private val smartDis: Length
         get() {
             return if(RobotContainer.op.shootWhileMoving) {
-                RobotContainer.navigation.position.getDistance(effectiveHubLocation).meters
+                effectiveDistance
             } else {
                 Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
             }
@@ -156,6 +155,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         hoodUpdate(smartDis)
     }
 
+    private const val moveIterations = 3
     val effectiveHubLocation: Translation2d
         get() {
             val base = Constants.HUB_POSITION
@@ -163,6 +163,9 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
             val fieldSpeeds = Drivetrain.fieldRelativeSpeeds
             return base - Translation2d(fieldSpeeds.vxMetersPerSecond * timeOfFlight.value, fieldSpeeds.vyMetersPerSecond * timeOfFlight.value)
         }
+
+    var movementAngleOffset: Angle = 0.degrees
+    var effectiveDistance: Length = 0.meters
 
     private val timeOfFlight = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(smartDis.meters).seconds
 
@@ -198,12 +201,29 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     init {
-        if (Game.sim) Simulation.instance.include(this)
+        if (Game.sim) flywheel.setupSim(ff)
+        if (RobotContainer.op.autoShot) defaultCommand = FireWhenReady
     }
 
     override fun periodic() {
         debugDashboard()
+        if(RobotContainer.op.shootWhileMoving) {
+            val rawDistance = Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+            var r = rawDistance
+            val hubSpeeds = Drivetrain.hubRelativeSpeeds
+            val parallel = hubSpeeds.vxMetersPerSecond
+            val perp = hubSpeeds.vyMetersPerSecond
+            for (i in 0 until moveIterations) {
+                val time = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(r.meters)
+                val a = r.meters + parallel * time
+                val b = perp * time
+                r = sqrt(a.pow(2) + b.pow(2)).meters
+                movementAngleOffset = atan(b/a).radians
+            }
+            effectiveDistance = r
+        }
         SmartDashboard.putNumber("fly error", flywheel.velocityError.rpm)
+        SmartDashboard.putNumber("rpm", flywheel.velocity.rpm)
         if (currentCommand != ShooterCalibration) hoodUpdate(smartDis)
     }
 
@@ -216,8 +236,6 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     override fun simUpdate(dt: Time) {
-//        flywheelControl.simUpdate(dt)
-//        hood.simPosition = hood.positionSetpoint
-//        topShooter.simVelocity = topShooter.velocitySetpoint
+
     }
 }

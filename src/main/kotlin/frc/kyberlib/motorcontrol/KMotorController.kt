@@ -76,20 +76,13 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     /**
      * The max angular velocity the motor can have
      */
-    open var maxVelocity: AngularVelocity
-        get() = constraints.maxVelocity.radiansPerSecond
-        set(value) {
-            constraints = TrapezoidProfile.Constraints(value.radiansPerSecond, constraints.maxVelocity)
-        }
+    open var maxVelocity: AngularVelocity = 0.rpm
 
     /**
      * The max angular acceleration the motor can have
      */
-    open var maxAcceleration: AngularVelocity
-        get() = constraints.maxAcceleration.radiansPerSecond
-        set(value) {
-            constraints = TrapezoidProfile.Constraints(constraints.maxVelocity, value.radiansPerSecond)
-        }
+    open var maxAcceleration: AngularVelocity = 0.rpm
+
     open var maxPosition: Angle = Angle(Double.POSITIVE_INFINITY)
     var maxLinearPosition: Length
         get() = rotationToLinear(maxPosition)
@@ -186,7 +179,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
                     val pid = PID.calculate(
                         velocity.radiansPerSecond,
                         velocitySetpoint.radiansPerSecond
-                    )  // todo: check constraints on that you want S profile on velocity control
+                    )
                     ff + pid
                 }
                 ControlMode.POSITION -> {
@@ -316,6 +309,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
 
     private val accelerationCalculator = Differentiator()
     var acceleration = 0.rpm
+        protected set
     val linearAcceleration
         get() = rotationToLinear(acceleration)
 
@@ -357,8 +351,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      */
     var velocitySetpoint: AngularVelocity = 0.rpm
         private set(value) {
-            field = value
-//            field = value.coerceIn(-maxVelocity, maxVelocity)
+            field = value//.coerceIn(-maxVelocity, maxVelocity)
             if (!closedLoopConfigured && real) rawVelocity = field
             else if (!customControlLock) updateVoltage()
         }
@@ -474,7 +467,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      */
     override fun initSendable(builder: NTSendableBuilder) {
         super.initSendable(builder)
-        builder.setActuator(true)
         builder.setUpdateTable {
             updateVoltage()
         }
@@ -501,11 +493,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
                 { velocitySetpoint.radiansPerSecond },
                 { if (it.radiansPerSecond != velocity) velocity = it.radiansPerSecond })
         }
-    }
-
-    private var tuning = false
-    fun tunable() {  // todo
-
     }
 
     override fun debugValues(): Map<String, Any?> {

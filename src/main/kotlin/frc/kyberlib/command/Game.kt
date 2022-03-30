@@ -1,9 +1,6 @@
 package frc.kyberlib.command
 
-import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.RobotBase
-import edu.wpi.first.wpilibj.RobotController
-import edu.wpi.first.wpilibj.RobotState
+import edu.wpi.first.wpilibj.*
 import frc.kyberlib.math.units.extensions.seconds
 import frc.kyberlib.math.units.micro
 
@@ -35,7 +32,7 @@ object Game {
         inline get() = RobotController.getBatteryVoltage()
 
     val time
-        inline get() = RobotController.getFPGATime().micro.seconds
+        inline get() = Timer.getFPGATimestamp().seconds
 
     val alliance: DriverStation.Alliance = DriverStation.getAlliance()
 

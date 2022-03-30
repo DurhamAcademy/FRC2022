@@ -44,10 +44,7 @@ class Robot : KRobot() {
     }
 
     override fun teleopInit() {
-        // TODO: probably want to get rid of this at the event, but it should
-        // handle being on fms just fine. probably just want to get rid of it
-        // just in case though
-        if (!DriverStation.isFMSAttached()) reset(Constants.START_POSE)
+        if (!Game.COMPETITION) reset(Constants.START_POSE)
     }
 
     override fun teleopPeriodic() {

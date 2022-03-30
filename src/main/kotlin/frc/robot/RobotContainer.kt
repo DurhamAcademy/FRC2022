@@ -29,6 +29,7 @@ import frc.robot.commands.turret.AimTurret
 import frc.robot.commands.turret.FreezeTurret
 import frc.robot.commands.turret.SeekTurret
 import frc.robot.commands.turret.ZeroTurret
+import frc.robot.controls.DefaultControls
 import frc.robot.controls.OperatorControls
 import frc.robot.controls.RocketLeague
 import frc.robot.subsystems.*
@@ -56,7 +57,7 @@ object RobotContainer {
     val controller = KXboxController(0)
     val op = OperatorControls()
 
-    var controlScheme = RocketLeague.apply {
+    var controlScheme = DefaultControls.apply {
         INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
         SHOOT.whileActiveOnce(Shoot)
         FORCE_SHOT.whileActiveOnce(ForceShoot)

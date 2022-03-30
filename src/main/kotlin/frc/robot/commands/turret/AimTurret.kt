@@ -26,11 +26,11 @@ object AimTurret : CommandBase() {
     override fun execute() {
         Debug.log("Aim", "execute", level = DebugFilter.Low)
 
-//         if the limelight is a target
+        // if the limelight is a target
         if (Turret.targetVisible) {
             val curveCorrection = (RobotContainer.op.curveComp * Turret.turret.position.sin).degrees
             if(RobotContainer.op.shootWhileMoving) {
-                Turret.fieldRelativeAngle = RobotContainer.navigation.position.towards(Shooter.effectiveHubLocation).k + curveCorrection
+                Turret.fieldRelativeAngle = Turret.turret.position + Shooter.movementAngleOffset + curveCorrection
             } else {
                 val goalOrientation = Turret.visionOffset!!
                 Turret.turret.position = Turret.turret.position + goalOrientation * 0.7 + curveCorrection

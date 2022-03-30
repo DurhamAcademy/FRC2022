@@ -11,6 +11,7 @@ import frc.kyberlib.math.units.zeroTranslation
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.subsystems.Conveyor
+import frc.robot.subsystems.ConveyorStatus
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.Turret
 
@@ -31,7 +32,7 @@ object Dispose : CommandBase() {
         timer.start()
         val pos = RobotContainer.navigation.position
         val center = Constants.HUB_POSITION
-        disposalTarget = if(pos.x > center.x && pos.y < center.y) default else zeroTranslation  // terminal
+        disposalTarget = if(pos.x > center.x && pos.y < center.y) zeroTranslation else default  // terminal
     }
 
     override fun execute() {
@@ -41,5 +42,9 @@ object Dispose : CommandBase() {
         Shooter.hoodUpdate(distance)
         if(timer.hasElapsed(0.3))
             Conveyor.feed()
+    }
+
+    override fun end(interrupted: Boolean) {
+        Conveyor.status = ConveyorStatus.EMPTY
     }
 }

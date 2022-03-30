@@ -13,7 +13,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.math.numbers.N2
 import edu.wpi.first.math.system.LinearSystem
-import edu.wpi.first.math.system.LinearSystemLoop
+import frc.kyberlib.motorcontrol.statespace.LinearSystemLoop
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -44,6 +44,11 @@ import frc.robot.commands.drive.Drive
 object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     // motors
     override val priority: DebugFilter = DebugFilter.Max
+
+    private val leftFF = SimpleMotorFeedforward(Constants.DRIVE_KS_L, Constants.DRIVE_KV_L, Constants.DRIVE_KA_L)
+    private val rightFF = SimpleMotorFeedforward(Constants.DRIVE_KS_R, Constants.DRIVE_KV_R, Constants.DRIVE_KA_R)
+    private val angularFeedforward = SimpleMotorFeedforward(0.6382, 2.7318, 0.32016)
+
     val leftMaster = KSparkMax(12).apply {
         identifier = "leftMaster"
         reversed = true
@@ -108,8 +113,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     private val motors = arrayOf(leftMaster, rightMaster)
 
     // values
-    val kinematics =
-        DifferentialDriveKinematics(Constants.TRACK_WIDTH)  // calculator to make drivetrain move is the desired directions
+    val kinematics = DifferentialDriveKinematics(Constants.TRACK_WIDTH)  // calculator to make drivetrain move is the desired directions
     override var chassisSpeeds: ChassisSpeeds  // variable representing the direction we want the robot to move
         get() = kinematics.toChassisSpeeds(wheelSpeeds)
         set(value) {
@@ -167,10 +171,6 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
 
 
     // setup motors
-    private val leftFF = SimpleMotorFeedforward(Constants.DRIVE_KS_L, Constants.DRIVE_KV_L, Constants.DRIVE_KA_L)
-    private val rightFF = SimpleMotorFeedforward(Constants.DRIVE_KS_R, Constants.DRIVE_KV_R, Constants.DRIVE_KA_R)
-    private val angularFeedforward = SimpleMotorFeedforward(0.6382, 2.7318, 0.32016)
-
     init {
         defaultCommand = Drive
         Navigator.instance!!.applyMovementRestrictions(5.39.feetPerSecond, 2.metersPerSecond)
@@ -220,9 +220,9 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
 
     private val anglePid = PIDController(0.5, 0.0, 0.0)
     fun fieldOrientedDrive(speed: LinearVelocity, direction: Angle) { // ignore this: I got bored on a flight
-        val dTheta = RobotContainer.navigation.heading - direction + 90.degrees // fixme
-        val vx = dTheta.cos
-        drive(ChassisSpeeds(vx, 1.0, anglePid.calculate(dTheta.radians)))
+        val dTheta = RobotContainer.navigation.heading - direction + 90.degrees
+        val vx = speed * dTheta.cos
+        drive(ChassisSpeeds(vx.metersPerSecond, 0.0, anglePid.calculate(dTheta.radians)))
     }
 
     fun stop() {
@@ -274,7 +274,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         if (Game.sim) Simulation.instance.include(this)
     }
 
-    private fun betterDrivetrainSystem(): LinearSystem<N2, N2, N2> {  // todo: implement these into the builtin
+    private fun betterDrivetrainSystem(): LinearSystem<N2, N2, N2> {
 //        return LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka)
         val kVAngular = angularFeedforward.kv// * 2.0 / Constants.TRACK_WIDTH
         val kAAngular = angularFeedforward.ka// * 2.0 / Constants.TRACK_WIDTH

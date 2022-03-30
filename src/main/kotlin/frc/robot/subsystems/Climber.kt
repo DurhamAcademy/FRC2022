@@ -1,9 +1,15 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.math.controller.ArmFeedforward
+import edu.wpi.first.math.controller.ElevatorFeedforward
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.wpilibj.simulation.EncoderSim
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
@@ -16,6 +22,7 @@ import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.kyberlib.simulation.Simulatable
+import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import kotlin.math.absoluteValue
@@ -104,7 +111,6 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     private val sim =
         Mechanism2d((Constants.MID2HIGH + Constants.HIGH2TRAVERSE).meters, Constants.TRAVERSAL_RUNG_HEIGHT.meters)
     private val extendPivot = sim.getRoot("extendable pivot", 0.0, 8.inches.value)
-    private val staticPivot = sim.getRoot("static pivot", 0.0, 15.5.inches.value)
     private val extendable = extendPivot.append(
         MechanismLigament2d(
             "extenable",
@@ -114,23 +120,24 @@ object Climber : SubsystemBase(), Debug, Simulatable {
             Color8Bit(255, 0, 0)
         )
     )
-    private val static =
-        staticPivot.append(MechanismLigament2d("static", 31.inches.value, 0.0, 1.0, Color8Bit(255, 255, 0)))
 
     init {
         if (Game.sim) {
-//            SmartDashboard.putData("climb sim", sim)
+            Simulation.instance.include(this)
+            leftWinch.setupSim(ElevatorFeedforward(0.2, 3.0, 5.0))
+            SmartDashboard.putData("climb sim", sim)
+            SmartDashboard.putData("winch", leftWinch)
         }
     }
 
     override fun simUpdate(dt: Time) {
         extendable.length = (35.inches.value + leftWinch.position.value)
-        extendable.angle = leftExtendable.position.degrees
-        static.angle = if (staticsLifted) 90.0 else 0.0
+        extendable.angle = if (staticsLifted) 90.0 else 22.0
     }
 
     override fun periodic() {
 //        debugDashboard()
+        updateMotors()
     }
 
     private val swing = Differentiator()
@@ -143,7 +150,6 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         val dampeningConstant = RobotContainer.op.climbStabilization
         Drivetrain.drive(DifferentialDriveWheelSpeeds( dTheta.value * dampeningConstant, dTheta.value * dampeningConstant))
         Shooter.flywheel.torque = dTheta.value * dampeningConstant
-
     }
 
     override fun debugValues(): Map<String, Any?> {

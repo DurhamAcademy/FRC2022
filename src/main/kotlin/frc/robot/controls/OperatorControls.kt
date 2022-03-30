@@ -14,7 +14,7 @@ class OperatorControls {
     private val fudgeString = "back fudge"
     private val compressorString = "compressor enabled"
 
-    val shootWhileMoving  // todo: make this not really on poseEstimation
+    val shootWhileMoving  // todo: make this not rely on poseEstimation
         inline get() = SmartDashboard.getBoolean("move shot", false)
     val smartNav
         inline get() = SmartDashboard.getBoolean("nav updates", true)

@@ -10,11 +10,8 @@ import frc.kyberlib.math.units.extensions.*
  * This file holds all important constants throughout the project
  */
 object Constants {
-    const val doStateSpace = false  // todo remove this
-
-    // ------ Climb ------ // todo: update these
+    // ------ Climb ------ //
     val WINCH_RADIUS: Length = 0.5.inches
-    const val EXTENDABLE_ROTATION_GEAR_RATIO = 250.0
     const val WINCH_GEAR_RATIO = (10.0 / 1.0) * (54.0 / 18.0)
 
     // ------ Conveyor ------ //

@@ -2,7 +2,6 @@ package frc.kyberlib.auto
 
 import edu.wpi.first.math.MatBuilder
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator
-import edu.wpi.first.math.estimator.KalmanFilterLatencyCompensator
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.*
