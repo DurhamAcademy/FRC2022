@@ -3,17 +3,14 @@ package frc.robot.subsystems
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.Nat
 import edu.wpi.first.math.VecBuilder
-import edu.wpi.first.math.controller.LinearQuadraticRegulator
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
-import edu.wpi.first.math.estimator.KalmanFilter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.math.numbers.N2
 import edu.wpi.first.math.system.LinearSystem
-import frc.kyberlib.motorcontrol.statespace.LinearSystemLoop
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -22,7 +19,6 @@ import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
-import frc.kyberlib.command.KRobot
 import frc.kyberlib.math.PolarPose
 import frc.kyberlib.math.polar
 import frc.kyberlib.math.units.debugValues
@@ -185,24 +181,6 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     }
 
     val driveSystem = betterDrivetrainSystem()
-    val loop = LinearSystemLoop(
-        driveSystem,
-        LinearQuadraticRegulator(
-            driveSystem,
-            VecBuilder.fill(0.1, 0.1),  // left/right velocity error tolerance
-            VecBuilder.fill(Game.batteryVoltage, Game.batteryVoltage),
-            KRobot.period
-        ),
-        KalmanFilter(
-            N2.instance, N2.instance,
-            driveSystem,
-            VecBuilder.fill(3.0, 3.0),
-            VecBuilder.fill(.01, 0.01),
-            KRobot.period
-        ),
-        Game.batteryVoltage,
-        KRobot.period
-    )
 
     /**
      * Drive the robot at the provided speeds

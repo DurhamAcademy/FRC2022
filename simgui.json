@@ -198,6 +198,7 @@
         }
       },
       "Turret": {
+        "open": true,
         "turret": {
           "open": true
         }
@@ -394,7 +395,7 @@
     "Plot <2>": {
       "plots": [
         {
-          "height": 205,
+          "height": -29,
           "series": [
             {
               "color": [
@@ -417,7 +418,7 @@
           ]
         },
         {
-          "height": 205,
+          "height": -29,
           "series": [
             {
               "color": [

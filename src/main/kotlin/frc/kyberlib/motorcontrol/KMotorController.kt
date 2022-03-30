@@ -1054,25 +1054,25 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         fun systemLoop(
             plant: LinearSystem<N2, N1, N1>,
             modelAccuracy: Double, measurementAccuracy: Double,
-            positionErrorCost: Double, velocityErrorCost: Double,
+            positionTolerance: Double, velocityTolerance: Double,
             inputCost: Double = 12.0,
             timeDelay: Time = 0.02.seconds
         ): LinearSystemLoop<N2, N1, N1> {
             val observer = observer(plant, modelAccuracy, measurementAccuracy, timeDelay)
-            val optimizer = optimizer(plant, positionErrorCost, velocityErrorCost, inputCost, timeDelay)
-            return LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds)
+            val optimizer = optimizer(plant, positionTolerance, velocityTolerance, inputCost, timeDelay)
+            return LinearSystemLoop(plant, optimizer, observer, inputCost, timeDelay.seconds)  // fixme
         }
 
         @JvmName("dualSystemLoop")
         fun systemLoop(
             plant: LinearSystem<N2, N1, N2>,
             modelAccuracy: Double, measurementAccuracy: Double,
-            positionErrorCost: Double, velocityErrorCost: Double,
+            positionTolerance: Double, velocityTolerance: Double,
             inputCost: Double = 12.0,
             timeDelay: Time = 0.02.seconds
         ): LinearSystemLoop<N2, N1, N2> {
             val observer = observer(plant, modelAccuracy, measurementAccuracy, timeDelay)
-            val optimizer = optimizer(plant, positionErrorCost, velocityErrorCost, inputCost, timeDelay)
+            val optimizer = optimizer(plant, positionTolerance, velocityTolerance, inputCost, timeDelay)
             return LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds)
         }
     }

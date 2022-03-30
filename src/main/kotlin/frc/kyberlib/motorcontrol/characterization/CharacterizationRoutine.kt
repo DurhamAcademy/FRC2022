@@ -14,7 +14,7 @@ import frc.kyberlib.math.units.extensions.rotationsPerSecond
 import frc.kyberlib.motorcontrol.KMotorController
 import kotlin.math.roundToLong
 
-class CharacterizationCommand(private vararg val motors: KMotorController, private val drivetrain: Boolean = false) : CommandBase() {
+class CharacterizationRoutine(private vararg val motors: KMotorController, private val drivetrain: Boolean = false) : CommandBase() {
     private var startTime = 0.0
     private var data: String = ""
 
@@ -81,7 +81,7 @@ class CharacterizationCommand(private vararg val motors: KMotorController, priva
                 "SysIdTelemetry",
                 data.substring(0, data.length - 1)
             )
-            println("Saved ${(data.length / 1024.0).roundToLong().toString()} KB of data.")
+            println("Saved ${(data.length / 1024.0).roundToLong()} KB of data.")
         } else {
             println("No data to save. Something's gone wrong here...")
         }

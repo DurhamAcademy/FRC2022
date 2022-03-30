@@ -80,9 +80,38 @@ class Robot : KRobot() {
         RobotContainer.navigation.pose = pose
     }
 
+    // todo:
+    // spin fly back for sec to remove tether
+    // separate intake system
+    // add spinup
     private fun loadRoutine(routine: String): SequentialCommandGroup {
         val command = SequentialCommandGroup()
         val f = File("${TrajectoryManager.AUTO_PATH}/$routine")
+        val list = f.readLines()
+        var index = 0
+        var prevCommand: Command? = null
+        while(index < list.size) {
+            val current = list.get(index)
+            val next = list.getOrNull(index + 1)
+            val currentCommand = when (current) {
+                "Shot" -> {
+                    prevCommand.let {
+
+                    }
+                    AutoShot()
+                }
+                "Dispose" -> {
+                    Dispose
+                }
+                else -> {
+                    AutoDrive(TrajectoryManager[current]!!)
+                }
+            }
+
+
+            prevCommand = currentCommand
+        }
+
         f.readLines().forEach {
             when (it) {
                 "Shot" -> command.addCommands(AutoShot())

@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.*
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 
-class KSolenoid(fwd: Int, back: Int, private val fake: Boolean = false) : Debug, NTSendable {
+class KSolenoid(vararg val ports: Int, private val fake: Boolean = false) : Debug, NTSendable {
     companion object {
         val allSolenoids = mutableListOf<KSolenoid>()
         val hub: PneumaticsBase = PneumaticsControlModule(1)
@@ -18,11 +18,27 @@ class KSolenoid(fwd: Int, back: Int, private val fake: Boolean = false) : Debug,
     init {
         allSolenoids.add(this)
     }
-    override var identifier: String = "Pneumatic$fwd"
-    private val solenoid: DoubleSolenoid = hub.makeDoubleSolenoid(fwd, back)
-    var extended: Boolean = false
-        get() = if (Game.sim || fake) field else solenoid.get() == DoubleSolenoid.Value.kForward
-        set(value) {if(Game.sim || fake) field = value else solenoid.set(if(value) DoubleSolenoid.Value.kForward else DoubleSolenoid.Value.kReverse)}
+    override var identifier: String = "Pneumatic$ports"
+    val solenoids = ports.map { hub.makeSolenoid(it) }
+    var extended: Boolean
+        get() = extension != 0
+        set(value) {extension = if(value) 1 else 0}
+
+    var extension: Int = 0
+        set(value) {
+            if(Game.real && !fake) {
+                if(solenoids.size == 1) {
+                    solenoids.first().set(value > 0)
+                }
+                else {
+                    solenoids.forEachIndexed{index, solenoid ->
+                        if(index <= value) solenoid.set(true)
+                        else solenoid.set(false)
+                    }
+                }
+            }
+            field = value
+        }
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(

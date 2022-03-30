@@ -1,11 +1,11 @@
 {
   "MainWindow": {
     "GLOBAL": {
-      "height": "948",
-      "maximized": "1",
+      "height": "768",
+      "maximized": "0",
       "style": "0",
       "userScale": "2",
-      "width": "1920",
+      "width": "1440",
       "xpos": "0",
       "ypos": "74"
     }
@@ -87,7 +87,7 @@
       "Size": "839,693"
     },
     "###Plot <2>": {
-      "Collapsed": "0",
+      "Collapsed": "1",
       "Pos": "7,179",
       "Size": "831,499"
     },

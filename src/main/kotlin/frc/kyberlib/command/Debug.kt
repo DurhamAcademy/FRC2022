@@ -29,7 +29,7 @@ enum class DebugFilter {
  */
 interface Debug {
     companion object {
-        private const val debugging = false
+        private const val debugging = true
         private val loggingLevel = if (Game.real) DebugFilter.High else DebugFilter.Normal
 
         fun log(
