@@ -59,6 +59,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
         motorType = DCMotor.getNEO(1)
+        currentLimit = 30
 //        if(Game.sim) setupSim(winchFF)
     }
 
@@ -72,6 +73,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
         motorType = DCMotor.getNEO(1)
+        currentLimit = 30
     }
 
     /** public variable to get/set whether the arms are lifted */

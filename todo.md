@@ -2,9 +2,10 @@
 - reformat Shuffleboard (require driver-station)
 - augmented loop (pg 109 of textbook)
   - detla U: add voltage into state model
-    - https://www.chiefdelphi.com/t/971s-control-system/137365/15?u=tatestaples 
-- playback auto
+    - https://www.chiefdelphi.com/t/971s-control-system/137365/15?u=tatestaples
 - current management
+- fix native PID to acknowledge gear Ratios *** 
+- figure out what pure pursuit it
 - https://www.chiefdelphi.com/t/what-impressive-things-did-you-do-in-software-this-year/382245/48?u=tatestaples
 - https://github.com/Team254/FRC-2020-Public/blob/master/src/main/java/com/team254/frc2020/planners/DriveMotionPlanner.java#L225
 

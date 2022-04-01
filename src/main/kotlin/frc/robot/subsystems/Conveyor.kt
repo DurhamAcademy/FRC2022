@@ -36,7 +36,7 @@ object Conveyor : SubsystemBase(), Debug {
     val conveyor = KSparkMax(21).apply {
         identifier = "conveyor"
         reversed = true
-        currentLimit = 20
+        currentLimit = 10
         gearRatio = 1 / 5.0
     }
 

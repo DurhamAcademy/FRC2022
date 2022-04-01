@@ -14,10 +14,6 @@ object Constants {
     val WINCH_RADIUS: Length = 0.5.inches
     const val WINCH_GEAR_RATIO = (10.0 / 1.0) * (54.0 / 18.0)
 
-    // ------ Conveyor ------ //
-    const val BALL_TRACKING = false
-    const val DRIVER_CAMERA = false
-
     // ------ Drivetrain ------ //
     // pids
     const val DRIVE_P = 0.03
@@ -111,9 +107,8 @@ object Constants {
     val HIGH2TRAVERSE = 2.feet
 
     // ----- measurements ----- //
-    val ROBOT_WEIGHT = 120.0 * MassConversions.poundsToGrams * 1000.0
+    val ROBOT_WEIGHT = 120.0 * MassConversions.poundsToGrams * 1000.0  // kg
     const val CLIMB_MOMENT_OF_INERTIA = 0.10571
-    const val TOP_ROLLER_MOMENT_OF_INERTIA = 0.00001
     const val FLYWHEEL_MOMENT_OF_INERTIA = 0.00064 // kg * m^2
     val BALL_DIAMETER = 9.5.inches
 }
