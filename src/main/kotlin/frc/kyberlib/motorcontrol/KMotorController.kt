@@ -23,6 +23,8 @@ import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.sign
+import frc.kyberlib.math.units.KUnit
+import frc.kyberlib.math.units.KUnitKey
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
@@ -370,7 +372,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     var positionSetpoint: Angle = 0.rotations
         private set(value) {
             field = value.coerceIn(minPosition, maxPosition)
-            if (!closedLoopConfigured && real) rawPosition = field
+            if (!closedLoopConfigured && real) rawPosition = field * gearRatio.invertIf { reversed }
             else if (!customControlLock) updateVoltage()
         }
 
@@ -380,7 +382,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     var velocitySetpoint: AngularVelocity = 0.rpm
         private set(value) {
             field = value//.coerceIn(-maxVelocity, maxVelocity)
-            if (!closedLoopConfigured && real) rawVelocity = field
+            if (!closedLoopConfigured && real) rawVelocity = field * gearRatio.invertIf { reversed }
             else if (!customControlLock) updateVoltage()
         }
 

@@ -9,14 +9,10 @@ import frc.kyberlib.motorcontrol.*
 /**
  * Kotlin wrapper for VictorSPX on CAN
  */
-class KVictorSPX(val canId: CANId) : KBasicMotorController() {
+class KVictorSPX(val canId: Int) : KBasicMotorController() {
     val victor = VictorSPX(canId)
 
-    override var identifier = CANRegistry.filterValues { it == canId }.keys.firstOrNull() ?: "can$canId"
-    init {
-        CANRegistry[identifier] = canId
-    }
-
+    override var identifier = "can$canId"
     override var brakeMode: BrakeMode = false
         set(value) {
             field = value

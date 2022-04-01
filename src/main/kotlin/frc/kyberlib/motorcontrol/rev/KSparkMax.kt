@@ -14,19 +14,18 @@ import frc.kyberlib.motorcontrol.EncoderType
  * [brushType] is the type of motor being driven. WARNING: If set incorrectly this can seriously damage hardware. You've been warned.
  */
 class KSparkMax(
-    private val canId: CANId,
+    private val canId: Int,
     brushedMotor: Boolean = false,
     type: EncoderType = EncoderType.NEO_HALL,
     cpr: Int = 42
 ) : KMotorController() {
     // ----- low-level stuff ----- //
-    override var identifier: String = CANRegistry.filterValues { it == canId }.keys.firstOrNull() ?: "can$canId"
+    override var identifier: String = "can$canId"
 
     val spark = CANSparkMax(canId, if (brushedMotor) MotorType.kBrushed else MotorType.kBrushless)
 
     init {
         if (real) spark.restoreFactoryDefaults()
-        CANRegistry[identifier] = canId
     }
 
     private var encoder: RelativeEncoder = when {
