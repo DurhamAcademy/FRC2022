@@ -73,6 +73,12 @@ class Polynomial(
         return total
     }
 
+    fun rSquared(data: DoubleArray, actualResults: DoubleArray): Double {
+        return data.zip(actualResults).sumOf {
+            (eval(it.first)!! - it.second).pow(2)
+        }
+    }
+
     override fun toString(): String {
         var s = ""
         for (i in coeffs.indices) {

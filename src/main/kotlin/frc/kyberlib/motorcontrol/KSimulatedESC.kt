@@ -19,6 +19,8 @@ class KSimulatedESC(name: Any) : KMotorController() {  // potentially remove thi
 
     override var rawPercent: Double = 0.0
 
+    var currentLimit = 20
+
     override fun resetPosition(position: Angle) { this.position = position }
 
     override fun followTarget(kmc: KBasicMotorController) {

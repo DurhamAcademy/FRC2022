@@ -48,11 +48,6 @@ class LatentStateLoop<States : Num?, Inputs : Num?, Outputs : Num?>(
     private val latency: Double
 )  {
     /**
-     * Returns the controller's next reference r.
-     *
-     * @return the controller's next reference r.
-     */
-    /**
      * Set the next reference r.
      *
      * @param nextR Next reference.
