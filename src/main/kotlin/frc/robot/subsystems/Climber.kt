@@ -7,7 +7,7 @@ import frc.kyberlib.math.units.extensions.Time
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.inches
 import frc.kyberlib.motorcontrol.KMotorController
-import frc.kyberlib.motorcontrol.rev.KSparkMax
+import frc.kyberlib.motorcontrol.KSimulatedESC
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.kyberlib.simulation.Simulatable
 import frc.robot.Constants
@@ -28,15 +28,15 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     var status = ClimberStatus.IDLE
 
     // pneumatics that lift the climb arms
-    private val leftStatic = KSolenoid(0, 1, fake = true).apply {
+    val leftStatic = KSolenoid(0, 1, fake = true).apply {
         identifier = "left static"
     }
-    private val rightStatic = KSolenoid(6, 7, fake = true).apply {
+    val rightStatic = KSolenoid(6, 7, fake = true).apply {
         identifier = "right static"
     }
 
     /** (left) winches that pull the robot up */
-    val leftWinch = KSparkMax(40).apply {
+    val leftWinch = KSimulatedESC(40).apply {
         identifier = "left winch"
         radius = Constants.WINCH_RADIUS
         brakeMode = true
@@ -45,11 +45,12 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
         motorType = DCMotor.getNEO(1)
+//        currentLimit = 20
 //        if(Game.sim) setupSim(winchFF)
     }
 
     /** (right) winches that pull the robot up */
-    val rightWinch = KSparkMax(41).apply {
+    val rightWinch = KSimulatedESC(41).apply {
         identifier = "right winch"
         radius = Constants.WINCH_RADIUS
         brakeMode = true
@@ -58,6 +59,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
         motorType = DCMotor.getNEO(1)
+//        currentLimit = 20
     }
 
     /** public variable to get/set whether the arms are lifted */

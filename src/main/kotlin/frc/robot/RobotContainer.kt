@@ -1,8 +1,11 @@
 package frc.robot
 
+import edu.wpi.first.cameraserver.CameraServer
+import edu.wpi.first.cscore.VideoMode
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.RobotState
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.Navigator
@@ -39,6 +42,15 @@ object RobotContainer {
     // initialize sensors and inputs here
     val gyro = KPigeon(6)
     val limelight = PhotonCamera("gloworm")
+
+    init {
+        if (Game.real) {
+            CameraServer.startAutomaticCapture().apply {
+                videoMode = VideoMode(videoMode.pixelFormat, 160, 120, 20)
+            }
+        }
+    }
+
     val turretLimit = DigitalInput(0)
 
     val navigation = Navigator(gyro, Constants.START_POSE)
@@ -73,22 +85,39 @@ object RobotContainer {
         this += KLEDRegion(AnimationCylon(Color.RED, 5, 40), 0, 14) { Game.alliance == DriverStation.Alliance.Red }
         this += KLEDRegion(AnimationCylon(Color.CYAN, 5, 40), 0, 14) { Game.alliance == DriverStation.Alliance.Blue }
 
-        this += KLEDRegion(AnimationBlink(Color.BLUE, 20), 0, 14) { Turret.currentCommand == ZeroTurret }
-        this += KLEDRegion(AnimationSolid(Color.RED), 0, 14) { Turret.currentCommand == SeekTurret }
-        this += KLEDRegion(AnimationSolid(Color.YELLOW), 0, 14) { Turret.currentCommand == AimTurret }
-        this += KLEDRegion(AnimationPulse(Color.YELLOW, 40), 0, 14, false) { Turret.ready }
-        this += KLEDRegion(AnimationSolid(Color.GREEN), 0, 14, false) { Shooter.status == ShooterStatus.SPINUP }
+        this += KLEDRegion(
+            AnimationBlink(Color.BLUE, 20),
+            0,
+            14
+        ) { Turret.currentCommand == ZeroTurret && RobotState.isEnabled() }
+        this += KLEDRegion(
+            AnimationSolid(Color.RED),
+            0,
+            14
+        ) { Turret.currentCommand == SeekTurret && RobotState.isEnabled() }
+        this += KLEDRegion(
+            AnimationSolid(Color.YELLOW),
+            0,
+            14
+        ) { Turret.currentCommand == AimTurret && RobotState.isEnabled() }
+        this += KLEDRegion(AnimationPulse(Color.YELLOW, 40), 0, 14, false) { Turret.ready && RobotState.isEnabled() }
+        this += KLEDRegion(
+            AnimationSolid(Color.GREEN),
+            0,
+            14,
+            false
+        ) { Shooter.status == ShooterStatus.SPINUP && RobotState.isEnabled() }
         this += KLEDRegion(
             AnimationPulse(Color.GREEN, 40),
             0,
             14,
             false
-        ) { Shooter.status == ShooterStatus.SHOT }
+        ) { Shooter.status == ShooterStatus.SHOT && RobotState.isEnabled() }
         this += KLEDRegion(
             AnimationPulse(Color.RED, 40),
             0,
             14
-        ) { !Shooter.inRange && Turret.currentCommand == AimTurret }
+        ) { !Shooter.inRange && Turret.currentCommand == AimTurret && RobotState.isEnabled() }
     }
 
     init {

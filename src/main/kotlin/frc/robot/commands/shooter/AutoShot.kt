@@ -24,9 +24,8 @@ class AutoShot : CommandBase() {
     val shootingTimer = Timer()
 
     override fun execute() {
+        Shooter.update()
         if ((Turret.targetVisible || Shooter.status == ShooterStatus.SHOT)) {
-            Shooter.update()
-
             // if the turret is on target
             if (Turret.ready && Shooter.ready) {
                 shootingTimer.start()

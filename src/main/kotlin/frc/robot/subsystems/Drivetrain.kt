@@ -203,18 +203,18 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
-        RobotContainer.navigation.odometry.update(
-            RobotContainer.gyro.heading.w,
-            leftMaster.linearPosition.meters,
-            rightMaster.linearPosition.meters
-        )
+//        RobotContainer.navigation.odometry.update(
+//            RobotContainer.gyro.heading.w,
+//            leftMaster.linearPosition.meters,
+//            rightMaster.linearPosition.meters
+//        )
         debugDashboard()
 
         SmartDashboard.putNumber("l_error", leftMaster.linearVelocityError.value)
         SmartDashboard.putNumber("r_error", rightMaster.linearVelocityError.value)
 
 //        KField2d.robotPose = RobotContainer.navigation.pose
-//        RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
+        RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
         if (SmartDashboard.getBoolean("nav updates", false) && Game.OPERATED && Turret.isZeroed) {
             val distance = Turret.targetDistance ?: return
             val offset = Turret.visionOffset ?: return

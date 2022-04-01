@@ -87,7 +87,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     var targetVelocity
         get() = flywheel.velocitySetpoint
         set(value) {
-            flywheel.velocity = value * SmartDashboard.getNumber("shooterMult", .5)
+            flywheel.velocity = value * SmartDashboard.getNumber("shooterMult", 1.0)
         }
 
 
@@ -101,8 +101,8 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     // Servo that sets the hood angle
-    private val hood = KLinearServo(8, 100, 18.0.millimetersPerSecond)
-    private val hood2 = KLinearServo(9, 100, 18.0.millimetersPerSecond)
+    private val hood = KLinearServo(8, 100.millimeters, 18.0.millimetersPerSecond)
+    private val hood2 = KLinearServo(9, 100.millimeters, 18.0.millimetersPerSecond)
 
     var hoodDistance: Length
         get() = hood.position
@@ -171,7 +171,9 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     override fun periodic() {
         debugDashboard()
         SmartDashboard.putNumber("fly error", flywheel.velocityError.rpm)
-        if (currentCommand != ShooterCalibration) Turret.targetDistance?.let { hoodUpdate(it) }
+        if (currentCommand != ShooterCalibration) hoodUpdate(
+            Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+        )
     }
 
     override fun debugValues(): Map<String, Any?> {

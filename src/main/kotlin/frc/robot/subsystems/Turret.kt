@@ -48,6 +48,10 @@ object Turret : SubsystemBase(), Debug {
     // characterization of the turret
     private val feedforward = SimpleMotorFeedforward(0.05, 1.1432, 0.045857) // 0.22832
 
+    val controller = ProfiledPIDController(40.0, 3.0, 0.0, TrapezoidProfile.Constraints(1.0, 1.0)).apply {
+        setIntegratorRange(-2.0, 2.0)
+    }
+
     // actual turret motors
     val turret = KSparkMax(11).apply {
         identifier = "turret"
@@ -60,18 +64,14 @@ object Turret : SubsystemBase(), Debug {
 
 //        val loop = stateSpaceControl(positionSystem(feedforward), 3.0, .1, 2.degrees.value,1.0,4.0)
 
-        PID = ProfiledPIDController(40.0, 3.0, 0.0, TrapezoidProfile.Constraints(1.0, 1.0)).apply {
-            setIntegratorRange(-2.0, 2.0)
-        }  // these constraints are not tested on real
-
         val new = { it: KMotorController ->
             val rot = -headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.1.seconds
             position = clampSafePosition(it.positionSetpoint + rot)
 
             SmartDashboard.putNumber("error", positionError.degrees)
             SmartDashboard.putNumber("set", positionSetpoint.degrees)
-            val offsetCorrection = PID.calculate(position.rotations, positionSetpoint.rotations)
-            val ff = feedforward.calculate(PID.setpoint.velocity.rotationsPerSecond.radiansPerSecond)
+            val offsetCorrection = controller.calculate(position.rotations, positionSetpoint.rotations)
+            val ff = feedforward.calculate(controller.setpoint.velocity.rotationsPerSecond.radiansPerSecond)
             if (isZeroed) (ff + offsetCorrection) else 0.0//.coerceIn(-4.0, 4.0)
         }
 
@@ -112,7 +112,7 @@ object Turret : SubsystemBase(), Debug {
      * Makes an angle safe for the electronics to not get tangled
      */
     private fun clampSafePosition(angle: Angle): Angle {
-        return (angle + 30.degrees).normalized - 30.degrees
+        return (angle + 40.degrees).normalized - 40.degrees
     }
 
     /**
@@ -151,7 +151,9 @@ object Turret : SubsystemBase(), Debug {
 
     fun reset() {
         distanceFilter.reset()
-        turret.PID.reset(turret.position.rotations, turret.velocity.rotationsPerSecond)
+        controller.reset(
+            turret.position.rotations, turret.velocity.rotationsPerSecond
+        )
     }
 
     private val lostDebouncer = Debouncer(0.5, Debouncer.DebounceType.kBoth)

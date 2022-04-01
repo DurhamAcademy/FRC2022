@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Subsystem
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.kyberlib.pneumatics.KSolenoid
+import frc.robot.commands.climb.ManualClimb
 import frc.robot.commands.intake.ManualConveyor
 import frc.robot.commands.intake.ManualIntake
 import frc.robot.commands.shooter.ShooterCalibration
@@ -23,6 +24,7 @@ class OperatorControls {
         SmartDashboard.putBoolean("ManualShooter", false)
         SmartDashboard.putBoolean("ManualConveyor", false)
         SmartDashboard.putBoolean("ManualIntake", false)
+        SmartDashboard.putBoolean("ManualClimb", false)
         SmartDashboard.putBoolean(compressorString, true)
     }
 
@@ -43,4 +45,5 @@ class OperatorControls {
         Trigger { SmartDashboard.getBoolean("ManualShooter", false) }.whileActiveOnce(ShooterCalibration)
     val MANUAL_CONVEYOR = Trigger { SmartDashboard.getBoolean("ManualConveyor", false) }.whileActiveOnce(ManualConveyor)
     val MANUAL_INTAKE = Trigger { SmartDashboard.getBoolean("ManualIntake", false) }.whileActiveOnce(ManualIntake)
+    val MANUAL_CLIMB = Trigger { SmartDashboard.getBoolean("ManualIntake", false) }.whileActiveOnce(ManualClimb)
 }
