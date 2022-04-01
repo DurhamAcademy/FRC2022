@@ -12,7 +12,7 @@ import frc.kyberlib.command.Game
 import frc.kyberlib.math.Polynomial
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
-import frc.kyberlib.motorcontrol.rev.KSparkMax
+import frc.kyberlib.motorcontrol.ctre.KTalon
 import frc.kyberlib.motorcontrol.servo.KLinearServo
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
@@ -45,7 +45,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     var time = Game.time
 
     // main motor attached to the flywheel
-    val flywheel = KSparkMax(31).apply {
+    val flywheel = KTalon(31).apply {
         identifier = "flywheel"
         motorType = DCMotor.getNEO(2)
         addFeedforward(ff)
@@ -71,7 +71,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         kP = 0.0160434
         kI = 0.0001
 
-        currentLimit = 50
+//        currentLimit = 50
         brakeMode = false
         if (Game.sim) setupSim(ff)
     }
@@ -92,11 +92,11 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
 
     // additional motors that copy the main
-    private val flywheel2 = KSparkMax(32).apply {
+    private val flywheel2 = KTalon(32).apply {
         identifier = "flywheel2"
         reversed = true
         brakeMode = false
-        currentLimit = 50
+//        currentLimit = 50
         follow(flywheel)
     }
 

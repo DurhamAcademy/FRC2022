@@ -13,6 +13,7 @@ import frc.kyberlib.motorcontrol.KMotorController
 class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation: Int = 2048) : KMotorController() {
     val talon = BaseTalon(port, model)
     override var identifier: String = "$model ($port)"
+
     init {
         CANRegistry[identifier] = port
     }
@@ -34,7 +35,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
     override var brakeMode: BrakeMode = false
         set(value) {
             field = value
-            talon.setNeutralMode(if(value)NeutralMode.Brake else NeutralMode.Brake)
+            talon.setNeutralMode(if (value) NeutralMode.Brake else NeutralMode.Brake)
         }
     override var rawPercent: Double
         get() = talon.motorOutputPercent
@@ -46,6 +47,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
         get() = talon.supplyCurrent
 
     override fun followTarget(kmc: KBasicMotorController) {
+        if (reversed) talon.inverted = true
         when (kmc) {
             is KTalon -> talon.follow(kmc.talon, FollowerType.PercentOutput)
             is KVictorSPX -> talon.follow(kmc.victor)
