@@ -65,6 +65,10 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Defines the relationship between rotation and linear motion for the motor.
      */
     var radius: Length? = null
+        set(value) {
+            field = value
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF+toNative)
+        }
 
     /**
      * Adds post-encoder gearing to allow for post-geared speeds to be set.
@@ -72,16 +76,28 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * product of (output teeth / input teeth) for each gear stage
      */
     var gearRatio: GearRatio = 1.0
+        set(value) {
+            field = value
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF+toNative)
+        }
     // ----- constraints ---- //
     /**
      * The max angular velocity the motor can have
      */
     open var maxVelocity: AngularVelocity = 0.rpm
+        set(value) {
+            field = value
+            updateNativeProfile(maxVelocity.rotationsPerSecond * toNative, maxAcceleration.rotationsPerSecond * toNative)
+        }
 
     /**
      * The max angular acceleration the motor can have
      */
     open var maxAcceleration: AngularVelocity = 0.rpm
+        set(value) {
+            field = value
+            updateNativeProfile(maxVelocity.rotationsPerSecond * toNative, maxAcceleration.rotationsPerSecond * toNative)
+        }
 
     open var maxPosition: Angle = Angle(Double.POSITIVE_INFINITY)
     var maxLinearPosition: Length
@@ -114,46 +130,58 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             maxAcceleration = linearToRotation(value)
         }
 
-    private var constraints = TrapezoidProfile.Constraints(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
-
+    protected abstract fun updateNativeProfile(maxVelocity: Double? = null, maxAcceleration: Double? = null,
+                                               rampRate: Double? = null)
     // ----- control schemes ---- //
     /**
      * Proportional gain of the customControl controller.
      */
-    open var kP: Double
+    var kP: Double
         get() = PID.p
         set(value) {
             PID.p = value
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF+toNative)
         }
 
     /**
      * Integral gain of the customControl controller.
      */
-    open var kI: Double
+    var kI: Double
         get() = PID.i
         set(value) {
             PID.i = value
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF+toNative)
         }
 
     /**
      * Derivative gain of the customControl controller.
      */
-    open var kD: Double
+    var kD: Double
         get() = PID.d
         set(value) {
             PID.d = value
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF+toNative)
         }
 
     /**
      * FF gain for native motor control.
      * Should be equal to kv on SysID ff
      */
-    open var kF: Double = 0.0
+    var kF: Double = 0.0
+        set(value) {
+            field = value
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF+toNative)
+        }
+
+    private val toNative
+        get() = if(linearConfigured) radius!!.meters * gearRatio else gearRatio
+
+    protected abstract fun updateNativeControl(p: Double, i: Double, d: Double, f: Double)
 
     /**
      * Max integration value
      */
-    open var kIRange = 0.0
+    var kIRange = 0.0
         set(value) {
             field = value
             PID.setIntegratorRange(-value, value)

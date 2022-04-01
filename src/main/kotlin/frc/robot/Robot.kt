@@ -87,30 +87,27 @@ class Robot : KRobot() {
     private fun loadRoutine(routine: String): SequentialCommandGroup {
         val command = SequentialCommandGroup()
         val f = File("${TrajectoryManager.AUTO_PATH}/$routine")
-        val list = f.readLines()
-        var index = 0
-        var prevCommand: Command? = null
-        while(index < list.size) {
-            val current = list.get(index)
-            val next = list.getOrNull(index + 1)
-            val currentCommand = when (current) {
-                "Shot" -> {
-                    prevCommand.let {
-
-                    }
-                    AutoShot()
-                }
-                "Dispose" -> {
-                    Dispose
-                }
-                else -> {
-                    AutoDrive(TrajectoryManager[current]!!)
-                }
-            }
-
-
-            prevCommand = currentCommand
-        }
+//        val list = f.readLines()
+//        var index = 0
+//        var prevCommand: Command? = null
+//        while(index < list.size) {
+//            val current = list.get(index)
+//            val next = list.getOrNull(index + 1)
+//            val currentCommand = when (current) {
+//                "Shot" -> {
+//                    AutoShot()
+//                }
+//                "Dispose" -> {
+//                    Dispose
+//                }
+//                else -> {
+//                    AutoDrive(TrajectoryManager[current]!!)
+//                }
+//            }
+//
+//
+//            prevCommand = currentCommand
+//        }
 
         f.readLines().forEach {
             when (it) {

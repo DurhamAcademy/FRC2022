@@ -100,32 +100,16 @@ class KSparkMax(
             )
         }
 
-    override var kP
-        get() = super.kP
-        set(value) {
-            super.kP = value
-            _pid.p = value
-        }
+    override fun updateNativeControl(p: Double, i: Double, d: Double, f: Double) {
+        _pid.p = p
+        _pid.i = i
+        _pid.d = d
+        _pid.ff = f
+    }
 
-    override var kI
-        get() = super.kI
-        set(value) {
-            super.kI = value
-            _pid.p = value
-        }
+    override fun updateNativeProfile(maxVelocity: Double?, maxAcceleration: Double?, rampRate: Double?) {
 
-    override var kD
-        get() = super.kD
-        set(value) {
-            super.kD = value
-            _pid.p = value
-        }
-
-    override var kF = 0.0
-        set(value) {
-            field = value
-            _pid.ff = value
-        }
+    }
 
     override var maxVelocity = -1.rpm
         set(value) {
