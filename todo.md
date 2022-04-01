@@ -1,32 +1,38 @@
 # In Sim
 - reformat Shuffleboard (require driver-station)
-- make auto not awful **
-- profiled flywheel
 - augmented loop (pg 109 of textbook)
+  - detla U: add voltage into state model
+    - https://www.chiefdelphi.com/t/971s-control-system/137365/15?u=tatestaples 
+- playback auto
+- current management
+- https://www.chiefdelphi.com/t/what-impressive-things-did-you-do-in-software-this-year/382245/48?u=tatestaples
+- https://github.com/Team254/FRC-2020-Public/blob/master/src/main/java/com/team254/frc2020/planners/DriveMotionPlanner.java#L225
 
 
 # With robot
+- climb testing
+- test other turret controls (it they want to redo tether, than recharacterize)
+  - velocity
+  - state space (hard with bad ff)
+- test disposal
+- speed up zeroTurret
+- test shot while moving
 - test why auto shot slow
 - test other shooter control schemes
   - inversion
-  - native
+  - native (probably good enough with the falcon)
   - full throttle
   - statespace
     - check how to use faster loop time
   - check changing tolerance
   - add I term
-- flash other limelight
+- flash other limelight (try)
   - tune ball detection
-- test other turret controls
-  - velocity 
-  - state space (hard with bad ff)
-- test disposal
 - speed up zeroTurret (or add faster version for when button not )
 
 ## random cool things
 - Auto Drive to Climb
 - Auto Climb
-- acceleration calculations
 
 ## Full Auto
 - goal system (shouldn't be too hard - should update) -> moderate difficulty
@@ -34,6 +40,7 @@
 - obstacles (can work on this) -> easy, just time intensive
 - ball detection in hopper
   - figure out colors senrsors (talk to bots on wheels) -> with resourses, not that hard
+  - pypico + 2 rev color sensors
 - ability to reaccesss if lost for too long -> simple
 - robot avoidance -> hard (try installing photon on picam or something)
 - climb -> unknown, probably not bad but will need empirics
@@ -52,11 +59,10 @@
   - drivetrain
     - fancy odometry
   - turret
-    - pid
-    - velocity controls?
+    - statespace
     - limelight
     - working while unplugged
-    - self wrapping
+    - self wrapping (protect the cables)
   - Shooter
     - conveyor management
     - color sensors?
@@ -89,8 +95,8 @@
     - why important for our robot (time)
     - branches
     - auto testing
-      - we no have field
-    - maximazing efficiency
+      - we don't have fielded
+    - maximizing efficiency
       - time with robot is limited
     - increase usability
 
