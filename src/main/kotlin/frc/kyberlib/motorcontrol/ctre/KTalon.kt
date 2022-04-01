@@ -32,12 +32,14 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             orchestra.pause()
         }
     }
+
     val talon = TalonFX(port, model)
     override var identifier: String = "$model ($port)"
+
     init {
         CANRegistry[identifier] = port
         orchestra.addInstrument(talon)
-        if(Game.real) {
+        if (Game.real && false) {
             val kTimeoutMs = 100
             talon.configVoltageCompSaturation(12.0, 100)
             talon.enableVoltageCompensation(true);
@@ -88,7 +90,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
     override var brakeMode: BrakeMode = false
         set(value) {
             field = value
-            talon.setNeutralMode(if(value)NeutralMode.Brake else NeutralMode.Coast)
+            talon.setNeutralMode(if (value) NeutralMode.Brake else NeutralMode.Coast)
         }
     override var rawPercent: Double
         get() = talon.motorOutputPercent
@@ -105,7 +107,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
     var currentLimit = 0
         set(value) {
             field = value
-            talon.configSupplyCurrentLimit(SupplyCurrentLimitConfiguration(true, value.toDouble(), value+10.0, .1))
+            talon.configSupplyCurrentLimit(SupplyCurrentLimitConfiguration(true, value.toDouble(), value + 10.0, .1))
         }
 
     override fun updateNativeControl(p: Double, i: Double, d: Double, f: Double) {
@@ -125,6 +127,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
         }
 
     override fun followTarget(kmc: KBasicMotorController) {
+        if (reversed) talon.inverted = true
         when (kmc) {
             is KTalon -> talon.follow(kmc.talon, FollowerType.PercentOutput)
             is KVictorSPX -> talon.follow(kmc.victor)
