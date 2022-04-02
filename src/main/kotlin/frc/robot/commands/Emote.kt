@@ -15,10 +15,12 @@ object Emote : CommandBase() {
         addRequirements(Drivetrain, Climber, Turret, Shooter, Intaker)
     }
 
+    // how fast and much to turn
     private const val turnPeriod = 2.0
     private const val turnMag = 1.0
 
-    private const val vroomPeriod = 10.0
+    // spinup emotes for emote
+    private const val vroomPeriod = 5.0
     private const val vroomDuration = 0.3
     private const val vroomSpacing = 1.0
     private const val vroomIntensity = 0.3

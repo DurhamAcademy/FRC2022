@@ -41,6 +41,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     // motors
     override val priority: DebugFilter = DebugFilter.Max
 
+    // ff for each part of the drivetrain
     private val leftFF = SimpleMotorFeedforward(Constants.DRIVE_KS_L, Constants.DRIVE_KV_L, Constants.DRIVE_KA_L)
     private val rightFF = SimpleMotorFeedforward(Constants.DRIVE_KS_R, Constants.DRIVE_KV_R, Constants.DRIVE_KA_R)
     private val angularFeedforward = SimpleMotorFeedforward(0.6382, 2.7318, 0.32016)
@@ -104,11 +105,11 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         spark.follow(rightMaster.spark, reversed)  // follow(rightMaster)
     }
 
+    // whether to switch to using back motors
     val driveInversion
         get() = SmartDashboard.getBoolean("invert drive motors", false)
-    private val motors = arrayOf(leftMaster, rightMaster)
 
-    // values
+
     val kinematics = DifferentialDriveKinematics(Constants.TRACK_WIDTH)  // calculator to make drivetrain move is the desired directions
     override var chassisSpeeds: ChassisSpeeds  // variable representing the direction we want the robot to move
         get() = kinematics.toChassisSpeeds(wheelSpeeds)
@@ -148,7 +149,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
                 polar.dTheta.toTangentialVelocity(Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters).value,
                 polar.dOrientation.radiansPerSecond)
         }
-    var pose
+    var pose  // pose of the robot
         get() = RobotContainer.navigation.pose
         set(value) {
             val latency = RobotContainer.limelight.latestResult!!.latencyMillis.milli.seconds
@@ -157,7 +158,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
             rightMaster.resetPosition()
             RobotContainer.navigation.update(value, detectionTime)
         }
-    private var polarCoordinates
+    private var polarCoordinates  // polar coordinates relative to the Hub
         get() = RobotContainer.navigation.pose.polar(Constants.HUB_POSITION)
         set(value) {
             pose = Pose2d(value.cartesian(Constants.HUB_POSITION).translation, RobotContainer.navigation.heading.w)
@@ -180,8 +181,6 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         drive(kinematics.toWheelSpeeds(speeds))
     }
 
-    val driveSystem = betterDrivetrainSystem()
-
     /**
      * Drive the robot at the provided speeds
      */
@@ -203,6 +202,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         drive(ChassisSpeeds(vx.metersPerSecond, 0.0, anglePid.calculate(dTheta.radians)))
     }
 
+    // stop the drivetrain
     fun stop() {
         leftMaster.stop()
         rightMaster.stop()
@@ -223,6 +223,7 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
 //        KField2d.robotPose = RobotContainer.navigation.pose
 //        RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
         if (RobotContainer.op.smartNav && Game.OPERATED && Turret.isZeroed) {
+            // do global position updates based on limelight data
             val distance = Turret.targetDistance ?: return
             val offset = Turret.visionOffset ?: return
             val angle = offset + Turret.fieldRelativeAngle + 180.degrees

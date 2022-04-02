@@ -59,6 +59,13 @@
     - fancy odometry
     - auto drive
     - playback controls
+    - multiple coordinate systems
+      - standard
+      - polar
+    - speed systems
+      - robo centric
+      - hub centric
+      - field centric
   - turret
     - statespace
     - limelight

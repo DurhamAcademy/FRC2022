@@ -50,12 +50,14 @@ object RobotContainer {
 //            video.videoMode = VideoMode(video.videoMode.pixelFormat, 640, 480, 30)
 //        }
     }
+    // hall sensor
     val turretLimit = DigitalInput(0)
 
     val navigation = Navigator(gyro, Constants.START_POSE, trackingMode = TrackingMode.Fancy)
 
-    val controller = KXboxController(0)
-    val op = OperatorControls()
+    // controllers
+    val controller = KXboxController(0)  // xbox
+    val op = OperatorControls()  // dashboard controls
 
     var controlScheme = DefaultControls.apply {
         INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
@@ -70,6 +72,7 @@ object RobotContainer {
         DISPOSE.whileActiveOnce(Dispose)
     }
 
+    // auto path chooser
     val autoChooser = SendableChooser<String>().apply {
         val options = TrajectoryManager.routines
         for (path in options) addOption(path, path)
@@ -85,10 +88,12 @@ object RobotContainer {
         this += KLEDRegion(AnimationCylon(Color.RED, 5, 40), 0, 14) { Game.alliance == DriverStation.Alliance.Red }
         this += KLEDRegion(AnimationCylon(Color.CYAN, 5, 40), 0, 14) { Game.alliance == DriverStation.Alliance.Blue }
 
+        // turret status
         this += KLEDRegion(AnimationBlink(Color.BLUE, 20), 0, 14) { Turret.currentCommand == ZeroTurret }
         this += KLEDRegion(AnimationSolid(Color.RED), 0, 14) { Turret.currentCommand == SeekTurret }
         this += KLEDRegion(AnimationSolid(Color.YELLOW), 0, 14) { Turret.currentCommand == AimTurret }
         this += KLEDRegion(AnimationPulse(Color.YELLOW, 40), 0, 14, false) { Turret.ready }
+        // shooter status
         this += KLEDRegion(AnimationSolid(Color.GREEN), 0, 14, false) { Shooter.status == ShooterStatus.SPINUP }
         this += KLEDRegion(
             AnimationPulse(Color.GREEN, 40),

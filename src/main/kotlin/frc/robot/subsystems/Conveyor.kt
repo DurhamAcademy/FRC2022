@@ -33,6 +33,7 @@ enum class ConveyorStatus {
 object Conveyor : SubsystemBase(), Debug {
     override val priority: DebugFilter = DebugFilter.Low
 
+    // control conveyor
     val conveyor = KSparkMax(21).apply {
         identifier = "conveyor"
         reversed = true
@@ -42,26 +43,30 @@ object Conveyor : SubsystemBase(), Debug {
 
     var status = ConveyorStatus.IDLE
 
+    // control motor that feeds into shooter
     val feeder = KSparkMax(30).apply {
         identifier = "feeder"
         gearRatio = 1 / 5.0
         currentLimit = 20
     }
 
+    // feed into shooter
     fun feed() {
         status = ConveyorStatus.FEEDING
         feeder.percent = 0.6
         conveyor.percent = 0.6
     }
 
+    // prepare to feed into shooter
     fun prepare() {
         conveyor.percent = -.1
         feeder.percent = -0.5
     }
 
+    // chill
     fun idle() {
         status = ConveyorStatus.IDLE
-        feeder.percent = -0.1
+        feeder.percent = -0.05
         conveyor.percent = -0.0
     }
 
@@ -75,6 +80,7 @@ object Conveyor : SubsystemBase(), Debug {
         defaultCommand = Idle
     }
 
+    // random hopper management we aren't gonna get to use :(
     private val colorSensorV3 = ColorSensorV3(I2C.Port.kOnboard)
     private val allianceColor = if(Game.alliance == DriverStation.Alliance.Red) Color.kRed else Color.kBlue
     private val enemyColor = if(Game.alliance == DriverStation.Alliance.Red) Color.kBlue else Color.kRed
@@ -93,6 +99,7 @@ object Conveyor : SubsystemBase(), Debug {
 
     override fun periodic() {
 //        debugDashboard()
+        // use hypothetical limelight to track balls and do shit
         if(RobotContainer.op.intakeCam) {
             val result = RobotContainer.ballMonitor.latestResult
             if (result != null) {
@@ -110,6 +117,7 @@ object Conveyor : SubsystemBase(), Debug {
                 }
             }
         }
+        // monitor hopper
         if(RobotContainer.op.autoShot) checkForBalls()
     }
 

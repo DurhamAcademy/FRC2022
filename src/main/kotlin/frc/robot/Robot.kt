@@ -48,8 +48,8 @@ class Robot : KRobot() {
     }
 
     override fun teleopPeriodic() {
-//        SmartDashboard.putBoolean("hall", RobotContainer.turretLimit.get())
         if (Game.real) {
+            // log relevant stuff
             SmartDashboard.putNumber("gyro", RobotContainer.gyro.heading.degrees)
             SmartDashboard.putBoolean("visible", Turret.targetVisible)
             SmartDashboard.putBoolean("shooter ready", Shooter.ready)
@@ -60,17 +60,21 @@ class Robot : KRobot() {
     }
 
     override fun autonomousInit() {
+        // zero Turret
         Turret.isZeroed = false
         ZeroTurret.schedule(false)
+        // prepare to pick up balls
         Intaker.deployed = true
         Conveyor.conveyor.percent = 0.05
         Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
+        // get auto commadn
         val auto = loadRoutine(RobotContainer.autoChooser.selected)//RobotContainer.autoChooser.selected!!)
         auto.schedule()
         autoCommand = auto
     }
 
     private fun reset(pose: Pose2d) {
+        // reset navigation to a specific pose
         if (Game.real) {
             Drivetrain.leftMaster.resetPosition(0.meters)
             Drivetrain.rightMaster.resetPosition(0.meters)
@@ -87,28 +91,6 @@ class Robot : KRobot() {
     private fun loadRoutine(routine: String): SequentialCommandGroup {
         val command = SequentialCommandGroup()
         val f = File("${TrajectoryManager.AUTO_PATH}/$routine")
-//        val list = f.readLines()
-//        var index = 0
-//        var prevCommand: Command? = null
-//        while(index < list.size) {
-//            val current = list.get(index)
-//            val next = list.getOrNull(index + 1)
-//            val currentCommand = when (current) {
-//                "Shot" -> {
-//                    AutoShot()
-//                }
-//                "Dispose" -> {
-//                    Dispose
-//                }
-//                else -> {
-//                    AutoDrive(TrajectoryManager[current]!!)
-//                }
-//            }
-//
-//
-//            prevCommand = currentCommand
-//        }
-
         f.readLines().forEach {
             when (it) {
                 "Shot" -> command.addCommands(AutoShot())

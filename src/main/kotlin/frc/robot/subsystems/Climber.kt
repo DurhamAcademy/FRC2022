@@ -83,13 +83,14 @@ object Climber : SubsystemBase(), Debug, Simulatable {
             leftStatic.extended = value
             rightStatic.extended = value
         }
-    var extension
+    var extension  // public variable to control position off both the arms
         get() = leftWinch.linearPosition
         set(value) {
             leftWinch.linearPosition = value
             rightWinch.linearPosition = value
         }
 
+    // update closed-loop controls
     fun updateMotors() {
         leftWinch.updateVoltage()
         rightWinch.updateVoltage()
@@ -110,8 +111,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     /**
      * In progress simulation of the climb
      */
-    private val sim =
-        Mechanism2d((Constants.MID2HIGH + Constants.HIGH2TRAVERSE).meters, Constants.TRAVERSAL_RUNG_HEIGHT.meters)
+    private val sim = Mechanism2d((Constants.MID2HIGH + Constants.HIGH2TRAVERSE).meters, Constants.TRAVERSAL_RUNG_HEIGHT.meters)
     private val extendPivot = sim.getRoot("extendable pivot", 0.0, 8.inches.value)
     private val extendable = extendPivot.append(
         MechanismLigament2d(
@@ -139,7 +139,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
 
     override fun periodic() {
 //        debugDashboard()
-        updateMotors()
+//        updateMotors()
     }
 
     private val swing = Differentiator()

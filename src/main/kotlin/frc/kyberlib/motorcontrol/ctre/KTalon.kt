@@ -102,7 +102,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             talon.configSupplyCurrentLimit(SupplyCurrentLimitConfiguration(true, value.toDouble(), value + 10.0, .1))
         }
 
-    val arbFF: (it: KTalon)->Double = { it: KTalon -> 0.0 }
+    var arbFF: (it: KTalon)->Double = { it: KTalon -> 0.0 }
 
     override fun updateNativeControl(p: Double, i: Double, d: Double, f: Double) {
         talon.config_kP(0, p)

@@ -135,12 +135,13 @@ object Turret : SubsystemBase(), Debug {
         turret.resetPosition()
     }
 
+    // latest data from limelight
     private var latestResult: PhotonPipelineResult? = null
-    var targetVisible: Boolean = false
+    var targetVisible: Boolean = false  // currently has target
         private set
-    var lost = false
-    private var target: PhotonTrackedTarget? = null
-    val visionOffset: Angle?
+    var lost = false  // should the turret behave as lost
+    private var target: PhotonTrackedTarget? = null  // target result
+    val visionOffset: Angle?  // how far to side turret is from target
         get() = if (Game.real) target?.yaw?.let { visionFilter.calculate(-it).degrees }
         else {
             var off = (RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k - fieldRelativeAngle + randomizer.nextGaussian().degrees * 0.0)
@@ -149,7 +150,7 @@ object Turret : SubsystemBase(), Debug {
             if (true || off.absoluteValue < 20.degrees) off.degrees.degrees else null
 //                    off
         }
-    private val visionPitch: Angle?
+    private val visionPitch: Angle?  // how far up the target is
         get() = target?.pitch?.degrees
 
     // how far from the center of the hub the robot is (based on limelight)
@@ -158,18 +159,20 @@ object Turret : SubsystemBase(), Debug {
         get() = if (Game.sim) RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters + randomizer.nextGaussian().inches
         else visionPitch?.let { pitch -> 2.feet + distanceFilter.calculate((Constants.UPPER_HUB_HEIGHT.inches - 1 - Constants.LIMELIGHT_HEIGHT.inches) / (Constants.LIMELIGHT_ANGLE + pitch).tan).inches }  // this could be wrong
 
-    val ready: Boolean
+    val ready: Boolean  // is the Turret prepared to shoot
         get() = Game.sim || (targetVisible && turret.positionError.absoluteValue < Constants.TURRET_TOLERANCE) || status == TurretStatus.FROZEN
 
-    fun reset() {
+    fun reset() {  // clear stuff to remove weird things happening when switching between commands
         distanceFilter.reset()
         controller.reset(turret.position.rotations, turret.velocity.rotationsPerSecond)
     }
 
+    // smooths out how fast we switch between lost and found
     private val lostDebouncer = Debouncer(0.5, Debouncer.DebounceType.kBoth)
     override fun periodic() {
         SmartDashboard.putString("turret cmd", this.currentCommand?.name ?: "none")
         debugDashboard()
+        // update vars with vision data
         if (Game.real) {
             latestResult = RobotContainer.limelight.latestResult
             targetVisible = latestResult != null && latestResult!!.hasTargets()
