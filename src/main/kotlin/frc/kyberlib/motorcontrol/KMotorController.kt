@@ -29,6 +29,8 @@ import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.math.absoluteValue
 
 typealias GearRatio = Double
@@ -89,7 +91,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     open var maxVelocity: AngularVelocity = 0.rpm
         set(value) {
             field = value
-            updateNativeProfile(maxVelocity.rotationsPerSecond * toNative, maxAcceleration.rotationsPerSecond * toNative)
+            updateNativeProfile(maxVelocity * toNative, maxAcceleration * toNative)
         }
 
     /**
@@ -98,7 +100,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     open var maxAcceleration: AngularVelocity = 0.rpm
         set(value) {
             field = value
-            updateNativeProfile(maxVelocity.rotationsPerSecond * toNative, maxAcceleration.rotationsPerSecond * toNative)
+            updateNativeProfile(maxVelocity * toNative, maxAcceleration * toNative)
         }
 
     open var maxPosition: Angle = Angle(Double.POSITIVE_INFINITY)
@@ -132,8 +134,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             maxAcceleration = linearToRotation(value)
         }
 
-    protected abstract fun updateNativeProfile(maxVelocity: Double? = null, maxAcceleration: Double? = null,
-                                               rampRate: Double? = null)
+    abstract fun updateNativeProfile(maxVelocity: AngularVelocity, maxAcceleration: AngularVelocity)
     // ----- control schemes ---- //
     /**
      * Proportional gain of the customControl controller.
@@ -142,7 +143,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         get() = PID.p
         set(value) {
             PID.p = value
-            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF+toNative)
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF*toNative)
         }
 
     /**
@@ -152,7 +153,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         get() = PID.i
         set(value) {
             PID.i = value
-            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF+toNative)
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF*toNative)
         }
 
     /**
@@ -162,7 +163,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         get() = PID.d
         set(value) {
             PID.d = value
-            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF+toNative)
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF*toNative)
         }
 
     /**
@@ -172,7 +173,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     var kF: Double = 0.0
         set(value) {
             field = value
-            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF+toNative)
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF*toNative)
         }
 
     private val toNative
@@ -433,7 +434,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Updates the voltage after changing position / velocity setpoint
      */
     fun updateVoltage() {
-        if (!isFollower && customControl != null && controlMode != ControlMode.VOLTAGE) {
+        if (!isFollower && closedLoopConfigured && controlMode != ControlMode.VOLTAGE) {
             acceleration = accelerationCalculator.calculate(velocity.value).radiansPerSecond
             customControlLock = true
             safeSetVoltage(customControl!!(this))

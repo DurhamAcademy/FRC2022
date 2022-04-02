@@ -9,25 +9,23 @@
 
 
 # With robot
-- climb testing
-- test other turret controls (it they want to redo tether, than recharacterize)
+- climb testing (3 hours)
+- get falcons work (1 hour)
+- test other turret controls (it they want to redo tether, than recharacterize) (2 hours)
   - velocity
   - state space (hard with bad ff)
-- test disposal
-- speed up zeroTurret
-- test shot while moving
-- test why auto shot slow
-- test other shooter control schemes
-  - inversion
-  - native (probably good enough with the falcon)
-  - full throttle
-  - statespace
-    - check how to use faster loop time
-  - check changing tolerance
-  - add I term
-- flash other limelight (try)
+- test disposal (1 hour)
+- speed up zeroTurret (think about always zero) (30 min)
+- recharacterize the shooter (2 hour)
+- test shot while moving (6 hour)
+- test why auto shot slow (3 hour)
+  - generally make auto better
+- flash other limelight (try) (4 hour)
   - tune ball detection
-- speed up zeroTurret (or add faster version for when button not )
+- climb prepare (30 min)
+- test drivetrain swap (30 min)
+- emote (1 hour)
+- Chris driver practice (whatever time remains)
 
 ## random cool things
 - Auto Drive to Climb
@@ -55,6 +53,7 @@
   - intake
     - no penalties
     - auto intake?
+    - driver camera
   - drivetrain
     - fancy odometry
     - auto drive
@@ -66,6 +65,7 @@
       - robo centric
       - hub centric
       - field centric
+    - lead swap
   - turret
     - statespace
     - limelight
@@ -81,21 +81,47 @@
     - closed loop, feed when ready
     - active hood
     - speed based on poly fit
+  - Climb
+    - position controlled
+    - prepare for faster climb
+    - reaction wheel stablization
+  - Controls
+    - Modular control system
+    - dashboard override on everything
+    - turn off fancy things if no work
+      - increase flywheel speed if shooting low
+      - debug intake snapping
+      - force turret out of weird positions
 - Kyber
-  - motor control systems integration
+  - motivation
+    - personal journey in understanding
+    - documentation for future year
+    - mechansims
+  - motor control systems integration (abstraction allows for modularity)
     - native
     - pid
-    - ff
+    - ff (intuitive to use)
     - statespace
+      - positon, velocity, dual, arm, elevator, drivetrain
+      - custom loops with latency compensation
     - bang
     - custom
+  - Characterization Tool
+    - use our own code to characterize systems and fit the data
+    - allows for more control of the data we get and ensures safety on constrained systems
   - Auto pathing generation
-    - shuffle integration
+    - shuffleboard integration
     - dynamic path planning
+    - communication with other teams
+    - role in navigation
+    - Playback
+      - records all the drivers inputs and plays them back
+      - allows for quick and easy non-standard autos
   - debug system
+    - allows for graphing and understanding of what everything is doing
   - fancy controller modifications
-    - trevors shit
-    - control schemeas
+    - drone modification
+    - able to be simulations (see playback)
   - LED animations
   - unit libraries
     - greater understanding and readiblity
@@ -107,161 +133,15 @@
     - building for the future team
   - Simulation support
     - why important for our robot (time)
+      - 2 days of testing
     - branches
+      - allow for testing cool new ideas
     - auto testing
-      - we don't have fielded
+      - All autos have actually been developed in sim and debugged on the field
     - maximizing efficiency
       - time with robot is limited
     - increase usability
-
-
-## software presentation
-- whole team (state goal of presentation first)
-  - tools
-    - controller map
-    - IntelliJ
-      - how deploy code
-      - important constant
-    - Driverstation
-      - comms
-      - code
-      - joystick
-      - enabling
-    - Dashboard
-      - selecting auto path
-      - nav update
-      - general concept on manual
-- coders
-  - overview: inputs -> outputs
-    - make it as easy for driver as possible
-  - Inputs
-    - human -> controller
-    - dashboard
-    - limelight (2 directions)
-    - gyro (direction)
-    - hall (bool)
-    - encoders
-  - Outputs
-    - pneumatics 
-      - how define
-    - motors
-      - how define
-      - basic vs encoded
-        - driving car blind example
-        - bring in chad bot
-        - discuss simplicity and talk about intake and conveyor
-      - position control example (turret)
-        - discuss the concept of bang bang
-        - ask for ideas
-        - discuss pid
-          - when use each constant
-      - velocity control example
-        - bring in feedforwards (its just actually doing the math)
-        - SysId (anaylize old data)
-  - Robot Code organization
-    - constants = random numbers to make code readable
-    - main = magic file of mystery. Starts program. *Don't touch*
-    - Robot = while loops of robot. Call functions at important stages of the match
-    - RobotContainer
-      - sensors go here
-      - all the things that the entire robot needs to have access to
-    - Subsystems
-      - all the things specfic to a mechanism
-        - sensors and outputs
-      - useful functions
-        - shot at speed
-    - Commands
-      - the mode that the mechanism is in
-      - reservation system
-      - tells the robot what to do at that timestep
-  - Pathweaver
-    - encourage brainstorming and do sim follow
-    - show where outputs go
-    - show where in Robot this is handled
-  - Our actual robot focus
-    - Climber
-      - pneumatic for each side
-      - motor for each side
-      - Default:
-        - on activation raise arms
-        - set voltage based on joysticks
-        - Future: elevator ff and velocity control
-      - Preperation idea:
-        - use encoder to go out a little early (still with in frame) for faster climb
-      - Auto idea:
-        - use encoders to automatically go to the right height
-      - Stablization concept:
-        - basic idea of torque and pid controller
-    - Conveyor
-      - conveyor motor
-      - feeder motor
-      - basic functions
-        - feed
-          - conveyor push things towards shooter
-          - feeder pull balls into shooter
-        - prepare
-          - back up feeder and conveyor for better grip
-        - idle
-          - agitate balls
-      - ask further ideas
-      - bring up color sensors
-    - Drivetrain
-      - show motors
-      - discuss motor following
-      - Discuss WPI classes
-        - translation
-        - pose
-        - chassis speeds 
-        - wheel speeds
-      - discuss kinematics
-        - how much turn per zoom
-      - discuss odometry
-        - basically just adding encoders to track movement
-      - Fancy things
-        - polar speeds
-        - hub relative speeds
-    - Intake
-      - pneumatics and motor
-      - when motor go zoom, intake go out
-      - also flush command is intake but reverse
-    - Shooter
-      - bring back the discussion of ff and check for questions
-      - discuss what ready means in this context
-      - whats been going wrong
-      - show how we calculate distance
-      - show the interpolar and say poly basically the same
-      - back fudge and shooter mult
-      - Shoot vs Force Shot
-      - Concept of Shooting while moving
-    - Turret
-      - ZeroTurret
-        - move until hall sensors
-      - SeekTurret
-        - point from here to hub
-      - AimTurret
-        - discuss limelight output
-        - spend some time talking about how limelight thresholds work
-      - back to subsystem
-      - discuss PID loops again
-      - disucss profiles
-        - add limits so pulley no die
-      - add a little bit of velocity compensation
-      - mention the ff but don't deep dive
-      - discuss how to wrap works
-      - discuss turret readiness
-        - ask for suggestions
-      - discuss intergration for shooting while mvoing
-      - side spin compensation
-      - pure velocity controls and it dumb but shhh
-    - Other things
-      - Emote cause fun
-      - LEDs
-      - controller interactinos
-      - flashing things
-        - Sparks
-        - Pheonix Tuner
-        - radio
-        - roborio
-        - limelight
-      - statespace concept as I understand it
-  - go code!!!!
+    - easy way to write code for subsystems not there
+      - simulated ESC
+      - fake solenoids
+      - halucinating climb past 2 events

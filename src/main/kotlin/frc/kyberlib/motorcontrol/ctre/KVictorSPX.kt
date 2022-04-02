@@ -23,7 +23,12 @@ class KVictorSPX(val canId: Int) : KBasicMotorController() {
         get() = victor.motorOutputPercent
         set(value) {victor.set(ControlMode.PercentOutput, value)}
 
+    init {
+
+    }
+
     override fun followTarget(kmc: KBasicMotorController) {
+        if(reversed) victor.inverted = true  // this may not work with none CTRE devices
         when (kmc) {
             is KVictorSPX -> victor.follow(kmc.victor)
             is KTalon -> victor.follow(kmc.talon)

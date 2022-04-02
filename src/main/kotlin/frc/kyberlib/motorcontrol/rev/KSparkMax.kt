@@ -2,6 +2,8 @@ package frc.kyberlib.motorcontrol.rev
 
 import com.revrobotics.*
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
+import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.wpilibj.simulation.EncoderSim
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.*
@@ -92,7 +94,7 @@ class KSparkMax(
         set(value) {
             _pid?.setReference(
                 value.rotations,
-                CANSparkMax.ControlType.kPosition,
+                CANSparkMax.ControlType.kSmartMotion,
                 0,
                 0.0,
                 SparkMaxPIDController.ArbFFUnits.kVoltage
@@ -106,21 +108,10 @@ class KSparkMax(
         _pid.ff = f
     }
 
-    override fun updateNativeProfile(maxVelocity: Double?, maxAcceleration: Double?, rampRate: Double?) {
-
+    override fun updateNativeProfile(maxVelocity: AngularVelocity, maxAcceleration: AngularVelocity) {
+        _pid.setSmartMotionMaxVelocity(maxVelocity.rpm, 0)
+        _pid.setSmartMotionMaxAccel(maxAcceleration.rpm, 0)
     }
-
-    override var maxVelocity = -1.rpm
-        set(value) {
-            field = value
-            _pid.setSmartMotionMaxVelocity(value.rpm, 0)
-        }
-
-    override var maxAcceleration = -1.rpm
-        set(value) {
-            field = value
-            _pid.setSmartMotionMaxAccel(value.rpm, 0)
-        }
 
     var currentLimit: Int = -1
         set(value) {

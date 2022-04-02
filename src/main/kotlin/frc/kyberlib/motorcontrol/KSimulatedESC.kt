@@ -21,7 +21,7 @@ class KSimulatedESC(name: Any) : KMotorController() {  // potentially remove thi
 
     var currentLimit = 20
 
-    override fun updateNativeProfile(maxVelocity: Double?, maxAcceleration: Double?, rampRate: Double?) {
+    override fun updateNativeProfile(maxVelocity: AngularVelocity, maxAcceleration: AngularVelocity) {
 
     }
 

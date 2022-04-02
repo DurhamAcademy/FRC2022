@@ -323,7 +323,7 @@
     "Plot <1>": {
       "plots": [
         {
-          "height": -29,
+          "height": 302,
           "name": "Movement",
           "series": [
             {
@@ -365,7 +365,7 @@
           ]
         },
         {
-          "height": -29,
+          "height": 302,
           "series": [
             {
               "color": [
@@ -384,6 +384,15 @@
                 1.0
               ],
               "id": "NT:/SmartDashboard/error"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard//Turret/turret/error"
             }
           ]
         }
