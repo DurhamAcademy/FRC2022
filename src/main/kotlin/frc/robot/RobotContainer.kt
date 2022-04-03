@@ -59,7 +59,7 @@ object RobotContainer {
     val controller = KXboxController(0)  // xbox
     val op = OperatorControls()  // dashboard controls
 
-    var controlScheme = DefaultControls.apply {
+    var controlScheme = RocketLeague.apply {
         INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
         SHOOT.whileActiveOnce(Shoot)
         FORCE_SHOT.whileActiveOnce(ForceShoot)

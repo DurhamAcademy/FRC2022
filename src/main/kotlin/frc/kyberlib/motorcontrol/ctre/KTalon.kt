@@ -66,7 +66,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
         // exotic my kid trash
 
         fun loadSong(file: String) {
-            orchestra.loadMusic(file)
+            orchestra.loadMusic("music/$file")
         }
 
         fun pauseMusic() {
