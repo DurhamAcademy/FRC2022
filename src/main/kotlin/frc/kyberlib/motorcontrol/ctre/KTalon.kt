@@ -1,11 +1,17 @@
 package frc.kyberlib.motorcontrol.ctre
 
 import com.ctre.phoenix.motorcontrol.*
-import com.ctre.phoenix.motorcontrol.can.*
+import com.ctre.phoenix.motorcontrol.can.SlotConfiguration
+import com.ctre.phoenix.motorcontrol.can.TalonFX
+import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration
+import com.ctre.phoenix.motorcontrol.can.TalonFXPIDSetConfiguration
 import com.ctre.phoenix.music.Orchestra
-import edu.wpi.first.wpilibj.motorcontrol.Talon
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.command.Game
-import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.extensions.Angle
+import frc.kyberlib.math.units.extensions.AngularVelocity
+import frc.kyberlib.math.units.extensions.falconSpeed
+import frc.kyberlib.math.units.extensions.rotations
 import frc.kyberlib.motorcontrol.BrakeMode
 import frc.kyberlib.motorcontrol.KBasicMotorController
 import frc.kyberlib.motorcontrol.KMotorController
@@ -17,11 +23,11 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             statorCurrLimit = StatorCurrentLimitConfiguration(false, 40.0, 50.0, 0.1)
             supplyCurrLimit = SupplyCurrentLimitConfiguration(false, 40.0, 50.0, 0.1)
 
-            openloopRamp = 0.1
-            closedloopRamp = 0.1
+            openloopRamp = 0.3
+            closedloopRamp = 0.3
             // voltage limits
             peakOutputForward = 1.0
-            peakOutputReverse = 0.0
+            peakOutputReverse = -1.0
             nominalOutputForward = 0.0
             nominalOutputReverse = 0.0
 //                    neutralDeadband = 0.001
@@ -78,11 +84,16 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
         }
     }
 
-    val talon = TalonFX(port, model)
+    val talon = TalonFX(port)
     override var identifier: String = "$model ($port)"
 
     init {
-        if (Game.real && false) {
+//        talon.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 1000)
+//        talon.configAllSettings(TalonFXConfiguration())
+//        talon.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0)
+//        talon.selectProfileSlot(0, 0)
+//        talon.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 10)
+        if (Game.real) {
             orchestra.addInstrument(talon)
             val kTimeoutMs = 100
 //            talon.configVoltageCompSaturation(12.0, 100)
@@ -95,6 +106,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             talon.inverted = false
 
             talon.selectProfileSlot(0, 0)
+//            talon.configFactoryDefault()
             talon.configAllSettings(defaultConfig)
         }
     }
@@ -109,9 +121,13 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             talon.set(ControlMode.Position, value.rotations / unitsPerRotation)
         }
     override var rawVelocity: AngularVelocity
-        get() = talon.selectedSensorVelocity.falconSpeed
+        get() {
+            SmartDashboard.putNumber("falcon speed", talon.selectedSensorVelocity)
+            return talon.selectedSensorVelocity.falconSpeed
+        }
         set(value) {
-            talon.set(ControlMode.Velocity, value.falconSpeed, DemandType.ArbitraryFeedForward, arbFF(this)/vbus)
+            SmartDashboard.putNumber("set falcon speed", value.falconSpeed)
+            talon.set(ControlMode.Velocity, value.falconSpeed, DemandType.ArbitraryFeedForward, arbFF(this) / vbus)
         }
     override var brakeMode: BrakeMode = false
         set(value) {
@@ -133,10 +149,13 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
     var currentLimit = 0
         set(value) {
             field = value
-            talon.configSupplyCurrentLimit(SupplyCurrentLimitConfiguration(true, value.toDouble(), value + 10.0, .1), 100)
+            talon.configSupplyCurrentLimit(
+                SupplyCurrentLimitConfiguration(true, value.toDouble(), value + 10.0, .1),
+                100
+            )
         }
 
-    var arbFF: (it: KTalon)->Double = { it: KTalon -> 0.0 }
+    var arbFF: (it: KTalon) -> Double = { it: KTalon -> 0.0 }
 
     override fun updateNativeControl(p: Double, i: Double, d: Double, f: Double) {
         talon.config_kP(0, p)

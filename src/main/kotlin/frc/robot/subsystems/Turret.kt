@@ -63,7 +63,8 @@ object Turret : SubsystemBase(), Debug {
         val headingDiff = Differentiator()
         val new = { it: KMotorController ->
             val polarSpeeds = Drivetrain.polarSpeeds
-            val rot = polarSpeeds.dTheta * 0.1.seconds//-headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.1.seconds
+            val rot =
+                polarSpeeds.dTheta * 0.1.seconds//-headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.1.seconds
             val mov = polarSpeeds.dOrientation * 0.0.seconds
             position = clampSafePosition(positionSetpoint + rot + mov)
 
@@ -97,14 +98,17 @@ object Turret : SubsystemBase(), Debug {
         val state = { _: KMotorController ->
             position = clampSafePosition(positionSetpoint)
             val polarSpeeds = Drivetrain.polarSpeeds
-            loop.nextR = VecBuilder.fill(positionSetpoint.degrees, (-polarSpeeds.dTheta - polarSpeeds.dOrientation).degreesPerSecond * 0.01)
+            loop.nextR = VecBuilder.fill(
+                positionSetpoint.degrees,
+                (-polarSpeeds.dTheta - polarSpeeds.dOrientation).degreesPerSecond * 0.01
+            )
             loop.correct(VecBuilder.fill(position.degrees))
             loop.predict(updateRate.seconds)  // math
             val nextVoltage = loop.getU(0)  // input
             nextVoltage
         }
 
-        customControl = state
+        customControl = new
 
         if (Game.sim) setupSim(feedforward)
     }
@@ -144,7 +148,8 @@ object Turret : SubsystemBase(), Debug {
     val visionOffset: Angle?  // how far to side turret is from target
         get() = if (Game.real) target?.yaw?.let { visionFilter.calculate(-it).degrees }
         else {
-            var off = (RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k - fieldRelativeAngle + randomizer.nextGaussian().degrees * 0.0)
+            var off =
+                (RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k - fieldRelativeAngle + randomizer.nextGaussian().degrees * 0.0)
             off = off.normalized
             if (off > 0.5.rotations) off -= 1.rotations
             if (true || off.absoluteValue < 20.degrees) off.degrees.degrees else null

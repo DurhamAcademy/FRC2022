@@ -1,11 +1,8 @@
 package frc.robot.subsystems
 
-import edu.wpi.first.math.controller.ArmFeedforward
 import edu.wpi.first.math.controller.ElevatorFeedforward
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.wpilibj.simulation.EncoderSim
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -15,9 +12,6 @@ import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.math.units.extensions.Time
-import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.extensions.inches
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.pneumatics.KSolenoid
@@ -42,10 +36,10 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     var status = ClimberStatus.IDLE
 
     // pneumatics that lift the climb arms
-    private val leftStatic = KSolenoid(0, 1, fake = false).apply {
+    private val leftStatic = KSolenoid(7, 6, fake = false).apply {
         identifier = "left static"
     }
-    private val rightStatic = KSolenoid(6, 7, fake = false).apply {
+    private val rightStatic = KSolenoid(0, 1, fake = false).apply {
         identifier = "right static"
     }
 
@@ -80,8 +74,8 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     var staticsLifted
         get() = leftStatic.extended
         set(value) {
-            leftStatic.extended = value
-            rightStatic.extended = value
+            leftStatic.extended = !value
+            rightStatic.extended = !value
         }
     var extension  // public variable to control position off both the arms
         get() = leftWinch.linearPosition
@@ -111,7 +105,8 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     /**
      * In progress simulation of the climb
      */
-    private val sim = Mechanism2d((Constants.MID2HIGH + Constants.HIGH2TRAVERSE).meters, Constants.TRAVERSAL_RUNG_HEIGHT.meters)
+    private val sim =
+        Mechanism2d((Constants.MID2HIGH + Constants.HIGH2TRAVERSE).meters, Constants.TRAVERSAL_RUNG_HEIGHT.meters)
     private val extendPivot = sim.getRoot("extendable pivot", 0.0, 8.inches.value)
     private val extendable = extendPivot.append(
         MechanismLigament2d(
@@ -143,14 +138,21 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     }
 
     private val swing = Differentiator()
+
     /**
      * Fun reaction wheel stuff. Optional, but cool if done
      */
     fun stabalize() {
         if (leftWinch.linearPosition < 5.inches) return
-        val dTheta = swing.calculate(RobotContainer.gyro.pitch.radians).radiansPerSecond * -1.0  // note: pitch may be wrong
+        val dTheta =
+            swing.calculate(RobotContainer.gyro.pitch.radians).radiansPerSecond * -1.0  // note: pitch may be wrong
         val dampeningConstant = RobotContainer.op.climbStabilization
-        Drivetrain.drive(DifferentialDriveWheelSpeeds( dTheta.value * dampeningConstant, dTheta.value * dampeningConstant))
+        Drivetrain.drive(
+            DifferentialDriveWheelSpeeds(
+                dTheta.value * dampeningConstant,
+                dTheta.value * dampeningConstant
+            )
+        )
         Shooter.flywheel.torque = dTheta.value * dampeningConstant
     }
 

@@ -1,11 +1,5 @@
 package frc.robot.subsystems
 
-import com.revrobotics.ColorMatch
-import com.revrobotics.ColorSensorV3
-import edu.wpi.first.math.filter.Debouncer
-import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.I2C
-import edu.wpi.first.wpilibj.util.Color
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
@@ -13,7 +7,6 @@ import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.milliseconds
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.field.KField2d
-import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.commands.conveyor.Idle
 import frc.robot.commands.intake.Intake
@@ -81,29 +74,29 @@ object Conveyor : SubsystemBase(), Debug {
     }
 
     // random hopper management we aren't gonna get to use :(
-    private val colorSensorV3 = ColorSensorV3(I2C.Port.kOnboard)
-    private val allianceColor = if(Game.alliance == DriverStation.Alliance.Red) Color.kRed else Color.kBlue
-    private val enemyColor = if(Game.alliance == DriverStation.Alliance.Red) Color.kBlue else Color.kRed
-    private val matcher = ColorMatch().apply {
-        addColorMatch(allianceColor)
-        addColorMatch(enemyColor)
-    }
-    fun checkForBalls() {
-        val detection = colorSensorV3.color
-        val result = matcher.matchColor(detection)
-        result.let {
-            status =    if(result.color == allianceColor) ConveyorStatus.SINGLE_GOOD
-                        else ConveyorStatus.BAD
-        }
-    }
+//    private val colorSensorV3 = ColorSensorV3(I2C.Port.kOnboard)
+//    private val allianceColor = if(Game.alliance == DriverStation.Alliance.Red) Color.kRed else Color.kBlue
+//    private val enemyColor = if(Game.alliance == DriverStation.Alliance.Red) Color.kBlue else Color.kRed
+//    private val matcher = ColorMatch().apply {
+//        addColorMatch(allianceColor)
+//        addColorMatch(enemyColor)
+//    }
+    fun checkForBalls() {}
+//        val detection = colorSensorV3.color
+//        val result = matcher.matchColor(detection)
+//        result.let {
+//            status =    if(result.color == allianceColor) ConveyorStatus.SINGLE_GOOD
+//                        else ConveyorStatus.BAD
+//        }
+//    }
 
     override fun periodic() {
 //        debugDashboard()
         // use hypothetical limelight to track balls and do shit
-        if(RobotContainer.op.intakeCam) {
+        if (RobotContainer.op.intakeCam) {
             val result = RobotContainer.ballMonitor.latestResult
             if (result != null) {
-                if(result.hasTargets()) {
+                if (result.hasTargets()) {
                     result.targets.forEach { ball ->
                         KField2d.addGoal(
                             RobotContainer.navigation.position.plus(ball.cameraToTarget.translation),
@@ -118,7 +111,7 @@ object Conveyor : SubsystemBase(), Debug {
             }
         }
         // monitor hopper
-        if(RobotContainer.op.autoShot) checkForBalls()
+        if (RobotContainer.op.autoShot) checkForBalls()
     }
 
     override fun debugValues(): Map<String, Any?> {

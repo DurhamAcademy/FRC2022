@@ -23,7 +23,8 @@ object Dispose : CommandBase() {
         addRequirements(Shooter, Turret, Conveyor)
     }
 
-    private val default: Translation2d = Translation2d(2.meters, Constants.FIELD_SIZE.y.meters - 2.meters)  // corner of hangar
+    private val default: Translation2d =
+        Translation2d(2.meters, Constants.FIELD_SIZE.y.meters - 2.meters)  // corner of hangar
     var disposalTarget: Translation2d = default
     val timer = Timer()
 
@@ -32,7 +33,7 @@ object Dispose : CommandBase() {
         timer.start()
         val pos = RobotContainer.navigation.position
         val center = Constants.HUB_POSITION
-        disposalTarget = if(pos.x > center.x && pos.y < center.y) zeroTranslation else default  // terminal
+        disposalTarget = if (pos.x > center.x && pos.y < center.y) zeroTranslation else default  // terminal
     }
 
     override fun execute() {
@@ -40,11 +41,12 @@ object Dispose : CommandBase() {
         val distance = RobotContainer.navigation.position.getDistance(disposalTarget).meters * 0.75
         Shooter.flywheelUpdate(distance)
         Shooter.hoodUpdate(distance)
-        if(timer.hasElapsed(0.3))
+        if (timer.hasElapsed(0.3))
             Conveyor.feed()
     }
 
     override fun end(interrupted: Boolean) {
         Conveyor.status = ConveyorStatus.EMPTY
+        Shooter.stop()
     }
 }

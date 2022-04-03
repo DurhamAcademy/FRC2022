@@ -17,7 +17,7 @@ object Emote : CommandBase() {
 
     // how fast and much to turn
     private const val turnPeriod = 2.0
-    private const val turnMag = 1.0
+    private const val turnMag = 4.0
 
     // spinup emotes for emote
     private const val vroomPeriod = 5.0
@@ -35,12 +35,12 @@ object Emote : CommandBase() {
 
     override fun execute() {
         val t = timer.get()
-        Drivetrain.drive(ChassisSpeeds(0.0, 0.0, sin(t * TAU/ turnPeriod) * turnMag))
+        Drivetrain.drive(ChassisSpeeds(0.0, 0.0, sin(t * TAU / turnPeriod) * turnMag))
 
         Turret.turret.updateVoltage()
 
         val vroomTime = t.mod(vroomPeriod)
-        if (vroomTime in 0.0..vroomDuration || vroomTime in vroomDuration+ vroomSpacing..2*vroomDuration+ vroomSpacing)
+        if (vroomTime in 0.0..vroomDuration || vroomTime in vroomDuration + vroomSpacing..2 * vroomDuration + vroomSpacing)
             Shooter.flywheel.percent = vroomIntensity
         else Shooter.stop()
     }
@@ -49,5 +49,6 @@ object Emote : CommandBase() {
         Intaker.deployed = false
         Climber.staticsLifted = false
         Drivetrain.stop()
+        Shooter.stop()
     }
 }

@@ -30,6 +30,7 @@ object Climb : CommandBase() {
     }
 
     var hasFallen = false
+
     /**
      * Set the winch percentage based on left/right joysticks
      */
@@ -37,9 +38,9 @@ object Climb : CommandBase() {
         Debug.log("Climb Command", "execute", level = DebugFilter.Low)
         Turret.turret.position = 0.degrees
 
-        Climber.leftWinch.percent = RobotContainer.controller.leftY.raw()
+        Climber.leftWinch.percent = -RobotContainer.controller.leftY.raw()
 //        Climber.leftExtendable.percent = RobotContainer.controller.leftX.raw()
-        Climber.rightWinch.percent = RobotContainer.controller.rightY.raw()
+        Climber.rightWinch.percent = -RobotContainer.controller.rightY.raw()
 //        Climber.rightExtendable.percent = RobotContainer.controller.rightX.raw()
 
 
@@ -48,8 +49,7 @@ object Climb : CommandBase() {
         else if (Climber.leftWinch.percent < 0.0) {
             Climber.status = ClimberStatus.FALLING
             hasFallen = true
-        }
-        else if (Climber.leftWinch.percent.absoluteValue > 0.0) Climber.status = ClimberStatus.RISING
+        } else if (Climber.leftWinch.percent.absoluteValue > 0.0) Climber.status = ClimberStatus.RISING
 
         if (RobotContainer.op.climbStabilization != 0.0 && Climber.leftWinch.linearPosition > 5.inches && hasFallen)
             Climber.stabalize()

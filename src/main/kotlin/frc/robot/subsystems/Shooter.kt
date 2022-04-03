@@ -16,15 +16,12 @@ import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.ctre.KTalon
-import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.motorcontrol.servo.KLinearServo
 import frc.kyberlib.simulation.Simulatable
-import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.commands.shooter.FireWhenReady
 import frc.robot.commands.shooter.ShooterCalibration
-import java.lang.Math.pow
 import kotlin.math.*
 
 
@@ -44,18 +41,18 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     var status = ShooterStatus.IDLE
     override val priority: DebugFilter = DebugFilter.Max
-    private val ff = SimpleMotorFeedforward(0.38267, 0.02508, 0.0019498)
+    private val ff = SimpleMotorFeedforward(0.81436, 0.01918, 0.0045666)
     var time = Game.time
 
     // main motor attached to the flywheel
-    val flywheel = KTalon(31).apply {
+    val flywheel = KTalon(32).apply {
         // configs
         identifier = "flywheel"
         motorType = DCMotor.getFalcon500(2)
         currentLimit = 50
         brakeMode = false
         // a bunch of random control schemes from before falcons
-        if(false) {
+        if (false) {
             val loop = KMotorController.StateSpace.systemLoop(
                 velocitySystem(ff),
                 180.rpm.rotationsPerSecond,
@@ -67,8 +64,8 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
             addFeedforward(ff)
             val default = customControl!!
             val fastSpinup = { it: KMotorController ->
-                if(velocitySetpoint < 10.rpm) 0.0
-                else if(velocityError < -100.rpm) 12.0
+                if (velocitySetpoint < 10.rpm) 0.0
+                else if (velocityError < -100.rpm) 12.0
                 else default(it)
             }
 
@@ -95,7 +92,10 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
         arbFF = {
             ff.calculate(velocitySetpoint.radiansPerSecond)
+//            0.0
         }
+
+        talon.config_kP(0, 0.20569)
 
         if (Game.sim) setupSim(ff)
     }
@@ -112,13 +112,14 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     var targetVelocity  // public accesser for setting flywheel speed
         inline get() = flywheel.velocitySetpoint
         inline set(value) {
+            SmartDashboard.putNumber("flywheel target", value.rpm)
             flywheel.velocity = value * SmartDashboard.getNumber("shooterMult", 1.0)
         }
 
     // distance function to work in several scenarios
-   private val smartDis: Length
+    private val smartDis: Length
         get() {
-            return if(RobotContainer.op.shootWhileMoving) {
+            return if (RobotContainer.op.shootWhileMoving) {
                 effectiveDistance
             } else {
                 Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
@@ -126,7 +127,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         }
 
     // additional motors that copy the main
-    private val flywheel2 = KSparkMax(32).apply {
+    private val flywheel2 = KTalon(31).apply {
         identifier = "flywheel2"
         reversed = true
         brakeMode = false
@@ -171,9 +172,12 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     val effectiveHubLocation: Translation2d  // translated hub position based on robot velocity
         get() {
             val base = Constants.HUB_POSITION
-            if(!Constants.MOVEMENT_CORRECTION) return base
+            if (!Constants.MOVEMENT_CORRECTION) return base
             val fieldSpeeds = Drivetrain.fieldRelativeSpeeds
-            return base - Translation2d(fieldSpeeds.vxMetersPerSecond * timeOfFlight.value, fieldSpeeds.vyMetersPerSecond * timeOfFlight.value)
+            return base - Translation2d(
+                fieldSpeeds.vxMetersPerSecond * timeOfFlight.value,
+                fieldSpeeds.vyMetersPerSecond * timeOfFlight.value
+            )
         }
     var movementAngleOffset: Angle = 0.degrees  // how much robot movement should cause turret to turn to compensate
     var effectiveDistance: Length = 0.meters  // how far shoooter should behave to compensate for movement
@@ -181,7 +185,9 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     private val timeOfFlight  // how long it should take the ball to score
         get() = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(smartDis.meters).seconds
 
-    private val hoodPoly = Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..5.5)  // poly fitted through our data
+    private val hoodPoly =
+        Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..5.5)  // poly fitted through our data
+
     fun hoodUpdate(dis: Length) {  // update the hood angle with a certain distance
         val hood = hoodPoly.eval(dis.value)
         if (hood == null) {
@@ -220,9 +226,10 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     override fun periodic() {
         debugDashboard()
-        if(RobotContainer.op.shootWhileMoving) {
+        if (RobotContainer.op.shootWhileMoving) {
             // update shooting while moving values
-            val rawDistance = Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+            val rawDistance =
+                Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
             var r = rawDistance
             val hubSpeeds = Drivetrain.hubRelativeSpeeds
             val parallel = hubSpeeds.vxMetersPerSecond
@@ -232,7 +239,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
                 val a = r.meters + parallel * time
                 val b = perp * time
                 r = sqrt(a.pow(2) + b.pow(2)).meters
-                movementAngleOffset = atan(b/a).radians
+                movementAngleOffset = atan(b / a).radians
             }
             effectiveDistance = r
         }

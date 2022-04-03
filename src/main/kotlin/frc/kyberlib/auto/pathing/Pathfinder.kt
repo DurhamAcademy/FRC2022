@@ -26,12 +26,14 @@ object Pathfinder : Debug {
     var minGoalDistance = 0.2.feet.value  // margin of error for pathfinding node
     var pathFound = false  // whether the Planner currently has a working path
         private set
-    private var endNode: Node? = null  // the node the represents the end goal [robot position] (think about changing to growing 2 seperate trees)
+    private var endNode: Node? =
+        null  // the node the represents the end goal [robot position] (think about changing to growing 2 seperate trees)
     val path: ArrayList<Node>?   // the working path of points to get from robot position to target goal
         get() = endNode?.let { tree.trace(it) }
 
     /** how many nodes to create before giving up finding target */
     private const val explorationDepth = 5000
+
     /** how many nodes to dedicate to optimization */
     private const val optimizationDepth = 50
 
@@ -87,11 +89,17 @@ object Pathfinder : Debug {
 
     private fun treeToTrajectory(startPose2d: Pose2d, endPosition: Translation2d): Trajectory {
         if (!pathFound)
-            return KTrajectory("default", startPose2d, emptyList(), Pose2d(endPosition, startPose2d.translation.towards(endPosition)))
+            return KTrajectory(
+                "default",
+                startPose2d,
+                emptyList(),
+                Pose2d(endPosition, startPose2d.translation.towards(endPosition))
+            )
         val smooth = smoothPath()
         smooth.removeFirst()
         smooth.removeLast()
-        val endRotation = if(smooth.isEmpty()) startPose2d.translation.towards(endPosition) else smooth.last().towards(endPosition)
+        val endRotation =
+            if (smooth.isEmpty()) startPose2d.translation.towards(endPosition) else smooth.last().towards(endPosition)
         return KTrajectory("Pathfinder path", startPose2d, smooth, Pose2d(endPosition, endRotation))  // test edit
     }
 
@@ -103,7 +111,7 @@ object Pathfinder : Debug {
         var firstIndex = 0
         while (improvement) {
             improvement = false
-            for (i in (firstIndex+1 until points.size).reversed()) {
+            for (i in (firstIndex + 1 until points.size).reversed()) {
                 if (i > firstIndex && KField2d.inField(points[i], newPoints.last())) {
                     newPoints.add(points[i])
                     firstIndex = i
@@ -117,7 +125,10 @@ object Pathfinder : Debug {
     /**
      * Creates the initial tree of nodes
      */
-    private fun loadTree(startPosition: Translation2d, endPosition: Translation2d) {  // to allow dynamic movement, maybe startPoint = goal and end is robot
+    private fun loadTree(
+        startPosition: Translation2d,
+        endPosition: Translation2d
+    ) {  // to allow dynamic movement, maybe startPoint = goal and end is robot
         // look @ BIT*
         // current version is Informed RRT*
         pathFound = false
@@ -145,7 +156,7 @@ object Pathfinder : Debug {
         var delta = point.minus(nearest.position)
         val magnitude = delta.getDistance(Translation2d(0.0, 0.0))
         if (magnitude > tree.maxBranchLength) {
-            delta = delta.times(tree.maxBranchLength/magnitude)  // resize the vector
+            delta = delta.times(tree.maxBranchLength / magnitude)  // resize the vector
         }
         val new = nearest.position.plus(delta)
         if (!field.inField(new, nearest.position)) {
@@ -173,7 +184,7 @@ object Pathfinder : Debug {
         do {
             x = random.nextDouble(field.width.meters)
             y = random.nextDouble(field.width.meters)
-        } while(!field.inField(x, y))  // the convertions here might cause issues
+        } while (!field.inField(x, y))  // the convertions here might cause issues
         return Translation2d(x, y)
     }
 
@@ -231,7 +242,7 @@ object PathingTest {
         end = Translation2d(2.meters, 2.meters)
         for (i in 0..0) {
             val p = Pathfinder.randomPoint()
-            val o = Obstacle(Pose2d(p, 0.degrees.w), 0.2, 0.2)
+            val o = Obstacle(p, 0.2.meters, 0.2.meters)
             if (o.contains(start) || o.contains(end)) continue
             Pathfinder.field.obstacles.add(o)
         }
@@ -243,7 +254,7 @@ object PathingTest {
 //        println(_root_ide_package_.frc.kyberlib.auto.pathing.Pathfinder.path!!.size)
         Pathfinder.drawTreePath()
         println(Pathfinder.path)
-        println(Pathfinder.path!!.map { Pathfinder.field.inField(it.position)})
+        println(Pathfinder.path!!.map { Pathfinder.field.inField(it.position) })
         println(Pathfinder.field.obstacles)
     }
 }

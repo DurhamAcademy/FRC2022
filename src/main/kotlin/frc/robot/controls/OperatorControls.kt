@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Subsystem
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.kyberlib.pneumatics.KSolenoid
+import frc.robot.commands.climb.ManualClimb
 import frc.robot.commands.conveyor.ManualConveyor
 import frc.robot.commands.intake.ManualIntake
 import frc.robot.commands.shooter.ShooterCalibration
@@ -43,6 +44,7 @@ class OperatorControls {
         SmartDashboard.putBoolean("ManualShooter", false)
         SmartDashboard.putBoolean("ManualConveyor", false)
         SmartDashboard.putBoolean("ManualIntake", false)
+        SmartDashboard.putBoolean("ManualClimb", false)
     }
 
     private val COMPRESSOR_ENABLED = Trigger { SmartDashboard.getBoolean(compressorString, true) }.whenActive {
@@ -57,11 +59,14 @@ class OperatorControls {
 
     // disable subsystems
     // manual subsystems
-    private val MANUAL_TURRET = Trigger { SmartDashboard.getBoolean("ManualTurret", false) }.whileActiveOnce(ManualTurret)
+    private val MANUAL_TURRET =
+        Trigger { SmartDashboard.getBoolean("ManualTurret", false) }.whileActiveOnce(ManualTurret)
     private val MANUAL_SHOOTER =
         Trigger { SmartDashboard.getBoolean("ManualShooter", false) }.whileActiveOnce(ShooterCalibration)
     private val MANUAL_CONVEYOR = Trigger { SmartDashboard.getBoolean("ManualConveyor", false) }.whileActiveOnce(
         ManualConveyor
     )
-    private val MANUAL_INTAKE = Trigger { SmartDashboard.getBoolean("ManualIntake", false) }.whileActiveOnce(ManualIntake)
+    private val MANUAL_INTAKE =
+        Trigger { SmartDashboard.getBoolean("ManualIntake", false) }.whileActiveOnce(ManualIntake)
+    private val MANUAL_CLIMB = Trigger { SmartDashboard.getBoolean("ManualClimb", false) }.whileActiveOnce(ManualClimb)
 }
