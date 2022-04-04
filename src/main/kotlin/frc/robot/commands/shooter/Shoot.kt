@@ -25,9 +25,9 @@ object Shoot : CommandBase() {
     override fun execute() {
         Debug.log("Shoot", "execute", level = DebugFilter.Low)
         // check if shooter should spin up
+        Shooter.update()
         if ((Turret.targetVisible || Shooter.status == ShooterStatus.SHOT)) {
 //            val parallelSpeed = Drivetrain.polarSpeeds.dr
-            Shooter.update()
 
             // if the turret is on target
             if (Turret.ready && Shooter.ready) {
