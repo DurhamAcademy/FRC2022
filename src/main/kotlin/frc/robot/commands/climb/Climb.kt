@@ -1,10 +1,12 @@
 package frc.robot.commands.climb
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.inches
+import frc.kyberlib.math.zeroIf
 import frc.robot.RobotContainer
 import frc.robot.commands.drive.Drive
 import frc.robot.subsystems.*
@@ -17,6 +19,7 @@ import kotlin.math.absoluteValue
 object Climb : CommandBase() {
     init {
         addRequirements(Climber, Drivetrain, Turret, Shooter)
+        SmartDashboard.putBoolean("sync climb", true)
     }
 
     /**
@@ -25,7 +28,6 @@ object Climb : CommandBase() {
     override fun initialize() {
         Debug.log("Climb Command", "init", level = DebugFilter.Low)
         Turret.turret.position = 0.degrees
-        Climber.staticsLifted = true
         Climber.status = ClimberStatus.ACTIVE
     }
 
@@ -37,10 +39,14 @@ object Climb : CommandBase() {
     override fun execute() {
         Debug.log("Climb Command", "execute", level = DebugFilter.Low)
         Turret.turret.position = 0.degrees
+        if(Turret.turret.positionError.absoluteValue < 5.degrees) Climber.staticsLifted = true
 
-        Climber.leftWinch.percent = -RobotContainer.controller.leftY.raw()
 //        Climber.leftExtendable.percent = RobotContainer.controller.leftX.raw()
-        Climber.rightWinch.percent = -RobotContainer.controller.rightY.raw()
+        val default = -RobotContainer.controller.rightY.raw().zeroIf { it.absoluteValue < .02 }
+        Climber.rightWinch.percent = default
+        if(SmartDashboard.getBoolean("sync climb", true)) {
+            Climber.leftWinch.percent = default
+        } else Climber.leftWinch.percent = -RobotContainer.controller.leftY.raw().zeroIf { it.absoluteValue < .02 }
 //        Climber.rightExtendable.percent = RobotContainer.controller.rightX.raw()
 
 
