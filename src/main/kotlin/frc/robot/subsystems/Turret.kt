@@ -61,54 +61,55 @@ object Turret : SubsystemBase(), Debug {
         currentLimit = 15
 
         val headingDiff = Differentiator()
-        val new = { it: KMotorController ->
+        val new = {
             val polarSpeeds = Drivetrain.polarSpeeds
             val rot =
                 polarSpeeds.dTheta * 0.1.seconds//-headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.1.seconds
             val mov = polarSpeeds.dOrientation * 0.0.seconds
             position = clampSafePosition(positionSetpoint + rot + mov)
 
-            SmartDashboard.putNumber("error", positionError.degrees)
-            SmartDashboard.putNumber("set", positionSetpoint.degrees)
             val offsetCorrection = controller.calculate(position.rotations, positionSetpoint.rotations)
             val ff = feedforward.calculate(controller.setpoint.velocity.rotationsPerSecond.radiansPerSecond)
             if (isZeroed) (ff + offsetCorrection) else 0.0//.coerceIn(-4.0, 4.0)
         }
 
-        val good = { _: KMotorController ->
+        val good = {
             position = clampSafePosition(positionSetpoint)
             val polarSpeeds = Drivetrain.polarSpeeds
             val movementComp = -polarSpeeds.dTheta
             val chassisComp = polarSpeeds.dOrientation
             val offsetCorrection = controller.calculate(positionError.rotations).rotationsPerSecond / feedforward.kv
             val targetVelocity = offsetCorrection - chassisComp - movementComp
-            val v =
-                feedforward.calculate(targetVelocity.radiansPerSecond)// + controller.calculate(velocityError.radiansPerSecond)
+            val v = feedforward.calculate(targetVelocity.radiansPerSecond)// + controller.calculate(velocityError.radiansPerSecond)
             v.zeroIf { v.absoluteValue < 1.0 }
         }
 
         val loop = KMotorController.StateSpace.systemLoop(
             positionSystem(feedforward),  // degrees units
             5.0,
+            0.01,
             1.0,
             2.0,
-            20.0,
-            6.0
+            12.0
         )
+
         val state = { _: KMotorController ->
             position = clampSafePosition(positionSetpoint)
+            SmartDashboard.putNumber("error", positionError.degrees)
+            SmartDashboard.putNumber("set", positionSetpoint.degrees)
             val polarSpeeds = Drivetrain.polarSpeeds
+            val compSpeed = (-polarSpeeds.dTheta * 0.0 - polarSpeeds.dOrientation).degreesPerSecond
             loop.nextR = VecBuilder.fill(
                 positionSetpoint.degrees,
-                (-polarSpeeds.dTheta - polarSpeeds.dOrientation).degreesPerSecond * 0.01
+                compSpeed * 0.03
             )
             loop.correct(VecBuilder.fill(position.degrees))
             loop.predict(updateRate.seconds)  // math
             val nextVoltage = loop.getU(0)  // input
-            nextVoltage
+            if (isZeroed) nextVoltage else 0.0
         }
 
-        customControl = new
+        customControl = state
 
         if (Game.sim) setupSim(feedforward)
     }
@@ -173,7 +174,7 @@ object Turret : SubsystemBase(), Debug {
     }
 
     // smooths out how fast we switch between lost and found
-    private val lostDebouncer = Debouncer(0.5, Debouncer.DebounceType.kBoth)
+    private val lostDebouncer = Debouncer(0.2, Debouncer.DebounceType.kBoth)  // *** this was changed from .5
     override fun periodic() {
         SmartDashboard.putString("turret cmd", this.currentCommand?.name ?: "none")
         debugDashboard()
