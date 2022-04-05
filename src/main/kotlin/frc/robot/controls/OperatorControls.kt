@@ -26,12 +26,14 @@ class OperatorControls {
     val intakeCam
         inline get() = SmartDashboard.getBoolean("intake cam", false)
     val autoShot
-        inline get() = SmartDashboard.getBoolean("auto shot", false)
+        inline get() = false && SmartDashboard.getBoolean("auto shot", false)
     val climbStabilization
         inline get() = SmartDashboard.getNumber("stablizer", 0.0)
+    val compressor
+        inline get() = SmartDashboard.getBoolean("compressor enabled", true)
 
     init {
-        SmartDashboard.putBoolean("nav updates", !Game.COMPETITION)
+        SmartDashboard.putBoolean("nav updates", false && !Game.COMPETITION)
         SmartDashboard.putNumber(multString, 1.0)
         SmartDashboard.putNumber(fudgeString, .06)
         SmartDashboard.putBoolean(compressorString, true)

@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.pneumatics.KSolenoid
+import frc.robot.RobotContainer
 import frc.robot.subsystems.Conveyor
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.ShooterStatus
@@ -39,7 +40,7 @@ object ForceShoot : CommandBase() {
     override fun end(interrupted: Boolean) {
         Shooter.stop()
         Conveyor.stop()
-        if (reenableCompressor) KSolenoid.compressor.enableDigital()
+        if (RobotContainer.op.compressor) KSolenoid.compressor.enableDigital()
     }
 
 }

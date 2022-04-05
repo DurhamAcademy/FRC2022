@@ -7,11 +7,12 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.auto.Navigator
-import frc.kyberlib.auto.pathing.Pathfinder
-import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
+import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.degrees
+import frc.kyberlib.math.units.extensions.rotationsPerSecond
+import frc.kyberlib.math.units.extensions.seconds
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
 import frc.robot.RobotContainer
@@ -51,7 +52,7 @@ class AutoDrive(var targetPose: Pose2d, private val intaking: Boolean = true) : 
 //            else if (rotationInvariant) Pathfinder.pathTo(Navigator.instance!!.pose, targetPose.translation)
 //            else Pathfinder.pathTo(Navigator.instance!!.pose, targetPose)
             KField2d.trajectory = trajectory
-        if(intaking) {
+        if (intaking) {
             Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
             Intaker.deployed = true
         }
@@ -67,7 +68,10 @@ class AutoDrive(var targetPose: Pose2d, private val intaking: Boolean = true) : 
         val targetSpeed = calculator.calculate(Navigator.instance!!.pose, targetPose)
         Debug.log("AutoDrive", "going to $targetPose, @ targetSpeed m/s", level = DebugFilter.Low)
 
-        Shooter.update()
+        if (Game.time - RobotContainer.startTime < 2.seconds)
+            Shooter.targetVelocity = -1.rotationsPerSecond
+        else
+            Shooter.update()
 
         SmartDashboard.putNumber("error_x", RobotContainer.navigation.position.x - targetPose.poseMeters.x)
         SmartDashboard.putNumber("error_y", RobotContainer.navigation.position.y - targetPose.poseMeters.y)

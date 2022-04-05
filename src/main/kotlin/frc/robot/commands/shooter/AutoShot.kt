@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Game
 import frc.kyberlib.pneumatics.KSolenoid
+import frc.robot.RobotContainer
 import frc.robot.subsystems.*
 
 class AutoShot : CommandBase() {
@@ -40,7 +41,7 @@ class AutoShot : CommandBase() {
     }
 
     override fun end(interrupted: Boolean) {
-        if (reenableCompressor) KSolenoid.compressor.enableDigital()
+        if (RobotContainer.op.compressor) KSolenoid.compressor.enableDigital()
         Shooter.stop()
         if (Game.AUTO) {
             Conveyor.conveyor.percent = 0.1

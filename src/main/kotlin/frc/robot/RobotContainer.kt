@@ -1,5 +1,7 @@
 package frc.robot
 
+import edu.wpi.first.cameraserver.CameraServer
+import edu.wpi.first.cscore.VideoMode
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.DriverStation
@@ -44,12 +46,16 @@ object RobotContainer {
     val gyro = KPigeon(6)
     val limelight = PhotonCamera("gloworm")
     val ballMonitor = PhotonCamera("balls")
+
     init {
-//        if(Game.real && false) { //Constants.DRIVER_CAMERA) {
-//            val video = CameraServer.startAutomaticCapture()
-//            video.videoMode = VideoMode(video.videoMode.pixelFormat, 640, 480, 30)
-//        }
+        if (Game.real) { //Constants.DRIVER_CAMERA) {
+            val video = CameraServer.startAutomaticCapture()
+            video.videoMode = VideoMode(video.videoMode.pixelFormat, 640, 480, 30)
+        }
     }
+
+    var startTime = Game.time
+
     // hall sensor
     val turretLimit = DigitalInput(0)
 
@@ -59,7 +65,7 @@ object RobotContainer {
     val controller = KXboxController(0)  // xbox
     val op = OperatorControls()  // dashboard controls
 
-    private val controlType = if(Game.sim) DefaultControls else RocketLeague
+    private val controlType = if (Game.sim) DefaultControls else RocketLeague
     var controlScheme = controlType.apply {
         INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
         SHOOT.whileActiveOnce(Shoot)
@@ -87,7 +93,11 @@ object RobotContainer {
 
         // idle alliance animations
         this += KLEDRegion(AnimationCylon(Color.RED, 5, 40), 0, 14) { Game.alliance == DriverStation.Alliance.Red }
-        this += KLEDRegion(AnimationCylon(Color.CYAN, 5, 40), 0, 14) { Game.alliance == DriverStation.Alliance.Blue }
+        this += KLEDRegion(
+            AnimationCylon(Color.CYAN, 5, 40),
+            0,
+            14
+        ) { Game.alliance == DriverStation.Alliance.Blue }
 
         // turret status
         this += KLEDRegion(AnimationBlink(Color.BLUE, 20), 0, 14) { Turret.currentCommand == ZeroTurret }

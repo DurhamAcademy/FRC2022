@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.math.units.extensions.millimeters
 import frc.kyberlib.math.units.extensions.rpm
 import frc.kyberlib.pneumatics.KSolenoid
+import frc.robot.RobotContainer
 import frc.robot.subsystems.Conveyor
 import frc.robot.subsystems.Shooter
 
@@ -40,7 +41,7 @@ object ShooterCalibration : CommandBase() {
     override fun end(interrupted: Boolean) {
         Shooter.stop()
         Conveyor.stop()
-        if (reenableCompressor) KSolenoid.compressor.enableDigital()
+        if (RobotContainer.op.compressor) KSolenoid.compressor.enableDigital()
     }
 
     override fun isFinished(): Boolean = false
