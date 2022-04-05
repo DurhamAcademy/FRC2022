@@ -49,7 +49,8 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
-        customControl = { bangBang(it) }
+        // state space for closed loop control     mass(kg)                                     model std       measure std     pos tolerance   vel tolerance
+//        stateSpaceControl(elevatorSystem(120 * MassConversions.poundsToGrams * 1000.0), 5.inches.value, 3.inches.value, 1.inches.value, (3.inches/1.seconds).value, 12.0)
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
         motorType = DCMotor.getNEO(1)
