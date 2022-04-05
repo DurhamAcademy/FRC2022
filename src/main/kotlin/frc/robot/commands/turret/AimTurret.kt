@@ -29,11 +29,11 @@ object AimTurret : CommandBase() {
         // if the limelight is a target
         if (Turret.targetVisible) {
             val curveCorrection = (RobotContainer.op.curveComp * Turret.turret.position.sin).degrees
+            val visionOffset = Turret.visionOffset!! * 0.7
             if(RobotContainer.op.shootWhileMoving) {
-                Turret.fieldRelativeAngle = Turret.turret.position + Shooter.movementAngleOffset + curveCorrection
+                Turret.fieldRelativeAngle = Turret.turret.position + visionOffset + Shooter.movementAngleOffset + curveCorrection
             } else {
-                val goalOrientation = Turret.visionOffset!!
-                Turret.turret.position = Turret.turret.position + goalOrientation * 0.7 + curveCorrection
+                Turret.turret.position = Turret.turret.position + visionOffset + curveCorrection
             }
         } else {
             Turret.turret.position = Turret.turret.position
