@@ -18,7 +18,7 @@ data class Rotation3d(val pitch: Angle, val yaw: Angle, val roll: Angle) {
         atan(rotationMatrix.get(2, 1)/rotationMatrix.get(1, 1)).radians,
         atan(rotationMatrix.get(3, 2)/rotationMatrix.get(3, 3)).radians
     )
-    constructor(rotation2d: Rotation2d) : this(rotation2d.k, 0.degrees, 0.degrees)
+    constructor(rotation2d: Rotation2d) : this(0.degrees, rotation2d.k, 0.degrees)
     val matrix: RotationMatrix
         get() = MatBuilder(N3.instance, N3.instance).fill(
                 yaw.cos*pitch.cos, yaw.cos*pitch.sin*roll.sin-yaw.sin*roll.cos, yaw.cos*pitch.sin*roll.cos+yaw.sin*roll.sin,

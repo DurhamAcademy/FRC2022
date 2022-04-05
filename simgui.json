@@ -322,7 +322,7 @@
     "Plot <1>": {
       "plots": [
         {
-          "height": 302,
+          "height": -29,
           "name": "Movement",
           "series": [
             {
@@ -364,7 +364,7 @@
           ]
         },
         {
-          "height": 302,
+          "height": -29,
           "series": [
             {
               "color": [
