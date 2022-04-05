@@ -11,6 +11,14 @@ import frc.kyberlib.command.Debug
  * Graph: https://www.desmos.com/calculator/mxwvyq14yp
  */
 class KAxis(val raw: () -> Double) : Debug {
+    companion object {
+        val all = mutableListOf<KAxis>()
+    }
+    init {
+        all.add(this)
+    }
+    var simVal = 0.0
+
     var maxVal = 1.0  // the adjusted max val that the axis will output (rate in explination)
     var expo = 0.0  // increases
     var deadband = 0.01  // how much of the controller should default to 0
@@ -39,7 +47,7 @@ class KAxis(val raw: () -> Double) : Debug {
      * Fancy non-linear value of the axis
      */
     val value: Double
-        get() = modify(raw.invoke())
+        get() = if(KController.sim) simVal else modify(raw.invoke())
 
     fun activateAt(value: Double = 0.5) = Trigger { this.raw() > value }
 

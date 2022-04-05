@@ -29,7 +29,7 @@ object ZeroTurret : CommandBase() {
         if (timer.hasElapsed(0.3))
             Turret.turret.percent = -0.2
         else
-            Turret.turret.percent = 0.3
+            Turret.turret.percent = 0.5
         Debug.log("turretLimit", RobotContainer.turretLimit.get().toString(), level = DebugFilter.Low)
     }
 

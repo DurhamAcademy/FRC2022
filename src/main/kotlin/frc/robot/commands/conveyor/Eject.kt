@@ -1,4 +1,4 @@
-package frc.robot.commands.intake
+package frc.robot.commands.conveyor
 
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.math.units.extensions.rotationsPerSecond

@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.kyberlib.command.Debug
 import frc.kyberlib.input.KAxis
+import frc.kyberlib.input.KButton
 import frc.kyberlib.input.KController
 
 /**
@@ -19,30 +20,30 @@ class KXboxController(port: Int) : KController(port), Debug {
     val rightX = KAxis { joystick.getRawAxis(4) }
     val rightY = KAxis { joystick.getRawAxis(5) }
 
-    val aButton = JoystickButton(joystick, 1)
-    val bButton = JoystickButton(joystick, 2)
-    val xButton = JoystickButton(joystick, 3)
-    val yButton = JoystickButton(joystick, 4)
+    val aButton = KButton(joystick, 1)
+    val bButton = KButton(joystick, 2)
+    val xButton = KButton(joystick, 3)
+    val yButton = KButton(joystick, 4)
 
-    val leftBumper = JoystickButton(joystick, 5)  // these might be the menu buttons
-    val rightBumper = JoystickButton(joystick, 6)
+    val leftBumper = KButton(joystick, 5)  // these might be the menu buttons
+    val rightBumper = KButton(joystick, 6)
 
     val leftTrigger = KAxis { joystick.getRawAxis(2) }
     val rightTrigger = KAxis { joystick.getRawAxis(3) }
 
-    val pressedLeftStick = JoystickButton(joystick, 9)
-    val pressedRightStick = JoystickButton(joystick, 10)
+    val pressedLeftStick = KButton(joystick, 9)
+    val pressedRightStick = KButton(joystick, 10)
 
-    val leftMenu = JoystickButton(joystick, 7)
-    val rightMenu = JoystickButton(joystick, 8)
+    val leftMenu = KButton(joystick, 7)
+    val rightMenu = KButton(joystick, 8)
 
     private val DPad
         get() = joystick.pov  // up = 0, 45º increments clockwise, none = -1
 
-    val rightDPad = Trigger { DPad in 1..179 }  // 90
-    val leftDPad = Trigger { DPad > 180 }  // 270
-    val upDPad = Trigger { DPad != 0 && (DPad < 90 || DPad > 270) }  // 0
-    val downDPad = Trigger { DPad in 91..269 }  // 180
+    val rightDPad = KButton { DPad in 1..179 }  // 90
+    val leftDPad = KButton { DPad > 180 }  // 270
+    val upDPad = KButton { DPad != 0 && (DPad < 90 || DPad > 270) }  // 0
+    val downDPad = KButton { DPad in 91..269 }  // 180
 
     var rumbleLeft = 0.0
         set(value) {

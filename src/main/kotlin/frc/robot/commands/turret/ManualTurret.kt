@@ -8,7 +8,7 @@ object ManualTurret: CommandBase() {
     const val turretString = "Turret percent"
     init {
         addRequirements(Turret)
-        SmartDashboard.putNumber(turretString, 0.0)
+        SmartDashboard.putNumber(turretString, 0.1)
     }
 
     override fun execute() {

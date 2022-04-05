@@ -7,7 +7,6 @@ import frc.kyberlib.math.units.extensions.Length
 import frc.kyberlib.math.units.extensions.LinearVelocity
 import frc.kyberlib.math.units.extensions.metersPerSecond
 import frc.kyberlib.math.units.extensions.millimeters
-import frc.kyberlib.motorcontrol.PWMRegristry
 
 /**
  * A PWM linear actuator.
@@ -27,9 +26,6 @@ class KLinearServo(
     maxMs: Double = 2.0
 ) : Debug {
     override val identifier: String = "Linear Servo $port"
-    init {
-        PWMRegristry[identifier] = port
-    }
 
     // the actual hardware servo being controlled
     private val servo = Servo(port).apply {

@@ -136,6 +136,8 @@ abstract class KBasicMotorController : NTSendable, Debug {
      */
     override fun initSendable(builder: NTSendableBuilder) {
         builder.setSmartDashboardType("Encoder")
+        builder.setActuator(true)
+        builder.setSafeState(this::stop)
         builder.addStringProperty("Control Type", { controlMode.name }, null)
         builder.addDoubleProperty("Voltage", this::voltage) { if (it != voltage) this.voltage = it }
     }

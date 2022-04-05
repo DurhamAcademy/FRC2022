@@ -33,4 +33,5 @@ object DefaultControls : ControlSchema2022() {
     override val ZERO_TURRET: Trigger = xbox.bButton
     override val CLIMB_MODE: Trigger = xbox.rightMenu
     override val EMOTE: Trigger = xbox.aButton
+    override val DISPOSE: Trigger = xbox.xButton
 }

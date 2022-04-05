@@ -9,14 +9,10 @@ import frc.kyberlib.motorcontrol.*
 /**
  * Kotlin wrapper for VictorSPX on CAN
  */
-class KVictorSPX(val canId: CANId) : KBasicMotorController() {
+class KVictorSPX(val canId: Int) : KBasicMotorController() {
     val victor = VictorSPX(canId)
 
-    override var identifier = CANRegistry.filterValues { it == canId }.keys.firstOrNull() ?: "can$canId"
-    init {
-        CANRegistry[identifier] = canId
-    }
-
+    override var identifier = "can$canId"
     override var brakeMode: BrakeMode = false
         set(value) {
             field = value
@@ -27,7 +23,12 @@ class KVictorSPX(val canId: CANId) : KBasicMotorController() {
         get() = victor.motorOutputPercent
         set(value) {victor.set(ControlMode.PercentOutput, value)}
 
+    init {
+
+    }
+
     override fun followTarget(kmc: KBasicMotorController) {
+        if(reversed) victor.inverted = true  // this may not work with none CTRE devices
         when (kmc) {
             is KVictorSPX -> victor.follow(kmc.victor)
             is KTalon -> victor.follow(kmc.talon)

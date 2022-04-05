@@ -15,6 +15,7 @@ import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.commands.drive.AutoDrive
 import frc.robot.commands.shooter.AutoShot
+import frc.robot.commands.shooter.Dispose
 import frc.robot.commands.shooter.FullAutoFire
 import frc.robot.commands.turret.ZeroTurret
 import frc.robot.subsystems.*
@@ -43,15 +44,12 @@ class Robot : KRobot() {
     }
 
     override fun teleopInit() {
-        // TODO: probably want to get rid of this at the event, but it should
-        // handle being on fms just fine. probably just want to get rid of it
-        // just in case though
-        if (!DriverStation.isFMSAttached()) reset(Constants.START_POSE)
+        if (!Game.COMPETITION) reset(Constants.START_POSE)
     }
 
     override fun teleopPeriodic() {
-//        SmartDashboard.putBoolean("hall", RobotContainer.turretLimit.get())
         if (Game.real) {
+            // log relevant stuff
             SmartDashboard.putNumber("gyro", RobotContainer.gyro.heading.degrees)
             SmartDashboard.putBoolean("visible", Turret.targetVisible)
             SmartDashboard.putBoolean("shooter ready", Shooter.ready)
@@ -62,17 +60,21 @@ class Robot : KRobot() {
     }
 
     override fun autonomousInit() {
+        // zero Turret
         Turret.isZeroed = false
         ZeroTurret.schedule(false)
+        // prepare to pick up balls
         Intaker.deployed = true
         Conveyor.conveyor.percent = 0.05
         Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
+        // get auto commadn
         val auto = loadRoutine(RobotContainer.autoChooser.selected)//RobotContainer.autoChooser.selected!!)
         auto.schedule()
         autoCommand = auto
     }
 
     private fun reset(pose: Pose2d) {
+        // reset navigation to a specific pose
         if (Game.real) {
             Drivetrain.leftMaster.resetPosition(0.meters)
             Drivetrain.rightMaster.resetPosition(0.meters)
@@ -82,12 +84,19 @@ class Robot : KRobot() {
         RobotContainer.navigation.pose = pose
     }
 
+    // todo:
+    // spin fly back for sec to remove tether
+    // separate intake system
+    // add spinup
     private fun loadRoutine(routine: String): SequentialCommandGroup {
         val command = SequentialCommandGroup()
         val f = File("${TrajectoryManager.AUTO_PATH}/$routine")
         f.readLines().forEach {
-            if (it == "Shot") command.addCommands(AutoShot())
-            else command.addCommands(AutoDrive(TrajectoryManager[it]!!))
+            when (it) {
+                "Shot" -> command.addCommands(AutoShot())
+                "Dispose" -> command.addCommands(Dispose)
+                else -> command.addCommands(AutoDrive(TrajectoryManager[it]!!))
+            }
         }
         if (!f.readLines().contains("Shot")) FullAutoFire().schedule()
 

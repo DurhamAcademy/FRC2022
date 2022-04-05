@@ -7,7 +7,6 @@ import frc.kyberlib.math.units.extensions.Angle
 import frc.kyberlib.math.units.extensions.AngularVelocity
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.radians
-import frc.kyberlib.motorcontrol.PWMRegristry
 
 
 /**
@@ -35,10 +34,6 @@ class KServo(
         setBounds(maxMs, 0.01 + (maxMs + minMs) / 2, (maxMs + minMs) / 2, -0.01 + (maxMs + minMs) / 2, minMs)
     }
     override var identifier: String = "Servo$port"
-
-    init {
-        PWMRegristry[identifier] = port
-    }
 
     // rate limiter for estimating current actuator position
     private val rateLimit = SlewRateLimiter(travelSpeed.value, initialPosition.value)

@@ -7,27 +7,25 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.auto.Navigator
+import frc.kyberlib.auto.pathing.Pathfinder
+import frc.kyberlib.auto.trajectory.KTrajectory
+import frc.kyberlib.command.Debug
+import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Intaker
+import frc.robot.subsystems.Shooter
 
 
 /**
  * Automatically path and drive to a pose when called
  * @param targetPose the pose to drive to
  */
-class AutoDrive(var targetPose: Pose2d) : CommandBase() {
+class AutoDrive(var targetPose: Pose2d, private val intaking: Boolean = true) : CommandBase() {
     private var calculator = RamseteController(2.0, 0.7)  // these are the recommended values
-
-    companion object {
-        fun updateRamsete(beta: Double, zeta: Double) {
-//            calculator = RamseteController(beta, zeta)
-        }
-    }
-
     val simple = true
 
     constructor(trajectory: Trajectory) : this(trajectory.states.last().poseMeters) {
@@ -36,7 +34,7 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
 
     init {
         assert(KField2d.inField(targetPose.translation)) { "Invalid location selected. The robot tried to drive to ${targetPose.translation}, which is outside of the field" }
-        addRequirements(Drivetrain)
+        addRequirements(Drivetrain, Intaker)
     }
 
     private var rotationInvariant = false
@@ -53,8 +51,10 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
 //            else if (rotationInvariant) Pathfinder.pathTo(Navigator.instance!!.pose, targetPose.translation)
 //            else Pathfinder.pathTo(Navigator.instance!!.pose, targetPose)
             KField2d.trajectory = trajectory
-        Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
-        Intaker.deployed = true
+        if(intaking) {
+            Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
+            Intaker.deployed = true
+        }
         timer.start()
         timer.reset()
     }
@@ -65,15 +65,12 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
     override fun execute() {
         val targetPose = trajectory.sample(timer.get())
         val targetSpeed = calculator.calculate(Navigator.instance!!.pose, targetPose)
+        Debug.log("AutoDrive", "going to $targetPose, @ targetSpeed m/s", level = DebugFilter.Low)
 
-//        if (trajectory.totalTimeSeconds - timer.get() < 0.3) {
-//            Shooter.update()
-//        }
-//        Shooter.update()
+        Shooter.update()
 
-        val pos = RobotContainer.navigation.position
-        SmartDashboard.putNumber("error_x", pos.x - targetPose.poseMeters.x)
-        SmartDashboard.putNumber("error_y", pos.y - targetPose.poseMeters.y)
+        SmartDashboard.putNumber("error_x", RobotContainer.navigation.position.x - targetPose.poseMeters.x)
+        SmartDashboard.putNumber("error_y", RobotContainer.navigation.position.y - targetPose.poseMeters.y)
         SmartDashboard.putNumber(
             "error_th",
             RobotContainer.navigation.heading.degrees - targetPose.poseMeters.rotation.degrees
@@ -85,6 +82,10 @@ class AutoDrive(var targetPose: Pose2d) : CommandBase() {
     }
 
     override fun end(interrupted: Boolean) {
+        if (intaking) {
+            Intaker.intakeMotor.stop()
+            Intaker.deployed = false
+        }
         Drivetrain.stop()
     }
 

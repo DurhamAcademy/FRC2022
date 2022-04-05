@@ -1,6 +1,7 @@
 package frc.kyberlib.input
 
 import edu.wpi.first.wpilibj.Joystick
+import edu.wpi.first.wpilibj2.command.button.Button
 import edu.wpi.first.wpilibj2.command.button.Trigger
 
 /**
@@ -9,4 +10,4 @@ import edu.wpi.first.wpilibj2.command.button.Trigger
  * @param axis the index of the axis
  * @param condition booleanSupplier that takes in the raw value of the axis and checks if the 'button' should be activated
  */
-class AxisButton(joystick: Joystick, axis: Int, condition: (value: Double) -> Boolean = {it > 0.5}) : Trigger({ condition(joystick.getRawAxis(axis)) })
+class AxisButton(joystick: Joystick, axis: Int, condition: (value: Double) -> Boolean = {it > 0.5}) : KButton({ condition(joystick.getRawAxis(axis)) })

@@ -75,7 +75,7 @@ internal class TreeIllustration(val tree: Tree) : JPanel() {
      */
     private fun drawObstacles(graphics: Graphics2D) {
         for (obstacle in field.obstacles) {
-            graphics.drawRect(drawingCoordinates(obstacle.x-obstacle.width), drawingCoordinates(obstacle.y-obstacle.height), drawingCoordinates(obstacle.width*2), drawingCoordinates(obstacle.height*2))
+            graphics.drawPolygon(obstacle.xPoints.map { drawingCoordinates(it/1000.0) }.toIntArray(), obstacle.xPoints.map { drawingCoordinates(it/1000.0) }.toIntArray(), obstacle.points.size)
         }
     }
 

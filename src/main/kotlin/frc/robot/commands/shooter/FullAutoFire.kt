@@ -18,8 +18,8 @@ class FullAutoFire : CommandBase() {
     }
 
     override fun execute() {
+        Shooter.update()
         if ((Turret.targetVisible || Shooter.status == ShooterStatus.SHOT)) {
-            Shooter.update()
 
             // if the turret is on target
             if (Turret.ready && Shooter.ready) {

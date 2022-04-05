@@ -37,7 +37,8 @@ object RocketLeague : ControlSchema2022() {
     override val FLUSH: Trigger = xbox.rightMenu
     override val LOCK_TURRET: Trigger = xbox.downDPad
     override val ZERO_TURRET: Trigger = xbox.upDPad
+    override val DISPOSE: Trigger = xbox.xButton
 
-    override val CLIMB_MODE: Trigger = xbox.xButton
+    override val CLIMB_MODE: Trigger = xbox.pressedLeftStick.and(xbox.pressedRightStick)
     override val EMOTE: Trigger = xbox.leftDPad
 }

@@ -23,10 +23,14 @@ import frc.kyberlib.command.LogMode
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.sign
+import frc.kyberlib.math.units.KUnit
+import frc.kyberlib.math.units.KUnitKey
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.math.absoluteValue
 
 typealias GearRatio = Double
@@ -65,6 +69,10 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Defines the relationship between rotation and linear motion for the motor.
      */
     var radius: Length? = null
+        set(value) {
+            field = value
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF+toNative)
+        }
 
     /**
      * Adds post-encoder gearing to allow for post-geared speeds to be set.
@@ -72,24 +80,29 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * product of (output teeth / input teeth) for each gear stage
      */
     var gearRatio: GearRatio = 1.0
+        set(value) {
+            field = value
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF+toNative)
+        }
     // ----- constraints ---- //
     /**
      * The max angular velocity the motor can have
      */
-    open var maxVelocity: AngularVelocity
-        get() = constraints.maxVelocity.radiansPerSecond
+    open var maxVelocity: AngularVelocity = 0.rpm
         set(value) {
-            constraints = TrapezoidProfile.Constraints(value.radiansPerSecond, constraints.maxVelocity)
+            field = value
+            updateNativeProfile(maxVelocity * toNative, maxAcceleration * toNative)
         }
 
     /**
      * The max angular acceleration the motor can have
      */
-    open var maxAcceleration: AngularVelocity
-        get() = constraints.maxAcceleration.radiansPerSecond
+    open var maxAcceleration: AngularVelocity = 0.rpm
         set(value) {
-            constraints = TrapezoidProfile.Constraints(constraints.maxVelocity, value.radiansPerSecond)
+            field = value
+            updateNativeProfile(maxVelocity * toNative, maxAcceleration * toNative)
         }
+
     open var maxPosition: Angle = Angle(Double.POSITIVE_INFINITY)
     var maxLinearPosition: Length
         get() = rotationToLinear(maxPosition)
@@ -121,46 +134,57 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
             maxAcceleration = linearToRotation(value)
         }
 
-    private var constraints = TrapezoidProfile.Constraints(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
-
+    abstract fun updateNativeProfile(maxVelocity: AngularVelocity, maxAcceleration: AngularVelocity)
     // ----- control schemes ---- //
     /**
      * Proportional gain of the customControl controller.
      */
-    open var kP: Double
+    var kP: Double
         get() = PID.p
         set(value) {
             PID.p = value
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF*toNative)
         }
 
     /**
      * Integral gain of the customControl controller.
      */
-    open var kI: Double
+    var kI: Double
         get() = PID.i
         set(value) {
             PID.i = value
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF*toNative)
         }
 
     /**
      * Derivative gain of the customControl controller.
      */
-    open var kD: Double
+    var kD: Double
         get() = PID.d
         set(value) {
             PID.d = value
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF*toNative)
         }
 
     /**
      * FF gain for native motor control.
      * Should be equal to kv on SysID ff
      */
-    open var kF: Double = 0.0
+    var kF: Double = 0.0
+        set(value) {
+            field = value
+            updateNativeControl(kP * toNative, kI*toNative, kD*toNative, kF*toNative)
+        }
+
+    private val toNative
+        get() = if(linearConfigured) radius!!.meters * gearRatio else gearRatio
+
+    protected abstract fun updateNativeControl(p: Double, i: Double, d: Double, f: Double)
 
     /**
      * Max integration value
      */
-    open var kIRange = 0.0
+    var kIRange = 0.0
         set(value) {
             field = value
             PID.setIntegratorRange(-value, value)
@@ -186,7 +210,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
                     val pid = PID.calculate(
                         velocity.radiansPerSecond,
                         velocitySetpoint.radiansPerSecond
-                    )  // todo: check constraints on that you want S profile on velocity control
+                    )
                     ff + pid
                 }
                 ControlMode.POSITION -> {
@@ -316,6 +340,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
 
     private val accelerationCalculator = Differentiator()
     var acceleration = 0.rpm
+        protected set
     val linearAcceleration
         get() = rotationToLinear(acceleration)
 
@@ -348,7 +373,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
     var positionSetpoint: Angle = 0.rotations
         private set(value) {
             field = value.coerceIn(minPosition, maxPosition)
-            if (!closedLoopConfigured && real) rawPosition = field
+            if (!closedLoopConfigured && real) rawPosition = field * gearRatio.invertIf { reversed }
             else if (!customControlLock) updateVoltage()
         }
 
@@ -357,9 +382,8 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      */
     var velocitySetpoint: AngularVelocity = 0.rpm
         private set(value) {
-            field = value
-//            field = value.coerceIn(-maxVelocity, maxVelocity)
-            if (!closedLoopConfigured && real) rawVelocity = field
+            field = value//.coerceIn(-maxVelocity, maxVelocity)
+            if (!closedLoopConfigured && real) rawVelocity = field * gearRatio.invertIf { reversed }
             else if (!customControlLock) updateVoltage()
         }
 
@@ -410,7 +434,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      * Updates the voltage after changing position / velocity setpoint
      */
     fun updateVoltage() {
-        if (!isFollower && customControl != null && controlMode != ControlMode.VOLTAGE) {
+        if (!isFollower && closedLoopConfigured && controlMode != ControlMode.VOLTAGE) {
             acceleration = accelerationCalculator.calculate(velocity.value).radiansPerSecond
             customControlLock = true
             safeSetVoltage(customControl!!(this))
@@ -474,7 +498,6 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      */
     override fun initSendable(builder: NTSendableBuilder) {
         super.initSendable(builder)
-        builder.setActuator(true)
         builder.setUpdateTable {
             updateVoltage()
         }
@@ -1062,25 +1085,25 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
         fun systemLoop(
             plant: LinearSystem<N2, N1, N1>,
             modelAccuracy: Double, measurementAccuracy: Double,
-            positionErrorCost: Double, velocityErrorCost: Double,
+            positionTolerance: Double, velocityTolerance: Double,
             inputCost: Double = 12.0,
             timeDelay: Time = 0.02.seconds
         ): LinearSystemLoop<N2, N1, N1> {
             val observer = observer(plant, modelAccuracy, measurementAccuracy, timeDelay)
-            val optimizer = optimizer(plant, positionErrorCost, velocityErrorCost, inputCost, timeDelay)
-            return LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds)
+            val optimizer = optimizer(plant, positionTolerance, velocityTolerance, inputCost, timeDelay)
+            return LinearSystemLoop(plant, optimizer, observer, inputCost, timeDelay.seconds)  // fixme
         }
 
         @JvmName("dualSystemLoop")
         fun systemLoop(
             plant: LinearSystem<N2, N1, N2>,
             modelAccuracy: Double, measurementAccuracy: Double,
-            positionErrorCost: Double, velocityErrorCost: Double,
+            positionTolerance: Double, velocityTolerance: Double,
             inputCost: Double = 12.0,
             timeDelay: Time = 0.02.seconds
         ): LinearSystemLoop<N2, N1, N2> {
             val observer = observer(plant, modelAccuracy, measurementAccuracy, timeDelay)
-            val optimizer = optimizer(plant, positionErrorCost, velocityErrorCost, inputCost, timeDelay)
+            val optimizer = optimizer(plant, positionTolerance, velocityTolerance, inputCost, timeDelay)
             return LinearSystemLoop(plant, optimizer, observer, Game.batteryVoltage, timeDelay.seconds)
         }
     }

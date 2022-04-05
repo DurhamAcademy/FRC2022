@@ -4,6 +4,9 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.degrees
+import frc.kyberlib.math.units.extensions.sin
+import frc.robot.RobotContainer
+import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.Turret
 
 /**
@@ -21,13 +24,16 @@ object AimTurret : CommandBase() {
     override fun execute() {
         Debug.log("Aim", "execute", level = DebugFilter.Low)
 
-//         if the limelight is a target
+        // if the limelight is a target
         if (Turret.targetVisible) {
-//             perp zoom correction
-//            val perpSpeed = Drivetrain.polarSpeeds.dTheta.toTangentialVelocity(Drivetrain.polarCoordinates.r)
-            var goalOrientation = Turret.visionOffset ?: return
-            if (goalOrientation.absoluteValue < 1.degrees) goalOrientation = 0.degrees
-            Turret.turret.position = Turret.turret.position + goalOrientation * 0.7
+            val curveCorrection = (RobotContainer.op.curveComp * Turret.turret.position.sin).degrees
+            val goalOrientation = Turret.visionOffset!!
+            if (RobotContainer.op.shootWhileMoving) {
+                Turret.turret.position =
+                    Turret.turret.position + goalOrientation + Shooter.movementAngleOffset + curveCorrection
+            } else {
+                Turret.turret.position = Turret.turret.position + goalOrientation * 0.7 + curveCorrection
+            }
         } else {
             Turret.turret.position = Turret.turret.position
         }
