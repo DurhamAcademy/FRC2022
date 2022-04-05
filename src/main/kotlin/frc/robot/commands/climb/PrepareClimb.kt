@@ -10,11 +10,17 @@ object PrepareClimb : CommandBase() {
     }
 
     override fun initialize() {
-        Climber.extension = 17.5.inches
+        Climber.extension = 15.5.inches
         Climber.staticsLifted = false
     }
 
     override fun execute() {
         Climber.updateMotors()
+    }
+
+    override fun end(interrupted: Boolean) {
+        if (!interrupted) {
+            Climber.extension = 0.inches
+        }
     }
 }

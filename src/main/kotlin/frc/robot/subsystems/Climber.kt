@@ -63,7 +63,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
-        customControl = { bangBang(it) }
+        
         minLinearPosition = 0.inches
         maxLinearPosition = 30.inches
         motorType = DCMotor.getNEO(1)

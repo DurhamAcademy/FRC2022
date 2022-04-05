@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.kyberlib.command.Game
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.robot.commands.climb.ManualClimb
+import frc.robot.commands.climb.PrepareClimb
 import frc.robot.commands.conveyor.ManualConveyor
 import frc.robot.commands.intake.ManualIntake
 import frc.robot.commands.shooter.ShooterCalibration
@@ -46,6 +47,8 @@ class OperatorControls {
         SmartDashboard.putBoolean("ManualConveyor", false)
         SmartDashboard.putBoolean("ManualIntake", false)
         SmartDashboard.putBoolean("ManualClimb", false)
+
+        SmartDashboard.putBoolean("prepare for climb", false)
     }
 
     private val COMPRESSOR_ENABLED = Trigger { SmartDashboard.getBoolean(compressorString, true) }.whenActive {
@@ -57,6 +60,9 @@ class OperatorControls {
         println("disable compress")
         emptySet<Subsystem>()
     }
+
+    private val PREPARE =
+        Trigger { SmartDashboard.getBoolean("prepare for climb", false) }.whileActiveOnce(PrepareClimb)
 
     // disable subsystems
     // manual subsystems

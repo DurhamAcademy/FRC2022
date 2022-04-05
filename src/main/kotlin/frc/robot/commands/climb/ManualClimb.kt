@@ -2,6 +2,7 @@ package frc.robot.commands.climb
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
+import frc.kyberlib.math.units.extensions.inches
 import frc.robot.subsystems.Climber
 
 object ManualClimb : CommandBase() {
@@ -23,6 +24,8 @@ object ManualClimb : CommandBase() {
         Climber.leftWinch.voltage = SmartDashboard.getNumber(leftWinchString, 0.0)
         Climber.rightWinch.voltage = SmartDashboard.getNumber(rightWinchString, 0.0)
         Climber.staticsLifted = SmartDashboard.getBoolean(staticString, false)
+
+        SmartDashboard.putNumber("right arm pos", Climber.rightWinch.linearPosition.inches)
     }
 
     override fun end(interrupted: Boolean) {

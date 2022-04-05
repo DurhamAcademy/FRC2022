@@ -11,7 +11,7 @@ import frc.kyberlib.math.units.extensions.*
  */
 object Constants {
     // ------ Climb ------ //
-    val WINCH_RADIUS: Length = 0.5.inches
+    val WINCH_RADIUS: Length = 0.375.inches
     const val WINCH_GEAR_RATIO = (10.0 / 1.0) * (54.0 / 18.0)
 
     // ------ Drivetrain ------ //

@@ -1,6 +1,5 @@
 package frc.robot.subsystems
 
-import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.math.filter.Debouncer.DebounceType
@@ -12,9 +11,7 @@ import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.Polynomial
-import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.ctre.KTalon
 import frc.kyberlib.motorcontrol.servo.KLinearServo
 import frc.kyberlib.simulation.Simulatable
@@ -50,44 +47,6 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         motorType = DCMotor.getFalcon500(2)
         currentLimit = 50
         brakeMode = false
-        // a bunch of random control schemes from before falcons
-        if (false) {
-            val loop = KMotorController.StateSpace.systemLoop(
-                velocitySystem(ff),
-                180.rpm.rotationsPerSecond,
-                6.rpm.radiansPerSecond,
-                50.rpm.radiansPerSecond,
-                10.0
-            )
-
-            addFeedforward(ff)
-            val default = customControl!!
-            val fastSpinup = { it: KMotorController ->
-                if (velocitySetpoint < 10.rpm) 0.0
-                else if (velocityError < -100.rpm) 12.0
-                else default(it)
-            }
-
-            val inversion = { it: KMotorController ->
-                val v = ff.calculate(velocity.value, velocitySetpoint.value, .02)
-                time = Game.time
-                v
-            }
-
-            val state = { it: KMotorController ->
-                loop.nextR = VecBuilder.fill(velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
-                loop.correct(VecBuilder.fill(velocity.radiansPerSecond))  // update with empirical
-                loop.predict(updateRate.seconds)  // math
-                val nextVoltage = loop.getU(0)  // input
-                nextVoltage + ff.ks.invertIf { velocitySetpoint < 0.rpm }
-            }
-
-            //customControl = null  // builtin
-            kF = ff.kv
-            kP = 0.0160434  // PIDController[3]
-//        kI = 0.0001
-//        customControl = fastSpinup
-        }
 
         arbFF = {
             ff.calculate(velocitySetpoint.radiansPerSecond)
