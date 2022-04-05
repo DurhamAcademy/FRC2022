@@ -28,6 +28,7 @@ object Intaker : SubsystemBase(), Debug {
         kP = 1.0
         currentLimit = 40
         motorType = DCMotor.getNeo550(1)
+        brakeMode = false
     }
 
     override fun periodic() {

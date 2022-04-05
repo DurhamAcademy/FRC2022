@@ -1,6 +1,7 @@
 # In Sim
 
-- adjust to be same by default
+- adjust climb arms to be same by default
+    - fix issues with manual
 - time delay on arm lift so turret safe
 - reformat Shuffleboard (require driver-station)
 - augmented loop (pg 109 of textbook)
@@ -12,10 +13,10 @@
 
 # With robo
 
-- test other turret controls (it they want to redo tether, than recharacterize) (2 hours)
+- test other turret controls (it they want to redo tether, than recharacterize) (2 hours) **
     - velocity
     - state space (hard with bad ff)
-- recharacterize the shooter (2 hour)
+    -
 - test shot while moving (6 hour)
 - test why auto shot slow (3 hour)
     - generally make auto better

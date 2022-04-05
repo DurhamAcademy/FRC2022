@@ -46,7 +46,7 @@ object Conveyor : SubsystemBase(), Debug {
     // feed into shooter
     fun feed() {
         status = ConveyorStatus.FEEDING
-        feeder.percent = 0.6
+        feeder.percent = 0.8
         conveyor.percent = 0.6
     }
 

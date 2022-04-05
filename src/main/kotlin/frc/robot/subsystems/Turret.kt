@@ -61,7 +61,8 @@ object Turret : SubsystemBase(), Debug {
         currentLimit = 15
 
         val headingDiff = Differentiator()
-        val new = { it: KMotorController ->
+        val difFiler = LinearFilter.movingAverage(8)
+        val classic = { it: KMotorController ->
             val polarSpeeds = Drivetrain.polarSpeeds
             val rot =
                 polarSpeeds.dTheta * 0.1.seconds//-headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.1.seconds
@@ -90,17 +91,18 @@ object Turret : SubsystemBase(), Debug {
         val loop = KMotorController.StateSpace.systemLoop(
             positionSystem(feedforward),  // degrees units
             5.0,
-            1.0,
+            .01,
             2.0,
             20.0,
-            6.0
+            9.0
         )
         val state = { _: KMotorController ->
             position = clampSafePosition(positionSetpoint)
             val polarSpeeds = Drivetrain.polarSpeeds
+            val spin = difFiler.calculate(headingDiff.calculate(RobotContainer.gyro.heading.degrees)).degreesPerSecond
             loop.nextR = VecBuilder.fill(
                 positionSetpoint.degrees,
-                (-polarSpeeds.dTheta - polarSpeeds.dOrientation).degreesPerSecond * 0.01
+                (-polarSpeeds.dTheta - spin).degreesPerSecond * 0.015
             )
             loop.correct(VecBuilder.fill(position.degrees))
             loop.predict(updateRate.seconds)  // math
@@ -108,7 +110,7 @@ object Turret : SubsystemBase(), Debug {
             nextVoltage
         }
 
-        customControl = new
+        customControl = classic
 
         if (Game.sim) setupSim(feedforward)
     }
