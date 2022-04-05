@@ -45,42 +45,44 @@ object Constants {
 
     val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(
         mapOf(
-            1.7 to 1400.0,
-            2.09375 to 1440.0,
-            2.4875 to 1420.0,
-            2.88125 to 1470.0,
-            3.275 to 1500.0,
-            3.66875 to 1600.0,
-            4.0625 to 1610.0,
-            4.45625 to 1730.0,
-            4.85 to 1800.0
+            1.84 to 1300.0,
+            2.39 to 1350.0,
+            2.94 to 1420.0,
+            3.48 to 1470.0,
+            4.02 to 1550.0,
+            4.65 to 1640.0,
+            5.11 to 1720.0,
+            5.565 to 1800.0,
+            6.2 to 1900.0
         )
     )
     val HOODANGLE_INTERPOLATOR: Interpolator = Interpolator(
         mapOf(
-            1.7 to 15.0,
-            2.09375 to 28.0,
-            2.4875 to 30.0,
-            2.88125 to 36.0,
-            3.275 to 40.0,
-            3.66875 to 45.0,
-            4.0625 to 50.0,
-            4.45625 to 50.0,
-            4.85 to 50.0
+            1.84 to 20.0,
+            2.39 to 33.0,
+            2.94 to 42.0,
+            3.48 to 49.0,
+            4.02 to 53.0,
+            4.65 to 63.0,
+            5.11 to 65.0,
+            5.565 to 70.0,
+            6.2 to 75.0
         )
     )
 
-    val TIME_OF_FLIGHT_INTERPOLATOR = Interpolator(mapOf(
-        2.5 to 1.0,
-        3.0 to 1.15,
-        3.5 to 1.15,
-        4.0 to 1.09,
-        4.5 to 1.32,
-        5.0 to 1.4,
-        5.5 to 1.52
-    ))
+    val TIME_OF_FLIGHT_INTERPOLATOR = Interpolator(
+        mapOf(
+            2.5 to 1.0,
+            3.0 to 1.15,
+            3.5 to 1.15,
+            4.0 to 1.09,
+            4.5 to 1.32,
+            5.0 to 1.4,
+            5.5 to 1.52
+        )
+    )
 
-    val SHOOTER_VELOCITY_TOLERANCE = 50.rpm
+    val SHOOTER_VELOCITY_TOLERANCE = 30.rpm
 
     // ------ Turret ------ //
     const val TURRET_GEAR_RATIO: Double = 10.0 * (215.0 / 18.0)  // 10 is vp and second is pulley ratio

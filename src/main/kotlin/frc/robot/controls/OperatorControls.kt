@@ -3,6 +3,7 @@ package frc.robot.controls
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Subsystem
 import edu.wpi.first.wpilibj2.command.button.Trigger
+import frc.kyberlib.command.Game
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.robot.commands.climb.ManualClimb
 import frc.robot.commands.conveyor.ManualConveyor
@@ -15,7 +16,7 @@ class OperatorControls {
     private val fudgeString = "back fudge"
     private val compressorString = "compressor enabled"
 
-    val shootWhileMoving  // todo: make this not rely on poseEstimation
+    val shootWhileMoving
         inline get() = SmartDashboard.getBoolean("move shot", false)
     val smartNav
         inline get() = SmartDashboard.getBoolean("nav updates", true)
@@ -29,7 +30,7 @@ class OperatorControls {
         inline get() = SmartDashboard.getNumber("stablizer", 0.0)
 
     init {
-        SmartDashboard.putBoolean("nav updates", false)
+        SmartDashboard.putBoolean("nav updates", !Game.COMPETITION)
         SmartDashboard.putNumber(multString, 1.0)
         SmartDashboard.putNumber(fudgeString, .06)
         SmartDashboard.putBoolean(compressorString, true)
@@ -37,7 +38,7 @@ class OperatorControls {
         SmartDashboard.putBoolean("invert drive motors", false)
         SmartDashboard.putBoolean("move shot", false)
         SmartDashboard.putBoolean("auto shot", false)
-        SmartDashboard.putNumber("curve comp", 0.0)
+        SmartDashboard.putNumber("curve comp", -4.0)
         SmartDashboard.putNumber("stabalizer", 0.0)
 
         SmartDashboard.putBoolean("ManualTurret", false)

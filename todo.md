@@ -1,4 +1,9 @@
 # In Sim
+
+- adjust climb arms to be same by default
+    - fix issues with manual
+- time delay on arm lift so turret safe
+- reformat Shuffleboard (require driver-station)
 - augmented loop (pg 109 of textbook)
     - detla U: add voltage into state model
         - https://www.chiefdelphi.com/t/971s-control-system/137365/15?u=tatestaples
@@ -23,6 +28,15 @@
 - test shot while moving (6 hour) [Monday/Tuesday]
 - test drivetrain swap (30 min) - should be fixed [Monday]
 - test auto (3 hour)  [Tuesday]
+# With robo
+
+- test other turret controls (it they want to redo tether, than recharacterize) (2 hours) **
+    - velocity
+    - state space (hard with bad ff)
+    -
+- test shot while moving (6 hour)
+- test why auto shot slow (3 hour)
+    - generally make auto better
 - flash other limelight (try) (4 hour)
     - tune ball detection
 - climb prepare (30 min) [Wednesday]

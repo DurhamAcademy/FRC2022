@@ -4,9 +4,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.degrees
-import frc.kyberlib.math.units.extensions.k
 import frc.kyberlib.math.units.extensions.sin
-import frc.kyberlib.math.units.towards
 import frc.robot.RobotContainer
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.Turret

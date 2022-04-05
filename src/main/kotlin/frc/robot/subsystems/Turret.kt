@@ -61,7 +61,8 @@ object Turret : SubsystemBase(), Debug {
         currentLimit = 15
 
         val headingDiff = Differentiator()
-        val new = {
+        val difFiler = LinearFilter.movingAverage(8)
+        val classic = { it: KMotorController ->
             val polarSpeeds = Drivetrain.polarSpeeds
             val rot =
                 polarSpeeds.dTheta * 0.1.seconds//-headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.1.seconds
@@ -109,7 +110,7 @@ object Turret : SubsystemBase(), Debug {
             if (isZeroed) nextVoltage else 0.0
         }
 
-        customControl = state
+        customControl = classic
 
         if (Game.sim) setupSim(feedforward)
     }
@@ -174,7 +175,7 @@ object Turret : SubsystemBase(), Debug {
     }
 
     // smooths out how fast we switch between lost and found
-    private val lostDebouncer = Debouncer(0.2, Debouncer.DebounceType.kBoth)  // *** this was changed from .5
+    private val lostDebouncer = Debouncer(0.5, Debouncer.DebounceType.kBoth)
     override fun periodic() {
         SmartDashboard.putString("turret cmd", this.currentCommand?.name ?: "none")
         debugDashboard()
