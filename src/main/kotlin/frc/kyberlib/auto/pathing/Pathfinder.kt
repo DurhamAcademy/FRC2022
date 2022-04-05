@@ -43,12 +43,12 @@ object Pathfinder : Debug {
      * @param endPose2d the end location
      * @return trajectory to get from start to end
      */
-    fun pathTo(startPose2d: Pose2d, endPose2d: Pose2d): Trajectory {
+    fun pathTo(startPose2d: Pose2d, endPose2d: Pose2d): KTrajectory {
         resetTree(startPose2d.translation, endPose2d.translation)
         return treeToTrajectory(startPose2d, endPose2d)
     }
 
-    fun pathTo(startPose2d: Pose2d, endPosition: Translation2d): Trajectory {
+    fun pathTo(startPose2d: Pose2d, endPosition: Translation2d): KTrajectory {
         resetTree(startPose2d.translation, endPosition)
         return treeToTrajectory(startPose2d, endPosition)
     }
@@ -78,7 +78,7 @@ object Pathfinder : Debug {
      * Converts a navigation tree into a path for the robot to follow
      * @return a trajectory that follows the Tree recommended path
      */
-    private fun treeToTrajectory(startPose2d: Pose2d, endPose2d: Pose2d): Trajectory {
+    private fun treeToTrajectory(startPose2d: Pose2d, endPose2d: Pose2d): KTrajectory {
         if (!pathFound)
             return KTrajectory("default", startPose2d, emptyList(), endPose2d)
         val smooth = smoothPath()
@@ -87,7 +87,7 @@ object Pathfinder : Debug {
         return KTrajectory("Pathfinder path", startPose2d, smooth, endPose2d)  // test edit
     }
 
-    private fun treeToTrajectory(startPose2d: Pose2d, endPosition: Translation2d): Trajectory {
+    private fun treeToTrajectory(startPose2d: Pose2d, endPosition: Translation2d): KTrajectory {
         if (!pathFound)
             return KTrajectory(
                 "default",

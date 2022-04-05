@@ -1,39 +1,40 @@
 # In Sim
-
-- adjust climb arms to be same by default
-    - fix issues with manual
-- time delay on arm lift so turret safe
-- reformat Shuffleboard (require driver-station)
 - augmented loop (pg 109 of textbook)
     - detla U: add voltage into state model
         - https://www.chiefdelphi.com/t/971s-control-system/137365/15?u=tatestaples
-- current management
 - https://www.chiefdelphi.com/t/what-impressive-things-did-you-do-in-software-this-year/382245/48?u=tatestaples
 - https://github.com/Team254/FRC-2020-Public/blob/master/src/main/java/com/team254/frc2020/planners/DriveMotionPlanner.java#L225
+- current management
 
-# With robo
-
-- test other turret controls (it they want to redo tether, than recharacterize) (2 hours) **
-    - velocity
+# With robo (19 hours)
+- recharacterize the shooter (2 hour)
+  - new lookup
+  - tof
+  - spin comp
+  - back comp
+  - lower vel tolerance
+  - *** remember that you changed debounce
+- test other turret controls (it they want to redo tether, than recharacterize) (2 hours) [Monday]
     - state space (hard with bad ff)
-    -
-- test shot while moving (6 hour)
-- test why auto shot slow (3 hour)
-    - generally make auto better
+      - works well without vel comp 
+        - try time constant vel comp
+      - graph diff heading results
+    - *** this needs to be really good to do shoot while move
+- test shot while moving (6 hour) [Monday/Tuesday]
+- test drivetrain swap (30 min) - should be fixed [Monday]
+- test auto (3 hour)  [Tuesday]
 - flash other limelight (try) (4 hour)
     - tune ball detection
-- climb prepare (30 min)
-- test drivetrain swap (30 min)
-- emote (1 hour)
-- Chris driver practice (whatever time remains)
+- climb prepare (30 min) [Wednesday]
+  - closed loop climb testing
+- climb stablization (30 min)
+- Chris driver practice (whatever time remains) [Thursday]
 
 ## random cool things
-
 - Auto Drive to Climb
 - Auto Climb
 
 ## Full Auto
-
 - goal system (shouldn't be too hard - should update) -> moderate difficulty
     - limelight
 - obstacles (can work on this) -> easy, just time intensive
@@ -77,6 +78,7 @@
         - self wrapping (protect the cables)
         - side spin comp
         - shoot while moving
+        - disposal
     - Shooter
         - conveyor management
         - control schemes
@@ -149,3 +151,32 @@
             - simulated ESC
             - fake solenoids
             - halucinating climb past 2 events
+
+
+
+/**
+* Definetly
+* - east
+* - hedgehogs
+* - triple strange
+*
+* Good:
+* sequence
+* omegabytes
+* pitt pirates
+* zebracorns
+* platypi :(
+* hawtimus prime?
+* yeti
+* bots on wheels
+* green hope falcons (5190)
+* gear cats
+*
+* I want
+*  collect all the data from NCFIRST matches
+*  teach me all of the programming required for FRC
+*  predict all the matches for States
+*  predict potential from top teams
+*  graph trends for all the teams over matches
+*  predict our potential
+   */

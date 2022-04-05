@@ -1,11 +1,11 @@
 {
   "MainWindow": {
     "GLOBAL": {
-      "height": "1017",
-      "maximized": "1",
+      "height": "768",
+      "maximized": "0",
       "style": "0",
       "userScale": "2",
-      "width": "1920",
+      "width": "1440",
       "xpos": "0",
       "ypos": "74"
     }
@@ -37,9 +37,9 @@
       "Size": "513,557"
     },
     "###Addressable LEDs": {
-      "Collapsed": "0",
+      "Collapsed": "1",
       "Pos": "105,40",
-      "Size": "167,183"
+      "Size": "81,42"
     },
     "###DIO": {
       "Collapsed": "0",
@@ -47,9 +47,9 @@
       "Size": "162,54"
     },
     "###FMS": {
-      "Collapsed": "0",
+      "Collapsed": "1",
       "Pos": "174,82",
-      "Size": "283,146"
+      "Size": "177,116"
     },
     "###Joysticks": {
       "Collapsed": "1",
@@ -63,8 +63,8 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "849,338",
-      "Size": "582,590"
+      "Pos": "839,321",
+      "Size": "586,544"
     },
     "###Other Devices": {
       "Collapsed": "1",
@@ -82,12 +82,12 @@
       "Size": "834,638"
     },
     "###Plot <1>": {
-      "Collapsed": "0",
+      "Collapsed": "1",
       "Pos": "8,200",
       "Size": "839,693"
     },
     "###Plot <2>": {
-      "Collapsed": "1",
+      "Collapsed": "0",
       "Pos": "7,179",
       "Size": "831,499"
     },
@@ -99,7 +99,7 @@
     "###Solenoids": {
       "Collapsed": "1",
       "Pos": "108,59",
-      "Size": "169,54"
+      "Size": "57,42"
     },
     "###System Joysticks": {
       "Collapsed": "1",
@@ -107,9 +107,9 @@
       "Size": "111,152"
     },
     "###Timing": {
-      "Collapsed": "0",
+      "Collapsed": "1",
       "Pos": "6,125",
-      "Size": "135,426"
+      "Size": "98,103"
     },
     "Debug##Default": {
       "Collapsed": "0",

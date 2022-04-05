@@ -2,6 +2,7 @@ package frc.kyberlib.pneumatics
 
 import edu.wpi.first.networktables.NTSendable
 import edu.wpi.first.networktables.NTSendableBuilder
+import edu.wpi.first.wpilibj.Compressor
 import edu.wpi.first.wpilibj.DoubleSolenoid
 import edu.wpi.first.wpilibj.PneumaticsBase
 import edu.wpi.first.wpilibj.PneumaticsControlModule
@@ -12,7 +13,7 @@ class KSolenoid(val back: Int, val fwd: Int, private val fake: Boolean = false) 
     companion object {
         val allSolenoids = mutableListOf<KSolenoid>()
         val hub: PneumaticsBase = PneumaticsControlModule(1)
-        val compressor = hub.makeCompressor().apply {
+        val compressor: Compressor = hub.makeCompressor().apply {
             enableDigital()
         }
     }

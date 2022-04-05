@@ -1,8 +1,10 @@
 package frc.robot.subsystems
 
+import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.math.filter.Debouncer.DebounceType
+import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -10,26 +12,24 @@ import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.Polynomial
+import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.ctre.KTalon
 import frc.kyberlib.motorcontrol.servo.KLinearServo
 import frc.kyberlib.simulation.Simulatable
-import frc.kyberlib.simulation.Simulation
 import frc.robot.Constants
 import frc.robot.RobotContainer
+import frc.robot.commands.shooter.FireWhenReady
 import frc.robot.commands.shooter.ShooterCalibration
-import kotlin.math.absoluteValue
-import kotlin.math.acos
-import kotlin.math.cos
-import kotlin.math.sqrt
+import kotlin.math.*
 
 
 /**
  * Current status of the shooter mechanism
  */
 enum class ShooterStatus {
-    IDLE, SPINUP, LOW_READY, HIGH_READY, SHOT, FORCE_SHOT
+    IDLE, SPINUP, SHOT, FORCE_SHOT
 }
 
 /**
@@ -41,62 +41,60 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     var status = ShooterStatus.IDLE
     override val priority: DebugFilter = DebugFilter.Max
-    private val ff = SimpleMotorFeedforward(0.38267, 0.02508, 0.0019498)
+    private val ff = SimpleMotorFeedforward(0.81436, 0.01918, 0.0045666)
     var time = Game.time
 
     // main motor attached to the flywheel
-    val flywheel = KTalon(31).apply {
+    val flywheel = KTalon(32).apply {
+        // configs
         identifier = "flywheel"
-        motorType = DCMotor.getNEO(2)
-        addFeedforward(ff)
-        val loop = KMotorController.StateSpace.systemLoop(
-            velocitySystem(ff),
-            180.rpm.rotationsPerSecond,
-            6.rpm.radiansPerSecond,
-            50.rpm.radiansPerSecond,
-            10.0
-        )
-//        customControl = {
-//            val v = ff.calculate(velocity.value, velocitySetpoint.value, .02)
-//            time = Game.time
-//            v
-//        }
-//        customControl = {
-//            loop.nextR = VecBuilder.fill(it.velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
-//            loop.correct(VecBuilder.fill(it.velocity.radiansPerSecond))  // update with empirical
-//            loop.predict(updateRate.seconds)  // math
-//            val nextVoltage = loop.getU(0)  // input
-//            nextVoltage + ff.ks.invertIf { velocitySetpoint < 0.rpm }// + .15
-//        }
-        kP = 0.0160434
-        kI = 0.0001
-
-//        currentLimit = 50
+        motorType = DCMotor.getFalcon500(2)
+        currentLimit = 50
         brakeMode = false
+
+        arbFF = {
+            ff.calculate(velocitySetpoint.radiansPerSecond)
+        }
+
+        talon.config_kP(0, 0.20569)
+
         if (Game.sim) setupSim(ff)
     }
 
-    private val readyDebouncer = Debouncer(0.2, DebounceType.kBoth)
+    // smooth out when shooter up to speed
+    private val readyDebouncer = Debouncer(0.2, DebounceType.kBoth)  // fixme: maybe just kFalling
     private val shortReady
-        get() = hood.atSetpoint && flywheel.velocityError.absoluteValue < Constants.SHOOTER_VELOCITY_TOLERANCE && flywheel.velocitySetpoint > 1.radiansPerSecond
-    val ready: Boolean
+        inline get() = hood.atSetpoint &&
+                flywheel.velocityError.absoluteValue < (if(RobotContainer.op.shootWhileMoving) 50.rpm else Constants.SHOOTER_VELOCITY_TOLERANCE)
+                && flywheel.velocitySetpoint > 1.radiansPerSecond
+    val ready: Boolean  // whether ready to shoot
         get() = readyDebouncer.calculate(shortReady)
     val stopped
         get() = flywheel.percent == 0.0
 
-    var targetVelocity
-        get() = flywheel.velocitySetpoint
-        set(value) {
+    var targetVelocity  // public accesser for setting flywheel speed
+        inline get() = flywheel.velocitySetpoint
+        inline set(value) {
+            SmartDashboard.putNumber("flywheel target", value.rpm)
             flywheel.velocity = value * SmartDashboard.getNumber("shooterMult", 1.0)
         }
 
+    // distance function to work in several scenarios
+    private val smartDis: Length
+        get() {
+            return if (RobotContainer.op.shootWhileMoving) {
+                effectiveDistance
+            } else {
+                Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+            }
+        }
 
     // additional motors that copy the main
-    private val flywheel2 = KTalon(32).apply {
+    private val flywheel2 = KTalon(31).apply {
         identifier = "flywheel2"
         reversed = true
         brakeMode = false
-//        currentLimit = 50
+        currentLimit = 50
         follow(flywheel)
     }
 
@@ -104,7 +102,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     private val hood = KLinearServo(8, 100.millimeters, 18.0.millimetersPerSecond)
     private val hood2 = KLinearServo(9, 100.millimeters, 18.0.millimetersPerSecond)
 
-    var hoodDistance: Length
+    var hoodDistance: Length  // public accessor var. Makes them move in sync
         get() = hood.position
         set(value) {
             SmartDashboard.putNumber("hood dis", value.millimeters)
@@ -121,20 +119,39 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     private const val D = 2 * A * B
     private val theta = 24.258.degrees.radians
     private val startLength = 6.61.inches
-    var hoodAngle: Angle
+    var hoodAngle: Angle  // set the angle of the hood. Not applied through most of the code because only got working later
         get() = acos((-hoodDistance.inches * hoodDistance.inches + A2 + B2) / D).radians
         set(value) {
             hoodDistance = sqrt(A2 + B2 - D * cos(theta + value.radians)).inches - startLength
         }
 
+    // update shooter stuff
     fun update() {
-        val dis = Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
-        flywheelUpdate(dis)
-        hoodUpdate(dis)
+        flywheelUpdate(smartDis)
+        hoodUpdate(smartDis)
     }
 
-    val hoodPoly = Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..5.5)
-    private fun hoodUpdate(dis: Length) {
+    private const val moveIterations = 3  // how many times to optimize the shoot while move target
+    val effectiveHubLocation: Translation2d  // translated hub position based on robot velocity
+        get() {
+            val base = Constants.HUB_POSITION
+            if (!Constants.MOVEMENT_CORRECTION) return base
+            val fieldSpeeds = Drivetrain.fieldRelativeSpeeds
+            return base - Translation2d(
+                fieldSpeeds.vxMetersPerSecond * timeOfFlight.value,
+                fieldSpeeds.vyMetersPerSecond * timeOfFlight.value
+            )
+        }
+    var movementAngleOffset: Angle = 0.degrees  // how much robot movement should cause turret to turn to compensate
+    var effectiveDistance: Length = 0.meters  // how far shoooter should behave to compensate for movement
+
+    private val timeOfFlight  // how long it should take the ball to score
+        get() = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(smartDis.meters).seconds
+
+    private val hoodPoly =
+        Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..5.5)  // poly fitted through our data
+
+    fun hoodUpdate(dis: Length) {  // update the hood angle with a certain distance
         val hood = hoodPoly.eval(dis.value)
         if (hood == null) {
             inRange = false
@@ -144,8 +161,8 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         }
     }
 
-    val speedPoly = Polynomial(37.43917, -119.05297, 1501.93519)
-    private fun flywheelUpdate(dis: Length) {
+    private val speedPoly = Polynomial(37.43917, -119.05297, 1501.93519)
+    fun flywheelUpdate(dis: Length) {  // update flywheel speed to shoot certain distance
         val interpolated =
             speedPoly.eval(dis.value) //.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
 
@@ -158,35 +175,52 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         }
     }
 
-    fun stop() {
+    fun stop() {  // stop the shooter
         targetVelocity = 0.rpm
         flywheel.stop()
         status = ShooterStatus.IDLE
     }
 
     init {
-        if (Game.sim) Simulation.instance.include(this)
+        // setup stuff
+        if (Game.sim) flywheel.setupSim(ff)
+        if (RobotContainer.op.autoShot) defaultCommand = FireWhenReady
     }
 
     override fun periodic() {
         debugDashboard()
+        if (RobotContainer.op.shootWhileMoving) {
+            // update shooting while moving values
+            val rawDistance =
+                Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+            var r = rawDistance
+            val hubSpeeds = Drivetrain.hubRelativeSpeeds
+            val parallel = hubSpeeds.vxMetersPerSecond
+            val perp = hubSpeeds.vyMetersPerSecond
+            for (i in 0 until moveIterations) {
+                val time = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(r.meters)
+                val a = r.meters + parallel * time
+                val b = perp * time
+                r = sqrt(a.pow(2) + b.pow(2)).meters
+                movementAngleOffset = atan(b / a).radians
+            }
+            effectiveDistance = r
+        }
+        // log stuff
         SmartDashboard.putNumber("fly error", flywheel.velocityError.rpm)
-        if (currentCommand != ShooterCalibration) hoodUpdate(
-            Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
-        )
+        SmartDashboard.putNumber("rpm", flywheel.velocity.rpm)
+        if (currentCommand != ShooterCalibration) hoodUpdate(smartDis)
     }
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
             "flywheel" to flywheel,
             "hood" to hood,
-            "distance" to Turret.targetDistance
+            "distance" to smartDis
         )
     }
 
     override fun simUpdate(dt: Time) {
-//        flywheelControl.simUpdate(dt)
-//        hood.simPosition = hood.positionSetpoint
-//        topShooter.simVelocity = topShooter.velocitySetpoint
+
     }
 }
