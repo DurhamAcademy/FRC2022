@@ -1,6 +1,5 @@
 package frc.robot.subsystems
 
-import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.math.filter.Debouncer.DebounceType
@@ -12,15 +11,14 @@ import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.Polynomial
-import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.ctre.KTalon
 import frc.kyberlib.motorcontrol.servo.KLinearServo
 import frc.kyberlib.simulation.Simulatable
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.commands.shooter.FireWhenReady
+import frc.robot.commands.shooter.ShooterCalibration
 import kotlin.math.*
 
 
@@ -64,7 +62,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     private val readyDebouncer = Debouncer(0.2, DebounceType.kBoth)  // fixme: maybe just kFalling
     private val shortReady
         inline get() = hood.atSetpoint &&
-                flywheel.velocityError.absoluteValue < (if(RobotContainer.op.shootWhileMoving) 50.rpm else Constants.SHOOTER_VELOCITY_TOLERANCE)
+                flywheel.velocityError.absoluteValue < (if (RobotContainer.op.shootWhileMoving) 50.rpm else Constants.SHOOTER_VELOCITY_TOLERANCE)
                 && flywheel.velocitySetpoint > 1.radiansPerSecond
     val ready: Boolean  // whether ready to shoot
         get() = readyDebouncer.calculate(shortReady)
@@ -148,10 +146,10 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         get() = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(smartDis.meters).seconds
 
     private val hoodPoly =
-        Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..6.5)  // poly fitted through our data
+        Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..5.5)  // poly fitted through our data
 
     fun hoodUpdate(dis: Length) {  // update the hood angle with a certain distance
-        val hood = Constants.HOODANGLE_INTERPOLATOR.calculate(dis.meters)//hoodPoly.eval(dis.value)
+        val hood = hoodPoly.eval(dis.value)
         if (hood == null) {
             inRange = false
         } else {
@@ -163,7 +161,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     private val speedPoly = Polynomial(37.43917, -119.05297, 1501.93519)
     fun flywheelUpdate(dis: Length) {  // update flywheel speed to shoot certain distance
         val interpolated =
-            Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters)//speedPoly.eval(dis.value) //.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
+            speedPoly.eval(dis.value) //.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
 
         if (interpolated != null) {
             val fudge = 1 + (SmartDashboard.getNumber(
@@ -184,7 +182,6 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         // setup stuff
         if (Game.sim) flywheel.setupSim(ff)
         if (RobotContainer.op.autoShot) defaultCommand = FireWhenReady
-        SmartDashboard.putNumber("time mult", 1.0)
     }
 
     override fun periodic() {
@@ -198,18 +195,25 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
             val parallel = hubSpeeds.vxMetersPerSecond
             val perp = hubSpeeds.vyMetersPerSecond
             for (i in 0 until moveIterations) {
-                val time = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(r.meters)
-                val a = r.meters - parallel * time * SmartDashboard.getNumber("time mult", 0.0)
-                val b = perp * time * SmartDashboard.getNumber("time mult", 0.0)
-                r = sqrt(a.pow(2) + b.pow(2)).meters
-                movementAngleOffset = atan(b / a).radians
+                val time = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(r.meters) * SmartDashboard.getNumber(
+                    "time mult",
+                    1.0
+                )
+                val a = r.meters - parallel * time
+                val b = perp * time
+                r = sqrt(a.pow(2) + b.pow(2)).meters.absoluteValue
+                movementAngleOffset = atan(b / a).radians * .3
             }
+            SmartDashboard.putNumber("effective distance", r.meters)
+            SmartDashboard.putNumber("effective turr offset", movementAngleOffset.degrees)
+            SmartDashboard.putNumber("parallel", parallel)
+            SmartDashboard.putNumber("perp", perp)
             effectiveDistance = r
         }
         // log stuff
         SmartDashboard.putNumber("fly error", flywheel.velocityError.rpm)
         SmartDashboard.putNumber("rpm", flywheel.velocity.rpm)
-//        if (currentCommand != ShooterCalibration) hoodUpdate(smartDis)
+        if (currentCommand != ShooterCalibration) hoodUpdate(smartDis)
     }
 
     override fun debugValues(): Map<String, Any?> {

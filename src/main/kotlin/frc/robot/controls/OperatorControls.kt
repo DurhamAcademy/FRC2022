@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.kyberlib.command.Game
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.robot.commands.climb.ManualClimb
+import frc.robot.commands.climb.PrepareClimb
 import frc.robot.commands.conveyor.ManualConveyor
 import frc.robot.commands.intake.ManualIntake
 import frc.robot.commands.shooter.ShooterCalibration
@@ -16,7 +17,7 @@ class OperatorControls {
     private val fudgeString = "back fudge"
     private val compressorString = "compressor enabled"
 
-    val shootWhileMoving
+    val shootWhileMoving  // todo: make this not rely on poseEstimation
         inline get() = SmartDashboard.getBoolean("move shot", false)
     val smartNav
         inline get() = SmartDashboard.getBoolean("nav updates", true)
@@ -25,17 +26,20 @@ class OperatorControls {
     val intakeCam
         inline get() = SmartDashboard.getBoolean("intake cam", false)
     val autoShot
-        inline get() = SmartDashboard.getBoolean("auto shot", false)
+        inline get() = false && SmartDashboard.getBoolean("auto shot", false)
     val climbStabilization
         inline get() = SmartDashboard.getNumber("stablizer", 0.0)
+    val compressor
+        inline get() = SmartDashboard.getBoolean("compressor enabled", true)
 
     init {
-        SmartDashboard.putBoolean("nav updates", !Game.COMPETITION)
+        SmartDashboard.putBoolean("nav updates", false && !Game.COMPETITION)
         SmartDashboard.putNumber(multString, 1.0)
         SmartDashboard.putNumber(fudgeString, .06)
         SmartDashboard.putBoolean(compressorString, true)
 
         SmartDashboard.putBoolean("invert drive motors", false)
+        SmartDashboard.putNumber("time mult", 1.0)
         SmartDashboard.putBoolean("move shot", false)
         SmartDashboard.putBoolean("auto shot", false)
         SmartDashboard.putNumber("curve comp", -4.0)
@@ -46,6 +50,8 @@ class OperatorControls {
         SmartDashboard.putBoolean("ManualConveyor", false)
         SmartDashboard.putBoolean("ManualIntake", false)
         SmartDashboard.putBoolean("ManualClimb", false)
+
+        SmartDashboard.putBoolean("prepare for climb", false)
     }
 
     private val COMPRESSOR_ENABLED = Trigger { SmartDashboard.getBoolean(compressorString, true) }.whenActive {
@@ -57,6 +63,9 @@ class OperatorControls {
         println("disable compress")
         emptySet<Subsystem>()
     }
+
+    private val PREPARE =
+        Trigger { SmartDashboard.getBoolean("prepare for climb", false) }.whileActiveOnce(PrepareClimb)
 
     // disable subsystems
     // manual subsystems

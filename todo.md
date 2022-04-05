@@ -11,36 +11,16 @@
 - https://github.com/Team254/FRC-2020-Public/blob/master/src/main/java/com/team254/frc2020/planners/DriveMotionPlanner.java#L225
 - current management
 
+
 # With robo (19 hours)
-- recharacterize the shooter (2 hour)
-  - new lookup
-  - tof
-  - spin comp
-  - back comp
-  - lower vel tolerance
-  - *** remember that you changed debounce
+
 - test other turret controls (it they want to redo tether, than recharacterize) (2 hours) [Monday]
     - state space (hard with bad ff)
-      - works well without vel comp 
-        - try time constant vel comp
-      - graph diff heading results
+        - works well without vel comp
+            - try time constant vel comp
+        - graph diff heading results
     - *** this needs to be really good to do shoot while move
-- test shot while moving (6 hour) [Monday/Tuesday]
-- test drivetrain swap (30 min) - should be fixed [Monday]
-- test auto (3 hour)  [Tuesday]
-# With robo
-
-- test other turret controls (it they want to redo tether, than recharacterize) (2 hours) **
-    - velocity
-    - state space (hard with bad ff)
-    -
-- test shot while moving (6 hour)
-- test why auto shot slow (3 hour)
-    - generally make auto better
-- flash other limelight (try) (4 hour)
-    - tune ball detection
-- climb prepare (30 min) [Wednesday]
-  - closed loop climb testing
+- remove drivetrain swap
 - climb stablization (30 min)
 - Chris driver practice (whatever time remains) [Thursday]
 
@@ -187,10 +167,10 @@
 * gear cats
 *
 * I want
-*  collect all the data from NCFIRST matches
-*  teach me all of the programming required for FRC
-*  predict all the matches for States
-*  predict potential from top teams
-*  graph trends for all the teams over matches
-*  predict our potential
-   */
+* collect all the data from NCFIRST matches
+* teach me all of the programming required for FRC
+* predict all the matches for States
+* predict potential from top teams
+* graph trends for all the teams over matches
+* predict our potential
+  */

@@ -7,7 +7,6 @@ import frc.kyberlib.math.units.Translation2d
 import frc.kyberlib.math.units.extensions.k
 import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.math.units.towards
-import frc.kyberlib.math.units.zeroTranslation
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.subsystems.Conveyor
@@ -23,8 +22,11 @@ object Dispose : CommandBase() {
         addRequirements(Shooter, Turret, Conveyor)
     }
 
-    private val default: Translation2d =
-        Translation2d(2.meters, Constants.FIELD_SIZE.y.meters - 2.meters)  // corner of hangar
+    private val default: Translation2d = Translation2d(
+        2.meters,
+        Constants.FIELD_SIZE.y.meters - 2.meters
+    )  // corner of hangar
+    private val alternate = Translation2d(2.0, 2.0)
     var disposalTarget: Translation2d = default
     val timer = Timer()
 
@@ -33,7 +35,7 @@ object Dispose : CommandBase() {
         timer.start()
         val pos = RobotContainer.navigation.position
         val center = Constants.HUB_POSITION
-        disposalTarget = if (pos.x > center.x && pos.y < center.y) zeroTranslation else default  // terminal
+        disposalTarget = if (pos.x > center.x && pos.y < center.y) alternate else default  // terminal
     }
 
     override fun execute() {

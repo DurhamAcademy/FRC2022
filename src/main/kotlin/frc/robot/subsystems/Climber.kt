@@ -36,10 +36,10 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     var status = ClimberStatus.IDLE
 
     // pneumatics that lift the climb arms
-    private val leftStatic = KSolenoid(7, 6, fake = false).apply {
+    private val leftStatic = KSolenoid(6, 7, fake = false).apply {
         identifier = "left static"
     }
-    private val rightStatic = KSolenoid(0, 1, fake = false).apply {
+    private val rightStatic = KSolenoid(1, 0, fake = false).apply {
         identifier = "right static"
     }
 
@@ -49,11 +49,18 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
-        // state space for closed loop control     mass(kg)                                     model std       measure std     pos tolerance   vel tolerance
-//        stateSpaceControl(elevatorSystem(120 * MassConversions.poundsToGrams * 1000.0), 5.inches.value, 3.inches.value, 1.inches.value, (3.inches/1.seconds).value, 12.0)
+        motorType = DCMotor.getNeo550(1)
+        // state space for closed loop control     mass(kg)         model std       measure std     pos tolerance   vel tolerance
+        stateSpaceControl(
+            elevatorSystem(Constants.ROBOT_WEIGHT),
+            5.inches.value,
+            .01.inches.value,
+            1.inches.value,
+            (3.inches / 1.seconds).value,
+            12.0
+        )
         minLinearPosition = 0.inches
-        maxLinearPosition = 30.inches
-        motorType = DCMotor.getNEO(1)
+        maxLinearPosition = 24.inches
         currentLimit = 30
 //        if(Game.sim) setupSim(winchFF)
     }
@@ -64,10 +71,18 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         radius = Constants.WINCH_RADIUS
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
-        customControl = { bangBang(it) }
+        motorType = DCMotor.getNeo550(1)
+//        stateSpaceControl(
+//            elevatorSystem(Constants.ROBOT_WEIGHT),
+//            5.inches.value,
+//            .01.inches.value,
+//            1.inches.value,
+//            (3.inches / 1.seconds).value,
+//            3.0
+//        )
+        bangBang(.5.inches, 1.metersPerSecond, effort = 3.0)
         minLinearPosition = 0.inches
-        maxLinearPosition = 30.inches
-        motorType = DCMotor.getNEO(1)
+        maxLinearPosition = 24.inches
         currentLimit = 30
     }
 
@@ -75,13 +90,13 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     var staticsLifted
         get() = leftStatic.extended
         set(value) {
-            leftStatic.extended = !value
-            rightStatic.extended = !value
+            leftStatic.extended = value
+            rightStatic.extended = value
         }
     var extension  // public variable to control position off both the arms
         get() = leftWinch.linearPosition
         set(value) {
-            leftWinch.linearPosition = value
+//            leftWinch.linearPosition = value
             rightWinch.linearPosition = value
         }
 
@@ -136,6 +151,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     override fun periodic() {
 //        debugDashboard()
 //        updateMotors()
+        SmartDashboard.putNumber("right arm pos", Climber.rightWinch.linearPosition.inches)
     }
 
     private val swing = Differentiator()

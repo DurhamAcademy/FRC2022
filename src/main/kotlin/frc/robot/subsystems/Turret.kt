@@ -61,8 +61,7 @@ object Turret : SubsystemBase(), Debug {
         currentLimit = 15
 
         val headingDiff = Differentiator()
-        val difFiler = LinearFilter.movingAverage(8)
-        val classic = { it: KMotorController ->
+        val classic = { _: KMotorController ->
             val polarSpeeds = Drivetrain.polarSpeeds
             val rot =
                 polarSpeeds.dTheta * 0.1.seconds//-headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.1.seconds
@@ -74,14 +73,15 @@ object Turret : SubsystemBase(), Debug {
             if (isZeroed) (ff + offsetCorrection) else 0.0//.coerceIn(-4.0, 4.0)
         }
 
-        val good = {
+        val good = { _: KMotorController ->
             position = clampSafePosition(positionSetpoint)
             val polarSpeeds = Drivetrain.polarSpeeds
             val movementComp = -polarSpeeds.dTheta
             val chassisComp = polarSpeeds.dOrientation
             val offsetCorrection = controller.calculate(positionError.rotations).rotationsPerSecond / feedforward.kv
             val targetVelocity = offsetCorrection - chassisComp - movementComp
-            val v = feedforward.calculate(targetVelocity.radiansPerSecond)// + controller.calculate(velocityError.radiansPerSecond)
+            val v =
+                feedforward.calculate(targetVelocity.radiansPerSecond)// + controller.calculate(velocityError.radiansPerSecond)
             v.zeroIf { v.absoluteValue < 1.0 }
         }
 
@@ -102,7 +102,7 @@ object Turret : SubsystemBase(), Debug {
             val compSpeed = (-polarSpeeds.dTheta * 0.0 - polarSpeeds.dOrientation).degreesPerSecond
             loop.nextR = VecBuilder.fill(
                 positionSetpoint.degrees,
-                compSpeed * 0.03
+                compSpeed * 0.01
             )
             loop.correct(VecBuilder.fill(position.degrees))
             loop.predict(updateRate.seconds)  // math
@@ -175,7 +175,7 @@ object Turret : SubsystemBase(), Debug {
     }
 
     // smooths out how fast we switch between lost and found
-    private val lostDebouncer = Debouncer(0.5, Debouncer.DebounceType.kBoth)
+    private val lostDebouncer = Debouncer(0.2, Debouncer.DebounceType.kBoth)  // *** this was changed from .5
     override fun periodic() {
         SmartDashboard.putString("turret cmd", this.currentCommand?.name ?: "none")
         debugDashboard()

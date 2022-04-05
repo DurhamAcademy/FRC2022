@@ -1,7 +1,6 @@
 package frc.robot
 
 import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
@@ -44,7 +43,7 @@ class Robot : KRobot() {
     }
 
     override fun teleopInit() {
-        if (!Game.COMPETITION) reset(Constants.START_POSE)
+//        if (!Game.COMPETITION) reset(Constants.START_POSE)
     }
 
     override fun teleopPeriodic() {
@@ -60,6 +59,7 @@ class Robot : KRobot() {
     }
 
     override fun autonomousInit() {
+        RobotContainer.startTime = Game.time
         // zero Turret
         Turret.isZeroed = false
         ZeroTurret.schedule(false)

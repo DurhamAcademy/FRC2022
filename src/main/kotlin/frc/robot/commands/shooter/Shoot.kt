@@ -48,7 +48,7 @@ object Shoot : CommandBase() {
         Shooter.stop()
         Conveyor.stop()
         RobotContainer.controller.rumble = 0.0
-        if (reenableCompressor) KSolenoid.compressor.enableDigital()
+        if (RobotContainer.op.compressor) KSolenoid.compressor.enableDigital()
 
     }
 }
