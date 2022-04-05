@@ -11,15 +11,18 @@
 - https://github.com/Team254/FRC-2020-Public/blob/master/src/main/java/com/team254/frc2020/planners/DriveMotionPlanner.java#L225
 - current management
 
-
-# With robo (19 hours)
-
-- test other turret controls (it they want to redo tether, than recharacterize) (2 hours) [Monday]
+# With robo
+- test other turret controls (it they want to redo tether, than recharacterize) (2 hours) **
+    - velocity
     - state space (hard with bad ff)
-        - works well without vel comp
-            - try time constant vel comp
-        - graph diff heading results
-    - *** this needs to be really good to do shoot while move
+    -
+- test shot while moving (6 hour)
+- test why auto shot slow (3 hour)
+    - generally make auto better
+- flash other limelight (try) (4 hour)
+    - tune ball detection
+- climb prepare (30 min) [Wednesday]
+  - closed loop climb testing
 - remove drivetrain swap
 - climb stablization (30 min)
 - Chris driver practice (whatever time remains) [Thursday]
