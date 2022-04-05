@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.motorcontrol.rev.KSparkMax
-import frc.robot.commands.intake.Idle
+import frc.robot.commands.conveyor.Idle
 
 
 /**

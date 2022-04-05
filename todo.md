@@ -1,4 +1,5 @@
 # In Sim
+
 - augmented loop (pg 109 of textbook)
     - detla U: add voltage into state model
         - https://www.chiefdelphi.com/t/971s-control-system/137365/15?u=tatestaples
@@ -7,34 +8,28 @@
 - current management
 
 # With robo (19 hours)
-- recharacterize the shooter (2 hour)
-  - new lookup
-  - tof
-  - spin comp
-  - back comp
-  - lower vel tolerance
-  - *** remember that you changed debounce
+
 - test other turret controls (it they want to redo tether, than recharacterize) (2 hours) [Monday]
     - state space (hard with bad ff)
-      - works well without vel comp 
-        - try time constant vel comp
-      - graph diff heading results
+        - works well without vel comp
+            - try time constant vel comp
+        - graph diff heading results
     - *** this needs to be really good to do shoot while move
 - test shot while moving (6 hour) [Monday/Tuesday]
 - test drivetrain swap (30 min) - should be fixed [Monday]
 - test auto (3 hour)  [Tuesday]
 - flash other limelight (try) (4 hour)
     - tune ball detection
-- climb prepare (30 min) [Wednesday]
-  - closed loop climb testing
 - climb stablization (30 min)
 - Chris driver practice (whatever time remains) [Thursday]
 
 ## random cool things
+
 - Auto Drive to Climb
 - Auto Climb
 
 ## Full Auto
+
 - goal system (shouldn't be too hard - should update) -> moderate difficulty
     - limelight
 - obstacles (can work on this) -> easy, just time intensive
@@ -152,13 +147,15 @@
             - fake solenoids
             - halucinating climb past 2 events
 
-
-
 /**
+
 * Definetly
-* - east
-* - hedgehogs
-* - triple strange
+*
+    - east
+*
+    - hedgehogs
+*
+    - triple strange
 *
 * Good:
 * sequence
@@ -173,10 +170,10 @@
 * gear cats
 *
 * I want
-*  collect all the data from NCFIRST matches
-*  teach me all of the programming required for FRC
-*  predict all the matches for States
-*  predict potential from top teams
-*  graph trends for all the teams over matches
-*  predict our potential
-   */
+* collect all the data from NCFIRST matches
+* teach me all of the programming required for FRC
+* predict all the matches for States
+* predict potential from top teams
+* graph trends for all the teams over matches
+* predict our potential
+  */

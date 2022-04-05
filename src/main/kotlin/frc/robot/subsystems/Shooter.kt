@@ -1,6 +1,5 @@
 package frc.robot.subsystems
 
-import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.math.filter.Debouncer.DebounceType
@@ -12,9 +11,7 @@ import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.Polynomial
-import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.ctre.KTalon
 import frc.kyberlib.motorcontrol.servo.KLinearServo
 import frc.kyberlib.simulation.Simulatable
@@ -65,7 +62,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     private val readyDebouncer = Debouncer(0.2, DebounceType.kBoth)  // fixme: maybe just kFalling
     private val shortReady
         inline get() = hood.atSetpoint &&
-                flywheel.velocityError.absoluteValue < (if(RobotContainer.op.shootWhileMoving) 50.rpm else Constants.SHOOTER_VELOCITY_TOLERANCE)
+                flywheel.velocityError.absoluteValue < (if (RobotContainer.op.shootWhileMoving) 50.rpm else Constants.SHOOTER_VELOCITY_TOLERANCE)
                 && flywheel.velocitySetpoint > 1.radiansPerSecond
     val ready: Boolean  // whether ready to shoot
         get() = readyDebouncer.calculate(shortReady)
@@ -131,7 +128,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         hoodUpdate(smartDis)
     }
 
-    private const val moveIterations = 3  // how many times to optimize the shoot while move target
+    private const val moveIterations = 1  // how many times to optimize the shoot while move target
     val effectiveHubLocation: Translation2d  // translated hub position based on robot velocity
         get() {
             val base = Constants.HUB_POSITION
@@ -198,12 +195,19 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
             val parallel = hubSpeeds.vxMetersPerSecond
             val perp = hubSpeeds.vyMetersPerSecond
             for (i in 0 until moveIterations) {
-                val time = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(r.meters)
-                val a = r.meters + parallel * time
+                val time = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(r.meters) * SmartDashboard.getNumber(
+                    "time mult",
+                    1.0
+                )
+                val a = r.meters - parallel * time
                 val b = perp * time
-                r = sqrt(a.pow(2) + b.pow(2)).meters
-                movementAngleOffset = atan(b / a).radians
+                r = sqrt(a.pow(2) + b.pow(2)).meters.absoluteValue
+                movementAngleOffset = atan(b / a).radians * .3
             }
+            SmartDashboard.putNumber("effective distance", r.meters)
+            SmartDashboard.putNumber("effective turr offset", movementAngleOffset.degrees)
+            SmartDashboard.putNumber("parallel", parallel)
+            SmartDashboard.putNumber("perp", perp)
             effectiveDistance = r
         }
         // log stuff

@@ -11,7 +11,7 @@ import frc.kyberlib.math.units.extensions.*
  */
 object Constants {
     // ------ Climb ------ //
-    val WINCH_RADIUS: Length = 0.375.inches
+    val WINCH_RADIUS: Length = 0.39.inches
     const val WINCH_GEAR_RATIO = (10.0 / 1.0) * (54.0 / 18.0)
 
     // ------ Drivetrain ------ //
@@ -73,16 +73,16 @@ object Constants {
     val TIME_OF_FLIGHT_INTERPOLATOR = Interpolator(
         mapOf(
             2.5 to 1.0,
-            3.0 to 1.15,
-            3.5 to 1.15,
-            4.0 to 1.09,
+            3.0 to 1.05,
+            3.5 to 1.10,
+            4.0 to 1.15,
             4.5 to 1.32,
             5.0 to 1.4,
             5.5 to 1.52
         )
     )
 
-    val SHOOTER_VELOCITY_TOLERANCE = 30.rpm
+    val SHOOTER_VELOCITY_TOLERANCE = 20.rpm
 
     // ------ Turret ------ //
     const val TURRET_GEAR_RATIO: Double = 10.0 * (215.0 / 18.0)  // 10 is vp and second is pulley ratio

@@ -1,8 +1,5 @@
 package frc.kyberlib.math.filters
 
-import frc.kyberlib.math.units.KUnit
-import frc.kyberlib.math.units.KUnitKey
-
 /**
  * Gets the rate of change of a stream of values
  */
@@ -24,7 +21,7 @@ class Differentiator : Filter() {
         return value
     }
 
-    inline fun <reified T: KUnitKey>calculate(unit: KUnit<T>) = KUnit<T>(calculate(unit.value))
+//    inline fun <reified T: KUnitKey>calculate(unit: KUnit<T>) = KUnit<T>(calculate(unit.value))
 
     override fun get(): Double = value
 }

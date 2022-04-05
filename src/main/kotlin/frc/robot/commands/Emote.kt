@@ -28,7 +28,6 @@ object Emote : CommandBase() {
     override fun initialize() {
         timer.reset()
         timer.start()
-        Climber.staticsLifted = true
         Turret.turret.position = 0.degrees
         Intaker.deployed = true
     }
@@ -38,6 +37,7 @@ object Emote : CommandBase() {
         Drivetrain.drive(ChassisSpeeds(0.0, 0.0, sin(t * TAU / turnPeriod) * turnMag))
 
         Turret.turret.updateVoltage()
+        if (Turret.turret.positionError.absoluteValue < 3.degrees) Climber.staticsLifted = true
 
         val vroomTime = t.mod(vroomPeriod)
         if (vroomTime in 0.0..vroomDuration || vroomTime in vroomDuration + vroomSpacing..2 * vroomDuration + vroomSpacing)

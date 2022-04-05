@@ -15,7 +15,7 @@ object RocketLeague : ControlSchema2022() {
 
         // throttle
         leftTrigger.apply {
-            maxVal = -12.0
+            maxVal = -12.0//-12.0
             expo = 20.0
             deadband = 0.2
         }
