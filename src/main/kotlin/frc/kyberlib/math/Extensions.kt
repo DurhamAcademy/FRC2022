@@ -13,8 +13,9 @@ fun Double.invertIf(condition: () -> Boolean) = this * if (condition()) -1.0 els
 
 fun Int.invertIf(condition: () -> Boolean) = this * if (condition()) -1 else 1
 
+const val kEpsilon = 0.00001
 infix fun Double.epsilonEquals(value: Double): Boolean {
-    return (this - value).absoluteValue < 0.00001
+    return (this - value).absoluteValue < kEpsilon
 }
 
 fun Double.round(decimals: Int): Double {
