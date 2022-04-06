@@ -47,7 +47,9 @@ object Turret : SubsystemBase(), Debug {
     var isZeroed = false
 
     // characterization of the turret
-    private val feedforward = SimpleMotorFeedforward(0.05, 1.1432, 0.045857) // 0.22832
+    private val feedforward = SimpleMotorFeedforward(
+        0.080522, 1.1453, 0.13704
+    ) // 0.22832
 
     // actual turret motors
     val controller = ProfiledPIDController(40.0, 3.0, 0.0, TrapezoidProfile.Constraints(1.0, 1.0)).apply {
