@@ -82,8 +82,7 @@ object Turret : SubsystemBase(), Debug {
             val chassisComp = polarSpeeds.dOrientation
             val offsetCorrection = controller.calculate(positionError.rotations).rotationsPerSecond / feedforward.kv
             val targetVelocity = offsetCorrection - chassisComp - movementComp
-            val v =
-                feedforward.calculate(targetVelocity.radiansPerSecond)// + controller.calculate(velocityError.radiansPerSecond)
+            val v = feedforward.calculate(targetVelocity.radiansPerSecond)// + controller.calculate(velocityError.radiansPerSecond)
             v.zeroIf { v.absoluteValue < 1.0 }
         }
 

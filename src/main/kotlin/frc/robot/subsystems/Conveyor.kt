@@ -38,12 +38,12 @@ object Conveyor : SubsystemBase(), Debug {
 
     fun feed() {
         status = ConveyorStatus.FEEDING
-        feeder.percent = 0.5
+        feeder.percent = 0.8
         conveyor.percent = 0.6
     }
 
     fun prepare() {
-        conveyor.percent = -.1
+        conveyor.percent = -.05
         feeder.percent = -0.5
     }
 

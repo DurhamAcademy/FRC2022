@@ -149,7 +149,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..5.5)  // poly fitted through our data
 
     fun hoodUpdate(dis: Length) {  // update the hood angle with a certain distance
-        val hood = hoodPoly.eval(dis.value)
+        val hood = Constants.HOODANGLE_INTERPOLATOR.calculate(dis.meters)// hoodPoly.eval(dis.value)
         if (hood == null) {
             inRange = false
         } else {
@@ -160,8 +160,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     private val speedPoly = Polynomial(37.43917, -119.05297, 1501.93519)
     fun flywheelUpdate(dis: Length) {  // update flywheel speed to shoot certain distance
-        val interpolated =
-            speedPoly.eval(dis.value) //.coerceAtMost(2000.rpm)//Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters).rpm
+        val interpolated = Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters)
 
         if (interpolated != null) {
             val fudge = 1 + (SmartDashboard.getNumber(
