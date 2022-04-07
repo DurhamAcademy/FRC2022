@@ -7,6 +7,7 @@ import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.inches
 import frc.kyberlib.math.zeroIf
+import frc.robot.Robot
 import frc.robot.RobotContainer
 import frc.robot.commands.drive.Drive
 import frc.robot.subsystems.*
@@ -31,6 +32,16 @@ object Climb : CommandBase() {
         Climber.status = ClimberStatus.ACTIVE
     }
 
+    /**
+     * true if the climb is too tilted and should have corrected earlier.
+     * this should stop the climb becasue it could break the robot if we continue
+     */
+    var climbError = false;
+    /**
+     * is true if the climb has become too tilted and must be corrected.
+     * it should stay that way until it is correct enough
+     */
+    var isCorrecting = false;
     var hasFallen = false
 
     /**
@@ -43,10 +54,20 @@ object Climb : CommandBase() {
 
 //        Climber.leftExtendable.percent = RobotContainer.controller.leftX.raw()
         val default = -RobotContainer.controller.rightY.raw().zeroIf { it.absoluteValue < .02 }
+
+        // MARK: correcting code
+        var degs = RobotContainer.gyro.roll.absoluteValue.degrees
+        val defaultLeft = default
+        val defaultRight = default
+
         Climber.rightWinch.percent = default
         if(SmartDashboard.getBoolean("sync climb", true)) {
             Climber.leftWinch.percent = default
-        } else Climber.leftWinch.percent = -RobotContainer.controller.leftY.raw().zeroIf { it.absoluteValue < .02 }
+        } else {
+            Climber.leftWinch.percent = -RobotContainer.controller.leftY.raw().zeroIf {
+                it.absoluteValue < .02
+            }
+        }
 //        Climber.rightExtendable.percent = RobotContainer.controller.rightX.raw()
 
 
