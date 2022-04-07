@@ -4,11 +4,8 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
-import frc.kyberlib.math.units.extensions.Length
-import frc.kyberlib.math.units.extensions.Time
-import frc.kyberlib.math.units.extensions.feet
-import frc.kyberlib.math.units.extensions.meters
-import frc.robot.Constants
+import frc.kyberlib.math.units.Translation2d
+import frc.kyberlib.math.units.extensions.*
 
 /**
  * Updated Field class to implement new behaviours.
@@ -20,8 +17,9 @@ import frc.robot.Constants
 object KField2d : Field2d() {
     val obstacles = ArrayList<Obstacle>()
     val goals = ArrayList<Goal>()
-    var width: Length = Constants.FIELD_SIZE.y.meters
-    var height: Length = Constants.FIELD_SIZE.x.meters
+    val fieldSize = Translation2d(648.inches, 324.inches)
+    var width: Length = fieldSize.y.meters
+    var height: Length = fieldSize.x.meters
 
     var trajectory: Trajectory? = null
         set(value) {

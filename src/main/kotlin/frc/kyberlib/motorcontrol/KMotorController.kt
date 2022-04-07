@@ -26,7 +26,6 @@ import frc.kyberlib.math.sign
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.simulation.Simulatable
 import frc.kyberlib.simulation.Simulation
-import frc.robot.Constants
 import kotlin.math.absoluteValue
 
 typealias GearRatio = Double
@@ -1148,12 +1147,11 @@ object MotorUnconfigured : Exception("You must set motor type before using linea
  */
 internal fun estimateFF(motorType: DCMotor, gearRatio: Double, momentOfInertia: Double) {
     val ka = (motorType.rOhms * momentOfInertia) / (gearRatio * motorType.KtNMPerAmp)
-    val kv =
-        -gearRatio * gearRatio * motorType.KtNMPerAmp / (motorType.KvRadPerSecPerVolt * motorType.rOhms * momentOfInertia) * -ka
+    val kv = -gearRatio * gearRatio * motorType.KtNMPerAmp / (motorType.KvRadPerSecPerVolt * motorType.rOhms * momentOfInertia) * -ka
     println("kv: $kv, ka: $ka")
 }
 
 
 fun main() {
-    estimateFF(DCMotor.getNeo550(1), Constants.TURRET_GEAR_RATIO, 0.123787)
+    estimateFF(DCMotor.getNeo550(1), 10.0 * (215.0 / 18.0), 0.123787)
 }

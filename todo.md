@@ -1,29 +1,16 @@
 # In Sim
-
-- adjust climb arms to be same by default
-    - fix issues with manual
-- time delay on arm lift so turret safe
-- reformat Shuffleboard (require driver-station)
+- control affine plant ff
 - augmented loop (pg 109 of textbook)
     - detla U: add voltage into state model
         - https://www.chiefdelphi.com/t/971s-control-system/137365/15?u=tatestaples
-- https://www.chiefdelphi.com/t/what-impressive-things-did-you-do-in-software-this-year/382245/48?u=tatestaples
-- https://github.com/Team254/FRC-2020-Public/blob/master/src/main/java/com/team254/frc2020/planners/DriveMotionPlanner.java#L225
-- current management
+- better turning in difdrive dynamics
+- work on better elevator and arm systems (using non linearity)
+- fix debugs
 
 # With robo
 - test other turret controls (it they want to redo tether, than recharacterize) (2 hours) **
     - velocity
     - state space (hard with bad ff)
-    -
-- test shot while moving (6 hour)
-- test why auto shot slow (3 hour)
-    - generally make auto better
-- flash other limelight (try) (4 hour)
-    - tune ball detection
-- climb prepare (30 min) [Wednesday]
-  - closed loop climb testing
-- remove drivetrain swap
 - climb stablization (30 min)
 - Chris driver practice (whatever time remains) [Thursday]
 
@@ -44,45 +31,33 @@
     - should add endgameInit or something (idk)
 
 ## Long Term
-
 - Make sure things are isolatable (specifically autoDrive and Navigation)
 - think about roborio2 (they said 30% faster)
-- probably get falcons
 
 ### software pitch
 
 - Features
     - intake
         - no penalties
-        - auto intake?
         - driver camera
     - drivetrain
         - fancy odometry
         - auto drive
         - playback controls
-        - multiple coordinate systems
-            - standard
-            - polar
-        - speed systems
-            - robo centric
-            - hub centric
-            - field centric
-        - lead swap
     - turret
         - statespace
-        - limelight
-        - working while unplugged
+        - vision
+        - working without camera
         - self wrapping (protect the cables)
         - side spin comp
+        - back compensation
         - shoot while moving
         - disposal
     - Shooter
         - conveyor management
         - control schemes
         - falcons
-        - shoot while move
         - closed loop, feed when ready
-        - active hood
         - speed based on poly fit
     - Climb
         - position controlled
@@ -91,15 +66,10 @@
     - Controls
         - Modular control system
         - dashboard override on everything
-        - turn off fancy things if no work
-            - increase flywheel speed if shooting low
-            - debug intake snapping
-            - force turret out of weird positions
 - Kyber
     - motivation
         - personal journey in understanding
         - documentation for future year
-        - mechansims
     - motor control systems integration (abstraction allows for modularity)
         - native
         - pid
