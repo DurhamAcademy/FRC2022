@@ -1,12 +1,13 @@
 package frc.kyberlib.lighting.animations
 
+import frc.kyberlib.math.units.extensions.Time
 import java.awt.Color
 import kotlin.math.ceil
 import kotlin.math.pow
 
-class AnimationRGBRain(private val cycles: Double = 1.0, private val dropLength: Int, val ticksPerMovement: Int, val reversed: Boolean = false) : LEDAnimation() {
+class AnimationRGBRain(private val cycles: Double = 1.0, private val dropLength: Int, val secondsPerMovement: Time, val reversed: Boolean = false, enableTransparency: Boolean = false, condition: ()->Boolean = { true }) : LEDAnimation(condition, enableTransparency) {
 
-    fun constructInitialBuffer(length: Int): MutableList<Color> {
+    private fun constructInitialBuffer(length: Int): MutableList<Color> {
 
         return Array<Color>(dropLength * ceil(length.toDouble() / dropLength).toInt()) {
             val alpha = ((1 + (it % dropLength)) / dropLength.toFloat()).pow(2)
@@ -14,7 +15,7 @@ class AnimationRGBRain(private val cycles: Double = 1.0, private val dropLength:
         }.toMutableList()
     }
 
-    fun constructRGBBuffer(length: Int): MutableList<Color> {
+    private fun constructRGBBuffer(length: Int): MutableList<Color> {
         return if (cycles >= 1) {
             Array<Color>(length) {
                 val hue = (it % (length / cycles)) / (length / cycles)
@@ -28,13 +29,13 @@ class AnimationRGBRain(private val cycles: Double = 1.0, private val dropLength:
         }
     }
 
-    override fun getBuffer(ticks: Int, length: Int): List<Color> {
+    override fun getBuffer(time: Time, length: Int): List<Color> {
         val b = constructInitialBuffer(length)
         val rgb = constructRGBBuffer(length)
 
 //        println(rgb.size)
 
-        for (i in 0 until (ticks / ticksPerMovement) % (dropLength * rgb.size)) {
+        for (i in 0 until (time / secondsPerMovement).toInt() % (dropLength * rgb.size)) {
             b.add(0, b.removeAt(b.size - 1))
             rgb.add(0, rgb.removeAt(rgb.size - 1))
         }

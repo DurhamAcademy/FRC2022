@@ -1,5 +1,6 @@
 package frc.kyberlib.lighting
 
+import frc.kyberlib.command.Game
 import java.awt.Color
 
 private val gamma = intArrayOf(
@@ -21,4 +22,5 @@ private val gamma = intArrayOf(
     215, 218, 220, 223, 225, 228, 231, 233, 236, 239, 241, 244, 247, 249, 252, 255
 )
 
-fun Color.gammaCorrect() = Color(gamma[red], gamma[green], gamma[blue], alpha)
+// gamma correction isn't important in sim sense it's a correction for the hardware
+fun Color.gammaCorrect() = if(Game.sim) this else Color(gamma[red], gamma[green], gamma[blue], alpha)

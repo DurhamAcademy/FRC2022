@@ -3,6 +3,7 @@ package frc.kyberlib.lighting
 import edu.wpi.first.wpilibj.AddressableLED
 import edu.wpi.first.wpilibj.AddressableLEDBuffer
 import edu.wpi.first.wpilibj.util.Color8Bit
+import frc.kyberlib.command.Game
 
 class KLEDStrip(port: Int, private val length: Int) {
 
@@ -13,7 +14,7 @@ class KLEDStrip(port: Int, private val length: Int) {
     private val addressableLED = AddressableLED(port)
     private val regions = arrayListOf<KLEDRegion>()
 
-    private var ticks = 0
+    private val startTime = Game.time
 
     init {
         require(singleton == null) { "Only one LED strip may be used at once" }
@@ -31,7 +32,8 @@ class KLEDStrip(port: Int, private val length: Int) {
 
     fun update() {
         val buffer = AddressableLEDBuffer(length)
-        val mutableBuffer = KLEDRegion.composite(length, ticks, regions).map {
+        val dt = Game.time - startTime
+        val mutableBuffer = KLEDRegion.composite(length, dt, regions).map {
             it.gammaCorrect()
         }
 
@@ -40,7 +42,5 @@ class KLEDStrip(port: Int, private val length: Int) {
         }
 
         addressableLED.setData(buffer)
-
-        ticks++
     }
 }

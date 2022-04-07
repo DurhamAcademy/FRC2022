@@ -109,8 +109,7 @@ object Constants {
     val HIGH2TRAVERSE = 2.feet
 
     // ----- measurements ----- //
-    val ROBOT_WEIGHT = 120.0 * MassConversions.poundsToGrams * 1000.0  // kg
-    const val CLIMB_MOMENT_OF_INERTIA = 0.10571
+    val ROBOT_WEIGHT = 115.0 * MassConversions.poundsToGrams * 1000.0  // kg
     const val FLYWHEEL_MOMENT_OF_INERTIA = 0.00064 // kg * m^2
     val BALL_DIAMETER = 9.5.inches
 }

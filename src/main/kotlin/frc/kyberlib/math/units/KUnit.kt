@@ -17,6 +17,7 @@ value class KUnit<T>(val value: Double) : Comparable<KUnit<T>> {
     operator fun div(other: KUnit<T>) = this.value / other.value
     operator fun times(other: Double): KUnit<T> = KUnit<T>(value * other)
     operator fun div(other: Double): KUnit<T> = KUnit<T>(value / other)
+    operator fun rem(other: KUnit<T>) = KUnit<T>(value % other.value)
 
     val absoluteValue inline get() = KUnit<T>(value.absoluteValue)
     override fun compareTo(other: KUnit<T>) = value.compareTo(other.value)

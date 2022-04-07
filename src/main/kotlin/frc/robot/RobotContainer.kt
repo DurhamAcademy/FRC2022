@@ -15,9 +15,14 @@ import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.lighting.KLEDRegion
 import frc.kyberlib.lighting.KLEDStrip
 import frc.kyberlib.lighting.animations.*
+import frc.kyberlib.math.kEpsilon
+import frc.kyberlib.math.units.extensions.feetPerSecond
+import frc.kyberlib.math.units.extensions.inches
+import frc.kyberlib.math.units.extensions.seconds
 import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.commands.Emote
 import frc.robot.commands.climb.Climb
+import frc.robot.commands.climb.PrepareClimb
 import frc.robot.commands.conveyor.Eject
 import frc.robot.commands.intake.Flush
 import frc.robot.commands.intake.Intake
@@ -34,6 +39,7 @@ import frc.robot.controls.RocketLeague
 import frc.robot.subsystems.*
 import org.photonvision.PhotonCamera
 import java.awt.Color
+import kotlin.math.absoluteValue
 
 /**
  * Contains all Robot subsystems and sensors
@@ -45,13 +51,13 @@ object RobotContainer {
     val ballMonitor = PhotonCamera("balls")
 
     init {
-        if (Game.real) { //Constants.DRIVER_CAMERA) {
+        if (Game.real) {
             val video = CameraServer.startAutomaticCapture()
             video.videoMode = VideoMode(video.videoMode.pixelFormat, 640, 480, 30)
         }
     }
 
-    var startTime = Game.time
+    var startTime = 0.seconds
 
     // hall sensor
     val turretLimit = DigitalInput(0)
@@ -85,47 +91,70 @@ object RobotContainer {
     }
 
     // QUOTE: I dont need a christmas tree, i need a robot. -Cherith
-    val leds = KLEDStrip(0, 74).apply {
+    val leds = KLEDStrip(1, 74).apply {
         val coral = Color(255, 93, 115)
+        val allianceColor = if(Game.alliance == DriverStation.Alliance.Red) coral else Color.CYAN
 
         // idle alliance animations
-        this += KLEDRegion(AnimationRGBRain(1.0, 10, 2, false), 0, 30)
-        this += KLEDRegion(AnimationRGBRain(1.0, 10, 2, true), 30, 60)
-        this += KLEDRegion(AnimationCylon(Color.RED, 5, 40), 60, 70) { Game.alliance == DriverStation.Alliance.Red }
-        this += KLEDRegion(
-            AnimationCylon(Color.CYAN, 5, 40),
-            60,
-            74
-        ) { Game.alliance == DriverStation.Alliance.Blue }
+        val prematchArms = AnimationRGBFade(7.seconds)//AnimationRGBWave(1.0, .1.seconds)
+        val idleArms = AnimationSolid(Color.BLACK) {Game.enabled}
+        val idleCylon = AnimationCylon(allianceColor, 5, 1.seconds)
 
         // turret status
-        this += KLEDRegion(
-            AnimationBlink(Color.BLUE, 20), 60, 74
-        ) { Turret.currentCommand == ZeroTurret }
-        this += KLEDRegion(
-            AnimationSolid(Color.RED), 60, 74
-        ) { Turret.currentCommand == SeekTurret }
-        this += KLEDRegion(
-            AnimationSolid(Color.YELLOW), 60, 74
-        ) { Turret.currentCommand == AimTurret }
-        this += KLEDRegion(
-            AnimationPulse(Color.YELLOW, 40), 60, 74, false
-        ) { Turret.ready }
+        val zero = AnimationBlink(Color.BLUE, 1.seconds){ Turret.currentCommand == ZeroTurret }
+        val seek = AnimationSolid(Color.RED) { Turret.currentCommand == SeekTurret && Game.enabled }
+        val aiming = AnimationSolid(Color.YELLOW) { Turret.currentCommand == AimTurret }
+        val turretReady = AnimationPulse(Color.YELLOW, 2.seconds) { Turret.ready && Game.enabled  }
+
         // shooter status
-        this += KLEDRegion(
-            AnimationSolid(Color.GREEN), 60, 74, false
-        ) { Shooter.status == ShooterStatus.SPINUP }
-        this += KLEDRegion(
-            AnimationPulse(Color.GREEN, 40),
-            60,
-            74,
-            false
-        ) { Shooter.status == ShooterStatus.SHOT }
-        this += KLEDRegion(
-            AnimationPulse(Color.RED, 40),
-            60,
-            74
-        ) { !Shooter.inRange && Turret.currentCommand == AimTurret }
+        val spinup = AnimationSolid(Color.GREEN) { Shooter.status == ShooterStatus.SPINUP }
+        val shooting = AnimationPulse(Color.GREEN, 2.seconds) { Shooter.status == ShooterStatus.SHOT }
+        val outOfRange = AnimationPulse(Color.RED, 2.seconds){ !Shooter.inRange && Turret.currentCommand == AimTurret }
+
+        // climb
+        val climbColor = Color(255, 155, 0)
+        val upClimb = AnimationRain(climbColor, 10, .1.seconds, false) {Climber.leftWinch.percent < -kEpsilon}
+        val downClimb = AnimationRain(climbColor, 10, .1.seconds, true) {Climber.leftWinch.percent > kEpsilon}
+        val extension = AnimationCustom({t, l -> List<Color>(l) { index -> if (index / l.toDouble() < Climber.extension / 24.inches) climbColor else Color.BLACK } }, {Climber.staticsLifted}, false)
+        val prepare = AnimationRain(climbColor, 3, 1.seconds) { Climber.currentCommand == PrepareClimb}
+        val postMatch = AnimationPulse(allianceColor, 2.seconds) {Game.disabled && Game.COMPETITION && startTime != 0.seconds}
+
+        // other random animations
+        val leftTurn = AnimationBlink(Color.YELLOW, .5.seconds) {Drivetrain.chassisSpeeds.omegaRadiansPerSecond > 0.1}
+        val rightTurn = AnimationBlink(Color.YELLOW, .5.seconds) {Drivetrain.chassisSpeeds.omegaRadiansPerSecond < -0.1}
+
+        val maxSpeed = 12.feetPerSecond
+        val leftSpeed = AnimationCustom({t, l -> List<Color>(l) { index ->
+            val percentDis = (index/l.toDouble())
+            val percentSpeed = (Drivetrain.leftMaster.linearVelocity/maxSpeed)
+            if(percentDis+.01 < percentSpeed.absoluteValue) {
+                Color(Color.HSBtoRGB((.33 - .33 * percentDis).toFloat(),  1F, 1F))
+            } else Color.BLACK
+        }}, { Game.enabled })
+        val rightSpeed = AnimationCustom({t, l -> List<Color>(l) { index ->
+            val percentDis = (index/l.toDouble())
+            val percentSpeed = (Drivetrain.rightMaster.linearVelocity/maxSpeed)
+            if(percentDis+.01 < percentSpeed.absoluteValue) {
+                Color(Color.HSBtoRGB((.33 - .33 * percentDis).toFloat(),  1F, 1F))
+            } else Color.BLACK
+        }}, { Game.enabled })
+
+        // left arm
+        this += KLEDRegion(0, 30,
+            prematchArms, idleArms, leftSpeed, upClimb, downClimb, prepare, postMatch
+        )
+        // right arm
+        this += KLEDRegion(30, 60,
+           prematchArms, idleArms, rightSpeed, upClimb, downClimb, prepare, postMatch,
+            reversed = true
+        )
+//         turret
+        this += KLEDRegion(60, 74,
+            idleCylon, zero, seek, aiming, turretReady, spinup, shooting, outOfRange
+        )
+
+        // todo:
+        // blink no work
     }
 
     init {

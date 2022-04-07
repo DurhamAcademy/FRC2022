@@ -1,8 +1,10 @@
 package frc.kyberlib.lighting.animations
 
+import frc.kyberlib.math.units.extensions.Time
+import frc.kyberlib.math.units.extensions.seconds
 import java.awt.Color
 
-class AnimationRGBWave(private val cycles: Double = 1.0, val ticksPerMovement: Int = 10, val reversed: Boolean = false) : LEDAnimation() {
+class AnimationRGBWave(private val cycles: Double = 1.0, val secondsPerMovement: Time = .2.seconds, val reversed: Boolean = false, enableTransparency: Boolean = false, condition: ()->Boolean = { true }) : LEDAnimation(condition, enableTransparency) {
 
     fun constructInitialBuffer(length: Int): MutableList<Color> {
 
@@ -19,10 +21,10 @@ class AnimationRGBWave(private val cycles: Double = 1.0, val ticksPerMovement: I
         }
     }
 
-    override fun getBuffer(ticks: Int, length: Int): List<Color> {
+    override fun getBuffer(time: Time, length: Int): List<Color> {
         val b = constructInitialBuffer(length)
 
-        for (i in 0 until (ticks / ticksPerMovement) % b.size) {
+        for (i in 0 until (time / secondsPerMovement).toInt() % b.size) {
             b.add(0, b.removeAt(b.size - 1))
         }
 

@@ -2,7 +2,8 @@
   "HALProvider": {
     "Addressable LEDs": {
       "0": {
-        "columns": 14
+        "columns": 30,
+        "serpentine": true
       },
       "window": {
         "visible": true
@@ -84,7 +85,6 @@
         "Robot": {
           "arrows": false
         },
-        "image": "C:\\Users\\frc6502\\robot-code\\FRC2022\\Rapid React Field.png",
         "traj": {
           "arrowSize": 0,
           "arrows": false,
@@ -404,7 +404,7 @@
     "Plot <2>": {
       "plots": [
         {
-          "height": 205,
+          "height": -29,
           "series": [
             {
               "color": [
@@ -427,7 +427,7 @@
           ]
         },
         {
-          "height": 205,
+          "height": -29,
           "series": [
             {
               "color": [
