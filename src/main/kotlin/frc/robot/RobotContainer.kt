@@ -14,10 +14,7 @@ import frc.kyberlib.command.Game
 import frc.kyberlib.input.controller.KXboxController
 import frc.kyberlib.lighting.KLEDRegion
 import frc.kyberlib.lighting.KLEDStrip
-import frc.kyberlib.lighting.animations.AnimationBlink
-import frc.kyberlib.lighting.animations.AnimationCylon
-import frc.kyberlib.lighting.animations.AnimationPulse
-import frc.kyberlib.lighting.animations.AnimationSolid
+import frc.kyberlib.lighting.animations.*
 import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.commands.Emote
 import frc.robot.commands.climb.Climb
@@ -88,34 +85,46 @@ object RobotContainer {
     }
 
     // QUOTE: I dont need a christmas tree, i need a robot. -Cherith
-    val leds = KLEDStrip(0, 14).apply {
+    val leds = KLEDStrip(0, 74).apply {
         val coral = Color(255, 93, 115)
 
         // idle alliance animations
-        this += KLEDRegion(AnimationCylon(Color.RED, 5, 40), 0, 14) { Game.alliance == DriverStation.Alliance.Red }
+        this += KLEDRegion(AnimationRGBRain(1.0, 10, 2, false), 0, 30)
+        this += KLEDRegion(AnimationRGBRain(1.0, 10, 2, true), 30, 60)
+        this += KLEDRegion(AnimationCylon(Color.RED, 5, 40), 60, 70) { Game.alliance == DriverStation.Alliance.Red }
         this += KLEDRegion(
             AnimationCylon(Color.CYAN, 5, 40),
-            0,
-            14
+            60,
+            74
         ) { Game.alliance == DriverStation.Alliance.Blue }
 
         // turret status
-        this += KLEDRegion(AnimationBlink(Color.BLUE, 20), 0, 14) { Turret.currentCommand == ZeroTurret }
-        this += KLEDRegion(AnimationSolid(Color.RED), 0, 14) { Turret.currentCommand == SeekTurret }
-        this += KLEDRegion(AnimationSolid(Color.YELLOW), 0, 14) { Turret.currentCommand == AimTurret }
-        this += KLEDRegion(AnimationPulse(Color.YELLOW, 40), 0, 14, false) { Turret.ready }
+        this += KLEDRegion(
+            AnimationBlink(Color.BLUE, 20), 60, 74
+        ) { Turret.currentCommand == ZeroTurret }
+        this += KLEDRegion(
+            AnimationSolid(Color.RED), 60, 74
+        ) { Turret.currentCommand == SeekTurret }
+        this += KLEDRegion(
+            AnimationSolid(Color.YELLOW), 60, 74
+        ) { Turret.currentCommand == AimTurret }
+        this += KLEDRegion(
+            AnimationPulse(Color.YELLOW, 40), 60, 74, false
+        ) { Turret.ready }
         // shooter status
-        this += KLEDRegion(AnimationSolid(Color.GREEN), 0, 14, false) { Shooter.status == ShooterStatus.SPINUP }
+        this += KLEDRegion(
+            AnimationSolid(Color.GREEN), 60, 74, false
+        ) { Shooter.status == ShooterStatus.SPINUP }
         this += KLEDRegion(
             AnimationPulse(Color.GREEN, 40),
-            0,
-            14,
+            60,
+            74,
             false
         ) { Shooter.status == ShooterStatus.SHOT }
         this += KLEDRegion(
             AnimationPulse(Color.RED, 40),
-            0,
-            14
+            60,
+            74
         ) { !Shooter.inRange && Turret.currentCommand == AimTurret }
     }
 

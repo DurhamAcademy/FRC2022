@@ -103,8 +103,8 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         get() = hood.position
         set(value) {
             SmartDashboard.putNumber("hood dis", value.millimeters)
-            hood.position = value
-            hood2.position = value
+//            hood.position = value
+//            hood2.position = value
         }
 
     //https://www.mathsisfun.com/algebra/trig-cosine-law.html
