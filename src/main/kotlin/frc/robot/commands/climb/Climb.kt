@@ -12,6 +12,8 @@ import frc.robot.RobotContainer
 import frc.robot.commands.drive.Drive
 import frc.robot.subsystems.*
 import kotlin.math.absoluteValue
+import kotlin.math.max
+import kotlin.math.min
 
 
 /**
@@ -58,8 +60,8 @@ object Climb : CommandBase() {
         // MARK: correcting code
         var tolorance = 3
         var degs = RobotContainer.gyro.roll.absoluteValue.degrees
-        val defaultLeft = default * (degs*(1.0/tolorance))+1
-        val defaultRight = default * (degs*(1.0/tolorance))-1
+        val defaultLeft = default * min((degs*(1.0/tolorance))+1, 1)
+        val defaultRight = default * max((degs*(1.0/tolorance))-1), -1
 
         Climber.rightWinch.percent = defaultRight
         if(SmartDashboard.getBoolean("sync climb", true)) {
