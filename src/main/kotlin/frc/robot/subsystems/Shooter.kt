@@ -96,15 +96,15 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     }
 
     // Servo that sets the hood angle
-    private val hood = KLinearServo(8, 100.millimeters, 18.0.millimetersPerSecond)
-    private val hood2 = KLinearServo(9, 100.millimeters, 18.0.millimetersPerSecond)
+    private val hood = KLinearServo(5, 100.millimeters, 18.0.millimetersPerSecond)
+    private val hood2 = KLinearServo(6, 100.millimeters, 18.0.millimetersPerSecond)
 
     var hoodDistance: Length  // public accessor var. Makes them move in sync
         get() = hood.position
         set(value) {
             SmartDashboard.putNumber("hood dis", value.millimeters)
-//            hood.position = value
-//            hood2.position = value
+            hood.position = value
+            hood2.position = value
         }
 
     //https://www.mathsisfun.com/algebra/trig-cosine-law.html
@@ -130,7 +130,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     private const val moveIterations = 1  // how many times to optimize the shoot while move target
     val effectiveHubLocation: Translation2d  // translated hub position based on robot velocity
-        get() {
+        inline get() {
             val base = Constants.HUB_POSITION
             if (!Constants.MOVEMENT_CORRECTION) return base
             val fieldSpeeds = Drivetrain.fieldRelativeSpeeds
@@ -142,7 +142,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     var movementAngleOffset: Angle = 0.degrees  // how much robot movement should cause turret to turn to compensate
     var effectiveDistance: Length = 0.meters  // how far shoooter should behave to compensate for movement
 
-    private val timeOfFlight  // how long it should take the ball to score
+    val timeOfFlight  // how long it should take the ball to score
         get() = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(smartDis.meters).seconds
 
     private val hoodPoly =

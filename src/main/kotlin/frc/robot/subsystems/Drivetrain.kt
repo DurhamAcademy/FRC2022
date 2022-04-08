@@ -111,7 +111,8 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         get() = SmartDashboard.getBoolean("invert drive motors", false)
 
 
-    val kinematics = DifferentialDriveKinematics(Constants.TRACK_WIDTH)  // calculator to make drivetrain move is the desired directions
+    val kinematics =
+        DifferentialDriveKinematics(Constants.TRACK_WIDTH)  // calculator to make drivetrain move is the desired directions
     override var chassisSpeeds: ChassisSpeeds  // variable representing the direction we want the robot to move
         get() = kinematics.toChassisSpeeds(wheelSpeeds)
         set(value) {
@@ -152,7 +153,10 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
             val polar = polarSpeeds
             return ChassisSpeeds(
                 polar.dr.value,
-                polar.dTheta.toTangentialVelocity(Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters).value,
+                polar.dTheta.toTangentialVelocity(
+                    Turret.targetDistance
+                        ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+                ).value,
                 polar.dOrientation.radiansPerSecond
             )
         }
@@ -220,11 +224,15 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
      * Update navigation
      */
     override fun periodic() {
-        RobotContainer.navigation.update(
-            wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition
+//        RobotContainer.navigation.update(
+//            wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition
+//        )
+        RobotContainer.navigation.poseEstimator.update(
+            RobotContainer.gyro.heading.w,
+            wheelSpeeds,
+            leftMaster.linearPosition.meters,
+            rightMaster.linearPosition.meters
         )
-        debugDashboard()
-
         SmartDashboard.putNumber("p spin", dif.calculate(RobotContainer.gyro.heading.radians))
         SmartDashboard.putNumber("c spin", chassisSpeeds.omegaRadiansPerSecond)
         SmartDashboard.putNumber("l_error", leftMaster.linearVelocityError.value)

@@ -39,14 +39,14 @@ object Climb : CommandBase() {
     override fun execute() {
         Debug.log("Climb Command", "execute", level = DebugFilter.Low)
         Turret.turret.position = 0.degrees
-        if(Turret.turret.positionError.absoluteValue < 5.degrees) Climber.staticsLifted = true
+        if (Turret.turret.positionError.absoluteValue < 5.degrees) Climber.staticsLifted = true
 
 //        Climber.leftExtendable.percent = RobotContainer.controller.leftX.raw()
         val default = -RobotContainer.controller.rightY.raw().zeroIf { it.absoluteValue < .02 }
-        Climber.rightWinch.percent = default
-        if(SmartDashboard.getBoolean("sync climb", true)) {
-            Climber.leftWinch.percent = default
-        } else Climber.leftWinch.percent = -RobotContainer.controller.leftY.raw().zeroIf { it.absoluteValue < .02 }
+        Climber.leftWinch.percent = default
+        if (SmartDashboard.getBoolean("sync climb", true)) {
+            Climber.rightWinch.percent = default
+        } else Climber.rightWinch.percent = -RobotContainer.controller.leftY.raw().zeroIf { it.absoluteValue < .02 }
 //        Climber.rightExtendable.percent = RobotContainer.controller.rightX.raw()
 
 
