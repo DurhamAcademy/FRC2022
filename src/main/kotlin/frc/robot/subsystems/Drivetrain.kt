@@ -38,7 +38,7 @@ import frc.robot.commands.drive.Drive
 /**
  * Mechanism that controls how the robot drives
  */
-object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
+object Drivetrain : SubsystemBase(), Debug, Simulatable {
     // motors
     override val priority: DebugFilter = DebugFilter.Max
 
@@ -107,31 +107,24 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
     }
 
     // whether to switch to using back motors
-    val driveInversion
-        get() = SmartDashboard.getBoolean("invert drive motors", false)
+//    val driveInversion
+//        inline get() = SmartDashboard.getBoolean("invert drive motors", false)
 
 
-    val kinematics =
-        DifferentialDriveKinematics(Constants.TRACK_WIDTH)  // calculator to make drivetrain move is the desired directions
-    override var chassisSpeeds: ChassisSpeeds  // variable representing the direction we want the robot to move
-        get() = kinematics.toChassisSpeeds(wheelSpeeds)
-        set(value) {
-            drive(value)
-        }
-    var wheelSpeeds: DifferentialDriveWheelSpeeds  // variable representing the speed of each side of the drivetrain
-        get() = DifferentialDriveWheelSpeeds(
+    val kinematics = DifferentialDriveKinematics(Constants.TRACK_WIDTH)  // calculator to make drivetrain move is the desired directions
+    val chassisSpeeds: ChassisSpeeds  // variable representing the direction we want the robot to move
+        inline get() = kinematics.toChassisSpeeds(wheelSpeeds)
+    val wheelSpeeds: DifferentialDriveWheelSpeeds  // variable representing the speed of each side of the drivetrain
+        inline get() = DifferentialDriveWheelSpeeds(
             leftMaster.linearVelocity.metersPerSecond,
             rightMaster.linearVelocity.metersPerSecond
         )
-        set(value) {
-            drive(value)
-        }
 
     /**
      * Speeds relative to the field
      */
     val fieldRelativeSpeeds: ChassisSpeeds
-        get() {
+        inline get() {
             val chassis = chassisSpeeds
             val heading = RobotContainer.navigation.heading
             return ChassisSpeeds(
@@ -148,47 +141,46 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
      *
      * vy = speed parallel to the hub.
      */
-    val hubRelativeSpeeds: ChassisSpeeds
-        get() {
+    val hubRelativeSpeeds: ChassisSpeeds  // todo: see if there is faster calc
+        inline get() {
             val polar = polarSpeeds
             return ChassisSpeeds(
                 polar.dr.value,
-                polar.dTheta.toTangentialVelocity(
-                    Turret.targetDistance
-                        ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
-                ).value,
+                polar.dTheta.toTangentialVelocity(Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters).value,
                 polar.dOrientation.radiansPerSecond
             )
         }
     var pose  // pose of the robot
-        get() = RobotContainer.navigation.pose
-        set(value) {
+        inline get() = RobotContainer.navigation.pose
+        inline set(value) {
             val latency = RobotContainer.limelight.latestResult!!.latencyMillis.milli.seconds
             val detectionTime = Game.time - latency
-            leftMaster.resetPosition()
-            rightMaster.resetPosition()
+            if(RobotContainer.navigation.useOdometry) {
+                leftMaster.resetPosition()  // is this supposed to be resetting?
+                rightMaster.resetPosition()
+            }
             RobotContainer.navigation.update(value, detectionTime)
         }
     private var polarCoordinates  // polar coordinates relative to the Hub
-        get() = RobotContainer.navigation.pose.polar(Constants.HUB_POSITION)
-        set(value) {
+        inline get() = RobotContainer.navigation.pose.polar(Constants.HUB_POSITION)
+        inline set(value) {
             pose = Pose2d(value.cartesian(Constants.HUB_POSITION).translation, RobotContainer.navigation.heading.w)
         }
     val polarSpeeds
-        get() = chassisSpeeds.polar(RobotContainer.navigation.pose.polar(Constants.HUB_POSITION))
+        inline get() = chassisSpeeds.polar(RobotContainer.navigation.pose.polar(Constants.HUB_POSITION))
 
 
     // setup motors
     init {
         defaultCommand = Drive
-        Navigator.instance!!.applyMovementRestrictions(5.39.feetPerSecond, 2.metersPerSecond)
+        Navigator.instance!!.applyMovementRestrictions(3.metersPerSecond, 2.metersPerSecond)
         Navigator.instance!!.applyKinematics(kinematics)
     }
 
     /**
      * Drive the robot at the provided speeds
      */
-    override fun drive(speeds: ChassisSpeeds) {
+    fun drive(speeds: ChassisSpeeds) {
         drive(kinematics.toWheelSpeeds(speeds))
     }
 
@@ -196,13 +188,13 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
      * Drive the robot at the provided speeds
      */
     fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) {
-        if (!driveInversion) {
+//        if (!driveInversion) {
             leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
             rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
-        } else {
-            leftFollower.voltage = wheelSpeeds.leftMetersPerSecond
-            rightFollower.voltage = wheelSpeeds.rightMetersPerSecond
-        }
+//        } else {
+//            leftFollower.voltage = wheelSpeeds.leftMetersPerSecond
+//            rightFollower.voltage = wheelSpeeds.rightMetersPerSecond
+//        }
     }
 
     private val anglePid = PIDController(0.5, 0.0, 0.0)
@@ -218,8 +210,6 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
         rightMaster.stop()
     }
 
-    val dif = Differentiator()
-
     /**
      * Update navigation
      */
@@ -233,10 +223,9 @@ object Drivetrain : SubsystemBase(), Debug, KDrivetrain, Simulatable {
             leftMaster.linearPosition.meters,
             rightMaster.linearPosition.meters
         )
-        SmartDashboard.putNumber("p spin", dif.calculate(RobotContainer.gyro.heading.radians))
-        SmartDashboard.putNumber("c spin", chassisSpeeds.omegaRadiansPerSecond)
-        SmartDashboard.putNumber("l_error", leftMaster.linearVelocityError.value)
-        SmartDashboard.putNumber("r_error", rightMaster.linearVelocityError.value)
+//        debugDashboard()
+//        SmartDashboard.putNumber("l_error", leftMaster.linearVelocityError.value)
+//        SmartDashboard.putNumber("r_error", rightMaster.linearVelocityError.value)
 
 //        KField2d.robotPose = RobotContainer.navigation.pose
 //        RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)

@@ -41,7 +41,7 @@ class Navigator(
 //        gyro.heading = startPose.rotation.k
     }
 
-    private val useOdometry = trackingMode != TrackingMode.Fancy
+    val useOdometry = trackingMode != TrackingMode.Fancy
 
     /**
      * A probability calculator to guess where the robot is from odometer and vision updates

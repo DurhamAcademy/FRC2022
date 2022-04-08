@@ -67,7 +67,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     val ready: Boolean  // whether ready to shoot
         get() = readyDebouncer.calculate(shortReady)
     val stopped
-        get() = flywheel.percent == 0.0
+        inline get() = flywheel.percent == 0.0
 
     var targetVelocity  // public accesser for setting flywheel speed
         inline get() = flywheel.velocitySetpoint
@@ -78,7 +78,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     // distance function to work in several scenarios
     private val smartDis: Length
-        get() {
+        inline get() {
             return if (RobotContainer.op.shootWhileMoving) {
                 effectiveDistance
             } else {
@@ -150,25 +150,22 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
     fun hoodUpdate(dis: Length) {  // update the hood angle with a certain distance
         val hood = Constants.HOODANGLE_INTERPOLATOR.calculate(dis.meters)// hoodPoly.eval(dis.value)
-        if (hood == null) {
-            inRange = false
-        } else {
-            inRange = true
+        inRange = dis > 5.8.meters
+//        if (hood == null) {
+//            inRange = false
+//        } else {
+//            inRange = true
             hoodDistance = hood.millimeters//Constants.HOODANGLE_INTERPOLATOR.calculate(dis.meters).millimeters
-        }
+//        }
     }
 
     private val speedPoly = Polynomial(37.43917, -119.05297, 1501.93519)
     fun flywheelUpdate(dis: Length) {  // update flywheel speed to shoot certain distance
         val interpolated = Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters)
 
-        if (interpolated != null) {
-            val fudge = 1 + (SmartDashboard.getNumber(
-                "back fudge",
-                0.03
-            )) * (Turret.turret.position / 2.0).sin.absoluteValue
-            targetVelocity = interpolated.rpm * fudge
-        }
+        val fudge = 1 + (SmartDashboard.getNumber("back fudge", 0.03)) *
+                        (Turret.turret.position / 2.0).sin.absoluteValue
+        targetVelocity = interpolated.rpm * fudge
     }
 
     fun stop() {  // stop the shooter
@@ -180,15 +177,14 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     init {
         // setup stuff
         if (Game.sim) flywheel.setupSim(ff)
-        if (RobotContainer.op.autoShot) defaultCommand = FireWhenReady
+//        if (RobotContainer.op.autoShot) defaultCommand = FireWhenReady
     }
 
     override fun periodic() {
         debugDashboard()
         if (RobotContainer.op.shootWhileMoving) {
             // update shooting while moving values
-            val rawDistance =
-                Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+            val rawDistance = Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
             var r = rawDistance
             val hubSpeeds = Drivetrain.hubRelativeSpeeds
             val parallel = hubSpeeds.vxMetersPerSecond
@@ -203,11 +199,15 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
                 r = sqrt(a.pow(2) + b.pow(2)).meters.absoluteValue
                 movementAngleOffset = atan(b / a).radians * .3
             }
-            SmartDashboard.putNumber("effective distance", r.meters)
-            SmartDashboard.putNumber("effective turr offset", movementAngleOffset.degrees)
-            SmartDashboard.putNumber("parallel", parallel)
-            SmartDashboard.putNumber("perp", perp)
+//            SmartDashboard.putNumber("effective distance", r.meters)
+//            SmartDashboard.putNumber("effective turr offset", movementAngleOffset.degrees)
+//            SmartDashboard.putNumber("parallel", parallel)
+//            SmartDashboard.putNumber("perp", perp)
             effectiveDistance = r
+        }
+        else {
+            effectiveDistance = Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
+            movementAngleOffset = 0.degrees
         }
         // log stuff
         SmartDashboard.putNumber("fly error", flywheel.velocityError.rpm)

@@ -151,7 +151,7 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     override fun periodic() {
 //        debugDashboard()
 //        updateMotors()
-        SmartDashboard.putNumber("right arm pos", Climber.rightWinch.linearPosition.inches)
+//        SmartDashboard.putNumber("right arm pos", Climber.rightWinch.linearPosition.inches)
     }
 
     private val swing = Differentiator()

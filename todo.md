@@ -49,106 +49,167 @@
 - think about roborio2 (they said 30% faster)
 - probably get falcons
 
-### software pitch
-
-- Features
-    - intake
-        - no penalties
-        - auto intake?
-        - driver camera
-    - drivetrain
-        - fancy odometry
-        - auto drive
-        - playback controls
-        - multiple coordinate systems
-            - standard
-            - polar
-        - speed systems
-            - robo centric
-            - hub centric
-            - field centric
-        - lead swap
-    - turret
-        - statespace
-        - limelight
-        - working while unplugged
-        - self wrapping (protect the cables)
-        - side spin comp
-        - shoot while moving
-        - disposal
-    - Shooter
-        - conveyor management
-        - control schemes
-        - falcons
-        - shoot while move
-        - closed loop, feed when ready
-        - active hood
-        - speed based on poly fit
-    - Climb
-        - position controlled
-        - prepare for faster climb
-        - reaction wheel stablization
-    - Controls
-        - Modular control system
-        - dashboard override on everything
-        - turn off fancy things if no work
-            - increase flywheel speed if shooting low
-            - debug intake snapping
-            - force turret out of weird positions
-- Kyber
+### software pitch (11k lines of code written)
+- Auto
+  - pathweaver option
+    - simulation testing (how it works)
+  - playback feature
+  - Auto pathing
+    - obstacle avoidance
+    - mention semester independent project (automation as my passion)
+  - auto turret
+  - auto climb
+  - early prototypes of auto shot and intake
+- Driver Simplicity
+  - custom driver controls (maybe cut)
+  - intake retraction (be breif)
+    - no penalties
+  - shoot from anywhere
+    - auto turret
+      - limelight
+      - pose estimator
+      - control
+        - wire management
+        - side spin
+        - back spin
+- Additional features (things that really put us apart)
+  - driving
+    - driver camera
+    - continually updating cameras
+  - shooting
+    - shooting while moving
+    - disposal
+  - climbing
+    - prepare climb
+    - auto climb
+  - bonus
+    - manual overrides
+      - every motor
+      - simplicity if errors
+- Kyber (8.5k lines of code - 75% of all code can be immediately reused)
     - motivation
         - personal journey in understanding
         - documentation for future year
-        - mechansims
-    - motor control systems integration (abstraction allows for modularity)
-        - native
-        - pid
-        - ff (intuitive to use)
-        - statespace
-            - positon, velocity, dual, arm, elevator, drivetrain
-            - custom loops with latency compensation
-        - bang
-        - custom
-    - Characterization Tool
-        - use our own code to characterize systems and fit the data
-        - allows for more control of the data we get and ensures safety on constrained systems
-    - Auto pathing generation
-        - shuffleboard integration
-        - dynamic path planning
-        - communication with other teams
-        - role in navigation
-        - Playback
-            - records all the drivers inputs and plays them back
-            - allows for quick and easy non-standard autos
-    - debug system
-        - allows for graphing and understanding of what everything is doing
-    - fancy controller modifications
-        - drone modification
-        - able to be simulations (see playback)
-    - LED animations
-    - unit libraries
-        - greater understanding and readiblity
-        - custom polar coordinates
-            - nav updates
-            - turret adjustments
-    - Pre-built mechanisms
+          - I am a senior
+    - motor control systems integration
+      - purpose
+        - rapid iteration
+          - can write a bunch of different control schemes and swap them out to see what worked
+            - had 6 different control schemes for flywheel at one point
+          - single line of code change to switch motors
+          - allow for simple simulation support
         - personal learning
-        - building for the future team
+        - usability for new coders
+      - modes
+        - percent
+        - position
+        - velocity
+        - follow
+        - current
+        - torque
+        - music!!
+      - control types - each able to be setup in a single line
+          - native controls
+          - pid
+          - ff (intuitive to use)
+          - statespace
+              - positon, velocity, dual, arm, elevator, drivetrain
+              - custom loops with latency compensation
+          - bang bang
+          - take half back
+          - custom
     - Simulation support
         - why important for our robot (time)
-            - 2 days of testing
-        - branches
-            - allow for testing cool new ideas
-        - auto testing
-            - All autos have actually been developed in sim and debugged on the field
-        - maximizing efficiency
-            - time with robot is limited
-        - increase usability
+            - 3 days of testing
         - easy way to write code for subsystems not there
             - simulated ESC
             - fake solenoids
             - halucinating climb past 2 events
 
+
+## Extended Pitch
+- unit libraries **
+  - greater understanding and readiblity
+  - custom polar coordinates
+  - nav updates
+  - turret adjustments
+- Characterization
+  - use our own code to characterize systems and fit the data
+  - allows for more control of the data we get and ensures safety on constrained systems
+- Expanded Trajectory generaion
+  - obstacles
+    - Informed Rapidly Expanding Random Trees
+      - illustraion
+      - optimizations
+    - Traveling Salesman
+      - brute
+      - nearest neighbors
+      - branch and bound
+      - general graph class
+  - goals
+    - CommandManager
+- Playback System
+  - recording inputs
+  - overriding the controller to play inputs
+- Navigation / Dynamics
+  - integrated and simple to use 
+  - built in for all drivetrain types (diff, mecanum, swerve)
+    - drive chassis
+    - drive auto
+    - update auto
+    - simulate motors
+    - calibration
+- debug system
+  - allows for graphing and understanding of what everything is doing
+- fancy controller modifications
+  - drone modification
+- LED animations
+    - 11 distinct animations
+    - sim support and simplicity
+- math 
+  - multiple coordinate systems
+    - robot rel
+    - hub rel
+    - polar
+  - threeD geometry
+- builtin mechanism (personal learning and example building)
+  - drivetrains
+  - elevator
+  - arm
+  - flywheel
+- motor control
+  - one line fix to swap out Neos (before musics)
+  - experimental statespace controls
+    - latency compensation
+    - delta U control
+  - simulating motors
+    - Feedforwards
+    - linear systems
+- simulations
+  - What needs simulation?
+    - actuators
+      - KSolenoid
+      - KMotor
+      - LEDs
+    - sensors
+      - PhotonCamera
+      - KGyro
+  - Practical uses
+    - coding in 3 days
+    - make sure nothing hits
+    - make sure everything moves at the speeds they should
+      - linear systems are really important for this because they allow for guessed simulations before getting to touch the actual motor
+- tutorials
+  - I am a senior
+  - setup by step 
+    - what is code -> Control Theory
+- UcoSLAM
+  - the research process
+    - talk about other approaches and their limitations
+  - the website
+    - relation to our auto Intake prototyping
+  - how it works
+    - mapping the roof
 
 
 /**

@@ -15,13 +15,13 @@ object ManualDrive : CommandBase() {
     }
 
     override fun execute() {
-        if(Drivetrain.driveInversion) {
-            Drivetrain.leftFollower.percent = SmartDashboard.getNumber(leftString, 0.0)
-            Drivetrain.rightFollower.percent = SmartDashboard.getNumber(rightString, 0.0)
-        } else {
+//        if(Drivetrain.driveInversion) {
+//            Drivetrain.leftFollower.percent = SmartDashboard.getNumber(leftString, 0.0)
+//            Drivetrain.rightFollower.percent = SmartDashboard.getNumber(rightString, 0.0)
+//        } else {
             Drivetrain.leftMaster.percent = SmartDashboard.getNumber(leftString, 0.0)
             Drivetrain.rightMaster.percent = SmartDashboard.getNumber(rightString, 0.0)
-        }
+//        }
     }
 
     override fun end(interrupted: Boolean) {

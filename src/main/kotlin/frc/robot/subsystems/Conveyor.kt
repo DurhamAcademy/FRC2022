@@ -63,10 +63,6 @@ object Conveyor : SubsystemBase(), Debug {
         defaultCommand = Idle
     }
 
-    override fun periodic() {
-//        debugDashboard()
-    }
-
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
             "indexer" to conveyor,

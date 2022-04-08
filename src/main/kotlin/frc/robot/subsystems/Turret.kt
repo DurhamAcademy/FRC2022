@@ -190,7 +190,7 @@ object Turret : SubsystemBase(), Debug {
             targetVisible = visionOffset!!.absoluteValue > 20.degrees
             lost = !lostDebouncer.calculate(targetVisible)
         }
-        if (status != TurretStatus.FROZEN) turret.updateVoltage()
+//        if (status != TurretStatus.FROZEN) turret.updateVoltage()
     }
 
     override fun simulationPeriodic() {

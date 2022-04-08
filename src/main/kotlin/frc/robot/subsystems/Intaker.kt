@@ -31,10 +31,6 @@ object Intaker : SubsystemBase(), Debug {
         brakeMode = false
     }
 
-    override fun periodic() {
-        debugDashboard()
-    }
-
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
             "deployed" to deployed,
