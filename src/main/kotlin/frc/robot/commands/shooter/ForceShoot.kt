@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.pneumatics.KSolenoid
-import frc.robot.RobotContainer
 import frc.robot.subsystems.Conveyor
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.ShooterStatus
@@ -21,7 +20,7 @@ object ForceShoot : CommandBase() {
 
     private var reenableCompressor = true
     override fun initialize() {
-        reenableCompressor = KSolenoid.compressor.enabled()
+//        reenableCompressor = KSolenoid.compressor.enabled()
         KSolenoid.compressor.disable()
         Conveyor.feed()
         Shooter.status = ShooterStatus.FORCE_SHOT
@@ -30,7 +29,7 @@ object ForceShoot : CommandBase() {
     override fun execute() {
         Debug.log("Force Shoot", "execute", level = DebugFilter.Low)
 
-        if (true || Shooter.ready) {
+        if (false && Shooter.ready) {
             Shooter.update()
         } else {
             Shooter.flywheel.percent = SmartDashboard.getNumber("zoom", 0.5)//0.5
@@ -40,7 +39,7 @@ object ForceShoot : CommandBase() {
     override fun end(interrupted: Boolean) {
         Shooter.stop()
         Conveyor.stop()
-        if (RobotContainer.op.compressor) KSolenoid.compressor.enableDigital()
+        KSolenoid.compressor.enableDigital()
     }
 
 }

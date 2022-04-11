@@ -78,7 +78,7 @@ class SwerveDrive(
                 gyro.heading.minus(fieldHeading).w
             )
             drive(*kinematics.toSwerveModuleStates(fieldSpeeds))
-        } else drive(speeds)
+        } else drive(speeds)  // this is recursive
     }
 
     /**
@@ -94,7 +94,7 @@ class SwerveDrive(
      * Locks the wheels to prevent being pushed
      */
     fun lock() {
-        drive(*swerveModules.map { it.breakState }.toTypedArray())
+        drive(*swerveModules.map { it.brakeState }.toTypedArray())
     }
 
     /**

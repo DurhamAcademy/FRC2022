@@ -36,14 +36,14 @@ abstract class SwerveModule(val location: Translation2d) : Debug {
     /**
      * The state that the module is going for
      */
-    var stateSetpoint: SwerveModuleState = breakState
+    var stateSetpoint: SwerveModuleState = brakeState
         private set
 
     /**
      * Gets the state that the module should go to in order to lock the robot in place.
      * (Normal to the line between location and center of rotation)
      */
-    val breakState: SwerveModuleState
+    val brakeState: SwerveModuleState
         get() = SwerveModuleState(0.0, Rotation2d(location.x, location.y).rotateBy(90.degrees.w))
 
     override fun debugValues(): Map<String, Any?> {

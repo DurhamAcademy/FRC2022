@@ -3,10 +3,7 @@ package frc.kyberlib.motorcontrol.servo
 import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.wpilibj.Servo
 import frc.kyberlib.command.Debug
-import frc.kyberlib.math.units.extensions.Length
-import frc.kyberlib.math.units.extensions.LinearVelocity
-import frc.kyberlib.math.units.extensions.metersPerSecond
-import frc.kyberlib.math.units.extensions.millimeters
+import frc.kyberlib.math.units.extensions.*
 
 /**
  * A PWM linear actuator.
@@ -34,7 +31,7 @@ class KLinearServo(
     }
 
     // rate limiter for estimating current actuator position
-    private val rateLimit = SlewRateLimiter(travelSpeed.metersPerSecond * 1000.0, initialPosition.millimeters)
+    private val rateLimit = SlewRateLimiter(travelSpeed.millimetersPerSecond, initialPosition.millimeters)
 
     /**
      * Target actuator length, in mm

@@ -36,5 +36,8 @@ object Game {
 
     val alliance: DriverStation.Alliance = DriverStation.getAlliance()
 
+//    val matchName
+//        inline get() = DriverStation.getEventName() + DriverStation.getLocation() + DriverStation.getMatchNumber()
+
     val game: String = DriverStation.getGameSpecificMessage()
 }

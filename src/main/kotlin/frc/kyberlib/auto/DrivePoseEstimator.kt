@@ -22,7 +22,7 @@ class DrivePoseEstimator(
     visionMeasurementStdDevs: Matrix<N3, N1> = MatBuilder(N3.instance, N1.instance).fill(0.1, 0.1, 0.01)
 ) {
     // me scuffing drive Pose
-    val cheesy = MecanumDriveKinematics(
+    private val cheesy = MecanumDriveKinematics(
         Translation2d(-1.0, 1.0),
         Translation2d(1.0, 1.0),
         Translation2d(-1.0, -1.0),
@@ -66,9 +66,8 @@ class DrivePoseEstimator(
      *
      * @return The estimated robot pose in meters.
      */
-    fun getEstimatedPosition(): Pose2d {
-        return internal.estimatedPosition
-    }
+    val estimatedPosition
+        get() = internal.estimatedPosition
 
     /**
      * Add a vision measurement to the Unscented Kalman Filter. This will correct the odometry pose
