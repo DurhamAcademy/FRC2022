@@ -12,7 +12,7 @@ typealias Voltage = Double
 /**
  * A basic motor controller. No closed-loop control
  */
-abstract class KBasicMotorController : NTSendable, Debug {
+abstract class KBasicMotorController(fake: Boolean = false) : NTSendable, Debug {
     companion object {
         val allMotors = mutableListOf<KBasicMotorController>()
     }
@@ -46,7 +46,7 @@ abstract class KBasicMotorController : NTSendable, Debug {
     /**
      * Whether the motor is connected to a real Robot
      */
-    protected val real: Boolean = Game.real
+    protected val real: Boolean = Game.real && !fake
 
     // ------ low-level write methods ----- //
     /**
@@ -96,6 +96,8 @@ abstract class KBasicMotorController : NTSendable, Debug {
         set(value) {
             field = value.coerceIn(0.0, vbus)
         }
+
+    open var currentLimit = 100
 
     /**
      * True if this motor is following another.

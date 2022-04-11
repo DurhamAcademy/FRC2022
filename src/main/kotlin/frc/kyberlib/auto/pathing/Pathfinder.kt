@@ -35,7 +35,7 @@ object Pathfinder : Debug {
     private const val explorationDepth = 5000
 
     /** how many nodes to dedicate to optimization */
-    private const val optimizationDepth = 50
+    private const val optimizationDepth = 4000
 
     /**
      * Generates a trajectory to get from current estimated pose to a separate target
@@ -169,8 +169,8 @@ object Pathfinder : Debug {
         if (endDis < minGoalDistance && !(pathFound && endDis < path!!.first().pathLengthFromRoot)) {
             pathFound = true
             endNode = node
-            println("path found = $path")
-            information.update(path!!.last().pathLengthFromRoot)
+            println(path!!.map { it.pathLengthFromRoot })
+            information.update(path!!.first().pathLengthFromRoot)
         }
     }
 
@@ -239,10 +239,10 @@ object PathingTest {
         // look @ informed RRT* and BIT*
         // current version in RRT
         start = Translation2d(0.meters, 0.meters)
-        end = Translation2d(2.meters, 2.meters)
-        for (i in 0..0) {
+        end = Translation2d(5.meters, 5.meters)
+        for (i in 0..95) {
             val p = Pathfinder.randomPoint()
-            val o = Obstacle(p, 0.2.meters, 0.2.meters)
+            val o = Obstacle(Pose2d(p, 0.degrees.w), 0.2, 0.2)
             if (o.contains(start) || o.contains(end)) continue
             Pathfinder.field.obstacles.add(o)
         }
@@ -250,11 +250,12 @@ object PathingTest {
 //        _root_ide_package_.frc.kyberlib.auto.pathing.Pathfinder.field.obstacles.add(testO)
         println("field setup")
         Pathfinder.pathTo(Pose2d(start, 0.degrees.w), Pose2d(end, 0.degrees.w))
+        Pathfinder.information.update(Pathfinder.path!!.first().pathLengthFromRoot)
         println("tree loaded")
 //        println(_root_ide_package_.frc.kyberlib.auto.pathing.Pathfinder.path!!.size)
         Pathfinder.drawTreePath()
         println(Pathfinder.path)
-        println(Pathfinder.path!!.map { Pathfinder.field.inField(it.position) })
-        println(Pathfinder.field.obstacles)
+//        println(Pathfinder.path!!.map { Pathfinder.field.inField(it.position) })
+//        println(Pathfinder.field.obstacles)
     }
 }

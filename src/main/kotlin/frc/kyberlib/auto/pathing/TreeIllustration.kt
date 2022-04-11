@@ -20,12 +20,14 @@ internal class TreeIllustration(val tree: Tree) : JPanel() {
         if (pathfinder.pathFound)
             path = pathfinder.path!!
     }
+
+    constructor() : this(Pathfinder)
     val field = KField2d
     var information: PathingInformation? = null
     var path: Collection<Node> = emptySet()
 
-    val frameWidth = 200
-    val frameHeight = 200
+    val frameWidth = 1000
+    val frameHeight = 1000
 
     /** Whether to draw the path */
     var drawPath = true

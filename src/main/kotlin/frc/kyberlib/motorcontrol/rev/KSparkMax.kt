@@ -19,8 +19,9 @@ class KSparkMax(
     private val canId: Int,
     brushedMotor: Boolean = false,
     type: EncoderType = EncoderType.NEO_HALL,
-    cpr: Int = 42
-) : KMotorController() {
+    cpr: Int = 42,
+    fake: Boolean = false
+) : KMotorController(fake) {
     // ----- low-level stuff ----- //
     override var identifier: String = "can$canId"
 
@@ -113,7 +114,7 @@ class KSparkMax(
         _pid.setSmartMotionMaxAccel(maxAcceleration.rpm, 0)
     }
 
-    var currentLimit: Int = -1
+    override var currentLimit: Int = 100
         set(value) {
             spark.setSmartCurrentLimit(value)
             field = value

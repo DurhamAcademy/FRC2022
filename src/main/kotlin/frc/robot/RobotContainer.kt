@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.Navigator
-import frc.kyberlib.auto.TrackingMode
 import frc.kyberlib.auto.trajectory.TrajectoryManager
 import frc.kyberlib.command.Game
 import frc.kyberlib.input.controller.KXboxController
@@ -62,7 +61,7 @@ object RobotContainer {
     // hall sensor
     val turretLimit = DigitalInput(0)
 
-    val navigation = Navigator(gyro, Constants.START_POSE, trackingMode = TrackingMode.Fancy)
+    val navigation = Navigator(gyro, Constants.START_POSE)
 
     // controllers
     val controller = KXboxController(0)  // xbox
@@ -71,15 +70,15 @@ object RobotContainer {
     private val controlType = if (Game.sim) DefaultControls else RocketLeague
     var controlScheme = controlType.apply {
         INTAKE.debounce(.3, Debouncer.DebounceType.kFalling).whileActiveOnce(Intake)
-        SHOOT.whileActiveOnce(Shoot)
-        FORCE_SHOT.whileActiveOnce(ForceShoot)
-        EJECT.whileActiveOnce(Eject)
-        FLUSH.whileActiveOnce(Flush)
-        LOCK_TURRET.toggleWhenActive(FreezeTurret)
-        ZERO_TURRET.whenActive(ZeroTurret)
-        CLIMB_MODE.toggleWhenActive(Climb)
-        EMOTE.whileActiveOnce(Emote)
-        DISPOSE.whileActiveOnce(Dispose)
+        SHOOT.whenHeld(Shoot)
+        FORCE_SHOT.whenHeld(ForceShoot)
+        EJECT.whenHeld(Eject)
+        FLUSH.whenHeld(Flush)
+        LOCK_TURRET.toggleWhenPressed(FreezeTurret)
+        ZERO_TURRET.whenPressed(ZeroTurret)
+        CLIMB_MODE.toggleWhenPressed(Climb)
+        EMOTE.whenHeld(Emote)
+        DISPOSE.whenHeld(Dispose)
     }
 
     // auto path chooser
@@ -165,9 +164,6 @@ object RobotContainer {
             60, 74,
             idleCylon, zero, seek, aiming, turretReady, spinup, shooting, outOfRange
         )
-
-        // todo:
-        // blink no work
     }
 
     init {

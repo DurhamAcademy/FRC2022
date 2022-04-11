@@ -1,6 +1,5 @@
 package frc.kyberlib.input.controller
 
-import frc.kyberlib.input.AxisButton
 import frc.kyberlib.input.KAxis
 import frc.kyberlib.input.KController
 
@@ -19,18 +18,18 @@ class KTaranis(port: Int) : KController(port) {
     val ch7Analog = KAxis { joystick.getRawAxis(6) }
     val ch8Analog = KAxis { joystick.getRawAxis(7) }
 
-    val ch5SwitchUp = AxisButton(joystick, 4) { value: Double -> value > 0.6 }
-    val ch6SwitchUp = AxisButton(joystick, 5) { value: Double -> value > 0.6 }
-    val ch7SwitchUp = AxisButton(joystick, 6) { value: Double -> value > 0.6 }
-    val ch8SwitchUp = AxisButton(joystick, 7) { value: Double -> value > 0.6 }
+    val ch5SwitchUp = KAxis(joystick, 4).activateAt(0.6 )
+    val ch6SwitchUp = KAxis(joystick, 5).activateAt(0.6 )
+    val ch7SwitchUp = KAxis(joystick, 6).activateAt(0.6 )
+    val ch8SwitchUp = KAxis(joystick, 7).activateAt(0.6 )
 
-    val ch5SwitchDown = AxisButton(joystick, 4) { value: Double -> value < 0.4 }
-    val ch6SwitchDown = AxisButton(joystick, 5) { value: Double -> value < 0.4 }
-    val ch7SwitchDown = AxisButton(joystick, 6) { value: Double -> value < 0.4 }
-    val ch8SwitchDown = AxisButton(joystick, 7) { value: Double -> value < 0.4 }
+    val ch5SwitchDown = KAxis(joystick, 4).activateBefore(0.4 )
+    val ch6SwitchDown = KAxis(joystick, 5).activateBefore(0.4 )
+    val ch7SwitchDown = KAxis(joystick, 6).activateBefore(0.4 )
+    val ch8SwitchDown = KAxis(joystick, 7).activateBefore(0.4 )
 
-    val ch5SwitchNeutral = AxisButton(joystick, 4) { value: Double -> value in 0.4..0.6 }
-    val ch6SwitchNeutral = AxisButton(joystick, 5) { value: Double -> value in 0.4..0.6 }
-    val ch7SwitchNeutral = AxisButton(joystick, 6) { value: Double -> value in 0.4..0.6 }
-    val ch8SwitchNeutral = AxisButton(joystick, 7) { value: Double -> value in 0.4..0.6 }
+    val ch5SwitchNeutral = KAxis(joystick, 4).activateBetween(0.4, 0.6 )
+    val ch6SwitchNeutral = KAxis(joystick, 5).activateBetween(0.4, 0.6 )
+    val ch7SwitchNeutral = KAxis(joystick, 6).activateBetween(0.4, 0.6 )
+    val ch8SwitchNeutral = KAxis(joystick, 7).activateBetween(0.4, 0.6 )
 }

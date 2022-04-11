@@ -113,7 +113,7 @@ object Turret : SubsystemBase(), Debug {
 
         customControl = classic
 
-        if (Game.sim) setupSim(feedforward)
+        setupSim(feedforward)
     }
 
     // angle of the turret from top view

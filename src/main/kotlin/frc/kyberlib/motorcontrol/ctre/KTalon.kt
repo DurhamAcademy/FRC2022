@@ -18,7 +18,7 @@ import frc.kyberlib.motorcontrol.KBasicMotorController
 import frc.kyberlib.motorcontrol.KMotorController
 
 
-class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation: Int = 2048) : KMotorController() {
+class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation: Int = 2048, fake: Boolean = false) : KMotorController(fake) {
     companion object {
         // https://github.dev/Team254/FRC-2020-Public/blob/master/src/main/java/com/team254/frc2020/planners/DriveMotionPlanner.java#L225
         private val defaultConfig = TalonFXConfiguration().apply {
@@ -152,7 +152,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             talon.set(ControlMode.Current, value)
         }
 
-    var currentLimit = 0
+    override var currentLimit = 100
         set(value) {
             field = value
             talon.configSupplyCurrentLimit(

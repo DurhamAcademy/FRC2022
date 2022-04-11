@@ -62,7 +62,6 @@ object Climber : SubsystemBase(), Debug, Simulatable {
         minLinearPosition = 0.inches
         maxLinearPosition = 24.inches
         currentLimit = 30
-//        if(Game.sim) setupSim(winchFF)
     }
 
     /** (right) winches that pull the robot up */
@@ -104,18 +103,6 @@ object Climber : SubsystemBase(), Debug, Simulatable {
     fun updateMotors() {
         leftWinch.updateVoltage()
         rightWinch.updateVoltage()
-    }
-
-    /**
-     * Bang bang control used winch position control.
-     * If too low, go up hard.
-     * If too high, go down hard.
-     * @return voltage represented as double
-     */
-    fun bangBang(motor: KMotorController): Double {
-        return if (motor.positionError.degrees.absoluteValue < 2.0) 0.0
-        else if (motor.positionError.value < 0.0) 10.0
-        else -10.0
     }
 
     /**

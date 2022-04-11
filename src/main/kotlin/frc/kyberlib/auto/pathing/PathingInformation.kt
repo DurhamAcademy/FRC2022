@@ -39,7 +39,7 @@ internal class PathingInformation(val startPosition: Translation2d, val endPosit
      * @param currentPathLength the shortest distance found to path between the two points
      */
     fun update(bestPathLength: Double) {
-        println("pathLen: $bestPathLength")
+        println("pathLen: $bestPathLength, ($dis)")
         this.currentPathLength = bestPathLength.coerceAtLeast(dis)
     }
 

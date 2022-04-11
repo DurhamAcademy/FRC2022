@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorController
 /**
  * Wraps a WPI SpeedController to use the KBasicMotorController API
  */
-class KSpeedController(private val m_speedController: MotorController) : KBasicMotorController() {
+class KSpeedController(private val m_speedController: MotorController, fake: Boolean = false) : KBasicMotorController(fake) {
     private companion object{
         var id = 1
     }

@@ -91,10 +91,12 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
      */
     fun update(speeds: DifferentialDriveWheelSpeeds, leftPosition: Length, rightPosition: Length) {  // estimate motion
         difPoseEstimator.update(gyro.heading.w, speeds, leftPosition.meters, rightPosition.meters)
+        simUpdate()
     }
 
     fun update(speeds: ChassisSpeeds) {
         holonomicPoseEstimator.update(gyro.heading.w, speeds)
+        simUpdate()
     }
 
 
@@ -107,6 +109,11 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
     fun update(globalPosition: Pose2d, time: Time) {  // apply global position update
         if(differentialDrive) difPoseEstimator.addVisionMeasurement(globalPosition, time.milliseconds)
         else holonomicPoseEstimator.addVisionMeasurement(globalPosition, time.milliseconds)
+        simUpdate()
+    }
+
+    private fun simUpdate() {
+        if(Game.sim) KField2d.robotPose = pose
     }
 
     override fun debugValues(): Map<String, Any?> {

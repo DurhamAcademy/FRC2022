@@ -48,7 +48,7 @@ enum class ControlMode {
 /**
  * A more advanced motor control with feedback control.
  */
-abstract class KMotorController : KBasicMotorController(), Simulatable {
+abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(fake), Simulatable {
     open var motorType: DCMotor? = null
 
     private val updateNotifier = Notifier { updateVoltage() }
@@ -316,6 +316,28 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      */
     var customControl: ((motor: KMotorController) -> Voltage)? = null
 
+    open fun copyConfig(other: KMotorController) {
+        kP = other.kP
+        kI = other.kI
+        kD = other.kD
+        kF = other.kF
+
+        customControl = other.customControl
+        reversed = other.reversed
+        currentLimit = other.currentLimit
+        gearRatio = other.gearRatio
+        radius = other.radius
+        motorType = other.motorType
+        brakeMode = other.brakeMode
+
+        maxPosition = other.maxPosition
+        minPosition = other.minPosition
+        maxVelocity = other.maxVelocity
+        maxAcceleration = other.maxAcceleration
+    }
+
+    fun shareConfig(other: KMotorController) {other.copyConfig(this)}
+
     /**
      * Locks recursive calls to customControl from inside customControl
      */
@@ -405,7 +427,7 @@ abstract class KMotorController : KBasicMotorController(), Simulatable {
      */
     var velocitySetpoint: AngularVelocity = 0.rpm
         private set(value) {
-            field = value//.coerceIn(-maxVelocity, maxVelocity)
+            field = value.coerceIn(-maxVelocity, maxVelocity)
             if (!closedLoopConfigured && real) rawVelocity = field * gearRatio.invertIf { reversed }
             else if (!customControlLock) updateVoltage()
         }

@@ -1,6 +1,6 @@
 package frc.kyberlib.input
 
-import edu.wpi.first.wpilibj2.command.button.Trigger
+import edu.wpi.first.wpilibj.Joystick
 import frc.kyberlib.command.Debug
 
 /**
@@ -11,6 +11,7 @@ import frc.kyberlib.command.Debug
  * Graph: https://www.desmos.com/calculator/mxwvyq14yp
  */
 class KAxis(val raw: () -> Double) : Debug {
+    constructor(joystick: Joystick, axis: Int) : this({joystick.getRawAxis(axis)})
     companion object {
         val all = mutableListOf<KAxis>()
     }
@@ -49,7 +50,9 @@ class KAxis(val raw: () -> Double) : Debug {
     val value: Double
         get() = if(KController.sim) simVal else modify(raw.invoke())
 
-    fun activateAt(value: Double = 0.5) = Trigger { this.raw() > value }
+    fun activateAt(value: Double = 0.5) = KButton { this.raw() > value }
+    fun activateBefore(value: Double = 0.5) = KButton {this.raw() < value }
+    fun activateBetween(low: Double, high: Double) = KButton {low < this.raw()  && this.raw() < high}
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(

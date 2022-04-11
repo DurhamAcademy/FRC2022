@@ -55,7 +55,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
 
         talon.config_kP(0, 0.20569)
 
-        if (Game.sim) setupSim(ff)
+        setupSim(ff)
     }
 
     // smooth out when shooter up to speed
@@ -145,8 +145,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
     val timeOfFlight  // how long it should take the ball to score
         get() = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(smartDis.meters).seconds
 
-    private val hoodPoly =
-        Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..5.5)  // poly fitted through our data
+    private val hoodPoly = Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..5.5)  // poly fitted through our data
 
     fun hoodUpdate(dis: Length) {  // update the hood angle with a certain distance
         val hood = Constants.HOODANGLE_INTERPOLATOR.calculate(dis.meters)// hoodPoly.eval(dis.value)
@@ -172,12 +171,6 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         targetVelocity = 0.rpm
         flywheel.stop()
         status = ShooterStatus.IDLE
-    }
-
-    init {
-        // setup stuff
-        if (Game.sim) flywheel.setupSim(ff)
-//        if (RobotContainer.op.autoShot) defaultCommand = FireWhenReady
     }
 
     override fun periodic() {

@@ -1,35 +1,23 @@
 package frc.robot.subsystems
 
-import edu.wpi.first.math.Matrix
-import edu.wpi.first.math.Nat
-import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
-import edu.wpi.first.math.numbers.N2
-import edu.wpi.first.math.system.LinearSystem
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.PolarPose
-import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.polar
 import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.milli
-import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
 import frc.kyberlib.motorcontrol.rev.KSparkMax
-import frc.kyberlib.simulation.Simulatable
-import frc.kyberlib.simulation.Simulation
-import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.commands.drive.Drive
@@ -38,7 +26,7 @@ import frc.robot.commands.drive.Drive
 /**
  * Mechanism that controls how the robot drives
  */
-object Drivetrain : SubsystemBase(), Debug, Simulatable {
+object Drivetrain : SubsystemBase(), Debug {
     // motors
     override val priority: DebugFilter = DebugFilter.Max
 
@@ -60,55 +48,22 @@ object Drivetrain : SubsystemBase(), Debug, Simulatable {
         kD = Constants.DRIVE_D
         addFeedforward(leftFF)
         motorType = DCMotor.getNEO(2)
+        setupSim(leftFF)
     }
     val rightMaster = KSparkMax(13).apply {
         identifier = "rightMaster"
-        reversed = false
-        brakeMode = true
-        gearRatio = Constants.DRIVE_GEAR_RATIO
-        radius = Constants.WHEEL_RADIUS
-        currentLimit = 40
-
-        kP = Constants.DRIVE_P
-        kI = Constants.DRIVE_I
-        kD = Constants.DRIVE_D
+        copyConfig(leftMaster)
         addFeedforward(rightFF)
-        motorType = DCMotor.getNEO(2)
+        setupSim(rightFF)
     }
     val leftFollower = KSparkMax(15).apply {
-        identifier = "leftFollow"
-        reversed = false
-        brakeMode = true
-        gearRatio = Constants.DRIVE_GEAR_RATIO
-        radius = Constants.WHEEL_RADIUS
-
-        kP = Constants.DRIVE_P
-        kI = Constants.DRIVE_I
-        kD = Constants.DRIVE_D
-        addFeedforward(leftFF)
-        currentLimit = 40
-        motorType = DCMotor.getNEO(2)
-        spark.follow(leftMaster.spark, reversed)  // follow(leftMaster)
+        copyConfig(leftMaster)
+        follow(leftMaster)
     }
     val rightFollower = KSparkMax(10).apply {
-        identifier = "rightFollow"
-        currentLimit = 40
-        brakeMode = true
-        reversed = false
-        gearRatio = Constants.DRIVE_GEAR_RATIO
-        radius = Constants.WHEEL_RADIUS
-
-        kP = Constants.DRIVE_P
-        kI = Constants.DRIVE_I
-        kD = Constants.DRIVE_D
-        addFeedforward(rightFF)
-        motorType = DCMotor.getNEO(2)
-        spark.follow(rightMaster.spark, reversed)  // follow(rightMaster)
+        copyConfig(rightMaster)
+        follow(rightMaster)  // follow(rightMaster)
     }
-
-    // whether to switch to using back motors
-//    val driveInversion
-//        inline get() = SmartDashboard.getBoolean("invert drive motors", false)
 
 
     val kinematics = DifferentialDriveKinematics(Constants.TRACK_WIDTH)  // calculator to make drivetrain move is the desired directions
@@ -155,10 +110,8 @@ object Drivetrain : SubsystemBase(), Debug, Simulatable {
         inline set(value) {
             val latency = RobotContainer.limelight.latestResult!!.latencyMillis.milli.seconds
             val detectionTime = Game.time - latency
-            if(RobotContainer.navigation.useOdometry) {
-                leftMaster.resetPosition()  // is this supposed to be resetting?
-                rightMaster.resetPosition()
-            }
+            leftMaster.resetPosition()  // is this supposed to be resetting?
+            rightMaster.resetPosition()
             RobotContainer.navigation.update(value, detectionTime)
         }
     private var polarCoordinates  // polar coordinates relative to the Hub
@@ -214,21 +167,10 @@ object Drivetrain : SubsystemBase(), Debug, Simulatable {
      * Update navigation
      */
     override fun periodic() {
-//        RobotContainer.navigation.update(
-//            wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition
-//        )
-        RobotContainer.navigation.poseEstimator.update(
-            RobotContainer.gyro.heading.w,
-            wheelSpeeds,
-            leftMaster.linearPosition.meters,
-            rightMaster.linearPosition.meters
+        RobotContainer.navigation.update(
+            wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition
         )
-//        debugDashboard()
-//        SmartDashboard.putNumber("l_error", leftMaster.linearVelocityError.value)
-//        SmartDashboard.putNumber("r_error", rightMaster.linearVelocityError.value)
 
-//        KField2d.robotPose = RobotContainer.navigation.pose
-//        RobotContainer.navigation.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
         if (RobotContainer.op.smartNav && Game.OPERATED && Turret.isZeroed) {
             // do global position updates based on limelight data
             val distance = Turret.targetDistance ?: return
@@ -236,64 +178,6 @@ object Drivetrain : SubsystemBase(), Debug, Simulatable {
             val angle = offset + Turret.fieldRelativeAngle + 180.degrees
             polarCoordinates = PolarPose(distance, angle, offset)
         }
-    }
-
-    override fun simulationPeriodic() {
-        debugDashboard()
-        KField2d.robotPose = RobotContainer.navigation.pose
-    }
-
-    // ignore this, it is sim and debug support
-    private lateinit var driveSim: DifferentialDrivetrainSim
-    private fun setupSim() {
-        driveSim = DifferentialDrivetrainSim( // Create a linear system from our characterization gains.
-            betterDrivetrainSystem(),
-//            LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka, Constants.TRACK_WIDTH),
-            leftMaster.motorType!!,  // 2 NEO motors on each side of the drivetrain.
-            leftMaster.gearRatio,  // gearing reduction
-            kinematics.trackWidthMeters,  // The track width
-            leftMaster.radius!!.meters,  // wheel radius
-//             The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
-            VecBuilder.fill(0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001)
-        )
-        driveSim.pose = RobotContainer.navigation.pose
-        if (Game.sim) Simulation.instance.include(this)
-    }
-
-    private fun betterDrivetrainSystem(): LinearSystem<N2, N2, N2> {
-//        return LinearSystemId.identifyDrivetrainSystem(leftFF.kv, leftFF.ka, angularFeedforward.kv, angularFeedforward.ka)
-        val kVAngular = angularFeedforward.kv// * 2.0 / Constants.TRACK_WIDTH
-        val kAAngular = angularFeedforward.ka// * 2.0 / Constants.TRACK_WIDTH
-        val A1: Double = 0.5 * -(leftFF.kv / leftFF.ka + kVAngular / kAAngular)
-        val A2: Double = 0.5 * -(rightFF.kv / rightFF.ka - kVAngular / kAAngular)
-        val B1: Double = 0.5 * (1.0 / leftFF.ka + 1.0 / kAAngular)
-        val B2: Double = 0.5 * (1.0 / rightFF.ka - 1.0 / kAAngular)
-
-        return LinearSystem(
-            Matrix.mat(Nat.N2(), Nat.N2()).fill(A1, A2, A2, A1),
-            Matrix.mat(Nat.N2(), Nat.N2()).fill(B1, B2, B2, B1),
-            Matrix.mat(Nat.N2(), Nat.N2()).fill(1.0, 0.0, 0.0, 1.0),
-            Matrix.mat(Nat.N2(), Nat.N2()).fill(0.0, 0.0, 0.0, 0.0)
-        )
-    }
-
-    init {
-        if (Game.sim) setupSim()
-    }
-
-    override fun simUpdate(dt: Time) {
-        // update the sim with new inputs
-        val leftVolt = leftMaster.voltage
-        val rightVolt = rightMaster.voltage
-        driveSim.setInputs(leftVolt, rightVolt)
-        driveSim.update(dt.seconds)
-//
-//         update the motors with what they should be
-        leftMaster.simLinearPosition = driveSim.leftPositionMeters.meters
-        leftMaster.simLinearVelocity = driveSim.leftVelocityMetersPerSecond.metersPerSecond
-        rightMaster.simLinearPosition = driveSim.rightPositionMeters.meters
-        rightMaster.simLinearVelocity = driveSim.rightVelocityMetersPerSecond.metersPerSecond
-        RobotContainer.gyro.heading = driveSim.heading.k
     }
 
     override fun debugValues(): Map<String, Any?> {

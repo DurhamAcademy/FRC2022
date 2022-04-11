@@ -1,4 +1,24 @@
+# Future
+- chief delphi post
+- resume
+- github page
+
 # In Sim
+- default motors to simple sim (thats in the uncommited code)
+  - update to gooder simple sim
+- clean up code
+  - make Simulation.kt not bad
+- check documentation
+- fix debug
+- add better native integration
+  - remove kF
+  - add custom control as arbFF
+
+# With robot
+- try Everett's climb idea
+- teach group about how climb works
+  - ask about position vs linearPosition preferences
+- try replacing flywheel colsons
 - control affine plant ff
 - augmented loop (pg 109 of textbook)
     - detla U: add voltage into state model
@@ -6,13 +26,6 @@
 - better turning in difdrive dynamics
 - work on better elevator and arm systems (using non linearity)
 - fix debugs
-
-# With robo
-- test other turret controls (it they want to redo tether, than recharacterize) (2 hours) **
-    - velocity
-    - state space (hard with bad ff)
-- climb stablization (30 min)
-- Chris driver practice (whatever time remains) [Thursday]
 
 ## random cool things
 - Auto Drive to Climb
@@ -31,8 +44,8 @@
     - should add endgameInit or something (idk)
 
 ## Long Term
-- Make sure things are isolatable (specifically autoDrive and Navigation)
 - think about roborio2 (they said 30% faster)
+- probably get falcons
 
 ### software pitch (11k lines of code written)
 - Auto

@@ -123,5 +123,5 @@ interface Debug {
      * Function that retrieves the values that need to be debugged
      * @return map of string (name) to value. Numbers, Booleans, and NTSendables are displayed as such
      */
-    fun debugValues(): Map<String, Any?>
+    fun debugValues(): Map<String, Any?>  // beware this can be really slow so shouldn't be debugging in comp
 }

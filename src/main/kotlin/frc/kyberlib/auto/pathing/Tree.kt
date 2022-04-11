@@ -3,6 +3,7 @@ package frc.kyberlib.auto.pathing
 import edu.wpi.first.math.geometry.Translation2d
 import frc.kyberlib.simulation.field.KField2d
 import java.util.function.Predicate
+import kotlin.math.absoluteValue
 
 /**
  * A node in the RRT tree

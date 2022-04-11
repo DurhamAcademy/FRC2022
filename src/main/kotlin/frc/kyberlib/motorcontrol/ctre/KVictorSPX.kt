@@ -9,7 +9,7 @@ import frc.kyberlib.motorcontrol.*
 /**
  * Kotlin wrapper for VictorSPX on CAN
  */
-class KVictorSPX(val canId: Int) : KBasicMotorController() {
+class KVictorSPX(canId: Int, fake: Boolean = false) : KBasicMotorController(fake) {
     val victor = VictorSPX(canId)
 
     override var identifier = "can$canId"

@@ -1,6 +1,8 @@
 package frc.robot.controls
 
 import edu.wpi.first.wpilibj2.command.button.Trigger
+import frc.kyberlib.input.KButton
+import frc.kyberlib.input.k
 import frc.kyberlib.math.invertIf
 import frc.robot.RobotContainer
 import kotlin.math.PI
@@ -30,15 +32,15 @@ object RocketLeague : ControlSchema2022() {
         get() = xbox.leftTrigger.value + xbox.rightTrigger.value
     override val DRIVE_TURN: Double
         get() = xbox.leftX.value.invertIf { DRIVE_FORWARD < 0.0 }
-    override val INTAKE: Trigger = xbox.aButton
-    override val SHOOT: Trigger = xbox.bButton
-    override val FORCE_SHOT: Trigger = xbox.yButton
-    override val EJECT: Trigger = xbox.leftMenu
-    override val FLUSH: Trigger = xbox.rightMenu
-    override val LOCK_TURRET: Trigger = xbox.downDPad
-    override val ZERO_TURRET: Trigger = xbox.upDPad
-    override val DISPOSE: Trigger = xbox.xButton
+    override val INTAKE: KButton = xbox.aButton
+    override val SHOOT: KButton = xbox.bButton
+    override val FORCE_SHOT: KButton = xbox.yButton
+    override val EJECT: KButton = xbox.leftMenu
+    override val FLUSH: KButton = xbox.rightMenu
+    override val LOCK_TURRET: KButton = xbox.downDPad
+    override val ZERO_TURRET: KButton = xbox.upDPad
+    override val DISPOSE: KButton = xbox.xButton
 
-    override val CLIMB_MODE: Trigger = xbox.pressedLeftStick.and(xbox.pressedRightStick)
-    override val EMOTE: Trigger = xbox.leftDPad
+    override val CLIMB_MODE: KButton = xbox.pressedLeftStick.and(xbox.pressedRightStick).k
+    override val EMOTE: KButton = xbox.leftDPad
 }

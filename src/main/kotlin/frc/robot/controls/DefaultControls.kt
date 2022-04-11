@@ -1,6 +1,7 @@
 package frc.robot.controls
 
 import edu.wpi.first.wpilibj2.command.button.Trigger
+import frc.kyberlib.input.KButton
 import frc.robot.RobotContainer
 import kotlin.math.PI
 
@@ -24,14 +25,14 @@ object DefaultControls : ControlSchema2022() {
         get() = xbox.leftY.value
     override val DRIVE_TURN: Double
         get() = xbox.rightX.value
-    override val INTAKE: Trigger = xbox.leftBumper
-    override val SHOOT: Trigger = xbox.rightTrigger.activateAt(0.1)
-    override val FORCE_SHOT: Trigger = xbox.rightBumper
-    override val EJECT: Trigger = xbox.leftDPad
-    override val FLUSH: Trigger = xbox.rightDPad
-    override val LOCK_TURRET: Trigger = xbox.yButton
-    override val ZERO_TURRET: Trigger = xbox.bButton
-    override val CLIMB_MODE: Trigger = xbox.rightMenu
-    override val EMOTE: Trigger = xbox.aButton
-    override val DISPOSE: Trigger = xbox.xButton
+    override val INTAKE: KButton = xbox.leftBumper
+    override val SHOOT: KButton = xbox.rightTrigger.activateAt(0.1)
+    override val FORCE_SHOT: KButton = xbox.rightBumper
+    override val EJECT: KButton = xbox.leftDPad
+    override val FLUSH: KButton = xbox.rightDPad
+    override val LOCK_TURRET: KButton = xbox.yButton
+    override val ZERO_TURRET: KButton = xbox.bButton
+    override val CLIMB_MODE: KButton = xbox.rightMenu
+    override val EMOTE: KButton = xbox.aButton
+    override val DISPOSE: KButton = xbox.xButton
 }
