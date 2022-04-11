@@ -20,7 +20,6 @@ open class KRobot() {
      * Executes some default code before calling the main functions
      */
     private inner class KRobotInternal : TimedRobot(period) {
-
         override fun robotInit() {
             Debug.log("Robot", "robot init", level=DebugFilter.Low)
             HAL.report(FRCNetComm.tResourceType.kResourceType_Language, FRCNetComm.tInstances.kLanguage_Kotlin)
@@ -30,7 +29,7 @@ open class KRobot() {
 
         override fun robotPeriodic() {
             Debug.log("Robot", "robot periodic", level=DebugFilter.Low)
-            CommandScheduler.getInstance().run()
+            CommandScheduler.getInstance().run()  // todo: replace this
             this@KRobot.robotPeriodic()
         }
 
@@ -67,8 +66,6 @@ open class KRobot() {
         }
 
         override fun teleopInit() {
-            if (!enabled) enabledInit()
-            enabled = true
             Debug.log("Robot", "teleop init", level=DebugFilter.Low)
             this@KRobot.teleopInit()
         }
@@ -177,6 +174,13 @@ open class KRobot() {
     open fun testInit() {}
     open fun testPeriodic() {}
     open fun testExit() {}
+
+    open fun endgameInit() {
+
+    }
+    open fun endgameExit() {
+
+    }
 
     /**
      * Runs the underlying WPILib startup methods. Run this in Main.kt

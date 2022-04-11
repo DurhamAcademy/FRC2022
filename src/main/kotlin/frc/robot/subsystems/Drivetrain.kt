@@ -141,13 +141,9 @@ object Drivetrain : SubsystemBase(), Debug {
      * Drive the robot at the provided speeds
      */
     fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) {
-//        if (!driveInversion) {
-            leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
-            rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
-//        } else {
-//            leftFollower.voltage = wheelSpeeds.leftMetersPerSecond
-//            rightFollower.voltage = wheelSpeeds.rightMetersPerSecond
-//        }
+        println(wheelSpeeds.leftMetersPerSecond)
+        leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
+        rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
     }
 
     private val anglePid = PIDController(0.5, 0.0, 0.0)
@@ -167,9 +163,11 @@ object Drivetrain : SubsystemBase(), Debug {
      * Update navigation
      */
     override fun periodic() {
+        RobotContainer.navigation.differentialDrive = true
         RobotContainer.navigation.update(
             wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition
         )
+        debugDashboard()
 
         if (RobotContainer.op.smartNav && Game.OPERATED && Turret.isZeroed) {
             // do global position updates based on limelight data

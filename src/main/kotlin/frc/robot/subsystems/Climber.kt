@@ -123,8 +123,8 @@ object Climber : SubsystemBase(), Debug, Simulatable {
 
     init {
         if (Game.sim) {
-            Simulation.instance.include(this)
-            leftWinch.setupSim(ElevatorFeedforward(0.2, 3.0, 5.0))
+            Simulation.include(this)
+            leftWinch.setupSim(leftWinch.elevatorSystem(Constants.ROBOT_WEIGHT))
             SmartDashboard.putData("climb sim", sim)
             SmartDashboard.putData("winch", leftWinch)
         }

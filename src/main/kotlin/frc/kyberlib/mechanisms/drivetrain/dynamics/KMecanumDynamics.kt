@@ -55,10 +55,6 @@ class KMecanumDynamics(
         motors.forEach { it.stop() }
     }
 
-    override fun setupSim() {
-        TODO("Not yet implemented")
-    }
-
     override val chassisSpeeds: ChassisSpeeds
         get() = kinematics.toChassisSpeeds(wheelSpeeds)
 

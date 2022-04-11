@@ -6,26 +6,21 @@
 # In Sim
 - default motors to simple sim (thats in the uncommited code)
   - update to gooder simple sim
-- clean up code
-  - make Simulation.kt not bad
 - check documentation
-- fix debug
-- add better native integration
-  - remove kF
-  - add custom control as arbFF
+- get chrp files
+- control affine plant ff
+- augmented loop (pg 109 of textbook)
+  - detla U: add voltage into state model
+    - https://www.chiefdelphi.com/t/971s-control-system/137365/15?u=tatestaples
+- better turning in difdrive dynamics
+- work on better elevator and arm systems (using non linearity)
+- fix debugs
 
 # With robot
 - try Everett's climb idea
 - teach group about how climb works
   - ask about position vs linearPosition preferences
 - try replacing flywheel colsons
-- control affine plant ff
-- augmented loop (pg 109 of textbook)
-    - detla U: add voltage into state model
-        - https://www.chiefdelphi.com/t/971s-control-system/137365/15?u=tatestaples
-- better turning in difdrive dynamics
-- work on better elevator and arm systems (using non linearity)
-- fix debugs
 
 ## random cool things
 - Auto Drive to Climb

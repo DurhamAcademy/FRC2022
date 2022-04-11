@@ -17,7 +17,6 @@ abstract class KDriveDynamics {
     abstract fun drive(chassisSpeeds: ChassisSpeeds)
     abstract fun drive(path: KTrajectory)
     abstract fun stop()
-    protected abstract fun setupSim()
 
     abstract val chassisSpeeds: ChassisSpeeds
 

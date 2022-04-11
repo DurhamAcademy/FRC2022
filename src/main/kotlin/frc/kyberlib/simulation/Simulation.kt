@@ -9,17 +9,7 @@ import frc.kyberlib.simulation.field.KField2d
 /**
  * Simulation that will run a loop to update simulatable objects
  */
-class Simulation : SubsystemBase() {
-    companion object {
-        val instance: Simulation
-            get() { return if(internal == null) Simulation() else internal!! }
-        private var internal: Simulation? = null
-    }
-    init {
-        assert(Game.sim)
-        internal = this
-    }
-
+object Simulation : SubsystemBase() {
     private val sims = ArrayList<Simulatable>()
 
     // stores time values
@@ -34,18 +24,17 @@ class Simulation : SubsystemBase() {
 
     // field to draw robot
     val field = KField2d
-
     init {
-        assert(Game.sim) {"should not be simulating from real robot"}
         SmartDashboard.putData("Field", field)
     }
 
     /**
-     * Update all the attached simulatables
+     * Update all attached simulations
      */
-    override fun periodic() {
+    override fun simulationPeriodic() {
         val dt = time - prevTime
         for (sim in sims) {
+            println(sim)
             sim.simUpdate(dt)
         }
         prevTime = time

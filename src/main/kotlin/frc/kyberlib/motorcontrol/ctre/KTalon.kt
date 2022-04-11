@@ -124,16 +124,12 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
     override var rawPosition: Angle
         get() = (talon.selectedSensorPosition / unitsPerRotation.toDouble()).rotations
         set(value) {
-            talon.set(ControlMode.Position, value.rotations / unitsPerRotation)
+            talon.set(ControlMode.Position, value.rotations / unitsPerRotation, DemandType.ArbitraryFeedForward, arbFFVolts/vbus)
         }
     override var rawVelocity: AngularVelocity
-        get() {
-            SmartDashboard.putNumber("falcon speed", talon.selectedSensorVelocity)
-            return talon.selectedSensorVelocity.falconSpeed
-        }
+        get() = talon.selectedSensorVelocity.falconSpeed
         set(value) {
-            SmartDashboard.putNumber("set falcon speed", value.falconSpeed)
-            talon.set(ControlMode.Velocity, value.falconSpeed, DemandType.ArbitraryFeedForward, arbFF(this) / vbus)
+            talon.set(ControlMode.Velocity, value.falconSpeed, DemandType.ArbitraryFeedForward, arbFFVolts/vbus)
         }
     override var brakeMode: BrakeMode = false
         set(value) {
@@ -161,13 +157,10 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             )
         }
 
-    var arbFF: (it: KTalon) -> Double = { 0.0 }
-
-    override fun updateNativeControl(p: Double, i: Double, d: Double, f: Double) {
+    override fun updateNativeControl(p: Double, i: Double, d: Double) {
         talon.config_kP(0, p)
         talon.config_kI(0, i)
         talon.config_kD(0, d)
-        talon.config_kF(0, f)
     }
 
     override fun updateNativeProfile(maxVelocity: AngularVelocity, maxAcceleration: AngularVelocity) {

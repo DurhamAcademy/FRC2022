@@ -32,7 +32,7 @@ class KSolenoid(val back: Int, val fwd: Int, private val fake: Boolean = false) 
             double.set(if (value) DoubleSolenoid.Value.kForward else DoubleSolenoid.Value.kReverse)
         }//extension = if(value) 1 else 0}
 
-    var extension: Int = 0
+    var extension: Int = 0  // attempt to make a variable extension length pneumatic system. Wasn't working but didn't test much
         set(value) {
             if (Game.real && !fake) {
 //                if(solenoids.size == 1) {

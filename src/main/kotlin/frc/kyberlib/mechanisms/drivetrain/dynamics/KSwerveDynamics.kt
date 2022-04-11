@@ -37,8 +37,4 @@ class KSwerveDynamics(vararg val swerveModules: SwerveModule, fieldRelativeOffse
             it.state = it.brakeState
         }
     }
-
-    override fun setupSim() {
-
-    }
 }

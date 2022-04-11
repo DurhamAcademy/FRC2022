@@ -42,6 +42,21 @@ import org.ietf.jgss.GSSManager
 class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaster: KMotorController, val trackWidth: Length,
                                 val angularFF: SimpleMotorFeedforward= SimpleMotorFeedforward(0.0, 0.0), val angularDrag: Double = 0.0) : KDriveDynamics() {
 
+    companion object {
+        fun toWheelSpeeds(chassisSpeeds: ChassisSpeeds, trackWidth: Length): DifferentialDriveWheelSpeeds {
+            return DifferentialDriveWheelSpeeds(
+                chassisSpeeds.vxMetersPerSecond - trackWidth.meters / 2 * chassisSpeeds.omegaRadiansPerSecond,
+                chassisSpeeds.vxMetersPerSecond + trackWidth.meters / 2 * chassisSpeeds.omegaRadiansPerSecond);
+        }
+
+        fun toChassisSpeed(wheelSpeeds: DifferentialDriveWheelSpeeds, trackWidth: Length): ChassisSpeeds {
+            return ChassisSpeeds(
+                (wheelSpeeds.leftMetersPerSecond + wheelSpeeds.rightMetersPerSecond) / 2,
+                0.0,
+                (wheelSpeeds.rightMetersPerSecond - wheelSpeeds.leftMetersPerSecond) / trackWidth.meters);
+        }
+    }
+
     val wheelSpeeds
         get() = DifferentialDriveWheelSpeeds(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond)
     override val chassisSpeeds: ChassisSpeeds
@@ -163,13 +178,6 @@ class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaste
             Matrix.mat(Nat.N2(), Nat.N2()).fill(1.0, 0.0, 0.0, 1.0),
             Matrix.mat(Nat.N2(), Nat.N2()).fill(0.0, 0.0, 0.0, 0.0)
         )
-    }
-
-    init {
-        if(Game.sim) setupSim()
-    }
-    override fun setupSim() {
-
     }
 
     init {

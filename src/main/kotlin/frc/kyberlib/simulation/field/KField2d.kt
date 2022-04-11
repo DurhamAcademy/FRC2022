@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
+import frc.kyberlib.FIELD_SIZE
 import frc.kyberlib.math.units.Translation2d
 import frc.kyberlib.math.units.extensions.*
 
@@ -17,7 +18,7 @@ import frc.kyberlib.math.units.extensions.*
 object KField2d : Field2d() {
     val obstacles = ArrayList<Obstacle>()
     val goals = ArrayList<Goal>()
-    val fieldSize = Translation2d(648.inches, 324.inches)
+    val fieldSize = FIELD_SIZE
     var width: Length = fieldSize.y.meters
     var height: Length = fieldSize.x.meters
 

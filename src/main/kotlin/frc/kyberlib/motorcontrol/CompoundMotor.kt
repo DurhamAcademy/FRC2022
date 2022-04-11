@@ -1,6 +1,5 @@
 package frc.kyberlib.motorcontrol
 
-import edu.wpi.first.math.controller.ControlAffinePlantInversionFeedforward
 import edu.wpi.first.wpilibj.Encoder
 import frc.kyberlib.math.units.extensions.*
 
@@ -12,7 +11,7 @@ class CompoundMotor(val basic: KBasicMotorController, val encoder: Encoder) : KM
 //        throw Exception("Compound motors have not builtin controller")
     }
 
-    override fun updateNativeControl(p: Double, i: Double, d: Double, f: Double) {
+    override fun updateNativeControl(p: Double, i: Double, d: Double) {
 //        throw Exception("Compound motors have not builtin controller")
     }
 

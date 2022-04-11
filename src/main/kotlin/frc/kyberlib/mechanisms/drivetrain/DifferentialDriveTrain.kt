@@ -82,7 +82,7 @@ abstract class DifferentialDriveTrain : SubsystemBase(), Simulatable, KDrivetrai
             // The standard deviations for measurement noise: x (m), y (m), heading (rad), L/R vel (m/s), L/R pos (m)
             VecBuilder.fill(0.001, 0.001, 0.001, 0.1, 0.1, 0.005, 0.005)
         )
-        if (Game.sim) Simulation.instance.include(this)
+        if (Game.sim) Simulation.include(this)
     }
 
     override fun simUpdate(dt: Time) {

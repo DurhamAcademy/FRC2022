@@ -85,7 +85,7 @@ class KSparkMax(
                 value.rpm,
                 CANSparkMax.ControlType.kVelocity,
                 0,
-                0.0,
+                arbFFVolts,
                 SparkMaxPIDController.ArbFFUnits.kVoltage
             )
         }
@@ -97,16 +97,15 @@ class KSparkMax(
                 value.rotations,
                 CANSparkMax.ControlType.kSmartMotion,
                 0,
-                0.0,
+                arbFFVolts,
                 SparkMaxPIDController.ArbFFUnits.kVoltage
             )
         }
 
-    override fun updateNativeControl(p: Double, i: Double, d: Double, f: Double) {
+    override fun updateNativeControl(p: Double, i: Double, d: Double) {
         _pid.p = p
         _pid.i = i
         _pid.d = d
-        _pid.ff = f
     }
 
     override fun updateNativeProfile(maxVelocity: AngularVelocity, maxAcceleration: AngularVelocity) {
