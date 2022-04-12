@@ -8,8 +8,6 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.RamseteController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.estimator.KalmanFilter
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
@@ -17,16 +15,12 @@ import edu.wpi.first.math.numbers.N2
 import edu.wpi.first.math.system.LinearSystem
 import edu.wpi.first.math.system.LinearSystemLoop
 import frc.kyberlib.auto.Navigator
-import frc.kyberlib.auto.pathing.Pathfinder
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.math.units.string
-import frc.kyberlib.math.units.towards
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.Voltage
-import org.ietf.jgss.GSSManager
 
 // https://github.com/Team254/FRC-2020-Public/blob/master/src/main/java/com/team254/lib/physics/DifferentialDrive.java
 
@@ -178,30 +172,5 @@ class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaste
             Matrix.mat(Nat.N2(), Nat.N2()).fill(1.0, 0.0, 0.0, 1.0),
             Matrix.mat(Nat.N2(), Nat.N2()).fill(0.0, 0.0, 0.0, 0.0)
         )
-    }
-
-    init {
-        val placeholder = SimpleMotorFeedforward(0.0, 0.0)
-        val driveSystem = stateSpace(placeholder, placeholder, placeholder)
-        val loop = LinearSystemLoop(
-            driveSystem,
-            LinearQuadraticRegulator(
-                driveSystem,
-                VecBuilder.fill(0.1, 0.1),  // left/right velocity error tolerance
-                VecBuilder.fill(Game.batteryVoltage, Game.batteryVoltage),
-                KRobot.period
-            ),
-            KalmanFilter(
-                N2.instance, N2.instance,
-                driveSystem,
-                VecBuilder.fill(3.0, 3.0),
-                VecBuilder.fill(.01, 0.01),
-                KRobot.period
-            ),
-            Game.batteryVoltage,
-            KRobot.period
-        )
-
-
     }
 }

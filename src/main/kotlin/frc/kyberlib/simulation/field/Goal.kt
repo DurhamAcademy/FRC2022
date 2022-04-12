@@ -11,12 +11,15 @@ import frc.kyberlib.math.units.extensions.w
 /**
  * A custom field object that has a position and linked command
  */
-class Goal(val name: String, val position: Translation2d, private val uponArrival: Command? = null) {
+class Goal(val name: String, val position: Translation2d, private val uponArrival: Command? = null) {  // this is still kinda janky
     private val fieldObject: FieldObject2d
         get() = KField2d.getObject(name)
 
     init { add() }
 
+    /**
+     * Adds the goal to field
+     */
     private fun add() {
         val prevPoses = fieldObject.poses
         prevPoses.add(Pose2d(position, 0.degrees.w))
@@ -24,6 +27,9 @@ class Goal(val name: String, val position: Translation2d, private val uponArriva
         KField2d.goals.add(this)
     }
 
+    /**
+     * Remove from field
+     */
     private fun remove() {
         val prevPoses = fieldObject.poses
         prevPoses.remove(Pose2d(position, 0.degrees.w))

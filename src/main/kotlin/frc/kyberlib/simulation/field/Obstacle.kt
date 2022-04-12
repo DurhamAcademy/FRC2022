@@ -14,7 +14,7 @@ import java.awt.geom.Rectangle2D
  * @param width horizontal distance from the center to the side (meters)
  * @param height vertical distance from center to top/bottom (meters)
  */
-class Obstacle(val pose: Pose2d, val width: Double, val height: Double) {
+class Obstacle(val pose: Pose2d, val width: Double, val height: Double) {  // todo: update to polygon
     val x: Double
         get() = pose.x
     val y: Double

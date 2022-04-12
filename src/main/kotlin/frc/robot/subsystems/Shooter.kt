@@ -49,7 +49,7 @@ object Shooter : SubsystemBase(), Debug, Simulatable {
         currentLimit = 50
         brakeMode = false
 
-        arbFF = {
+        customControl = {
             ff.calculate(velocitySetpoint.radiansPerSecond)
         }
 

@@ -19,6 +19,7 @@ class DifferentialSwerveModule(
 ) : SwerveModule(location) {
 
     private val rotationPID = PIDController(0.07, 0.00, 0.01)
+    private val velPid = PIDController(0.07, 0.00, 0.01)
     private val feedforward = SimpleMotorFeedforward(0.0, 0.0, 0.0)
 
     /**
@@ -27,7 +28,7 @@ class DifferentialSwerveModule(
     private fun differentialControl(it: KMotorController): Double {
         val goal = stateSetpoint
         val ff = feedforward.calculate(it.linearVelocity.metersPerSecond)
-        val velCorrection = it.PID.calculate(goal.speedMetersPerSecond)
+        val velCorrection = velPid.calculate(goal.speedMetersPerSecond)
         val rotationError = rotation - goal.angle.k
         val rotCorrection = rotationPID.calculate(rotationError.radians, goal.angle.radians)
         return ff + velCorrection + rotCorrection

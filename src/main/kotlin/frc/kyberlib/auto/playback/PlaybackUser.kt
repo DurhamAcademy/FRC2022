@@ -33,7 +33,6 @@ class PlaybackUser(file: File) {
     fun update() {
         val timeIndex = times.binarySearch((Game.time - startTime).seconds)
         if (timeIndex < 0) {
-            println("done")
             end()
             return
         }

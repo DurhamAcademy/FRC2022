@@ -10,6 +10,7 @@ import frc.kyberlib.simulation.field.KField2d
  * Simulation that will run a loop to update simulatable objects
  */
 object Simulation : SubsystemBase() {
+    // stores things to be sim updated
     private val sims = ArrayList<Simulatable>()
 
     // stores time values

@@ -6,6 +6,7 @@ import frc.kyberlib.math.units.extensions.inches
 import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.math.units.extensions.seconds
 
+// note: this while is still a work in progress
 val PATHWEAVER_PATH = "/Pathweaver"
 val MUSIC = "/music"
 

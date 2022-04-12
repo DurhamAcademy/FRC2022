@@ -46,7 +46,7 @@ abstract class KBasicMotorController(fake: Boolean = false) : NTSendable, Debug 
     /**
      * Whether the motor is connected to a real Robot
      */
-    protected val real: Boolean = Game.real && !fake
+    val real: Boolean = Game.real && !fake
 
     // ------ low-level write methods ----- //
     /**
@@ -81,7 +81,7 @@ abstract class KBasicMotorController(fake: Boolean = false) : NTSendable, Debug 
      */
     var voltage: Voltage
         inline get() = percent * vbus
-        set(value) {
+        inline set(value) {
             val norm = value.coerceIn(-maxVoltage, maxVoltage)
             percent = (norm / vbus)
         }
@@ -90,13 +90,17 @@ abstract class KBasicMotorController(fake: Boolean = false) : NTSendable, Debug 
      * The voltage available to the motor
      */
     val vbus
-        get() = if (real) RobotController.getBatteryVoltage() else 12.0
+        inline get() = if (real) RobotController.getBatteryVoltage() else 12.0
 
+    /**
+     * Max voltage able to be applied to the motor
+     */
     var maxVoltage: Voltage = vbus
         set(value) {
             field = value.coerceIn(0.0, vbus)
         }
 
+    // unused var that can be overriden by various implementations of KBasicMotor
     open var currentLimit = 100
 
     /**

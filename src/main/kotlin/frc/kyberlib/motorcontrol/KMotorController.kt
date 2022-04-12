@@ -97,12 +97,19 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
             updateNativeProfile(maxVelocity * toNative, maxAcceleration * toNative)
         }
 
+    /**
+     * Max position setpoint
+     */
     open var maxPosition: Angle = Angle(Double.POSITIVE_INFINITY)
     var maxLinearPosition: Length
         get() = rotationToLinear(maxPosition)
         set(value) {
             maxPosition = linearToRotation(value)
         }
+
+    /**
+     * Min position setpoint
+     */
     open var minPosition: Angle = Angle(Double.NEGATIVE_INFINITY)
     var minLinearPosition: Length
         get() = rotationToLinear(minPosition)
@@ -136,6 +143,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var kP: Double = 0.0
         set(value) {
             field = value
+            simPID.p = value
             updateNativeControl(kP * toNative, kI*toNative, kD*toNative)
         }
 
@@ -145,6 +153,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var kI: Double = 0.0
         set(value) {
             field = value
+            simPID.i = value
             updateNativeControl(kP * toNative, kI*toNative, kD*toNative)
         }
 
@@ -154,11 +163,17 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var kD: Double = 0.0
         set(value) {
             field = value
+            simPID.d = value
             updateNativeControl(kP * toNative, kI*toNative, kD*toNative)
         }
 
-    private val toNative
-        get() = if(linearConfigured) radius!!.meters * gearRatio else gearRatio
+    private val simPID = PIDController(0.0, 0.0, 0.0)
+
+    /**
+     * The multiplier to get from high level units (geared) to native units (ungeared)
+     */
+    protected val toNative
+        inline get() = if(linearConfigured) radius!!.meters * gearRatio else gearRatio
 
     protected abstract fun updateNativeControl(p: Double, i: Double, d: Double)
     /**
@@ -259,7 +274,6 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Bang bang on linear values
      */
     fun bangBang(positionTolerance: Length, velocityTolerance: LinearVelocity, effort: Voltage) {
-        val test = BangBangController()
         bangBang(linearToRotation(positionTolerance), linearToRotation(velocityTolerance), effort)
     }
 
@@ -270,9 +284,20 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      */
     var customControl: ((motor: KMotorController) -> Voltage)? = null
 
+    /**
+     * The base voltage to apply to the motor when using native controls (before pid correction)
+     */
     protected val arbFFVolts: Voltage
-        inline get() = if(customControl != null) customControl!!(this) else 0.0
+        get() {
+            customControlLock = true
+            val v = if(customControl != null) customControl!!(this) else 0.0
+            customControlLock = false
+            return v
+        }
 
+    /**
+     * Copy all the settings from another KMotor
+     */
     open fun copyConfig(other: KMotorController) {
         kP = other.kP
         kI = other.kI
@@ -292,10 +317,13 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         maxAcceleration = other.maxAcceleration
     }
 
+    /**
+     * Give all settings to another KMotor
+     */
     fun shareConfig(other: KMotorController) {other.copyConfig(this)}
 
     /**
-     * Locks recursive calls to customControl from inside customControl
+     * Locks recursive calls to customControl from inside customControl when setting position/velocity
      */
     private var customControlLock = false  // this could brake but I don't think its been an issue so far
 
@@ -350,22 +378,22 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     /**
      * Angle between where it is and where it wants to be
      */
-    inline val positionError get() = position - positionSetpoint
+    inline val positionError inline get() = position - positionSetpoint
 
     /**
      * Distance between where it is and where it wants to be
      */
-    inline val linearPositionError get() = linearPosition - linearPositionSetpoint
+    inline val linearPositionError inline get() = linearPosition - linearPositionSetpoint
 
     /**
      * Velocity difference between where it is and where it wants to be
      */
-    inline val velocityError get() = velocity - velocitySetpoint
+    inline val velocityError inline get() = velocity - velocitySetpoint
 
     /**
      * Linear Velocity difference between where it is and where it wants to be
      */
-    inline val linearVelocityError get() = linearVelocity - linearVelocitySetpoint
+    inline val linearVelocityError inline get() = linearVelocity - linearVelocitySetpoint
 
     // ----- setpoints ---- //
     /**
@@ -374,8 +402,9 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var positionSetpoint: Angle = 0.rotations
         private set(value) {
             field = value.coerceIn(minPosition, maxPosition)
-            if (!closedLoopConfigured && real) rawPosition = field * gearRatio.invertIf { reversed }
-            else if (!customControlLock) updateVoltage()
+            if(customControlLock) return
+            if (real) rawPosition = field * gearRatio.invertIf { reversed }
+            else { safeSetVoltage(arbFFVolts + simPID.calculate(if(linearConfigured) linearPositionError.meters else positionError.radians)) }
         }
 
     /**
@@ -384,9 +413,15 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var velocitySetpoint: AngularVelocity = 0.rpm
         private set(value) {
             field = value//.coerceIn(-maxVelocity, maxVelocity)
-            if (!closedLoopConfigured && real) rawVelocity = field * gearRatio.invertIf { reversed }
-            else if (!customControlLock) updateVoltage()
+            if(customControlLock) return
+            if (real) rawVelocity = field * gearRatio.invertIf { reversed }
+            else { safeSetVoltage(arbFFVolts + simPID.calculate(if(linearConfigured) linearVelocityError.metersPerSecond else velocityError.radiansPerSecond)) }
         }
+
+    fun updateVoltage() {
+        if(controlMode == ControlMode.POSITION) position = positionSetpoint
+        else if(controlMode == ControlMode.VELOCITY) velocity = velocitySetpoint
+    }
 
     /**
      * Sets the linear position to which the motor should go
@@ -431,39 +466,19 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         return vel.toTangentialVelocity(radius!!)
     }
 
-    /**
-     * Updates the voltage after changing position / velocity setpoint
-     */
-    fun updateVoltage() {
-        if (!isFollower && closedLoopConfigured && controlMode != ControlMode.VOLTAGE) {
-            acceleration = accelerationCalculator.calculate(velocity.value).radiansPerSecond
-            customControlLock = true
-            safeSetVoltage(customControl!!(this))
-            println("$identifier, $voltage")
-            customControlLock = false
-        }
-    }
-
     // ----- meta information ----- //
     /**
      * Does the motor controller have a rotational to linear motion conversion defined? (i.e. wheel radius)
      * Allows for linear units to be used.
      */
-    private val linearConfigured
+    val linearConfigured
         inline get() = radius != null
 
     /**
      * Whether the type of DC motor has been set. Relevant for some Statespace and sim stuff
      */
-    private val motorConfigured
+    val motorConfigured
         inline get() = motorType != null
-
-    /**
-     * Does the motor have closed-loop gains set?
-     * Allows for closed-loop control methods to be used
-     */
-    private val closedLoopConfigured
-        inline get() = customControl != null
 
     // ----- natives ----- //
     /**
@@ -500,9 +515,6 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      */
     override fun initSendable(builder: NTSendableBuilder) {
         super.initSendable(builder)
-        builder.setUpdateTable {
-            updateVoltage()
-        }
         if (linearConfigured) {
             builder.addDoubleProperty("Linear Position (m)", { linearPosition.meters }, null)
             builder.addDoubleProperty(
@@ -582,6 +594,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     }
 
     // ----- sim ---- //
+    // you should never really need to touch these values unless you are making a custom sim  // todo: maybe make private
     /**
      * Settable variable describing velocity according to whatever simulation
      */
@@ -797,7 +810,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         ff: SimpleMotorFeedforward,
         kvAngular: Double,
         kaAngular: Double,
-        trackWidth: Length = 2.meters
+        trackWidth: Length = 1.meters
     ): LinearSystem<N2, N2, N2> {
         return LinearSystemId.identifyDrivetrainSystem(ff.kv, ff.ka, kvAngular, kaAngular, trackWidth.meters)
     }
@@ -806,7 +819,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Set or retrieve the estimated torque the motor is generating
      * @throws MotorUnconfigured if you have not set motor type
      */
-    var torque: Double  // todo: account for gear ratio
+    var torque: Double
         get() {
             if (!motorConfigured) throw MotorUnconfigured
             return motorType!!.KtNMPerAmp * motorType!!.getCurrent(velocity.radiansPerSecond, voltage) * gearRatio
@@ -816,12 +829,16 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
             voltage = motorType!!.rOhms / (value / motorType!!.KtNMPerAmp + 1.0 / motorType!!.KvRadPerSecPerVolt / motorType!!.rOhms * velocity.radiansPerSecond) / gearRatio
         }
 
+    /**
+     * The linear force (in newtons) applied by the motor
+     */
     var force: Double
         get() = torque * radius!!.value
         set(value) {
             torque = value / radius!!.value
         }
 
+    // todo: move Statespace somewhere else
     /**
      * Sets a control system based around a velocity control loop
      */

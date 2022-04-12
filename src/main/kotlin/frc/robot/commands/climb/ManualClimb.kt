@@ -5,8 +5,8 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.subsystems.Climber
 
 object ManualClimb : CommandBase() {
-    const val leftWinchString = "left winch volt"
-    const val rightWinchString = "right winch volt"
+    private const val leftWinchString = "left winch volt"
+    private const val rightWinchString = "right winch volt"
 
     //    const val leftRotString = "left winch volt"
 //    const val rightRotString = "right winch volt"

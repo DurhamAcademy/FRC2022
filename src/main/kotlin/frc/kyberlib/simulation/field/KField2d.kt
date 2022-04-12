@@ -22,10 +22,10 @@ object KField2d : Field2d() {
     var width: Length = fieldSize.y.meters
     var height: Length = fieldSize.x.meters
 
+    // setter for the active trajectory in use by the robot
     var trajectory: Trajectory? = null
         set(value) {
-            if (value == null)
-                getObject("traj").setPoses()
+            if (value == null) getObject("traj").setPoses()
             else getObject("traj").setTrajectory(value)
             field = value
         }

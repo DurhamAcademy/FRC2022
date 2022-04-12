@@ -35,7 +35,7 @@ object Pathfinder : Debug {
     private const val explorationDepth = 5000
 
     /** how many nodes to dedicate to optimization */
-    private const val optimizationDepth = 4000
+    private const val optimizationDepth = 5000
 
     /**
      * Generates a trajectory to get from current estimated pose to a separate target

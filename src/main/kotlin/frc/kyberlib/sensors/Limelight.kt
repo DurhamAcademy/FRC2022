@@ -1,6 +1,12 @@
 package frc.kyberlib.sensors
 
 import edu.wpi.first.networktables.NetworkTableInstance
+import frc.kyberlib.math.threeD.Pose3d
+import frc.kyberlib.math.threeD.Rotation3d
+import frc.kyberlib.math.threeD.Translation3d
+import frc.kyberlib.math.units.extensions.degrees
+import frc.kyberlib.math.units.extensions.meters
+import frc.kyberlib.math.units.extensions.milliseconds
 
 /**
  * A wrapper for the limelight vision camera.
@@ -26,20 +32,20 @@ class Limelight(private val table: String = "limelight") {
     /**
      * Is the camera currently detecting an object?
      */
-    val targetFound
+    val targetFound: Boolean
         get() = tbl.getEntry("tv").getDouble(0.0) != 0.0
 
     /**
      * The x-heading the detection is in
      */
-    val x
-        get() = tbl.getEntry("tx").getDouble(0.0)
+    val yaw
+        get() = tbl.getEntry("tx").getDouble(0.0).degrees
 
     /**
      * The y-heading the detection is in
      */
-    val y
-        get() = tbl.getEntry("ty").getDouble(0.0)
+    val pitch
+        get() = tbl.getEntry("ty").getDouble(0.0).degrees
 
     /**
      * The area of the detected contour
@@ -57,7 +63,7 @@ class Limelight(private val table: String = "limelight") {
      * The milliseconds it takes for the pipeline to be processed
      */
     val latency
-        get() = tbl.getEntry("tl").getDouble(0.0)
+        get() = tbl.getEntry("tl").getDouble(0.0).milliseconds
 
     /**
      * Sidelength of shortest side of the fitted bounding box (pixels)
@@ -104,7 +110,7 @@ class Limelight(private val table: String = "limelight") {
     /**
      * Sets limelight’s operation mode. True enables Driver Camera (Increases exposure, disables vision processing)
      */
-    var driverMode
+    var driverMode: Boolean
         get() = tbl.getEntry("camMode").getNumber(0) == 1
         set(value) {
             tbl.getEntry("camMode").setNumber(if (value) 1 else 0)
@@ -113,7 +119,7 @@ class Limelight(private val table: String = "limelight") {
     /**
      * Allows users to take snapshots during a match
      */
-    var snapshot
+    var snapshot: Boolean
         get() = tbl.getEntry("snapshot").getNumber(0) == 1
         set(value) {
             tbl.getEntry("snapshot").setNumber(if (value) 1 else 0)
@@ -125,21 +131,18 @@ class Limelight(private val table: String = "limelight") {
     var pipeline
         get() = tbl.getEntry("getpipe").getDouble(0.0).toInt()
         set(value) {
-            tbl.getEntry("pipeline").setNumber(pipeline)
+            tbl.getEntry("pipeline").setNumber(value)
         }
 
     /**
      * 3D transform of the detected target if using PnP
      */
-    val transform: VisionTransform?
+    val transform: Pose3d?
         get() {
             val entry = tbl.getEntry("camtran")
             val cmt = if (entry.exists()) entry.getDoubleArray(arrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)) else null
-            return if (cmt != null) VisionTransform(cmt[0], cmt[1], cmt[2], cmt[3], cmt[4], cmt[5]) else null
+            return if (cmt != null)
+                Pose3d(Translation3d(cmt[0].meters, cmt[1].meters, cmt[2].meters),
+                        Rotation3d(cmt[3].degrees, cmt[4].degrees, cmt[5].degrees)) else null
         }
 }
-
-/**
- * Represents the transformation of a vision target in 3D space, as returned by the Limelight's 3D mode.
- */
-data class VisionTransform(val x: Double, val y: Double, val z: Double, val pitch: Double, val yaw: Double, val roll: Double)

@@ -1,30 +1,60 @@
 # Future
-- chief delphi post
+- chief delphi post *
 - resume
 - github page
+- ask Adair 
 
 # In Sim
 - default motors to simple sim (thats in the uncommited code)
   - update to gooder simple sim
 - check documentation
 - get chrp files
-- control affine plant ff
-- augmented loop (pg 109 of textbook)
-  - detla U: add voltage into state model
-    - https://www.chiefdelphi.com/t/971s-control-system/137365/15?u=tatestaples
-- better turning in difdrive dynamics
 - work on better elevator and arm systems (using non linearity)
 - fix debugs
+- use KyberlibConfigs
+- add matchTime to Game.kt
 
 # With robot
 - try Everett's climb idea
 - teach group about how climb works
   - ask about position vs linearPosition preferences
 - try replacing flywheel colsons
+- better turning in difdrive dynamics
+  - skid factor mentioned in 254 code
 
-## random cool things
-- Auto Drive to Climb
-- Auto Climb
+# Short-term what better
+- operator controls (2 drivers)
+- no hopper
+- less violent intake
+- inertia wheels?
+
+# longer-term what better
+- testing is valuable
+- driver practice is important
+- compact causes issues
+  - have a plan for electronics (not necesarily CAD)
+  - pnuematics take space, use with caution
+  - leave room for mistakes and future innovations
+- fundraising is a priority
+- long-term planning and time estimation
+- chairmans -> outreach
+- look into working with other teams
+  - builds connections
+  - lets us practice with other robots
+  - more fun
+- fail fast and early
+  - build before done
+- name batteries
+- build driverstation
+
+# what good
+- banging shooter
+- working climb
+- LEDs
+- awards!
+- student led team
+- no COTS
+- overcoming hurdles
 
 ## Full Auto
 - goal system (shouldn't be too hard - should update) -> moderate difficulty
@@ -40,7 +70,6 @@
 
 ## Long Term
 - think about roborio2 (they said 30% faster)
-- probably get falcons
 
 ### software pitch (11k lines of code written)
 - Auto
@@ -119,115 +148,86 @@
             - fake solenoids
             - halucinating climb past 2 events
 
-
-## Extended Pitch
-- unit libraries **
-  - greater understanding and readiblity
-  - custom polar coordinates
-  - nav updates
-  - turret adjustments
-- Characterization
-  - use our own code to characterize systems and fit the data
-  - allows for more control of the data we get and ensures safety on constrained systems
-- Expanded Trajectory generaion
-  - obstacles
-    - Informed Rapidly Expanding Random Trees
-      - illustraion
-      - optimizations
-    - Traveling Salesman
-      - brute
-      - nearest neighbors
-      - branch and bound
-      - general graph class
-  - goals
-    - CommandManager
-- Playback System
-  - recording inputs
-  - overriding the controller to play inputs
-- Navigation / Dynamics
-  - integrated and simple to use 
-  - built in for all drivetrain types (diff, mecanum, swerve)
-    - drive chassis
-    - drive auto
-    - update auto
-    - simulate motors
-    - calibration
-- debug system
-  - allows for graphing and understanding of what everything is doing
-- fancy controller modifications
-  - drone modification
-- LED animations
-    - 11 distinct animations
-    - sim support and simplicity
-- math 
-  - multiple coordinate systems
-    - robot rel
-    - hub rel
+Post / Github outline
+- Introduction
+  - Who I am
+  - Why I'm qualified
+    - states award
+    - 11k lines of code
+  - What is kyberlib
+- SpinShot software overview
+  - navigation
+    - poseEstimators
+    - limelight updates
+  - auto
+    - pathweaver
+  - turret
+    - side spin comp
+    - back spin comp
+    - aiming while blind
+    - dispose
+    - hall sensor zeroing
+  - shooter
+    - interpolator for speed and hood angle
+    - shooting while moving
+    - falcon integrated controls
+  - climb
+    - swing compensation
+    - gyroscope sync climb
+    - prepared climb
+  - leds
+    - looks cool
+    - communicates robot state with driver
+  - controls
+    - control schema
+      - rocket league controls
+    - manual dashboard controls
+- Kyberlib
+  - KMotor
+    - modes
+      - unencoded
+        - percent
+        - voltage
+        - follow
+      - encoded
+        - position
+        - velocity
+        - torque
+        - current
+      - falcon
+        - music
+    - builtin algorithms
+      - pid
+      - ff
+      - statespace
+      - bang bang custom
+    - sim support
+      - ff
+      - linear system
+    - characterization support
+      - allows for safety and consistency with our motor controls
+    - wrapped substitution
+  - Autonomous
+    - pathweaver integration
+    - playback
+    - trajectory generation with obstacle avoidance
+      - Informed Rapidly Expanding Random Tree*
+    - goal system
+      - travelling salesman
+  - Mechanisms
+    - drivetrains
+      - chassis drive
+      - auto
+  - Units
+    - make code more readable and type safe
+  - LEDs
+    - regions
+    - animations
+  - debug system
+  - math utils
+    - 3d
     - polar
-  - threeD geometry
-- builtin mechanism (personal learning and example building)
-  - drivetrains
-  - elevator
-  - arm
-  - flywheel
-- motor control
-  - one line fix to swap out Neos (before musics)
-  - experimental statespace controls
-    - latency compensation
-    - delta U control
-  - simulating motors
-    - Feedforwards
-    - linear systems
-- simulations
-  - What needs simulation?
-    - actuators
-      - KSolenoid
-      - KMotor
-      - LEDs
-    - sensors
-      - PhotonCamera
-      - KGyro
-  - Practical uses
-    - coding in 3 days
-    - make sure nothing hits
-    - make sure everything moves at the speeds they should
-      - linear systems are really important for this because they allow for guessed simulations before getting to touch the actual motor
-- tutorials
-  - I am a senior
-  - setup by step 
-    - what is code -> Control Theory
 - UcoSLAM
-  - the research process
-    - talk about other approaches and their limitations
-  - the website
-    - relation to our auto Intake prototyping
-  - how it works
-    - mapping the roof
-
-
-/**
-* Definetly
-* - east
-* - hedgehogs
-* - triple strange
-*
-* Good:
-* sequence
-* omegabytes
-* pitt pirates
-* zebracorns
-* platypi :(
-* hawtimus prime?
-* yeti
-* bots on wheels
-* green hope falcons (5190)
-* gear cats
-*
-* I want
-* collect all the data from NCFIRST matches
-* teach me all of the programming required for FRC
-* predict all the matches for States
-* predict potential from top teams
-* graph trends for all the teams over matches
-* predict our potential
-  */
+- Conclusion
+  - thoughts?
+  - improvements?
