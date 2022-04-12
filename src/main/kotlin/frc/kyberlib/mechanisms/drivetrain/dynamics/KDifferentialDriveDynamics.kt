@@ -2,22 +2,17 @@ package frc.kyberlib.mechanisms.drivetrain.dynamics
 
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.Nat
-import edu.wpi.first.math.VecBuilder
-import edu.wpi.first.math.controller.LinearQuadraticRegulator
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.RamseteController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
-import edu.wpi.first.math.estimator.KalmanFilter
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.math.numbers.N2
 import edu.wpi.first.math.system.LinearSystem
-import edu.wpi.first.math.system.LinearSystemLoop
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.command.Game
-import frc.kyberlib.command.KRobot
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.Voltage

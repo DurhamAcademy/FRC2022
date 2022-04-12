@@ -31,7 +31,6 @@ class KSwerveDynamics(vararg val swerveModules: SwerveModule, fieldRelativeOffse
         swerveModules.zip(states).forEach { it.first.state = it.second }
     }
 
-
     override fun stop() {
         swerveModules.forEach {
             it.state = it.brakeState

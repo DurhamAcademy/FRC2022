@@ -18,6 +18,7 @@ import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.feetPerSecond
 import frc.kyberlib.math.units.extensions.w
 import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
+import frc.kyberlib.mechanisms.drivetrain.dynamics.KSwerveDynamics
 import frc.kyberlib.sensors.gyros.KGyro
 
 /**
@@ -33,13 +34,7 @@ class SwerveDrive(
         10.feetPerSecond.value,
         10.feetPerSecond.value
     )
-) : SubsystemBase(), KDrivetrain, Debug {
-    // controls
-    private val kinematics = SwerveDriveKinematics(*swerveModules.map { it.location }.toTypedArray())
-    private val odometry = SwerveDriveOdometry(kinematics, 0.degrees.w)
-
-    // field relative settings
-    private var fieldHeading = gyro.heading
+) : KDrivetrain() {
 
     var states
         get() = swerveModules.map { it.state }
@@ -47,22 +42,7 @@ class SwerveDrive(
             swerveModules.zip(value).forEach { it.first.state = it.second }
         }
 
-    override val chassisSpeeds: ChassisSpeeds
-        get() = kinematics.toChassisSpeeds(*states.toTypedArray())
-    var heading: Angle
-        get() = gyro.heading
-        set(value) {
-            gyro.heading = value
-        }
-    var pose: Pose2d
-        get() = odometry.poseMeters
-        set(value) {
-            odometry.resetPosition(value, heading.w)
-        }
-
-    override fun drive(speeds: ChassisSpeeds) {
-        drive(speeds, true)
-    }
+    override val dynamics: KSwerveDynamics = KSwerveDynamics(*swerveModules)
 
     /**
      * Drive the robot is given directions
@@ -70,15 +50,7 @@ class SwerveDrive(
      * @param fieldOriented whether to drive relative to the driver or relative to the robot
      */
     fun drive(speeds: ChassisSpeeds, fieldOriented: Boolean = true) {
-        if (fieldOriented) {
-            val fieldSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                speeds.vxMetersPerSecond,
-                speeds.vyMetersPerSecond,
-                speeds.omegaRadiansPerSecond,
-                gyro.heading.minus(fieldHeading).w
-            )
-            drive(*kinematics.toSwerveModuleStates(fieldSpeeds))
-        } else drive(speeds)  // this is recursive
+        dynamics.drive(speeds, fieldOriented)
     }
 
     /**
@@ -87,7 +59,7 @@ class SwerveDrive(
     fun drive(vararg states: SwerveModuleState) {
         assert(states.size == swerveModules.size) { "The size of states(${states.size}) do no match the number of modules ${swerveModules.size}" }
         SwerveDriveKinematics.desaturateWheelSpeeds(states, constraints.maxVelocity)
-        swerveModules.zip(states).forEach { it.first.state = it.second }
+        dynamics.drive(*states)
     }
 
     /**
@@ -97,36 +69,12 @@ class SwerveDrive(
         drive(*swerveModules.map { it.brakeState }.toTypedArray())
     }
 
-    /**
-     * Called periodically.
-     * Updates the robot location with each of the modules states
-     */
-    override fun periodic() {
-        val moduleStates = swerveModules.map { it.state }
-        odometry.update(gyro.heading.w, *moduleStates.toTypedArray())
-    }
-
     val xControl = PIDController(0.7, 0.0, 0.1)
     val yControl = PIDController(0.7, 0.0, 0.1)
     val thetaControl = ProfiledPIDController(0.7, 0.0, 0.1, constraints)
 
-    /**
-     * generates a command to follow a trajectory
-     */
-    fun auto(trajectory: Trajectory): SwerveControllerCommand {
-        return SwerveControllerCommand(
-            trajectory,
-            odometry::getPoseMeters,
-            kinematics,
-            xControl, yControl, thetaControl,
-            this::drive,
-            this
-        )
-    }
-
     override fun debugValues(): Map<String, Any?> {
         val map = mutableMapOf<String, Any>(
-            "pose" to pose.debugValues,
             "speed" to chassisSpeeds.debugValues,
         )
         swerveModules.forEachIndexed { index, swerveModule -> map["swerve Module #$index"] = swerveModule }
