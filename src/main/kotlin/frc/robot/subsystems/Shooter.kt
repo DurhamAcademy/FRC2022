@@ -52,7 +52,7 @@ object Shooter : SubsystemBase(), Debug {
     }
 
     // smooth out when shooter up to speed
-    private val readyDebouncer = Debouncer(0.2, DebounceType.kBoth)  // fixme: maybe just kFalling
+    private val readyDebouncer = Debouncer(0.2, DebounceType.kBoth)
     private val shortReady
         inline get() = hood.atSetpoint &&
                     flywheel.velocityError.absoluteValue < (if (RobotContainer.op.shootWhileMoving) 50.rpm else Constants.SHOOTER_VELOCITY_TOLERANCE)

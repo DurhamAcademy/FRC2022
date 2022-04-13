@@ -10,6 +10,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.math.numbers.N2
 import edu.wpi.first.math.system.LinearSystem
+import frc.kyberlib.TRACK_WIDTH
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.command.Game
@@ -28,7 +29,7 @@ import frc.kyberlib.motorcontrol.Voltage
  * better turn
  * statespace
  */
-class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaster: KMotorController, val trackWidth: Length,
+class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaster: KMotorController,
                                 val angularFF: SimpleMotorFeedforward= SimpleMotorFeedforward(0.0, 0.0), val angularDrag: Double = 0.0) : KDriveDynamics() {
 
     companion object {
@@ -52,7 +53,7 @@ class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaste
         get() {
             val averageSpeed = (leftMaster.linearVelocity.value + rightMaster.linearVelocity.value) / 2.0
             val fwd = averageSpeed
-            val turn = averageSpeed * trackWidth.meters
+            val turn = averageSpeed * TRACK_WIDTH.meters
             return ChassisSpeeds(fwd, 0.0,  turn)
         }
 
@@ -62,14 +63,14 @@ class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaste
         get() {
             val averageSpeed = (leftMaster.linearAcceleration.value + rightMaster.linearAcceleration.value) / 2.0
             val fwd = averageSpeed
-            val turn = averageSpeed * trackWidth.meters
+            val turn = averageSpeed * TRACK_WIDTH.meters
             return ChassisSpeeds(fwd, 0.0, turn)
         }
 
     val curvature
         get() = chassisSpeeds.omegaRadiansPerSecond / chassisSpeeds.vxMetersPerSecond
 
-    val kinematics = DifferentialDriveKinematics(trackWidth.meters)
+    val kinematics = DifferentialDriveKinematics(TRACK_WIDTH.meters)
     init {
         Navigator.instance!!.applyKinematics(kinematics)
         Navigator.instance!!.differentialDrive = true
@@ -80,8 +81,8 @@ class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaste
      * @param chassisSpeeds the chassis speeds object representing how to drive the robot
      */
     override fun drive(chassisSpeeds: ChassisSpeeds) {
-        val left = chassisSpeeds.vxMetersPerSecond - trackWidth.value * chassisSpeeds.omegaRadiansPerSecond
-        val right = chassisSpeeds.vxMetersPerSecond + trackWidth.value * chassisSpeeds.omegaRadiansPerSecond
+        val left = chassisSpeeds.vxMetersPerSecond - TRACK_WIDTH.value * chassisSpeeds.omegaRadiansPerSecond
+        val right = chassisSpeeds.vxMetersPerSecond + TRACK_WIDTH.value * chassisSpeeds.omegaRadiansPerSecond
         drive(left.metersPerSecond, right.metersPerSecond)
     }
 
@@ -155,8 +156,8 @@ class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaste
     }
 
     private fun stateSpace(leftFF: SimpleMotorFeedforward, rightFF: SimpleMotorFeedforward, angularFeedforward: SimpleMotorFeedforward): LinearSystem<N2, N2, N2> {
-        val kVAngular = angularFeedforward.kv * 2.0 / trackWidth.meters
-        val kAAngular = angularFeedforward.ka * 2.0 / trackWidth.meters
+        val kVAngular = angularFeedforward.kv * 2.0 / TRACK_WIDTH.meters
+        val kAAngular = angularFeedforward.ka * 2.0 / TRACK_WIDTH.meters
         val A1: Double = 0.5 * -(leftFF.kv / leftFF.ka + kVAngular / kAAngular)
         val A2: Double = 0.5 * -(rightFF.kv / rightFF.ka - kVAngular / kAAngular)
         val B1: Double = 0.5 * (1.0 / leftFF.ka + 1.0 / kAAngular)

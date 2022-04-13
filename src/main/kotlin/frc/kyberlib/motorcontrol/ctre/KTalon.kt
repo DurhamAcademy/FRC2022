@@ -104,7 +104,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             orchestra.addInstrument(talon)
             val kTimeoutMs = 100
 //            talon.configVoltageCompSaturation(12.0, 100)
-            talon.enableVoltageCompensation(false)  // todo: look into if we want this
+            talon.enableVoltageCompensation(false)
 
             talon.clearMotionProfileHasUnderrun(kTimeoutMs)
             talon.clearMotionProfileTrajectories()

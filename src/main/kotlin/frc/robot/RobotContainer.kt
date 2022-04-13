@@ -36,10 +36,7 @@ import frc.robot.controls.DefaultControls
 import frc.robot.controls.OperatorControls
 import frc.robot.controls.RocketLeague
 import frc.robot.subsystems.*
-import org.photonvision.PhotonCamera
 import org.photonvision.SimPhotonCamera
-import org.photonvision.SimVisionSystem
-import org.photonvision.SimVisionTarget
 import java.awt.Color
 import kotlin.math.absoluteValue
 
@@ -174,7 +171,7 @@ object RobotContainer {
         Intaker
         Shooter
         Turret
-        Limelight  // fixme: Turret lost is wrong
+        Limelight
     }
 
 }

@@ -15,14 +15,18 @@ import frc.kyberlib.simulation.Simulatable
  * Pre-made Flywheel Subsystem. Also a demo of StateSpace control from WPILIB. Control using velocity variable.
  * @param motor the controlling motor of the flywheel. If other motors are involves, make them follow this
  */
-class Flywheel(
-    private val motor: KMotorController,
+class Flywheel(  // todo: allow for gooder constructor
+    leadMotor: KMotorController,
     kFlywheelMomentOfInertia: Double = 0.00032, // kg * m^2
     timeDelay: Double = 0.02
-) : Debug, Simulatable {
+) : Debug {
     // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-flywheel-walkthrough.html
 
-    private val kFlywheelGearing = motor.gearRatio
+    private val motor = leadMotor.apply {
+        val system = flywheelSystem(kFlywheelMomentOfInertia)
+        stateSpaceControl(system, 3.radiansPerSecond, 8.radiansPerSecond)
+        setupSim(flywheelSystem(kFlywheelMomentOfInertia))
+    }
 
     /**
      * The plant holds a state-space model of our flywheel. This system has the following properties:
@@ -57,11 +61,6 @@ class Flywheel(
      */
     private val loop = LinearSystemLoop(plant, optimizer, observer, 12.0, timeDelay)
 
-
-    init {
-        motor.stateSpaceControl(loop, timeDelay.seconds)
-    }
-
     var velocity: AngularVelocity
         get() = motor.velocity
         set(value) {
@@ -69,12 +68,4 @@ class Flywheel(
         }
 
     override fun debugValues(): Map<String, Any?> = motor.debugValues()
-
-    private val sim = FlywheelSim(plant, motor.motorType!!, kFlywheelGearing)
-    override fun simUpdate(dt: Time) {
-        sim.setInputVoltage(motor.voltage)
-        sim.update(dt.seconds)
-        motor.simVelocity = sim.angularVelocityRPM.rpm
-    }
-
 }

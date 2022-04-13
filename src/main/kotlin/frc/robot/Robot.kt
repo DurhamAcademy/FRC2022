@@ -69,10 +69,7 @@ class Robot : KRobot() {
         RobotContainer.navigation.pose = pose
     }
 
-    // todo:
-    // spin fly back for sec to remove tether
-    // separate intake system
-    // add spinup
+    // todo: separate intake system
     private fun loadRoutine(routine: String): SequentialCommandGroup {
         val command = SequentialCommandGroup()
         TrajectoryManager.routines

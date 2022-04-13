@@ -10,8 +10,6 @@ import frc.kyberlib.auto.trajectory.TrajectoryManager
 
 open class KRobot() {
     companion object {
-        var enabled = false
-            private set
         const val period: Double = 0.02
     }
 
@@ -29,12 +27,11 @@ open class KRobot() {
 
         override fun robotPeriodic() {
             Debug.log("Robot", "robot periodic", level=DebugFilter.Low)
-            CommandScheduler.getInstance().run()  // todo: replace this
+            CommandScheduler.getInstance().run()
             this@KRobot.robotPeriodic()
         }
 
         override fun disabledInit() {
-            enabled = false
             Debug.log("Robot", "disabled", level=DebugFilter.Low)
             this@KRobot.disabledInit()
         }
@@ -44,11 +41,9 @@ open class KRobot() {
             this@KRobot.disabledPeriodic()
         }
 
-        override fun disabledExit() {
-            Debug.log("Robot", "enable init", level=DebugFilter.Low)
-            this@KRobot.enabledInit()
-        }
         override fun autonomousInit() {
+            Game.startTime = Game.time
+            enabledInit()
             Debug.log("Robot", "auto init", level=DebugFilter.Low)
             TrajectoryManager.load()
             this@KRobot.autonomousInit()
@@ -66,6 +61,8 @@ open class KRobot() {
         }
 
         override fun teleopInit() {
+            if(!Game.COMPETITION && !Game.PRACTICE) Game.startTime = Game.time
+            else enabledInit()
             Debug.log("Robot", "teleop init", level=DebugFilter.Low)
             this@KRobot.teleopInit()
         }

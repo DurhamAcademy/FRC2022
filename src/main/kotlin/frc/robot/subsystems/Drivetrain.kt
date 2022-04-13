@@ -62,7 +62,7 @@ object Drivetrain : DifferentialDriveTrain() {
         follow(rightMaster)  // follow(rightMaster)
     }
 
-    override val dynamics: KDifferentialDriveDynamic = KDifferentialDriveDynamic(leftMaster, rightMaster, Constants.TRACK_WIDTH.meters)  // todo: use KyberlibConfig
+    override val dynamics: KDifferentialDriveDynamic = KDifferentialDriveDynamic(leftMaster, rightMaster)
 
     /**
      * Get speeds relative to the hub.
@@ -102,7 +102,6 @@ object Drivetrain : DifferentialDriveTrain() {
     init {
         defaultCommand = Drive
         Navigator.instance!!.applyMovementRestrictions(3.metersPerSecond, 2.metersPerSecond)
-        // Navigator.instance!!.applyKinematics(kinematics)  // todo: add this into dynamics if not there
     }
 
     /**

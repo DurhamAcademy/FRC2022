@@ -7,9 +7,6 @@
 # In Sim
 - get chrp files
 - fix debugs
-- use KyberlibConfigs
-- add matchTime to Game.kt
-- fix
 
 # With robot
 - try Everett's climb idea

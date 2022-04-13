@@ -4,6 +4,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.math.units.extensions.Length
 import frc.kyberlib.math.units.extensions.feet
+import frc.kyberlib.math.units.extensions.inches
+import frc.kyberlib.math.units.extensions.metersPerSecond
 import frc.kyberlib.motorcontrol.KMotorController
 
 /**
@@ -12,17 +14,15 @@ import frc.kyberlib.motorcontrol.KMotorController
  * @param radius the radius of the wheel that moves the elevator. Alternatively rotationToVelocityConversionFactor/2π
  * @param initialPosition optional value of where the elevator starts
  */
-class Elevator(vararg val motors: KMotorController, radius: Length, initialPosition: Length = 0.feet) : SubsystemBase(),
+class Elevator(leadMotor: KMotorController, initialPosition: Length = 0.feet, mass: Double) : SubsystemBase(),
     Debug {
-    private val master = motors[0].apply {
-        this.radius = radius
+    private val master = leadMotor.apply {
         resetPosition(initialPosition)
-    }
-
-    init {
-        for (info in motors.withIndex()) {
-            if (info.index > 0) info.value.follow(master)
-        }
+        val system = elevatorSystem(mass)
+        setupSim(system)
+        stateSpaceControl(
+            system, 2.inches, 2.inches, .5.metersPerSecond
+        )
     }
 
     /**

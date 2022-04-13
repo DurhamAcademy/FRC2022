@@ -12,11 +12,9 @@ class AutoShot : CommandBase() {
         addRequirements(Shooter, Drivetrain, Conveyor)
     }
 
-    private var reenableCompressor = true
-    override fun initialize() {  // fixme: this needs to be edited
+    override fun initialize() {
         Intaker.intakeMotor.stop()
         Intaker.deployed = false
-        reenableCompressor = KSolenoid.compressor.enabled()
         KSolenoid.compressor.disable()
         shootingTimer.reset()
         Drivetrain.stop()

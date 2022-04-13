@@ -56,19 +56,17 @@ class KSparkMax(
         set(value) {
             field = value
             if (real) {
-                val direction =
-                    if (reversed) CANSparkMax.SoftLimitDirection.kReverse else CANSparkMax.SoftLimitDirection.kForward
-                spark.setSoftLimit(direction, (value.rotations * gearRatio.invertIf { reversed }).toFloat())
+                val direction = if (reversed) CANSparkMax.SoftLimitDirection.kReverse else CANSparkMax.SoftLimitDirection.kForward
+                                spark.setSoftLimit(direction, (value.rotations * gearRatio.invertIf { reversed }).toFloat())
             }
         }
 
     override fun checkError(): Boolean = if (real) spark.getFault(CANSparkMax.FaultID.kCANRX) else false
 
     override var brakeMode = false
-        get() = if (real) spark.idleMode == CANSparkMax.IdleMode.kBrake else field
         set(value) {
-            if (real) spark.idleMode = if (value) CANSparkMax.IdleMode.kBrake else CANSparkMax.IdleMode.kCoast
-            else field = value
+            spark.idleMode = if (value) CANSparkMax.IdleMode.kBrake else CANSparkMax.IdleMode.kCoast
+           field = value
         }
 
     override var rawPercent

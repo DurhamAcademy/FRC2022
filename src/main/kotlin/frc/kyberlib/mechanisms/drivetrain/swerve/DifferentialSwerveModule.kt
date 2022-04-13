@@ -14,29 +14,18 @@ import frc.kyberlib.motorcontrol.KMotorController
  * @param bottomMotor the second motor of the dif swerve
  */
 class DifferentialSwerveModule(
-    location: Translation2d, wheelRadius: Length,
+    location: Translation2d, private val wheelRadius: Length,
     private val topMotor: KMotorController, private val bottomMotor: KMotorController
 ) : SwerveModule(location) {
 
     private val rotationPID = PIDController(0.07, 0.00, 0.01)
-    private val velPid = PIDController(0.07, 0.00, 0.01)
-    private val feedforward = SimpleMotorFeedforward(0.0, 0.0, 0.0)
 
-    /**
-     * Custom control for each motor. Finds what voltage the motors should be.
-     */
-    private fun differentialControl(it: KMotorController): Double {
-        val goal = stateSetpoint
-        val ff = feedforward.calculate(it.linearVelocity.metersPerSecond)
-        val velCorrection = velPid.calculate(goal.speedMetersPerSecond)
-        val rotationError = rotation - goal.angle.k
-        val rotCorrection = rotationPID.calculate(rotationError.radians, goal.angle.radians)
-        return ff + velCorrection + rotCorrection
-    }
-
-    init {
-        topMotor.customControl = { it: KMotorController -> differentialControl(it) }
-        bottomMotor.customControl = { it: KMotorController -> differentialControl(it) }
+    private fun updateSpeeds() {
+        val wheelSpeed = stateSetpoint.speedMetersPerSecond.metersPerSecond
+        val rotationCorrection = rotationPID.calculate(stateSetpoint.angle.radians).radiansPerSecond
+        val motorSpeed = wheelSpeed / wheelRadius / 2.0
+        topMotor.velocity = motorSpeed + rotationCorrection
+        bottomMotor.velocity = motorSpeed - rotationCorrection
     }
 
     override var rotation: Angle
@@ -47,6 +36,7 @@ class DifferentialSwerveModule(
         }
         set(value) {
             stateSetpoint.angle = value.w
+            updateSpeeds()
         }
 
     override var speed: LinearVelocity
@@ -57,5 +47,6 @@ class DifferentialSwerveModule(
         }
         set(value) {
             stateSetpoint.speedMetersPerSecond = value.metersPerSecond
+            updateSpeeds()
         }
 }

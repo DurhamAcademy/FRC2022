@@ -22,6 +22,12 @@ object Game {
         inline get() = RobotState.isEStopped()
     val COMPETITION
         inline get() = DriverStation.isFMSAttached()
+    val PRACTICE
+        inline get() = DriverStation.getMatchType() == DriverStation.MatchType.Practice
+    val QUALIFICATION
+        inline get() = DriverStation.getMatchType() == DriverStation.MatchType.Qualification
+    val ELIMINATION
+        inline get() = DriverStation.getMatchType() == DriverStation.MatchType.Elimination
 
     val brownedOut
         inline get() = RobotController.isBrownedOut()
@@ -33,6 +39,8 @@ object Game {
 
     val time
         inline get() = Timer.getFPGATimestamp().seconds
+    val bootTime = time
+    var startTime = bootTime
 
     val alliance: DriverStation.Alliance = DriverStation.getAlliance()
 
