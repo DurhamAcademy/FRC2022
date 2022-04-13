@@ -5,18 +5,15 @@
 - ask Adair 
 
 # In Sim
-- default motors to simple sim (thats in the uncommited code)
-  - update to gooder simple sim
-- check documentation
 - get chrp files
-- work on better elevator and arm systems (using non linearity)
 - fix debugs
 - use KyberlibConfigs
 - add matchTime to Game.kt
+- fix
 
 # With robot
 - try Everett's climb idea
-- teach group about how climb works
+- teach group about how kyberlib works
   - ask about position vs linearPosition preferences
 - try replacing flywheel colsons
 - better turning in difdrive dynamics

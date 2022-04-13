@@ -17,15 +17,11 @@ import frc.kyberlib.motorcontrol.KMotorController
  * @param gyro KGyro to provide heading information
  */
 abstract class DifferentialDriveTrain : KDrivetrain(), Debug {
-    abstract val leftMaster: KMotorController
-    abstract val rightMaster: KMotorController
-    override val dynamics: KDifferentialDriveDynamic = KDifferentialDriveDynamic(leftMaster, rightMaster, TRACK_WIDTH)
+
+    abstract override val dynamics: KDifferentialDriveDynamic
 
     val wheelSpeeds
-        inline get() = DifferentialDriveWheelSpeeds(
-            leftMaster.linearVelocity.metersPerSecond,
-            rightMaster.linearVelocity.metersPerSecond
-        )
+        inline get() = dynamics.wheelSpeeds
 
     fun drive(speeds: DifferentialDriveWheelSpeeds) {
         dynamics.drive(speeds)
@@ -35,8 +31,6 @@ abstract class DifferentialDriveTrain : KDrivetrain(), Debug {
         return mapOf(
             "pose" to Navigator.instance!!.pose.debugValues,
             "speed" to chassisSpeeds.debugValues,
-            "leftMaster" to leftMaster,
-            "rightMaster" to rightMaster
         )
     }
 }

@@ -3,14 +3,16 @@ package frc.kyberlib.auto.trajectory
 import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.math.trajectory.TrajectoryUtil
 import edu.wpi.first.wpilibj.Filesystem
+import frc.kyberlib.PATHWEAVER_PATH
+import java.nio.file.Path
 
 /**
  * Central location to store trajectories
  */
 object TrajectoryManager {
-    val TRAJECTORY_PATH = Filesystem.getDeployDirectory().toPath().resolve("PathWeaver/output")
-    val AUTO_PATH = Filesystem.getDeployDirectory().toPath().resolve("PathWeaver/Autos")
-    val trajectories = mutableMapOf<String, KTrajectory>()
+    val TRAJECTORY_PATH: Path = PATHWEAVER_PATH.resolve("output")
+    val AUTO_PATH: Path = PATHWEAVER_PATH.resolve("Autos")
+    private val trajectories = mutableMapOf<String, KTrajectory>()
 
     fun load() {
         for (file in paths) trajectories[file] = KTrajectory(file, getPath(file))

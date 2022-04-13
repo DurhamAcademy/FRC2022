@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.PneumaticsControlModule
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 
-class KSolenoid(val back: Int, val fwd: Int, private val fake: Boolean = false) : Debug, NTSendable {
+class KSolenoid(back: Int, fwd: Int, fake: Boolean = false) : Debug, NTSendable {
     companion object {
         val allSolenoids = mutableListOf<KSolenoid>()
         val hub: PneumaticsBase = PneumaticsControlModule(1)  // represents a PCM
@@ -17,22 +17,27 @@ class KSolenoid(val back: Int, val fwd: Int, private val fake: Boolean = false) 
             enableDigital()
         }
     }
+    private val followers = mutableListOf<KSolenoid>()
+    private val real = !fake && Game.real
 
     init {
         allSolenoids.add(this)
     }
 
     override var identifier: String = "Pneumatic$fwd"
-    val double = hub.makeDoubleSolenoid(fwd, back)
+    private val double = hub.makeDoubleSolenoid(fwd, back)
 
     //    val solenoids = ports.map { hub.makeSolenoid(it) }
     /**
      * Whether the solenoid is extended or retracted
      */
-    var extended: Boolean
-        get() = double.get() == DoubleSolenoid.Value.kForward//extension != 0
+    var extended: Boolean = false
+        get() = if (real) double.get() == DoubleSolenoid.Value.kForward else field//extension != 0
         set(value) {
-            double.set(if (value) DoubleSolenoid.Value.kForward else DoubleSolenoid.Value.kReverse)
+            if (real)
+                double.set(if (value) DoubleSolenoid.Value.kForward else DoubleSolenoid.Value.kReverse)
+            else field = value
+            followers.forEach { it.extended = value }
         }//extension = if(value) 1 else 0}
 
     /**
@@ -41,7 +46,7 @@ class KSolenoid(val back: Int, val fwd: Int, private val fake: Boolean = false) 
      */
     var extension: Int = 0  // attempt to make a variable extension length pneumatic system. Wasn't working but didn't test much
         set(value) {
-            if (Game.real && !fake) {
+            if (real) {
 //                if(solenoids.size == 1) {
 //                    solenoids.first().set(value > 0)
 //                }
@@ -53,7 +58,10 @@ class KSolenoid(val back: Int, val fwd: Int, private val fake: Boolean = false) 
 //                }
             }
             field = value
+            followers.forEach { it.extension = value }
         }
+
+    fun follow(other: KSolenoid) {other.followers.add(this)}
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(

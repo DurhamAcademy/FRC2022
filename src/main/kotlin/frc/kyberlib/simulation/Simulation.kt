@@ -11,7 +11,7 @@ import frc.kyberlib.simulation.field.KField2d
  */
 object Simulation : SubsystemBase() {
     // stores things to be sim updated
-    private val sims = ArrayList<Simulatable>()
+    private val sims = mutableSetOf<Simulatable>()
 
     // stores time values
     private var prevTime = Game.time
@@ -35,7 +35,6 @@ object Simulation : SubsystemBase() {
     override fun simulationPeriodic() {
         val dt = time - prevTime
         for (sim in sims) {
-            println(sim)
             sim.simUpdate(dt)
         }
         prevTime = time

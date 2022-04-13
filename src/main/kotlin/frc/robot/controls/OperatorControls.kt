@@ -17,10 +17,10 @@ class OperatorControls {
     private val fudgeString = "back fudge"
     private val compressorString = "compressor enabled"
 
-    val shootWhileMoving  // todo: make this not rely on poseEstimation
+    val shootWhileMoving
         inline get() = SmartDashboard.getBoolean("move shot", false)
     val smartNav
-        inline get() = SmartDashboard.getBoolean("nav updates", true)
+        inline get() = Game.real && SmartDashboard.getBoolean("nav updates", true)
     val curveComp
         inline get() = SmartDashboard.getNumber("curve comp", -4.0)
     val intakeCam

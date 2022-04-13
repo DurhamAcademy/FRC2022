@@ -39,6 +39,8 @@ abstract class KDrivetrain : SubsystemBase(), Debug {
      */
     fun driveTo(goal: Translation2d, direct: Boolean = true) = dynamics.driveTo(goal, direct)
 
+    fun stop() = dynamics.stop()
+
     val chassisSpeeds: ChassisSpeeds
         inline get() = dynamics.chassisSpeeds
 

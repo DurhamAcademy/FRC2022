@@ -1,22 +1,18 @@
 package frc.robot.subsystems
 
-import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
-import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
-import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.auto.Navigator
-import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.PolarPose
 import frc.kyberlib.math.polar
-import frc.kyberlib.math.units.debugValues
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.milli
+import frc.kyberlib.mechanisms.drivetrain.DifferentialDriveTrain
+import frc.kyberlib.mechanisms.drivetrain.dynamics.KDifferentialDriveDynamic
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.robot.Constants
 import frc.robot.RobotContainer
@@ -26,14 +22,13 @@ import frc.robot.commands.drive.Drive
 /**
  * Mechanism that controls how the robot drives
  */
-object Drivetrain : SubsystemBase(), Debug {
+object Drivetrain : DifferentialDriveTrain() {
     // motors
     override val priority: DebugFilter = DebugFilter.Max
 
     // ff for each part of the drivetrain
     private val leftFF = SimpleMotorFeedforward(Constants.DRIVE_KS_L, Constants.DRIVE_KV_L, Constants.DRIVE_KA_L)
     private val rightFF = SimpleMotorFeedforward(Constants.DRIVE_KS_R, Constants.DRIVE_KV_R, Constants.DRIVE_KA_R)
-    private val angularFeedforward = SimpleMotorFeedforward(0.6382, 2.7318, 0.32016)
 
     val leftMaster = KSparkMax(12).apply {
         identifier = "leftMaster"
@@ -48,13 +43,15 @@ object Drivetrain : SubsystemBase(), Debug {
         kD = Constants.DRIVE_D
         addFeedforward(leftFF)
         motorType = DCMotor.getNEO(2)
-        setupSim(leftFF)
+        setupSim()
+//        setupSim(leftFF)
     }
     val rightMaster = KSparkMax(13).apply {
         identifier = "rightMaster"
         copyConfig(leftMaster)
         addFeedforward(rightFF)
-        setupSim(rightFF)
+        setupSim()
+//        setupSim(rightFF)
     }
     val leftFollower = KSparkMax(15).apply {
         copyConfig(leftMaster)
@@ -65,29 +62,7 @@ object Drivetrain : SubsystemBase(), Debug {
         follow(rightMaster)  // follow(rightMaster)
     }
 
-
-    val kinematics = DifferentialDriveKinematics(Constants.TRACK_WIDTH)  // calculator to make drivetrain move is the desired directions
-    val chassisSpeeds: ChassisSpeeds  // variable representing the direction we want the robot to move
-        inline get() = kinematics.toChassisSpeeds(wheelSpeeds)
-    val wheelSpeeds: DifferentialDriveWheelSpeeds  // variable representing the speed of each side of the drivetrain
-        inline get() = DifferentialDriveWheelSpeeds(
-            leftMaster.linearVelocity.metersPerSecond,
-            rightMaster.linearVelocity.metersPerSecond
-        )
-
-    /**
-     * Speeds relative to the field
-     */
-    val fieldRelativeSpeeds: ChassisSpeeds
-        inline get() {
-            val chassis = chassisSpeeds
-            val heading = RobotContainer.navigation.heading
-            return ChassisSpeeds(
-                chassis.vxMetersPerSecond * heading.cos,
-                chassis.vxMetersPerSecond * heading.sin,
-                chassis.omegaRadiansPerSecond
-            )
-        }
+    override val dynamics: KDifferentialDriveDynamic = KDifferentialDriveDynamic(leftMaster, rightMaster, Constants.TRACK_WIDTH.meters)  // todo: use KyberlibConfig
 
     /**
      * Get speeds relative to the hub.
@@ -101,7 +76,7 @@ object Drivetrain : SubsystemBase(), Debug {
             val polar = polarSpeeds
             return ChassisSpeeds(
                 polar.dr.value,
-                polar.dTheta.toTangentialVelocity(Turret.targetDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters).value,
+                polar.dTheta.toTangentialVelocity(Limelight.distance).value,
                 polar.dOrientation.radiansPerSecond
             )
         }
@@ -127,64 +102,22 @@ object Drivetrain : SubsystemBase(), Debug {
     init {
         defaultCommand = Drive
         Navigator.instance!!.applyMovementRestrictions(3.metersPerSecond, 2.metersPerSecond)
-        Navigator.instance!!.applyKinematics(kinematics)
-    }
-
-    /**
-     * Drive the robot at the provided speeds
-     */
-    fun drive(speeds: ChassisSpeeds) {
-        drive(kinematics.toWheelSpeeds(speeds))
-    }
-
-    /**
-     * Drive the robot at the provided speeds
-     */
-    fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) {
-        println(wheelSpeeds.leftMetersPerSecond)
-        leftMaster.linearVelocity = wheelSpeeds.leftMetersPerSecond.metersPerSecond
-        rightMaster.linearVelocity = wheelSpeeds.rightMetersPerSecond.metersPerSecond
-    }
-
-    private val anglePid = PIDController(0.5, 0.0, 0.0)
-    fun fieldOrientedDrive(speed: LinearVelocity, direction: Angle) { // ignore this: I got bored on a flight
-        val dTheta = RobotContainer.navigation.heading - direction + 90.degrees
-        val vx = speed * dTheta.cos
-        drive(ChassisSpeeds(vx.metersPerSecond, 0.0, anglePid.calculate(dTheta.radians)))
-    }
-
-    // stop the drivetrain
-    fun stop() {
-        leftMaster.stop()
-        rightMaster.stop()
+        // Navigator.instance!!.applyKinematics(kinematics)  // todo: add this into dynamics if not there
     }
 
     /**
      * Update navigation
      */
     override fun periodic() {
-        RobotContainer.navigation.differentialDrive = true
-        RobotContainer.navigation.update(
-            wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition
-        )
+        super.periodic()
         debugDashboard()
-
         if (RobotContainer.op.smartNav && Game.OPERATED && Turret.isZeroed) {
             // do global position updates based on limelight data
-            val distance = Turret.targetDistance ?: return
-            val offset = Turret.visionOffset ?: return
+            val distance = Limelight.visionDistance ?: return
+            val offset = Limelight.visionOffset ?: return
             val angle = offset + Turret.fieldRelativeAngle + 180.degrees
             polarCoordinates = PolarPose(distance, angle, offset)
         }
-    }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "pose" to RobotContainer.navigation.pose.debugValues,
-            "speed" to chassisSpeeds.debugValues,
-            "leftMaster" to leftMaster,
-            "rightMaster" to rightMaster
-        )
     }
 
 }

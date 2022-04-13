@@ -26,17 +26,14 @@ class AutoShot : CommandBase() {
 
     override fun execute() {
         Shooter.update()
-        if ((Turret.targetVisible || Shooter.status == ShooterStatus.SHOT)) {
-            // if the turret is on target
-            if (Turret.ready && Shooter.ready) {
-                shootingTimer.start()
-                Shooter.status = ShooterStatus.SHOT
-                Conveyor.feed()
-            } else {
-                Shooter.status = ShooterStatus.SPINUP
-                Conveyor.prepare()
-                Conveyor.feeder.percent = 0.0
-            }
+        if (Turret.ready && Shooter.ready) {
+            shootingTimer.start()
+            Shooter.status = ShooterStatus.SHOT
+            Conveyor.feed()
+        } else {
+            Shooter.status = ShooterStatus.SPINUP
+            Conveyor.prepare()
+            Conveyor.feeder.percent = 0.0
         }
     }
 

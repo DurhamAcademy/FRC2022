@@ -6,6 +6,7 @@ import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.sin
 import frc.robot.RobotContainer
+import frc.robot.subsystems.Limelight
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.Turret
 
@@ -25,10 +26,11 @@ object AimTurret : CommandBase() {
         Debug.log("Aim", "execute", level = DebugFilter.Low)
 
         // if the limelight is a target
-        if (Turret.targetVisible) {
+        if (Limelight.targetVisible) {
             val curveCorrection = (RobotContainer.op.curveComp * Turret.turret.position.sin).degrees
-            val visionOffset = Turret.visionOffset!! * 0.7
-            Turret.turret.position = Turret.turret.position + visionOffset + Shooter.movementAngleOffset + curveCorrection
+            val visionOffset = Limelight.visionOffset!!
+            val correction = visionOffset + Limelight.movementAngleOffset + curveCorrection
+            Turret.turret.position = Turret.turret.position + correction * 0.7
         } else {
             Turret.turret.position = Turret.turret.position
         }

@@ -671,7 +671,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
             val vel = velocity.radiansPerSecond
             val accVolt = applicableVolt - kV * vel
             val acceleration = accVolt / kA
-            if (false && brakeMode) {
+            if (brakeMode) {
                 val velMaintananceVolt = staticVolt + kV * velocity.radiansPerSecond.absoluteValue
                 if (velMaintananceVolt.sign != velocity.radiansPerSecond.sign && vel != 0.0)
                     simVelocity = 0.radiansPerSecond
@@ -722,9 +722,20 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         }
     }
 
-    lateinit var simUpdater: (Time) -> Unit
+    fun setupSim() {
+        if(Game.sim) Simulation.include(this)
+    }
+    var simUpdater = { dt: Time ->
+        if(controlMode == ControlMode.POSITION) {
+            simVelocity = (positionSetpoint - simPosition) / dt
+            simPosition = positionSetpoint
+        } else if (controlMode == ControlMode.VELOCITY) {
+            simVelocity = velocitySetpoint
+            simPosition += simVelocity * dt
+        }
+    }
     override fun simUpdate(dt: Time) {
-        if (this::simUpdater.isInitialized) simUpdater(dt)
+        simUpdater(dt)
     }
 
     // ----- state-space ---- // -> LinearSystem<# States, #Outpust, #inputs>

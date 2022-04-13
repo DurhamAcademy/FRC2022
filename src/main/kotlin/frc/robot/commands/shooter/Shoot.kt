@@ -26,20 +26,15 @@ object Shoot : CommandBase() {
         Debug.log("Shoot", "execute", level = DebugFilter.Low)
         // check if shooter should spin up
         Shooter.update()
-        if ((Turret.targetVisible || Shooter.status == ShooterStatus.SHOT)) {
-//            val parallelSpeed = Drivetrain.polarSpeeds.dr
-
-            // if the turret is on target
-            if (Turret.ready && Shooter.ready) {
-                Shooter.status = ShooterStatus.SHOT
-                Conveyor.status = ConveyorStatus.FEEDING
-                Conveyor.feed()
-                RobotContainer.controller.rumble = 0.0
-            } else {
-                RobotContainer.controller.rumble = 0.5
-                Shooter.status = ShooterStatus.SPINUP
-                Conveyor.prepare()
-            }
+        // if the turret is on target
+        if (Turret.ready && Shooter.ready) {
+            Shooter.status = ShooterStatus.SHOT
+            Conveyor.feed()
+            RobotContainer.controller.rumble = 0.0
+        } else {
+            RobotContainer.controller.rumble = 0.5
+            Shooter.status = ShooterStatus.SPINUP
+            Conveyor.prepare()
         }
     }
 

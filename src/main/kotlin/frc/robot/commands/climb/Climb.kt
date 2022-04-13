@@ -28,7 +28,6 @@ object Climb : CommandBase() {
     override fun initialize() {
         Debug.log("Climb Command", "init", level = DebugFilter.Low)
         Turret.turret.position = 0.degrees
-        Climber.status = ClimberStatus.ACTIVE
     }
 
     var hasFallen = false
@@ -39,7 +38,7 @@ object Climb : CommandBase() {
     override fun execute() {
         Debug.log("Climb Command", "execute", level = DebugFilter.Low)
         Turret.turret.position = 0.degrees
-        if (Turret.turret.positionError.absoluteValue < 5.degrees) Climber.staticsLifted = true
+        if (Turret.turret.positionError.absoluteValue < 5.degrees) Climber.armsLifted = true
 
 //        Climber.leftExtendable.percent = RobotContainer.controller.leftX.raw()
         val default = -RobotContainer.controller.rightY.raw().zeroIf { it.absoluteValue < .02 }
@@ -51,13 +50,11 @@ object Climb : CommandBase() {
 
 
         // set the status of the robot based on what the winches are doing
-        if (Climber.leftWinch.percent.absoluteValue < 0.1) Climber.status = ClimberStatus.ACTIVE
-        else if (Climber.leftWinch.percent < 0.0) {
-            Climber.status = ClimberStatus.FALLING
+        if (Climber.leftWinch.voltage < 0.1) {
             hasFallen = true
-        } else if (Climber.leftWinch.percent.absoluteValue > 0.0) Climber.status = ClimberStatus.RISING
+        }
 
-        if (RobotContainer.op.climbStabilization != 0.0 && Climber.leftWinch.linearPosition > 5.inches && hasFallen)
+        if (RobotContainer.op.climbStabilization != 0.0 && Climber.leftWinch.linearPosition < 15.inches && hasFallen)
             Climber.stabalize()
         else Drive.execute()
     }

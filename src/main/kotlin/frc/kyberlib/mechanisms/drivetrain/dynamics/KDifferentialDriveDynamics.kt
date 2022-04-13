@@ -72,6 +72,7 @@ class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaste
     val kinematics = DifferentialDriveKinematics(trackWidth.meters)
     init {
         Navigator.instance!!.applyKinematics(kinematics)
+        Navigator.instance!!.differentialDrive = true
     }
 
     /**

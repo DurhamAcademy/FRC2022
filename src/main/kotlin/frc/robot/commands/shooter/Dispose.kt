@@ -10,7 +10,6 @@ import frc.kyberlib.math.units.towards
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.subsystems.Conveyor
-import frc.robot.subsystems.ConveyorStatus
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.Turret
 
@@ -48,7 +47,6 @@ object Dispose : CommandBase() {
     }
 
     override fun end(interrupted: Boolean) {
-        Conveyor.status = ConveyorStatus.EMPTY
         Shooter.stop()
     }
 }

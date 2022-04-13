@@ -6,14 +6,6 @@ import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.robot.commands.conveyor.Idle
 
-
-/**
- * State of the hopper. Used for LEDs and other dependencies
- */
-enum class ConveyorStatus {
-    EMPTY, SINGLE_GOOD, FULL_GOOD, BAD, FEEDING, IDLE, OFF
-}
-
 /**
  * Controls all aspects of the hopper.
  * Waiting for design to be finalized before code is added
@@ -28,8 +20,6 @@ object Conveyor : SubsystemBase(), Debug {
         gearRatio = 1 / 5.0
     }
 
-    var status = ConveyorStatus.IDLE
-
     val feeder = KSparkMax(30).apply {
         identifier = "feeder"
         gearRatio = 1 / 5.0
@@ -37,7 +27,6 @@ object Conveyor : SubsystemBase(), Debug {
     }
 
     fun feed() {
-        status = ConveyorStatus.FEEDING
         feeder.percent = 0.8
         conveyor.percent = 0.6
     }
@@ -48,13 +37,11 @@ object Conveyor : SubsystemBase(), Debug {
     }
 
     fun idle() {
-        status = ConveyorStatus.IDLE
         feeder.percent = -0.1
         conveyor.percent = -0.0
     }
 
     fun stop() {
-        status = ConveyorStatus.OFF
         conveyor.stop()
         feeder.stop()
     }
@@ -66,8 +53,7 @@ object Conveyor : SubsystemBase(), Debug {
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
             "indexer" to conveyor,
-            "feeder" to feeder,
-            "status" to status.name
+            "feeder" to feeder
         )
     }
 }

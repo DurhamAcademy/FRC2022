@@ -21,8 +21,7 @@ object AutoClimb : CommandBase() {
     override fun initialize() {
         Debug.log("Climb Command", "init", level = DebugFilter.Low)
         Turret.turret.position = 0.degrees
-        Climber.staticsLifted = true
-        Climber.status = ClimberStatus.ACTIVE
+        Climber.armsLifted = true
     }
 
     var risen = false
@@ -32,7 +31,6 @@ object AutoClimb : CommandBase() {
             Climber.extension = 23.inches
             if(Climber.extension > 20.inches) risen = true
         } else if (driven > 0) {
-            Climber.updateMotors()
             Drivetrain.drive(ChassisSpeeds(-.1, 0.0, 0.0))
             driven -= KRobot.period
         } else {

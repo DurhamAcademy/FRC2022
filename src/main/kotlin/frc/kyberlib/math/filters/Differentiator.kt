@@ -1,5 +1,7 @@
 package frc.kyberlib.math.filters
 
+import frc.kyberlib.math.units.extensions.*
+
 /**
  * Gets the rate of change of a stream of values
  */
@@ -21,7 +23,9 @@ class Differentiator : Filter() {
         return value
     }
 
-//    inline fun <reified T: KUnitKey>calculate(unit: KUnit<T>) = KUnit<T>(calculate(unit.value))
+    fun calculate(angle: Angle): AngularVelocity = calculate(angle.radians).radiansPerSecond
+    @JvmName("calculate1")
+    fun calculate(dis: Length): LinearVelocity = calculate(dis.meters).metersPerSecond
 
     override fun get(): Double = value
 }

@@ -1,6 +1,5 @@
 package frc.robot.controls
 
-import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.kyberlib.input.KButton
 import frc.robot.RobotContainer
 import kotlin.math.PI

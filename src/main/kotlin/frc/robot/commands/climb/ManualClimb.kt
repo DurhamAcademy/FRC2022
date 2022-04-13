@@ -22,7 +22,7 @@ object ManualClimb : CommandBase() {
     override fun execute() {
         Climber.leftWinch.voltage = SmartDashboard.getNumber(leftWinchString, 0.0)
         Climber.rightWinch.voltage = SmartDashboard.getNumber(rightWinchString, 0.0)
-        Climber.staticsLifted = SmartDashboard.getBoolean(staticString, false)
+        Climber.armsLifted = SmartDashboard.getBoolean(staticString, false)
     }
 
     override fun end(interrupted: Boolean) {

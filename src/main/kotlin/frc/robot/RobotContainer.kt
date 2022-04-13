@@ -37,6 +37,9 @@ import frc.robot.controls.OperatorControls
 import frc.robot.controls.RocketLeague
 import frc.robot.subsystems.*
 import org.photonvision.PhotonCamera
+import org.photonvision.SimPhotonCamera
+import org.photonvision.SimVisionSystem
+import org.photonvision.SimVisionTarget
 import java.awt.Color
 import kotlin.math.absoluteValue
 
@@ -46,8 +49,7 @@ import kotlin.math.absoluteValue
 object RobotContainer {
     // initialize sensors and inputs here
     val gyro = KPigeon(6)
-    val limelight = PhotonCamera("gloworm")
-    val ballMonitor = PhotonCamera("balls")
+    val limelight = SimPhotonCamera("gloworm")
 
     init {
         if (Game.real) {
@@ -117,17 +119,15 @@ object RobotContainer {
         val extension =
             AnimationCustom(
                 { t, l -> List<Color>(l) { index -> if (index / l.toDouble() < Climber.extension / 24.inches) climbColor else Color.BLACK } },
-                { Climber.staticsLifted },
+                { Climber.armsLifted },
                 false
             )
         val prepare = AnimationRain(climbColor, 3, 1.seconds) { Climber.currentCommand == PrepareClimb }
-        val postMatch =
-            AnimationPulse(allianceColor, 2.seconds) { Game.disabled && Game.COMPETITION && startTime != 0.seconds }
+        val postMatch = AnimationPulse(allianceColor, 2.seconds) { Game.disabled && Game.COMPETITION && startTime != 0.seconds }
 
         // other random animations
         val leftTurn = AnimationBlink(Color.YELLOW, .5.seconds) { Drivetrain.chassisSpeeds.omegaRadiansPerSecond > 0.1 }
-        val rightTurn =
-            AnimationBlink(Color.YELLOW, .5.seconds) { Drivetrain.chassisSpeeds.omegaRadiansPerSecond < -0.1 }
+        val rightTurn = AnimationBlink(Color.YELLOW, .5.seconds) { Drivetrain.chassisSpeeds.omegaRadiansPerSecond < -0.1 }
 
         val maxSpeed = 12.feetPerSecond
         val leftSpeed = AnimationCustom({ t, l ->
@@ -174,6 +174,7 @@ object RobotContainer {
         Intaker
         Shooter
         Turret
+        Limelight  // fixme: Turret lost is wrong
     }
 
 }
