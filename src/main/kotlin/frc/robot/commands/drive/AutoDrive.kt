@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.auto.Navigator
+import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
@@ -29,7 +30,7 @@ class AutoDrive(var targetPose: Pose2d, private val intaking: Boolean = true) : 
     private var calculator = RamseteController(2.0, 0.7)  // these are the recommended values
     val simple = true
 
-    constructor(trajectory: Trajectory) : this(trajectory.states.last().poseMeters) {
+    constructor(trajectory: KTrajectory) : this(trajectory.states.last().poseMeters) {
         this.trajectory = trajectory
     }
 
@@ -40,7 +41,7 @@ class AutoDrive(var targetPose: Pose2d, private val intaking: Boolean = true) : 
 
     private var rotationInvariant = false
 
-    lateinit var trajectory: Trajectory
+    lateinit var trajectory: KTrajectory
     private val timer = Timer()
 
     /**
@@ -64,25 +65,7 @@ class AutoDrive(var targetPose: Pose2d, private val intaking: Boolean = true) : 
      * Follow the generated trajectory
      */
     override fun execute() {
-        val targetPose = trajectory.sample(timer.get())
-        val targetSpeed = calculator.calculate(Navigator.instance!!.pose, targetPose)
-        Debug.log("AutoDrive", "going to $targetPose, @ targetSpeed m/s", level = DebugFilter.Low)
-
-        if (Game.time - RobotContainer.startTime < 2.seconds)
-            Shooter.targetVelocity = -1.rotationsPerSecond
-        else
-            Shooter.update()
-
-        SmartDashboard.putNumber("error_x", RobotContainer.navigation.position.x - targetPose.poseMeters.x)
-        SmartDashboard.putNumber("error_y", RobotContainer.navigation.position.y - targetPose.poseMeters.y)
-        SmartDashboard.putNumber(
-            "error_th",
-            RobotContainer.navigation.heading.degrees - targetPose.poseMeters.rotation.degrees
-        )
-
-//        println("pose: ${Navigator.instance!!.pose.string}, expected: ${trajectory.sample(timer.get()).poseMeters.string}")
-        Drivetrain.drive(targetSpeed)
-//        trajectory = PathPlanner.updateTrajectory(trajectory) - this should be necesary until moving obstabcles
+        Drivetrain.drive(trajectory)
     }
 
     override fun end(interrupted: Boolean) {

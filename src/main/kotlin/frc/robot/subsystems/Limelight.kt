@@ -67,7 +67,7 @@ object Limelight : SubsystemBase() {
             movementAngleOffset = 0.degrees
         }
 
-        if (Game.sim) {  // simulate vision
+        if (false && Game.sim) {  // simulate vision
             val boundRect = listOf(TargetCorner(100.0, 100.0), TargetCorner(200.0, 100.0), TargetCorner(200.0, 200.0), TargetCorner(100.0, 200.0))
             val off = estimatedOffset
             val target = if (off.absoluteValue < 25.degrees) listOf(PhotonTrackedTarget(

@@ -35,6 +35,7 @@ class Robot : KRobot() {
             SmartDashboard.putNumber("distance", Limelight.distance.meters)
             SmartDashboard.putString("pose", (RobotContainer.navigation.position - Constants.HUB_POSITION).string)
         }
+        KField2d["turret"].pose = RobotContainer.navigation.pose
     }
 
     override fun disabledInit() {

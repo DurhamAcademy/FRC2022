@@ -18,6 +18,7 @@ import frc.kyberlib.mechanisms.drivetrain.dynamics.KSwerveDynamics
 import frc.kyberlib.mechanisms.drivetrain.swerve.StandardSwerveModule
 import frc.kyberlib.mechanisms.drivetrain.swerve.SwerveDrive
 import frc.kyberlib.motorcontrol.ctre.KTalon
+import frc.kyberlib.motorcontrol.estimateFF
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.robot.Constants
 import frc.robot.RobotContainer
@@ -32,17 +33,69 @@ object Drivetrain : SwerveDrive() {
     override val priority: DebugFilter = DebugFilter.Max
 
     // ff for each part of the drivetrain
-    private val leftFF = SimpleMotorFeedforward(Constants.DRIVE_KS_L, Constants.DRIVE_KV_L, Constants.DRIVE_KA_L)
-    private val rightFF = SimpleMotorFeedforward(Constants.DRIVE_KS_R, Constants.DRIVE_KV_R, Constants.DRIVE_KA_R)
+    private val driveFF = SimpleMotorFeedforward(0.01, 2.0, .12)
+    private val turnFF = SimpleMotorFeedforward(0.01, 2.0, 0.25)
+    override val maxVelocity: LinearVelocity = 5.metersPerSecond//(12/driveFF.kv - 0.5).metersPerSecond
+    private val turnMOI = 0.01
+    private val driveMOI = 0.05
+    init {
+        println(estimateFF(DCMotor.getFalcon500(1), 1.0, driveMOI))
+        println(estimateFF(DCMotor.getFalcon500(1), 1.0, turnMOI))
+    }
 
-    val FLdrive = KTalon(0).apply { setupSim() }
-    val FLturn = KTalon(1).apply { setupSim() }
-    val FRdrive = KTalon(2).apply { setupSim() }
-    val FRturn = KTalon(3).apply { setupSim() }
-    val BLdrive = KTalon(4).apply { setupSim() }
-    val BLturn = KTalon(5).apply { setupSim() }
-    val BRdrive = KTalon(6).apply { setupSim() }
-    val BRturn = KTalon(7).apply { setupSim() }
+    val FLdrive = KTalon(0).apply {
+        radius = 2.inches
+        brakeMode = true
+        gearRatio = Constants.DRIVE_GEAR_RATIO
+        motorType = DCMotor.getFalcon500(1)
+        addFeedforward(driveFF)
+        kP = 3.0
+//        setupSim(flywheelSystem(driveMOI))
+        setupSim()
+
+    }
+    val FLturn = KTalon(1).apply {
+        kP = 3.0
+        maxVelocity = 1.radiansPerSecond
+        maxAcceleration = 1.radiansPerSecond
+//        kD = 0.1
+        motorType = DCMotor.getFalcon500(1)
+        gearRatio = Constants.TURRET_GEAR_RATIO
+        brakeMode = true
+        addFeedforward(turnFF)
+        setupSim()
+//        setupSim(flywheelSystem(turnMOI))
+    }
+    val FRdrive = KTalon(2).apply {
+        copyConfig(FLdrive)
+        setupSim()
+//        setupSim(flywheelSystem(driveMOI))
+    }
+    val FRturn = KTalon(3).apply {
+        copyConfig(FLturn)
+        setupSim()
+//        setupSim(flywheelSystem(turnMOI))
+    }
+    val BLdrive = KTalon(4).apply {
+        copyConfig(FLdrive)
+        setupSim()
+//        setupSim(flywheelSystem(driveMOI))
+    }
+    val BLturn = KTalon(5).apply {
+        copyConfig(FLturn)
+        setupSim()
+//        setupSim(flywheelSystem(turnMOI))
+    }
+    val BRdrive = KTalon(6).apply {
+        copyConfig(FLdrive)
+        setupSim()
+//        setupSim(flywheelSystem(driveMOI))
+    }
+    val BRturn = KTalon(7).apply {
+        copyConfig(FLturn)
+        setupSim()
+//        setupSim(flywheelSystem(turnMOI))
+    }
     val frontLeft = StandardSwerveModule(Translation2d(-0.5, 0.5), FLdrive, FLturn)
     val frontRight = StandardSwerveModule(Translation2d(0.5, 0.5), FRdrive, FRturn)
     val backLeft = StandardSwerveModule(Translation2d(-0.5, -0.5), BLdrive, BLturn)
@@ -96,8 +149,8 @@ object Drivetrain : SwerveDrive() {
         debugDashboard()
         if (RobotContainer.op.smartNav && Game.OPERATED && Limelight.targetVisible) {
             // do global position updates based on limelight data
-            val distance = Limelight.visionDistance ?: return
-            val offset = Limelight.visionOffset ?: return
+            val distance = Limelight.visionDistance
+            val offset = Limelight.visionOffset
             val angle = offset + 180.degrees
             polarCoordinates = PolarPose(distance, angle, offset)
         }

@@ -7,6 +7,7 @@
 # In Sim
 - get chrp files
 - fix debugs
+- add characterization support for each drivetrain dynamics
 
 # With robot
 - try Everett's climb idea

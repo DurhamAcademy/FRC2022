@@ -6,7 +6,7 @@
       "style": "0",
       "userScale": "2",
       "width": "1440",
-      "xpos": "0",
+      "xpos": "17",
       "ypos": "45"
     }
   },
@@ -57,7 +57,7 @@
       "Size": "436,147"
     },
     "###Keyboard 1 Settings": {
-      "Collapsed": "1",
+      "Collapsed": "0",
       "Pos": "325,19",
       "Size": "300,560"
     },
@@ -77,17 +77,17 @@
       "Size": "64,42"
     },
     "###Plot <0>": {
-      "Collapsed": "1",
+      "Collapsed": "0",
       "Pos": "7,159",
       "Size": "834,638"
     },
     "###Plot <1>": {
-      "Collapsed": "1",
+      "Collapsed": "0",
       "Pos": "8,200",
       "Size": "839,693"
     },
     "###Plot <2>": {
-      "Collapsed": "0",
+      "Collapsed": "1",
       "Pos": "7,179",
       "Size": "831,499"
     },
