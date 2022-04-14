@@ -29,8 +29,8 @@ class PlaybackRecorder() {
         val writer = file.writer()
         times.zip(buttons).zip(axises).forEach {
             val time = it.first.first
-            val buttons = it.first.second
-            val axises = it.second
+            val buttons = it.first.second.toList()
+            val axises = it.second.toList()
             writer.appendLine("$time;$buttons;$axises")
         }
     }
