@@ -124,7 +124,11 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
     override var rawPosition: Angle
         get() = (talon.selectedSensorPosition / unitsPerRotation.toDouble()).rotations
         set(value) {
-            talon.set(ControlMode.Position, value.rotations / unitsPerRotation, DemandType.ArbitraryFeedForward, arbFFVolts/vbus)
+            talon.set(
+                if(smartMotion) ControlMode.MotionMagic else ControlMode.Position,
+                value.rotations / unitsPerRotation,
+                DemandType.ArbitraryFeedForward,
+                arbFFVolts/vbus)
         }
     override var rawVelocity: AngularVelocity
         get() = talon.selectedSensorVelocity.falconSpeed
@@ -163,7 +167,9 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
         talon.config_kD(0, d)
     }
 
+    var smartMotion = false
     override fun updateNativeProfile(maxVelocity: AngularVelocity, maxAcceleration: AngularVelocity) {
+        smartMotion = true
         talon.configMotionCruiseVelocity(maxVelocity.falconSpeed)
         talon.configMotionAcceleration(maxAcceleration.falconSpeed)
     }

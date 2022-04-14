@@ -3,19 +3,26 @@ package frc.kyberlib.mechanisms.drivetrain.dynamics
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.auto.Navigator
+import frc.kyberlib.command.Game
+import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.mechanisms.drivetrain.swerve.SwerveModule
+import kotlin.math.roundToLong
 
 class KSwerveDynamics(vararg val swerveModules: SwerveModule, fieldRelativeOffset: Angle = 0.degrees) : KHolonomicDriveDynamics(fieldRelativeOffset) {
-    var maxWheelSpeed: LinearVelocity = 10.feetPerSecond
+    var maxWheelSpeed: LinearVelocity = 4.metersPerSecond
     val kinematics = SwerveDriveKinematics(*swerveModules.map { it.location }.toTypedArray())
     override val chassisSpeeds: ChassisSpeeds
         get() = kinematics.toChassisSpeeds(*swerveModules.map { it.state }.toTypedArray())
 
     init {
         Navigator.instance!!.applyKinematics(kinematics)
+        instance = this
     }
+
 
     override fun drive(chassisSpeeds: ChassisSpeeds) = drive(chassisSpeeds, true)
 
@@ -36,4 +43,11 @@ class KSwerveDynamics(vararg val swerveModules: SwerveModule, fieldRelativeOffse
             it.state = it.brakeState
         }
     }
+
+    override fun debugValues(): Map<String, Any?> {
+        val map = mutableMapOf<String, Any?>()
+        swerveModules.forEachIndexed { index, swerveModule -> map["swerveModule$index"] = swerveModule }
+        return map.toMap()
+    }
+
 }

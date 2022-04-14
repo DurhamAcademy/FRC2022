@@ -18,7 +18,7 @@ open class StandardSwerveModule(
 ) : SwerveModule(location) {
     // turn controls
     override var rotation: Angle
-        get() = turnMotor.position.normalized
+        get() = turnMotor.position
         set(value) {
             turnMotor.position = value
         }

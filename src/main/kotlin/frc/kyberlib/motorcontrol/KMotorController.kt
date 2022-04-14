@@ -66,7 +66,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var radius: Length? = null
         set(value) {
             field = value
-            updateNativeControl(kP * toNative, kI*toNative, kD*toNative)
+            if(real) updateNativeControl(kP * toNative, kI*toNative, kD*toNative)
         }
 
     /**
@@ -77,25 +77,27 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var gearRatio: GearRatio = 1.0
         set(value) {
             field = value
-            updateNativeControl(kP * toNative, kI*toNative, kD*toNative)
+            if(real) updateNativeControl(kP * toNative, kI*toNative, kD*toNative)
         }
     // ----- constraints ---- //
     /**
      * The max angular velocity the motor can have
      */
-    open var maxVelocity: AngularVelocity = 0.rpm
+    open var maxVelocity: AngularVelocity = 100.rpm
         set(value) {
             field = value
-            updateNativeProfile(maxVelocity * toNative, maxAcceleration * toNative)
+            if(real) updateNativeProfile(maxVelocity * toNative, maxAcceleration * toNative)
+            else simPID.setConstraints(TrapezoidProfile.Constraints(maxVelocity.value, maxAcceleration.value))
         }
 
     /**
      * The max angular acceleration the motor can have
      */
-    open var maxAcceleration: AngularVelocity = 0.rpm
+    open var maxAcceleration: AngularVelocity = 100.rpm
         set(value) {
             field = value
-            updateNativeProfile(maxVelocity * toNative, maxAcceleration * toNative)
+            if(real) updateNativeProfile(maxVelocity * toNative, maxAcceleration * toNative)
+            else simPID.setConstraints(TrapezoidProfile.Constraints(maxVelocity.value, maxAcceleration.value))
         }
 
     /**
@@ -144,8 +146,8 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var kP: Double = 0.0
         set(value) {
             field = value
-            simPID.p = value
-            updateNativeControl(kP * toNative, kI*toNative, kD*toNative)
+            if(real) updateNativeControl(kP * toNative, kI*toNative, kD*toNative)
+            else simPID.p = value
         }
 
     /**
@@ -154,8 +156,8 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var kI: Double = 0.0
         set(value) {
             field = value
-            simPID.i = value
-            updateNativeControl(kP * toNative, kI*toNative, kD*toNative)
+            if(real)updateNativeControl(kP * toNative, kI*toNative, kD*toNative)
+            else simPID.i = value
         }
 
     /**
@@ -168,7 +170,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
             updateNativeControl(kP * toNative, kI*toNative, kD*toNative)
         }
 
-    private val simPID = PIDController(0.0, 0.0, 0.0)
+    private val simPID = ProfiledPIDController(0.0, 0.0, 0.0, TrapezoidProfile.Constraints(10.0, 10.0))
 
     /**
      * The multiplier to get from high level units (geared) to native units (ungeared)
@@ -333,7 +335,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Angle that the motor is at / should be at
      */
     var position: Angle
-        get() = if (Game.real) (rawPosition / gearRatio.invertIf { reversed }) else simPosition
+        get() = if (real) (rawPosition / gearRatio.invertIf { reversed }) else simPosition
         set(value) {
             controlMode = ControlMode.POSITION
             positionSetpoint = value
@@ -352,7 +354,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Spin rate of motor system
      */
     var velocity: AngularVelocity
-        get() = if (Game.real) rawVelocity / gearRatio.invertIf { reversed } else simVelocity
+        get() = if (real) rawVelocity / gearRatio.invertIf { reversed } else simVelocity
         set(value) {
             controlMode = ControlMode.VELOCITY
             velocitySetpoint = value
@@ -629,14 +631,14 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Setup simulations based on a feedforward of how the motor should move
      */
     fun setupSim(feedforward: SimpleMotorFeedforward) {
-        if (Game.sim) Simulation.include(this)
+        if (!real) Simulation.include(this)
         val linearFactor = if(linearConfigured) radius!!.meters else 1.0
         simUpdater = { dt: Time -> feedforwardUpdate(feedforward.ks * linearFactor, feedforward.kv * linearFactor, feedforward.ka * linearFactor, dt) }
     }
 
     fun setupSim(feedforward: ArmFeedforward) {
         if (!brakeMode) log("Use brakeMode", logMode = LogMode.WARN)
-        if (Game.sim) Simulation.include(this)
+        if (!real) Simulation.include(this)
         simUpdater = { dt: Time ->
             feedforwardUpdate(
                 feedforward.ks + feedforward.kcos * position.cos,
@@ -649,7 +651,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
 
     fun setupSim(feedforward: ElevatorFeedforward) {
         if (!brakeMode) log("Use brakeMode", logMode = LogMode.WARN)
-        if (Game.sim) Simulation.include(this)
+        if (!real) Simulation.include(this)
         simUpdater = { dt: Time ->
             feedforwardUpdate(
                 feedforward.ks * voltage.sign + feedforward.kg,
@@ -692,29 +694,32 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      */
     fun setupSim(system: LinearSystem<N1, N1, N1>) {
         val sim = LinearSystemSim(system)
-        if (Game.sim) Simulation.include(this)
+        if (!real) Simulation.include(this)
         simUpdater = { dt: Time ->
             sim.setInput(voltage)
             sim.update(dt.seconds)
             simVelocity = sim.getOutput(0).radiansPerSecond
+            simPosition += simVelocity * dt
         }
     }
 
     @JvmName("setupPositionSim")
     fun setupSim(system: LinearSystem<N2, N1, N1>) {
         val sim = LinearSystemSim(system)
-        if (Game.sim) Simulation.include(this)
+        if (!real) Simulation.include(this)
         simUpdater = { dt: Time ->
             sim.setInput(voltage)
             sim.update(dt.seconds)
-            simPosition = sim.getOutput(0).radians
+            val newPosition = sim.getOutput(0).radians
+            simVelocity = (newPosition - simPosition) / dt
+            simPosition = newPosition
         }
     }
 
     @JvmName("setupDualSim")
     fun setupSim(system: LinearSystem<N2, N1, N2>) {
         val sim = LinearSystemSim(system)
-        if (Game.sim) Simulation.include(this)
+        if (!real) Simulation.include(this)
         simUpdater = { dt: Time ->
             sim.setInput(voltage)
             sim.update(dt.seconds)
@@ -724,7 +729,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     }
 
     fun setupSim() {
-        if(Game.sim) Simulation.include(this)
+        if(!real) Simulation.include(this)
     }
     var simUpdater = { dt: Time ->
         if(controlMode == ControlMode.POSITION) {

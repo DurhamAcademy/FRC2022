@@ -3,32 +3,30 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.kyberlib.motorcontrol.characterization
 
-import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.auto.Navigator
+import frc.kyberlib.command.Game
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.units.extensions.radians
 import frc.kyberlib.math.units.extensions.rotations
 import frc.kyberlib.math.units.extensions.rotationsPerSecond
+import frc.kyberlib.math.units.extensions.seconds
 import frc.kyberlib.motorcontrol.KMotorController
 import kotlin.math.roundToLong
 
 class CharacterizationRoutine(private vararg val motors: KMotorController, private val drivetrain: Boolean = false) : CommandBase() {
-    private var startTime = 0.0
     private var data: String = ""
 
     // Called when the command is initially scheduled.
     override fun initialize() {
         SmartDashboard.putBoolean("SysIdOverflow", false)
         SmartDashboard.putString("SysIdTelemetry", "")
-        startTime = Timer.getFPGATimestamp()
     }
 
     private val headingDiff = Differentiator()
     // Called every time the scheduler runs while the command is scheduled.
     override fun execute() {
-        val timestamp = Timer.getFPGATimestamp()
 
         // Check if running the correct test
         val test = SmartDashboard.getString("SysIdTest", "")
@@ -50,7 +48,7 @@ class CharacterizationRoutine(private vararg val motors: KMotorController, priva
         val voltageCommand = SmartDashboard.getNumber("SysIdVoltageCommand", 0.0)
         val rotate = SmartDashboard.getBoolean("SysIdRotate", false)
         val baseVoltage: Double = when (testType) {
-            "Quasistatic" -> voltageCommand * (timestamp - startTime)
+            "Quasistatic" -> voltageCommand * Game.matchTime.seconds
             "Dynamic" -> voltageCommand
             else -> 0.0
         }
@@ -63,14 +61,14 @@ class CharacterizationRoutine(private vararg val motors: KMotorController, priva
             val rightMotor = motors[1]
             leftMotor.voltage = primaryVoltage
             rightMotor.voltage = primaryVoltage
-            data += "$timestamp,$primaryVoltage,$secondaryVoltage," +
+            data += "${Game.matchTime.seconds},$primaryVoltage,$secondaryVoltage," +
                     "${leftMotor.position.rotations},${rightMotor.position.rotations}," +
                     "${leftMotor.velocity.rotationsPerSecond}, ${rightMotor.velocity.rotationsPerSecond}," +
                     "${Navigator.instance!!.heading.radians},${headingDiff.calculate(Navigator.instance!!.heading.radians)},"
         } else {
             motors.forEach { it.voltage = primaryVoltage }
             val definingMotor = motors.first()
-            data += "$timestamp,$primaryVoltage,${definingMotor.position.rotations},${definingMotor.velocity.rotationsPerSecond},"
+            data += "${Game.matchTime.seconds},$primaryVoltage,${definingMotor.position.rotations},${definingMotor.velocity.rotationsPerSecond},"
         }
     }
 

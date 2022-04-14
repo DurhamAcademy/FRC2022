@@ -93,7 +93,7 @@ class KSparkMax(
         set(value) {
             _pid?.setReference(
                 value.rotations,
-                CANSparkMax.ControlType.kSmartMotion,
+                if(smartMotion) CANSparkMax.ControlType.kSmartMotion else CANSparkMax.ControlType.kPosition,
                 0,
                 arbFFVolts,
                 SparkMaxPIDController.ArbFFUnits.kVoltage
@@ -106,7 +106,9 @@ class KSparkMax(
         _pid.d = d
     }
 
+    var smartMotion = false
     override fun updateNativeProfile(maxVelocity: AngularVelocity, maxAcceleration: AngularVelocity) {
+        smartMotion = true
         _pid.setSmartMotionMaxVelocity(maxVelocity.rpm, 0)
         _pid.setSmartMotionMaxAccel(maxAcceleration.rpm, 0)
     }

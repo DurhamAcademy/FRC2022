@@ -41,7 +41,7 @@ abstract class KHolonomicDriveDynamics(var fieldRelativeOffset: Angle) : KDriveD
         val targetChassisSpeeds: ChassisSpeeds = controller.calculate(
             Navigator.instance!!.pose,
             desiredState, trajectory!!.states.last().poseMeters.rotation)  // idk about this
-        drive(targetChassisSpeeds)
+        drive(targetChassisSpeeds, false)
     }
 
     override fun updateNavigation() {

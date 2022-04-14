@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.kyberlib.command.Debug
+import frc.kyberlib.math.kEpsilon
 import frc.kyberlib.math.units.extensions.*
 
 /**
@@ -13,7 +14,7 @@ abstract class SwerveModule(val location: Translation2d) : Debug {
     /**
      * The rotation that the wheel is facing
      */
-    abstract var rotation: Angle
+    abstract var rotation: Angle  // fixme: this needs to be profiled
 
     /**
      * The speed that the motor should drive
@@ -29,8 +30,9 @@ abstract class SwerveModule(val location: Translation2d) : Debug {
         set(value) {
             val optimized = SwerveModuleState.optimize(value, rotation.w)
             stateSetpoint = optimized
-            rotation = optimized.angle.k
             speed = optimized.speedMetersPerSecond.metersPerSecond
+            rotation = if(optimized.speedMetersPerSecond == 0.0) rotation
+                        else optimized.angle.k
         }
 
     /**
@@ -49,8 +51,7 @@ abstract class SwerveModule(val location: Translation2d) : Debug {
     override fun debugValues(): Map<String, Any?> {
         return mapOf(
             "Rotation (rad)" to rotation.radians,
-            "Speed (m/s)" to speed.metersPerSecond,
-            "location" to location
+            "Speed (m per s)" to speed.metersPerSecond
         )
     }
 }

@@ -6,6 +6,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.auto.pathing.Pathfinder
 import frc.kyberlib.auto.trajectory.KTrajectory
+import frc.kyberlib.command.Debug
 import frc.kyberlib.math.units.extensions.AngularVelocity
 import frc.kyberlib.math.units.extensions.LinearVelocity
 import frc.kyberlib.math.units.extensions.metersPerSecond
@@ -13,7 +14,10 @@ import frc.kyberlib.math.units.extensions.radiansPerSecond
 import frc.kyberlib.math.units.string
 import frc.kyberlib.math.units.towards
 
-abstract class KDriveDynamics {
+abstract class KDriveDynamics : Debug {
+    companion object {
+        var instance: KDriveDynamics? = null
+    }
     abstract fun drive(chassisSpeeds: ChassisSpeeds)
     abstract fun drive(path: KTrajectory)
     abstract fun stop()
@@ -67,4 +71,8 @@ abstract class KDriveDynamics {
      * remove the active trajectory data
      */
     fun clearTrajectory() {activeTrajectory = null}
+
+    override fun debugValues(): Map<String, Any?> {
+        TODO("Not yet implemented")
+    }
 }

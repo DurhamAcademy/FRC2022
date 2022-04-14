@@ -30,7 +30,6 @@ abstract class SwerveDrive : KDrivetrain() {
      * Individually sets the states for each module
      */
     fun drive(vararg states: SwerveModuleState) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(states, maxVelocity.metersPerSecond)
         dynamics.drive(*states)
     }
 
@@ -44,7 +43,9 @@ abstract class SwerveDrive : KDrivetrain() {
     override fun debugValues(): Map<String, Any?> {
         val map = mutableMapOf<String, Any>(
             "speed" to chassisSpeeds.debugValues,
+            "dynamics" to dynamics
         )
+
         return map.toMap()
     }
 
