@@ -7,6 +7,7 @@ import frc.kyberlib.math.threeD.Translation3d
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.math.units.extensions.milliseconds
+import org.photonvision.targeting.PhotonTrackedTarget
 
 /**
  * A wrapper for the limelight vision camera.
@@ -29,100 +30,114 @@ class Limelight(private val table: String = "limelight") {
 
     private val tbl = NetworkTableInstance.getDefault().getTable(table)
 
+    private val foundEntry = tbl.getEntry("tb")
     /**
      * Is the camera currently detecting an object?
      */
     val targetFound: Boolean
-        get() = tbl.getEntry("tv").getDouble(0.0) != 0.0
+        get() = foundEntry.getDouble(0.0) != 0.0
 
+    private val yawEntry = tbl.getEntry("tx")
     /**
      * The x-heading the detection is in
      */
     val yaw
-        get() = tbl.getEntry("tx").getDouble(0.0).degrees
+        get() = yawEntry.getDouble(0.0).degrees
 
+    private val pitchEntry = tbl.getEntry("ty")
     /**
      * The y-heading the detection is in
      */
     val pitch
-        get() = tbl.getEntry("ty").getDouble(0.0).degrees
+        get() = pitchEntry.getDouble(0.0).degrees
 
+    private val areaEntry = tbl.getEntry("ta")
     /**
      * The area of the detected contour
      */
     val area
-        get() = tbl.getEntry("ta").getDouble(0.0)
+        get() = areaEntry.getDouble(0.0)
 
+    private val skewEntry = tbl.getEntry("ts")
     /**
      * The angle of the detected contour relative to the camera
      */
     val skew
-        get() = tbl.getEntry("ts").getDouble(0.0)
+        get() = skewEntry.getDouble(0.0)
 
+    private val latencyEntry = tbl.getEntry("tl")
     /**
      * The milliseconds it takes for the pipeline to be processed
      */
     val latency
-        get() = tbl.getEntry("tl").getDouble(0.0).milliseconds
+        get() = latencyEntry.getDouble(0.0).milliseconds
 
+    private val shortEntry = tbl.getEntry("tl")
     /**
      * Sidelength of shortest side of the fitted bounding box (pixels)
      */
     val short
-        get() = tbl.getEntry("tshort").getDouble(0.0)
+        get() = shortEntry.getDouble(0.0)
 
+    private val longEntry = tbl.getEntry("tlong")
     /**
      * 	Sidelength of longest side of the fitted bounding box (pixels)
      */
     val long
-        get() = tbl.getEntry("tlong").getDouble(0.0)
+        get() = longEntry.getDouble(0.0)
 
+    private val horEntry = tbl.getEntry("thor")
     /**
      * Horizontal sidelength of the rough bounding box (0 - 320 pixels)
      */
     val horizontal
-        get() = tbl.getEntry("thor").getDouble(0.0)
+        get() = horEntry.getDouble(0.0)
 
+    private val vertEntry = tbl.getEntry("tvert")
     /**
      * Vertical sidelength of the rough bounding box (0 - 320 pixels)
      */
     val vertical
-        get() = tbl.getEntry("tvert").getDouble(0.0)
+        get() = vertEntry.getDouble(0.0)
 
+    private val ledEntry = tbl.getEntry("ledMode")
     /**
      * Sets limelight’s LED state
      */
     var ledMode
-        get() = LedMode.values().find { it.idx == tbl.getEntry("ledMode").getNumber(0) } ?: LedMode.PIPELINE
+        get() = LedMode.values().find { it.idx == ledEntry.getNumber(0) } ?: LedMode.PIPELINE
         set(value) {
-            tbl.getEntry("ledMode").setNumber(value.idx)
+            ledEntry.setNumber(value.idx)
         }
 
+    private val streamEntry = tbl.getEntry("ledMode")
     /**
      * 	Sets limelight’s streaming mode
      */
     var stream
-        get() = StreamMode.values().find { it.idx == tbl.getEntry("stream").getNumber(0) } ?: StreamMode.STANDARD
+        get() = StreamMode.values().find { it.idx == streamEntry.getNumber(0) } ?: StreamMode.STANDARD
         set(value) {
-            tbl.getEntry("stream").setNumber(value.idx)
+            streamEntry.setNumber(value.idx)
         }
 
+    private val driverEntry = tbl.getEntry("camMode")
     /**
      * Sets limelight’s operation mode. True enables Driver Camera (Increases exposure, disables vision processing)
      */
     var driverMode: Boolean
-        get() = tbl.getEntry("camMode").getNumber(0) == 1
+        get() = driverEntry.getNumber(0) == 1
         set(value) {
-            tbl.getEntry("camMode").setNumber(if (value) 1 else 0)
+            driverEntry.setNumber(if (value) 1 else 0)
         }
 
+    private val snapEntry = tbl.getEntry("snapshot")
     /**
      * Allows users to take snapshots during a match
      */
     var snapshot: Boolean
-        get() = tbl.getEntry("snapshot").getNumber(0) == 1
+        get() = snapEntry.getNumber(0) == 1
         set(value) {
-            tbl.getEntry("snapshot").setNumber(if (value) 1 else 0)
+            snapEntry.setNumber(if (value) 1 else 0)
         }
 
     /**
@@ -134,15 +149,36 @@ class Limelight(private val table: String = "limelight") {
             tbl.getEntry("pipeline").setNumber(value)
         }
 
+    private val tranEntry = tbl.getEntry("camtran")
     /**
      * 3D transform of the detected target if using PnP
      */
     val transform: Pose3d?
         get() {
-            val entry = tbl.getEntry("camtran")
+            val entry = tranEntry
             val cmt = if (entry.exists()) entry.getDoubleArray(arrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)) else null
             return if (cmt != null)
                 Pose3d(Translation3d(cmt[0].meters, cmt[1].meters, cmt[2].meters),
                         Rotation3d(cmt[3].degrees, cmt[4].degrees, cmt[5].degrees)) else null
         }
+
+    /**
+     * Copy of Photons sim support for limelight
+     */
+    fun submitProcessedFrame(latencyMils: Double, targets: List<PhotonTrackedTarget>) {
+        latencyEntry.setNumber(latencyMils)
+        val target = targets.first() // limelight only supports one I think
+        yawEntry.setNumber(target.yaw)
+        pitchEntry.setNumber(target.pitch)
+        areaEntry.setNumber(target.area)
+        skewEntry.setNumber(target.skew)
+
+        val corners = target.corners
+        val horizontal = corners[1].x - corners[0].x
+        val vertical = corners[3].y - corners[0].y
+        horEntry.setNumber(horizontal)
+        vertEntry.setNumber(vertical)
+        longEntry.setNumber(minOf(horizontal, vertical))
+        shortEntry.setNumber(maxOf(horizontal, vertical))
+    }
 }
