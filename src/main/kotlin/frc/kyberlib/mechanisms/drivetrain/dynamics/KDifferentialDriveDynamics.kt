@@ -17,6 +17,7 @@ import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.Voltage
+import frc.kyberlib.motorcontrol.characterization.CharacterizationRoutine
 
 // https://github.com/Team254/FRC-2020-Public/blob/master/src/main/java/com/team254/lib/physics/DifferentialDrive.java
 
@@ -74,6 +75,7 @@ class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaste
     init {
         Navigator.instance!!.applyKinematics(kinematics)
         Navigator.instance!!.differentialDrive = true
+        instance = this
     }
 
     /**
@@ -170,4 +172,7 @@ class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaste
             Matrix.mat(Nat.N2(), Nat.N2()).fill(0.0, 0.0, 0.0, 0.0)
         )
     }
+    
+    val characterizationRoutine
+        get() = CharacterizationRoutine(leftMaster, rightMaster, drivetrain = true)
 }

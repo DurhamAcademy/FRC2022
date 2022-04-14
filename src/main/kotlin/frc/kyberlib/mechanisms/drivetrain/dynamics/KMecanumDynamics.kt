@@ -5,20 +5,26 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics
 import edu.wpi.first.math.kinematics.MecanumDriveMotorVoltages
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds
+import frc.kyberlib.auto.Navigator
 import frc.kyberlib.math.units.extensions.Angle
 import frc.kyberlib.math.units.extensions.LinearVelocity
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.metersPerSecond
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.Voltage
+import frc.kyberlib.motorcontrol.characterization.CharacterizationRoutine
 
 class KMecanumDynamics(
     val leftFront: KMotorController, val leftBack: KMotorController, val rightFront: KMotorController, val rightBack: KMotorController,
     val locations: Array<Translation2d>, fieldRelativeOffset: Angle = 0.degrees
 ) : KHolonomicDriveDynamics(fieldRelativeOffset) {
 
-    private val motors = arrayOf(leftFront, leftBack, rightFront, rightBack)
+    val motors = arrayOf(leftFront, leftBack, rightFront, rightBack)
     private val kinematics = MecanumDriveKinematics(locations[0], locations[1], locations[2], locations[3])
+    init {
+        Navigator.instance!!.applyKinematics(kinematics)
+        instance = this
+    }
 
     override fun driveRobotRelative(speeds: ChassisSpeeds) {
         drive(kinematics.toWheelSpeeds(chassisSpeeds))
@@ -60,4 +66,7 @@ class KMecanumDynamics(
 
     val wheelSpeeds: MecanumDriveWheelSpeeds
         get() = MecanumDriveWheelSpeeds(leftFront.linearVelocity.value, rightFront.linearVelocity.value, leftBack.linearVelocity.value, rightBack.linearVelocity.value)
+
+    val characterizationRoutine
+        get() = CharacterizationRoutine(*motors)
 }

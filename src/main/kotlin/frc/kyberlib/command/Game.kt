@@ -41,6 +41,8 @@ object Game {
         inline get() = Timer.getFPGATimestamp().seconds
     val bootTime = time
     var startTime = bootTime
+    val matchTime
+        inline get() = time - startTime
 
     val alliance: DriverStation.Alliance = DriverStation.getAlliance()
 
