@@ -167,10 +167,6 @@ class Limelight(private val table: String = "limelight") {
      */
     fun submitProcessedFrame(latencyMils: Double, targets: List<PhotonTrackedTarget>) {
         latencyEntry.setNumber(latencyMils)
-        if(targets.isEmpty()) {
-            foundEntry.setNumber(0.0)
-            return
-        }
         val target = targets.first() // limelight only supports one I think
         yawEntry.setNumber(target.yaw)
         pitchEntry.setNumber(target.pitch)
