@@ -13,8 +13,7 @@ import frc.kyberlib.math.units.string
 import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.commands.drive.AutoDrive
-import frc.robot.commands.shooter.AutoShot
-import frc.robot.commands.shooter.Dispose
+import frc.robot.commands.shooter.Shoot
 import frc.robot.subsystems.*
 import java.io.File
 
@@ -28,13 +27,11 @@ class Robot : KRobot() {
     }
 
     override fun robotPeriodic() {
-        RobotContainer.leds.update()
         if (Game.real) {
             // log relevant stuff
             SmartDashboard.putNumber("gyro", RobotContainer.gyro.heading.degrees)
             SmartDashboard.putBoolean("visible", Limelight.targetVisible)
             SmartDashboard.putBoolean("shooter ready", Shooter.ready)
-            SmartDashboard.putBoolean("turret ready", Turret.ready)
             SmartDashboard.putNumber("distance", Limelight.distance.meters)
             SmartDashboard.putString("pose", (RobotContainer.navigation.position - Constants.HUB_POSITION).string)
         }
@@ -46,8 +43,6 @@ class Robot : KRobot() {
 
     override fun autonomousInit() {
         RobotContainer.startTime = Game.time
-        // zero Turret
-        Turret.zeroTurret()
         // prepare to pick up balls
         Intaker.deployed = true
         Conveyor.conveyor.percent = 0.05
@@ -60,12 +55,6 @@ class Robot : KRobot() {
 
     private fun reset(pose: Pose2d) {
         // reset navigation to a specific pose
-        if (Game.real) {
-            Drivetrain.leftMaster.resetPosition(0.meters)
-            Drivetrain.rightMaster.resetPosition(0.meters)
-        } else {
-//            RobotContainer.gyro.heading = pose.rotation.k
-        }
         RobotContainer.navigation.pose = pose
     }
 
@@ -76,8 +65,7 @@ class Robot : KRobot() {
         val f = File("${TrajectoryManager.AUTO_PATH}/$routine")
         f.readLines().forEach {
             when (it) {
-                "Shot" -> command.addCommands(AutoShot())
-                "Dispose" -> command.addCommands(Dispose)
+                "Shot" -> command.addCommands(Shoot())
                 else -> command.addCommands(AutoDrive(TrajectoryManager[it]!!))
             }
         }

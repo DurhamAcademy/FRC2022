@@ -12,7 +12,7 @@ import frc.robot.subsystems.*
 
 object AutoClimb : CommandBase() {
     init {
-        addRequirements(Climber, Drivetrain, Turret, Shooter)
+        addRequirements(Climber, Drivetrain, Shooter)
     }
 
     /**
@@ -20,7 +20,6 @@ object AutoClimb : CommandBase() {
      */
     override fun initialize() {
         Debug.log("Climb Command", "init", level = DebugFilter.Low)
-        Turret.turret.position = 0.degrees
         Climber.armsLifted = true
     }
 

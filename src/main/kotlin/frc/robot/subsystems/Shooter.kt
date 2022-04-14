@@ -119,10 +119,7 @@ object Shooter : SubsystemBase(), Debug {
 
     fun flywheelUpdate(dis: Length) {  // update flywheel speed to shoot certain distance
         val interpolated = Constants.FLYWHEEL_INTERPOLATOR.calculate(dis.meters)
-
-        val fudge = 1 + (SmartDashboard.getNumber("back fudge", 0.03)) *
-                        (Turret.turret.position / 2.0).sin.absoluteValue
-        targetVelocity = interpolated.rpm * fudge
+        targetVelocity = interpolated.rpm
     }
 
     fun stop() {  // stop the shooter

@@ -104,8 +104,6 @@ object Climber : SubsystemBase(), Debug {
         val dTheta = -swing.calculate(RobotContainer.gyro.pitch)  // note: pitch may be wrong
         val dampeningConstant = RobotContainer.op.climbStabilization
         val targetTorque = dTheta.value * dampeningConstant
-        Drivetrain.leftMaster.torque = targetTorque
-        Drivetrain.rightMaster.torque = targetTorque
         Shooter.flywheel.torque = dTheta.value * dampeningConstant
     }
 

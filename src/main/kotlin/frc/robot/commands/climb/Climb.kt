@@ -18,7 +18,7 @@ import kotlin.math.absoluteValue
  */
 object Climb : CommandBase() {
     init {
-        addRequirements(Climber, Drivetrain, Turret, Shooter)
+        addRequirements(Climber, Drivetrain, Shooter)
         SmartDashboard.putBoolean("sync climb", true)
     }
 
@@ -27,7 +27,7 @@ object Climb : CommandBase() {
      */
     override fun initialize() {
         Debug.log("Climb Command", "init", level = DebugFilter.Low)
-        Turret.turret.position = 0.degrees
+        Climber.armsLifted = true
     }
 
     var hasFallen = false
@@ -37,8 +37,6 @@ object Climb : CommandBase() {
      */
     override fun execute() {
         Debug.log("Climb Command", "execute", level = DebugFilter.Low)
-        Turret.turret.position = 0.degrees
-        if (Turret.turret.positionError.absoluteValue < 5.degrees) Climber.armsLifted = true
 
 //        Climber.leftExtendable.percent = RobotContainer.controller.leftX.raw()
         val default = -RobotContainer.controller.rightY.raw().zeroIf { it.absoluteValue < .02 }

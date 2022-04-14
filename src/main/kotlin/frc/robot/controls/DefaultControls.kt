@@ -20,9 +20,11 @@ object DefaultControls : ControlSchema2022() {
         }
     }
 
-    override val DRIVE_FORWARD: Double
+    override val FORWARD: Double
+        get() = xbox.rightY.value
+    override val TURN: Double
         get() = xbox.leftY.value
-    override val DRIVE_TURN: Double
+    override val STRAFE: Double
         get() = xbox.rightX.value
     override val INTAKE: KButton = xbox.leftBumper
     override val SHOOT: KButton = xbox.rightTrigger.activateAt(0.1)

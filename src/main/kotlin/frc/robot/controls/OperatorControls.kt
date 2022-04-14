@@ -10,7 +10,6 @@ import frc.robot.commands.climb.PrepareClimb
 import frc.robot.commands.conveyor.ManualConveyor
 import frc.robot.commands.intake.ManualIntake
 import frc.robot.commands.shooter.ShooterCalibration
-import frc.robot.commands.turret.ManualTurret
 
 class OperatorControls {
     private val multString = "shooterMult"
@@ -69,8 +68,6 @@ class OperatorControls {
 
     // disable subsystems
     // manual subsystems
-    private val MANUAL_TURRET =
-        Trigger { SmartDashboard.getBoolean("ManualTurret", false) }.whileActiveOnce(ManualTurret)
     private val MANUAL_SHOOTER =
         Trigger { SmartDashboard.getBoolean("ManualShooter", false) }.whileActiveOnce(ShooterCalibration)
     private val MANUAL_CONVEYOR = Trigger { SmartDashboard.getBoolean("ManualConveyor", false) }.whileActiveOnce(

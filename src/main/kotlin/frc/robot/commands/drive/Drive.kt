@@ -31,14 +31,15 @@ object Drive : CommandBase() {
     override fun execute() {
 //        val fwd = velFilter.calculate(RobotContainer.controlScheme.DRIVE_FORWARD).feetPerSecond
 //        val turn = rotFilter.calculate(RobotContainer.controlScheme.DRIVE_TURN).radiansPerSecond
-        var fwd = RobotContainer.controlScheme.DRIVE_FORWARD.feetPerSecond
-        var turn = RobotContainer.controlScheme.DRIVE_TURN.radiansPerSecond
+        var fwd = RobotContainer.controlScheme.FORWARD.feetPerSecond
+        var strafe = RobotContainer.controlScheme.STRAFE.feetPerSecond
+        var turn = RobotContainer.controlScheme.TURN.radiansPerSecond
         if (RobotContainer.op.shootWhileMoving && Shooter.targetVelocity > 10.rpm) {
             fwd = fwd.coerceIn(-3.feetPerSecond, 3.feetPerSecond)
+            strafe = strafe.coerceIn(-3.feetPerSecond, 3.feetPerSecond)
             turn = turn.coerceIn(-1.radiansPerSecond, 1.radiansPerSecond)
         }
-        val speeds =
-            ChassisSpeeds(velFilter.calculate(fwd.metersPerSecond), 0.0, rotFilter.calculate(turn.radiansPerSecond))
+        val speeds = ChassisSpeeds(fwd.metersPerSecond, strafe.metersPerSecond, turn.radiansPerSecond)
         Debug.log("Default Drive", "fwd: $fwd, turn: $turn", level = DebugFilter.Low)
         Drivetrain.drive(speeds)
     }

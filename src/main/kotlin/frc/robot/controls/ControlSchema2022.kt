@@ -1,11 +1,11 @@
 package frc.robot.controls
 
-import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.kyberlib.input.KButton
 
 abstract class ControlSchema2022 {
-    abstract val DRIVE_FORWARD: Double
-    abstract val DRIVE_TURN: Double
+    abstract val FORWARD: Double
+    abstract val STRAFE: Double
+    abstract val TURN: Double
 
     abstract val INTAKE: KButton
 

@@ -2,6 +2,7 @@ package frc.robot.subsystems
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
 import frc.kyberlib.auto.Navigator
@@ -13,6 +14,10 @@ import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.milli
 import frc.kyberlib.mechanisms.drivetrain.DifferentialDriveTrain
 import frc.kyberlib.mechanisms.drivetrain.dynamics.KDifferentialDriveDynamic
+import frc.kyberlib.mechanisms.drivetrain.dynamics.KSwerveDynamics
+import frc.kyberlib.mechanisms.drivetrain.swerve.StandardSwerveModule
+import frc.kyberlib.mechanisms.drivetrain.swerve.SwerveDrive
+import frc.kyberlib.motorcontrol.ctre.KTalon
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.robot.Constants
 import frc.robot.RobotContainer
@@ -22,7 +27,7 @@ import frc.robot.commands.drive.Drive
 /**
  * Mechanism that controls how the robot drives
  */
-object Drivetrain : DifferentialDriveTrain() {
+object Drivetrain : SwerveDrive() {
     // motors
     override val priority: DebugFilter = DebugFilter.Max
 
@@ -30,39 +35,20 @@ object Drivetrain : DifferentialDriveTrain() {
     private val leftFF = SimpleMotorFeedforward(Constants.DRIVE_KS_L, Constants.DRIVE_KV_L, Constants.DRIVE_KA_L)
     private val rightFF = SimpleMotorFeedforward(Constants.DRIVE_KS_R, Constants.DRIVE_KV_R, Constants.DRIVE_KA_R)
 
-    val leftMaster = KSparkMax(12).apply {
-        identifier = "leftMaster"
-        reversed = true
-        brakeMode = true
-        gearRatio = Constants.DRIVE_GEAR_RATIO
-        radius = Constants.WHEEL_RADIUS
-        currentLimit = 40
+    val FLdrive = KTalon(0).apply { setupSim() }
+    val FLturn = KTalon(1).apply { setupSim() }
+    val FRdrive = KTalon(2).apply { setupSim() }
+    val FRturn = KTalon(3).apply { setupSim() }
+    val BLdrive = KTalon(4).apply { setupSim() }
+    val BLturn = KTalon(5).apply { setupSim() }
+    val BRdrive = KTalon(6).apply { setupSim() }
+    val BRturn = KTalon(7).apply { setupSim() }
+    val frontLeft = StandardSwerveModule(Translation2d(-0.5, 0.5), FLdrive, FLturn)
+    val frontRight = StandardSwerveModule(Translation2d(0.5, 0.5), FRdrive, FRturn)
+    val backLeft = StandardSwerveModule(Translation2d(-0.5, -0.5), BLdrive, BLturn)
+    val backRight = StandardSwerveModule(Translation2d(0.5, -0.5), BRdrive, BRturn)
 
-        kP = Constants.DRIVE_P
-        kI = Constants.DRIVE_I
-        kD = Constants.DRIVE_D
-        addFeedforward(leftFF)
-        motorType = DCMotor.getNEO(2)
-        setupSim()
-//        setupSim(leftFF)
-    }
-    val rightMaster = KSparkMax(13).apply {
-        identifier = "rightMaster"
-        copyConfig(leftMaster)
-        addFeedforward(rightFF)
-        setupSim()
-//        setupSim(rightFF)
-    }
-    val leftFollower = KSparkMax(15).apply {
-        copyConfig(leftMaster)
-        follow(leftMaster)
-    }
-    val rightFollower = KSparkMax(10).apply {
-        copyConfig(rightMaster)
-        follow(rightMaster)  // follow(rightMaster)
-    }
-
-    override val dynamics: KDifferentialDriveDynamic = KDifferentialDriveDynamic(leftMaster, rightMaster)
+    override val dynamics = KSwerveDynamics(frontLeft, frontRight, backLeft, backRight)
 
     /**
      * Get speeds relative to the hub.
@@ -71,7 +57,7 @@ object Drivetrain : DifferentialDriveTrain() {
      *
      * vy = speed parallel to the hub.
      */
-    val hubRelativeSpeeds: ChassisSpeeds  // todo: see if there is faster calc
+    val hubRelativeSpeeds: ChassisSpeeds
         inline get() {
             val polar = polarSpeeds
             return ChassisSpeeds(
@@ -83,10 +69,8 @@ object Drivetrain : DifferentialDriveTrain() {
     var pose  // pose of the robot
         inline get() = RobotContainer.navigation.pose
         inline set(value) {
-            val latency = RobotContainer.limelight.latestResult!!.latencyMillis.milli.seconds
+            val latency = RobotContainer.limelight.latency
             val detectionTime = Game.time - latency
-            leftMaster.resetPosition()  // is this supposed to be resetting?
-            rightMaster.resetPosition()
             RobotContainer.navigation.update(value, detectionTime)
         }
     private var polarCoordinates  // polar coordinates relative to the Hub
@@ -110,11 +94,11 @@ object Drivetrain : DifferentialDriveTrain() {
     override fun periodic() {
         super.periodic()
         debugDashboard()
-        if (RobotContainer.op.smartNav && Game.OPERATED && Turret.isZeroed) {
+        if (RobotContainer.op.smartNav && Game.OPERATED && Limelight.targetVisible) {
             // do global position updates based on limelight data
             val distance = Limelight.visionDistance ?: return
             val offset = Limelight.visionOffset ?: return
-            val angle = offset + Turret.fieldRelativeAngle + 180.degrees
+            val angle = offset + 180.degrees
             polarCoordinates = PolarPose(distance, angle, offset)
         }
     }

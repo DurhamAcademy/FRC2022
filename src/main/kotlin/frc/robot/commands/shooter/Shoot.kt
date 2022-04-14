@@ -3,15 +3,17 @@ package frc.robot.commands.shooter
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
+import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.robot.RobotContainer
+import frc.robot.commands.drive.AimDrive
 import frc.robot.subsystems.*
 
 
 /**
  * Default Shooter method to automatically shoot balls when ready
  */
-object Shoot : CommandBase() {
+class Shoot : CommandBase() {
     init {
         addRequirements(Shooter, Conveyor)
     }
@@ -20,6 +22,7 @@ object Shoot : CommandBase() {
     override fun initialize() {
         reenableCompressor = KSolenoid.compressor.enabled()
         KSolenoid.compressor.disable()
+        AimDrive.schedule()
     }
 
     override fun execute() {
@@ -27,7 +30,7 @@ object Shoot : CommandBase() {
         // check if shooter should spin up
         Shooter.update()
         // if the turret is on target
-        if (Turret.ready && Shooter.ready) {
+        if (Limelight.targetVisible && Limelight.visionOffset!!.absoluteValue < 3.degrees && Shooter.ready) {
             Shooter.status = ShooterStatus.SHOT
             Conveyor.feed()
             RobotContainer.controller.rumble = 0.0
