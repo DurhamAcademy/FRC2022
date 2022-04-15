@@ -7,39 +7,22 @@ import frc.kyberlib.math.units.extensions.k
 import frc.kyberlib.math.units.towards
 import frc.robot.Constants
 import frc.robot.RobotContainer
+import frc.robot.subsystems.Limelight
 import frc.robot.subsystems.Turret
-import frc.robot.subsystems.TurretStatus
 
 /**
  * Spin turret in circle. This command should never really be necessary if we odometry good
  */
 object SeekTurret : CommandBase() {
-    init {
-        addRequirements(Turret)
-    }
-
-    /**
-     * Update status to indicated turret is lost
-     */
-    override fun initialize() {
-        Turret.reset()
-        Turret.status = TurretStatus.LOST
-    }
+    init { addRequirements(Turret) }
 
     override fun execute() {
-        Debug.log("Seek", "execute", level = DebugFilter.Low)
-        // sweeps menacingly - test this
+        // point towards where hub should be
         Turret.fieldRelativeAngle = RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k
-
         // if you are sure you see the target
-        if (!Turret.lost) {
+        if (Limelight.targetVisible) {
             // lock onto the target
             AimTurret.schedule()
         }
-    }
-
-    override fun end(interrupted: Boolean) {
-        if (!interrupted) Turret.status = TurretStatus.ADJUSTING
-//        Turret.turret.stop()
     }
 }

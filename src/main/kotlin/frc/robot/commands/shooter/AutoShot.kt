@@ -15,7 +15,6 @@ class AutoShot : CommandBase() {
     override fun initialize() {
         Intaker.intakeMotor.stop()
         Intaker.deployed = false
-        KSolenoid.compressor.disable()
         shootingTimer.reset()
         Drivetrain.stop()
     }
@@ -26,17 +25,13 @@ class AutoShot : CommandBase() {
         Shooter.update()
         if (Turret.ready && Shooter.ready) {
             shootingTimer.start()
-            Shooter.status = ShooterStatus.SHOT
             Conveyor.feed()
         } else {
-            Shooter.status = ShooterStatus.SPINUP
             Conveyor.prepare()
-            Conveyor.feeder.percent = 0.0
         }
     }
 
     override fun end(interrupted: Boolean) {
-        if (RobotContainer.op.compressor) KSolenoid.compressor.enableDigital()
         Shooter.stop()
         if (Game.AUTO) {
             Conveyor.conveyor.percent = 0.1

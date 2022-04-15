@@ -1,20 +1,17 @@
 package frc.robot
 
 import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
+import frc.kyberlib.auto.AutoDrive
 import frc.kyberlib.auto.trajectory.TrajectoryManager
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.meters
-import frc.kyberlib.math.units.string
 import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.simulation.field.KField2d
-import frc.robot.commands.drive.AutoDrive
 import frc.robot.commands.shooter.AutoShot
-import frc.robot.commands.shooter.Dispose
 import frc.robot.subsystems.*
 import java.io.File
 
@@ -25,23 +22,6 @@ class Robot : KRobot() {
 
         Climber.leftWinch.resetPosition(0.degrees)
         Climber.rightWinch.resetPosition(0.degrees)
-    }
-
-    override fun robotPeriodic() {
-        RobotContainer.leds.update()
-        if (Game.real) {
-            // log relevant stuff
-            SmartDashboard.putNumber("gyro", RobotContainer.gyro.heading.degrees)
-            SmartDashboard.putBoolean("visible", Limelight.targetVisible)
-            SmartDashboard.putBoolean("shooter ready", Shooter.ready)
-            SmartDashboard.putBoolean("turret ready", Turret.ready)
-            SmartDashboard.putNumber("distance", Limelight.distance.meters)
-            SmartDashboard.putString("pose", (RobotContainer.navigation.position - Constants.HUB_POSITION).string)
-        }
-    }
-
-    override fun disabledInit() {
-        Drivetrain.stop()
     }
 
     override fun autonomousInit() {
@@ -72,13 +52,11 @@ class Robot : KRobot() {
     // todo: separate intake system
     private fun loadRoutine(routine: String): SequentialCommandGroup {
         val command = SequentialCommandGroup()
-        TrajectoryManager.routines
         val f = File("${TrajectoryManager.AUTO_PATH}/$routine")
         f.readLines().forEach {
             when (it) {
                 "Shot" -> command.addCommands(AutoShot())
-                "Dispose" -> command.addCommands(Dispose)
-                else -> command.addCommands(AutoDrive(TrajectoryManager[it]!!))
+                else -> command.addCommands(AutoDrive(Drivetrain, TrajectoryManager[it]!!))
             }
         }
 
@@ -88,7 +66,6 @@ class Robot : KRobot() {
             if (it != "Shot") pose = TrajectoryManager[it]!!.initialPose
             break
         }
-
         reset(pose)
         return command
     }

@@ -28,19 +28,10 @@ import org.photonvision.targeting.PhotonTrackedTarget
 import org.photonvision.targeting.TargetCorner
 import kotlin.math.atan
 
-
-/**
- * Status of what the turret is doing
- */
-enum class TurretStatus {
-    ADJUSTING, FROZEN, LOST
-}
-
 /**
  * Controls the turret
  */
-object Turret : SubsystemBase(), Debug {
-    var status = TurretStatus.LOST
+object Turret : SubsystemBase() {
 
     //    override val priority: DebugFilter = DebugFilter.Max
     var isZeroed = false
@@ -57,32 +48,22 @@ object Turret : SubsystemBase(), Debug {
     val turret = KSparkMax(11).apply {
         identifier = "turret"
         gearRatio = Constants.TURRET_GEAR_RATIO
-        motorType = DCMotor.getNeo550(1)
         brakeMode = true
         currentLimit = 15
 
-        val classic = { _: KMotorController ->
-            val polarSpeeds = Drivetrain.polarSpeeds
-            val rot =
-                polarSpeeds.dTheta * 0.1.seconds//-headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.1.seconds
-            val mov = polarSpeeds.dOrientation * 0.0.seconds
-            position = clampSafePosition(positionSetpoint + rot + mov)
-
+        customControl = { _: KMotorController ->
+            position = clampSafePosition(positionSetpoint)
             val offsetCorrection = controller.calculate(position.rotations, positionSetpoint.rotations)
             val ff = feedforward.calculate(controller.setpoint.velocity.rotationsPerSecond.radiansPerSecond)
             if (isZeroed) (ff + offsetCorrection) else 0.0//.coerceIn(-4.0, 4.0)
         }
-
-        customControl = classic
         setupSim(feedforward)
     }
 
     // angle of the turret from top view
     var fieldRelativeAngle: Angle
         get() = (turret.position + RobotContainer.navigation.heading).normalized
-        set(value) {
-            turret.position = value - RobotContainer.navigation.heading
-        }
+        set(value) { turret.position = value - RobotContainer.navigation.heading }
 
     init {
         defaultCommand = SeekTurret
@@ -104,32 +85,9 @@ object Turret : SubsystemBase(), Debug {
     }
 
     val ready: Boolean  // is the Turret prepared to shoot
-        get() = (Limelight.targetVisible && turret.positionError.absoluteValue < Constants.TURRET_TOLERANCE) || status == TurretStatus.FROZEN
-
-    fun reset() {  // clear stuff to remove weird things happening when switching between commands
-        controller.reset(turret.position.rotations, turret.velocity.rotationsPerSecond)
-    }
-
-    // smooths out how fast we switch between lost and found
-    private val lostDebouncer = Debouncer(0.2, Debouncer.DebounceType.kBoth)  // *** this was changed from .5
-    var lost = false
-    // update limelight data
-    override fun periodic() {
-        SmartDashboard.putString("turret cmd", this.currentCommand?.name ?: "none")
-        debugDashboard()
-        lost = lostDebouncer.calculate(!Limelight.targetVisible)
-    }
+        get() = Limelight.targetVisible && turret.positionError.absoluteValue < Constants.TURRET_TOLERANCE
 
     override fun simulationPeriodic() {
         KField2d.getObject("turret").pose = Pose2d(RobotContainer.navigation.position, fieldRelativeAngle.w)
-    }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "turret" to turret,
-            "turret error" to Limelight.visionOffset,
-            "field Heading" to fieldRelativeAngle.radians,
-            "target detected" to Limelight.targetVisible
-        )
     }
 }
