@@ -2,8 +2,10 @@ package frc.kyberlib.mechanisms
 
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.LinearQuadraticRegulator
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.estimator.KalmanFilter
 import edu.wpi.first.math.numbers.N1
+import edu.wpi.first.math.system.LinearSystem
 import edu.wpi.first.math.system.LinearSystemLoop
 import edu.wpi.first.wpilibj.simulation.FlywheelSim
 import frc.kyberlib.command.Debug
@@ -17,15 +19,17 @@ import frc.kyberlib.simulation.Simulatable
  */
 class Flywheel(  // todo: allow for gooder constructor
     leadMotor: KMotorController,
-    kFlywheelMomentOfInertia: Double = 0.00032, // kg * m^2
+    plant: LinearSystem<N1, N1, N1>, // kg * m^2
     timeDelay: Double = 0.02
 ) : Debug {
+
+    constructor(leadMotor: KMotorController, ff: SimpleMotorFeedforward, timeDelay: Double = 0.02) : this(leadMotor, leadMotor.velocitySystem(ff), timeDelay)
+    constructor(leadMotor: KMotorController, kFlywheelMomentOfInertia: Double = 0.00032, timeDelay: Double = 0.02) : this(leadMotor, leadMotor.flywheelSystem(kFlywheelMomentOfInertia), timeDelay)
     // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-flywheel-walkthrough.html
 
     private val motor = leadMotor.apply {
-        val system = flywheelSystem(kFlywheelMomentOfInertia)
-        stateSpaceControl(system, 3.radiansPerSecond, 8.radiansPerSecond)
-        setupSim(flywheelSystem(kFlywheelMomentOfInertia))
+        stateSpaceControl(plant, 3.radiansPerSecond, 8.radiansPerSecond)
+        setupSim(plant)
     }
 
     /**
@@ -34,7 +38,6 @@ class Flywheel(  // todo: allow for gooder constructor
      * Inputs (what we can "put in"): [voltage], in volts.
      * Outputs (what we can measure): [velocity], in radians per second.
      */
-    private val plant = motor.flywheelSystem(kFlywheelMomentOfInertia)
 
     private val observer: KalmanFilter<N1, N1, N1> = KalmanFilter(
         N1.instance, N1.instance,

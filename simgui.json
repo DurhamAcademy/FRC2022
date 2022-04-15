@@ -112,6 +112,9 @@
   },
   "NetworkTables": {
     "LiveWindow": {
+      "Drivetrain": {
+        "open": true
+      },
       "Turret": {
         "open": true
       },
@@ -155,8 +158,7 @@
         "Climber": {
           "open": true
         }
-      },
-      "open": true
+      }
     },
     "SmartDashboard": {
       "Climber": {
@@ -204,7 +206,6 @@
         }
       },
       "Turret": {
-        "open": true,
         "turret": {
           "open": true
         }
@@ -240,7 +241,7 @@
     "Plot <0>": {
       "plots": [
         {
-          "height": -29,
+          "height": 274,
           "series": [
             {
               "color": [
@@ -290,7 +291,7 @@
           ]
         },
         {
-          "height": -29,
+          "height": 274,
           "series": [
             {
               "color": [
@@ -428,7 +429,7 @@
     "Plot <2>": {
       "plots": [
         {
-          "height": 205,
+          "height": -29,
           "series": [
             {
               "color": [
@@ -451,7 +452,7 @@
           ]
         },
         {
-          "height": 205,
+          "height": -29,
           "series": [
             {
               "color": [

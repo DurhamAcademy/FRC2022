@@ -762,6 +762,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Creates a plant that model how velocity for a motor evolves
      */
     fun velocitySystem(ff: SimpleMotorFeedforward): LinearSystem<N1, N1, N1> {
+        if(linearConfigured) return LinearSystemId.identifyVelocitySystem(ff.kv * radius!!.meters, ff.ka * radius!!.meters)
         return LinearSystemId.identifyVelocitySystem(ff.kv, ff.ka)
     }
 
@@ -769,6 +770,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Creates a plant that model how position for a motor evolves
      */
     fun positionSystem(ff: SimpleMotorFeedforward): LinearSystem<N2, N1, N1> {
+        if(linearConfigured) return LinearSystemId.identifyPositionSystem(ff.kv * radius!!.meters, ff.ka * radius!!.meters)
         return LinearSystemId.identifyPositionSystem(ff.kv, ff.ka)
     }
 

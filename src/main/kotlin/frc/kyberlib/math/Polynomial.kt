@@ -1,6 +1,7 @@
 package frc.kyberlib.math
 
 import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  * Representation and calculator of a polynomial
@@ -55,6 +56,7 @@ class Polynomial(
                     a[i] = a[i] - B[i][j] * a[j]
                 a[i] = a[i] / B[i][i] //now finally divide the rhs by the coefficient of the variable to be calculated
             }
+            a.reverse()
             return Polynomial(*a)
         }
     }
@@ -73,10 +75,10 @@ class Polynomial(
         return total
     }
 
-    fun rSquared(data: DoubleArray, actualResults: DoubleArray): Double {
-        return data.zip(actualResults).sumOf {
-            (eval(it.first)!! - it.second).pow(2)
-        }
+    fun r(data: DoubleArray, actualResults: DoubleArray): Double {
+        val n = data.size
+        return (n*(data.zip(actualResults).sumOf { it.first * it.second }) - data.sum() * actualResults.sum()) /
+                sqrt(n*(data.sumOf { it*it }-data.sum())) / n*(actualResults.sumOf { it*it }-actualResults.sum())
     }
 
     override fun toString(): String {
