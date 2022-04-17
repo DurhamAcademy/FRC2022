@@ -9,10 +9,7 @@ import com.ctre.phoenix.music.Orchestra
 import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.command.Game
-import frc.kyberlib.math.units.extensions.Angle
-import frc.kyberlib.math.units.extensions.AngularVelocity
-import frc.kyberlib.math.units.extensions.falconSpeed
-import frc.kyberlib.math.units.extensions.rotations
+import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.BrakeMode
 import frc.kyberlib.motorcontrol.KBasicMotorController
 import frc.kyberlib.motorcontrol.KMotorController
@@ -125,7 +122,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
         get() = (talon.selectedSensorPosition / unitsPerRotation.toDouble()).rotations
         set(value) {
             talon.set(
-                if(smartMotion) ControlMode.MotionMagic else ControlMode.Position,
+                ControlMode.MotionMagic,
                 value.rotations / unitsPerRotation,
                 DemandType.ArbitraryFeedForward,
                 arbFFVolts/vbus)
@@ -156,20 +153,19 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
         set(value) {
             field = value
             talon.configSupplyCurrentLimit(
-                SupplyCurrentLimitConfiguration(true, value.toDouble(), value + 10.0, .1),
+                SupplyCurrentLimitConfiguration(true, value-10.0, value + 0.0, .1),
                 100
             )
         }
 
-    override fun updateNativeControl(p: Double, i: Double, d: Double) {
-        talon.config_kP(0, p)
-        talon.config_kI(0, i)
-        talon.config_kD(0, d)
-    }
-
-    var smartMotion = false
-    override fun updateNativeProfile(maxVelocity: AngularVelocity, maxAcceleration: AngularVelocity) {
-        smartMotion = true
+    override fun implementNativeControls()  {
+        val nativeLoopTime = 0.001  // 1 ms  // todo: this could be wrong - only really relevant if trying to do dimensional analysis
+        val fullOutput = 1023.0
+        val ticksPerRadian = toNative / TAU * unitsPerRotation
+        talon.config_kP(0, kP * ticksPerRadian * fullOutput / 12.0)
+        talon.config_kI(0, kI * ticksPerRadian * fullOutput / 12.0)
+        talon.config_kD(0, kD * ticksPerRadian * fullOutput / 12.0)
+        talon.config_IntegralZone(0, kIRange * toNative)
         talon.configMotionCruiseVelocity(maxVelocity.falconSpeed)
         talon.configMotionAcceleration(maxAcceleration.falconSpeed)
     }

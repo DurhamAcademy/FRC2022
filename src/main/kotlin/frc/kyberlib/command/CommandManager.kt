@@ -1,7 +1,6 @@
-package frc.kyberlib.command.scheduler
+package frc.kyberlib.command
 
 import edu.wpi.first.wpilibj2.command.*
-import frc.kyberlib.command.Debug
 
 
 /**
