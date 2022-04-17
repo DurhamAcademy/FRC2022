@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Translation2d
 import frc.kyberlib.math.units.extensions.Angle
 import frc.kyberlib.math.units.extensions.normalized
 import frc.kyberlib.motorcontrol.KMotorController
+import kotlin.math.PI
 
 /**
  * Standard Swerve Module. One motor drives speed and the other controls rotation
@@ -16,6 +17,10 @@ open class StandardSwerveModule(
     private val driveMotor: KMotorController,
     private val turnMotor: KMotorController
 ) : SwerveModule(location) {
+
+    init {
+        turnMotor.PID.enableContinuousInput(-PI, PI)
+    }
     // turn controls
     override var rotation: Angle
         get() = turnMotor.position

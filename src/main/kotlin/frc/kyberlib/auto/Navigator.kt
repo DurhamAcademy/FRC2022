@@ -8,12 +8,15 @@ import edu.wpi.first.math.kinematics.*
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
 import edu.wpi.first.math.numbers.N5
+import frc.kyberlib.TRACK_WIDTH
 import frc.kyberlib.auto.trajectory.KTrajectory
 import frc.kyberlib.auto.trajectory.KTrajectoryConfig
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
+import frc.kyberlib.command.KRobot
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.zeroPose
+import frc.kyberlib.mechanisms.drivetrain.dynamics.KDifferentialDriveDynamic
 import frc.kyberlib.sensors.gyros.KGyro
 import frc.kyberlib.simulation.field.KField2d
 
@@ -87,14 +90,13 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
      * Update position based on estimated motion
      */
     fun update(speeds: DifferentialDriveWheelSpeeds, leftPosition: Length, rightPosition: Length) {  // estimate motion
-        differentialDrive = true
         difPoseEstimator.update(gyro.heading.w, speeds, leftPosition.meters, rightPosition.meters)
-        simUpdate()
+        simUpdate(KDifferentialDriveDynamic.toChassisSpeed(speeds, TRACK_WIDTH).omegaRadiansPerSecond.radiansPerSecond)
     }
 
     fun update(speeds: ChassisSpeeds) {
         holonomicPoseEstimator.update(gyro.heading.w, speeds)
-        simUpdate()
+        simUpdate(speeds.omegaRadiansPerSecond.radiansPerSecond)
     }
 
 
@@ -110,8 +112,11 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
         simUpdate()
     }
 
-    private fun simUpdate() {
-        if(Game.sim) KField2d.robotPose = pose
+    private fun simUpdate(spin: AngularVelocity=0.radiansPerSecond) {
+        gyro.heading += spin * KRobot.period.seconds
+        if(Game.sim) {
+            KField2d.robotPose = pose
+        }
     }
 
     override fun debugValues(): Map<String, Any?> {
