@@ -158,8 +158,7 @@
         "Climber": {
           "open": true
         }
-      },
-      "open": true
+      }
     },
     "SmartDashboard": {
       "Climber": {
@@ -226,7 +225,6 @@
         }
       },
       "Turret": {
-        "open": true,
         "turret": {
           "open": true
         }

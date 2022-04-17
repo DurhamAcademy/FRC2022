@@ -5,6 +5,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Translation2d
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
+import kotlin.math.PI
 
 /**
  * Untested Class to control differential swerve module.
@@ -18,7 +19,9 @@ class DifferentialSwerveModule(
     private val topMotor: KMotorController, private val bottomMotor: KMotorController
 ) : SwerveModule(location) {
 
-    private val rotationPID = PIDController(0.07, 0.00, 0.01)
+    private val rotationPID = PIDController(0.07, 0.00, 0.01).apply {
+        enableContinuousInput(-PI, PI)
+    }
 
     private fun updateSpeeds() {
         val wheelSpeed = stateSetpoint.speedMetersPerSecond.metersPerSecond

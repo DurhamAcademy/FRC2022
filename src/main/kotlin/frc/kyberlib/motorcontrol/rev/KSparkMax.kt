@@ -93,24 +93,20 @@ class KSparkMax(
         set(value) {
             _pid?.setReference(
                 value.rotations,
-                if(smartMotion) CANSparkMax.ControlType.kSmartMotion else CANSparkMax.ControlType.kPosition,
+                CANSparkMax.ControlType.kSmartMotion,
                 0,
                 arbFFVolts,
                 SparkMaxPIDController.ArbFFUnits.kVoltage
             )
         }
 
-    override fun updateNativeControl(p: Double, i: Double, d: Double) {
-        _pid.p = p
-        _pid.i = i
-        _pid.d = d
-    }
-
-    var smartMotion = false
-    override fun updateNativeProfile(maxVelocity: AngularVelocity, maxAcceleration: AngularVelocity) {
-        smartMotion = true
-        _pid.setSmartMotionMaxVelocity(maxVelocity.rpm, 0)
-        _pid.setSmartMotionMaxAccel(maxAcceleration.rpm, 0)
+    override fun implementNativeControls() {
+        _pid.p = kP * toNative
+        _pid.i = kP * toNative
+        _pid.d = kP * toNative
+        _pid.iZone = kIRange * toNative
+        _pid.setSmartMotionMaxAccel(maxAcceleration.rpm * toNative, 0)
+        _pid.setSmartMotionMaxVelocity(maxVelocity.rpm * toNative, 0)
     }
 
     override var currentLimit: Int = 100
