@@ -1,35 +1,55 @@
+# Future
+- chief delphi post *
+- resume
+- github page
+- ask Adair 
+
 # In Sim
+- get chrp files
+- fix debugs
+- look at inner classes
 
-- adjust climb arms to be same by default
-    - fix issues with manual
-- time delay on arm lift so turret safe
-- reformat Shuffleboard (require driver-station)
-- augmented loop (pg 109 of textbook)
-    - detla U: add voltage into state model
-        - https://www.chiefdelphi.com/t/971s-control-system/137365/15?u=tatestaples
-- https://www.chiefdelphi.com/t/what-impressive-things-did-you-do-in-software-this-year/382245/48?u=tatestaples
-- https://github.com/Team254/FRC-2020-Public/blob/master/src/main/java/com/team254/frc2020/planners/DriveMotionPlanner.java#L225
-- current management
+# With robot
+- try Everett's climb idea
+- teach group about how kyberlib works
+  - ask about position vs linearPosition preferences
+- try replacing flywheel colsons
+- better turning in difdrive dynamics
+  - skid factor mentioned in 254 code
 
-# With robo
-- test other turret controls (it they want to redo tether, than recharacterize) (2 hours) **
-    - velocity
-    - state space (hard with bad ff)
-    -
-- test shot while moving (6 hour)
-- test why auto shot slow (3 hour)
-    - generally make auto better
-- flash other limelight (try) (4 hour)
-    - tune ball detection
-- climb prepare (30 min) [Wednesday]
-  - closed loop climb testing
-- remove drivetrain swap
-- climb stablization (30 min)
-- Chris driver practice (whatever time remains) [Thursday]
+# Short-term what better
+- operator controls (2 drivers)
+- no hopper
+- less violent intake
+- inertia wheels?
 
-## random cool things
-- Auto Drive to Climb
-- Auto Climb
+# longer-term what better
+- testing is valuable
+- driver practice is important
+- compact causes issues
+  - have a plan for electronics (not necesarily CAD)
+  - pnuematics take space, use with caution
+  - leave room for mistakes and future innovations
+- fundraising is a priority
+- long-term planning and time estimation
+- chairmans -> outreach
+- look into working with other teams
+  - builds connections
+  - lets us practice with other robots
+  - more fun
+- fail fast and early
+  - build before done
+- name batteries
+- build driverstation
+
+# what good
+- banging shooter
+- working climb
+- LEDs
+- awards!
+- student led team
+- no COTS
+- overcoming hurdles
 
 ## Full Auto
 - goal system (shouldn't be too hard - should update) -> moderate difficulty
@@ -44,136 +64,165 @@
     - should add endgameInit or something (idk)
 
 ## Long Term
-
-- Make sure things are isolatable (specifically autoDrive and Navigation)
 - think about roborio2 (they said 30% faster)
-- probably get falcons
 
-### software pitch
-
-- Features
-    - intake
-        - no penalties
-        - auto intake?
-        - driver camera
-    - drivetrain
-        - fancy odometry
-        - auto drive
-        - playback controls
-        - multiple coordinate systems
-            - standard
-            - polar
-        - speed systems
-            - robo centric
-            - hub centric
-            - field centric
-        - lead swap
-    - turret
-        - statespace
-        - limelight
-        - working while unplugged
-        - self wrapping (protect the cables)
-        - side spin comp
-        - shoot while moving
-        - disposal
-    - Shooter
-        - conveyor management
-        - control schemes
-        - falcons
-        - shoot while move
-        - closed loop, feed when ready
-        - active hood
-        - speed based on poly fit
-    - Climb
-        - position controlled
-        - prepare for faster climb
-        - reaction wheel stablization
-    - Controls
-        - Modular control system
-        - dashboard override on everything
-        - turn off fancy things if no work
-            - increase flywheel speed if shooting low
-            - debug intake snapping
-            - force turret out of weird positions
-- Kyber
+### software pitch (11k lines of code written)
+- Auto
+  - pathweaver option
+    - simulation testing (how it works)
+  - playback feature
+  - Auto pathing
+    - obstacle avoidance
+    - mention semester independent project (automation as my passion)
+  - auto turret
+  - auto climb
+  - early prototypes of auto shot and intake
+- Driver Simplicity
+  - custom driver controls (maybe cut)
+  - intake retraction (be breif)
+    - no penalties
+  - shoot from anywhere
+    - auto turret
+      - limelight
+      - pose estimator
+      - control
+        - wire management
+        - side spin
+        - back spin
+- Additional features (things that really put us apart)
+  - driving
+    - driver camera
+    - continually updating cameras
+  - shooting
+    - shooting while moving
+    - disposal
+  - climbing
+    - prepare climb
+    - auto climb
+  - bonus
+    - manual overrides
+      - every motor
+      - simplicity if errors
+- Kyber (8.5k lines of code - 75% of all code can be immediately reused)
     - motivation
         - personal journey in understanding
         - documentation for future year
-        - mechansims
-    - motor control systems integration (abstraction allows for modularity)
-        - native
-        - pid
-        - ff (intuitive to use)
-        - statespace
-            - positon, velocity, dual, arm, elevator, drivetrain
-            - custom loops with latency compensation
-        - bang
-        - custom
-    - Characterization Tool
-        - use our own code to characterize systems and fit the data
-        - allows for more control of the data we get and ensures safety on constrained systems
-    - Auto pathing generation
-        - shuffleboard integration
-        - dynamic path planning
-        - communication with other teams
-        - role in navigation
-        - Playback
-            - records all the drivers inputs and plays them back
-            - allows for quick and easy non-standard autos
-    - debug system
-        - allows for graphing and understanding of what everything is doing
-    - fancy controller modifications
-        - drone modification
-        - able to be simulations (see playback)
-    - LED animations
-    - unit libraries
-        - greater understanding and readiblity
-        - custom polar coordinates
-            - nav updates
-            - turret adjustments
-    - Pre-built mechanisms
+          - I am a senior
+    - motor control systems integration
+      - purpose
+        - rapid iteration
+          - can write a bunch of different control schemes and swap them out to see what worked
+            - had 6 different control schemes for flywheel at one point
+          - single line of code change to switch motors
+          - allow for simple simulation support
         - personal learning
-        - building for the future team
+        - usability for new coders
+      - modes
+        - percent
+        - position
+        - velocity
+        - follow
+        - current
+        - torque
+        - music!!
+      - control types - each able to be setup in a single line
+          - native controls
+          - pid
+          - ff (intuitive to use)
+          - statespace
+              - positon, velocity, dual, arm, elevator, drivetrain
+              - custom loops with latency compensation
+          - bang bang
+          - take half back
+          - custom
     - Simulation support
         - why important for our robot (time)
-            - 2 days of testing
-        - branches
-            - allow for testing cool new ideas
-        - auto testing
-            - All autos have actually been developed in sim and debugged on the field
-        - maximizing efficiency
-            - time with robot is limited
-        - increase usability
+            - 3 days of testing
         - easy way to write code for subsystems not there
             - simulated ESC
             - fake solenoids
             - halucinating climb past 2 events
 
-
-
-/**
-* Definetly
-* - east
-* - hedgehogs
-* - triple strange
-*
-* Good:
-* sequence
-* omegabytes
-* pitt pirates
-* zebracorns
-* platypi :(
-* hawtimus prime?
-* yeti
-* bots on wheels
-* green hope falcons (5190)
-* gear cats
-*
-* I want
-* collect all the data from NCFIRST matches
-* teach me all of the programming required for FRC
-* predict all the matches for States
-* predict potential from top teams
-* graph trends for all the teams over matches
-* predict our potential
-  */
+Post / Github outline
+- Introduction
+  - Who I am
+  - Why I'm qualified
+    - states award
+    - 11k lines of code
+  - What is kyberlib
+- SpinShot software overview
+  - navigation
+    - poseEstimators
+    - limelight updates
+  - auto
+    - pathweaver
+  - turret
+    - side spin comp
+    - back spin comp
+    - aiming while blind
+    - dispose
+    - hall sensor zeroing
+  - shooter
+    - interpolator for speed and hood angle
+    - shooting while moving
+    - falcon integrated controls
+  - climb
+    - swing compensation
+    - gyroscope sync climb
+    - prepared climb
+  - leds
+    - looks cool
+    - communicates robot state with driver
+  - controls
+    - control schema
+      - rocket league controls
+    - manual dashboard controls
+- Kyberlib
+  - KMotor
+    - modes
+      - unencoded
+        - percent
+        - voltage
+        - follow
+      - encoded
+        - position
+        - velocity
+        - torque
+        - current
+      - falcon
+        - music
+    - builtin algorithms
+      - pid
+      - ff
+      - statespace
+      - bang bang custom
+    - sim support
+      - ff
+      - linear system
+    - characterization support
+      - allows for safety and consistency with our motor controls
+    - wrapped substitution
+  - Autonomous
+    - pathweaver integration
+    - playback
+    - trajectory generation with obstacle avoidance
+      - Informed Rapidly Expanding Random Tree*
+    - goal system
+      - travelling salesman
+  - Mechanisms
+    - drivetrains
+      - chassis drive
+      - auto
+  - Units
+    - make code more readable and type safe
+  - LEDs
+    - regions
+    - animations
+  - debug system
+  - math utils
+    - 3d
+    - polar
+- UcoSLAM
+- Conclusion
+  - thoughts?
+  - improvements?

@@ -24,7 +24,7 @@ open class KRobot() {
         override fun robotInit() {
             Debug.log("Robot", "robot init", level=DebugFilter.Low)
             HAL.report(FRCNetComm.tResourceType.kResourceType_Language, FRCNetComm.tInstances.kLanguage_Kotlin)
-            if (Game.real) LiveWindow.disableAllTelemetry()
+            LiveWindow.disableAllTelemetry()
             this@KRobot.robotInit()
         }
 

@@ -58,18 +58,18 @@ object Climb : CommandBase() {
         val default = -RobotContainer.controller.rightY.raw().zeroIf { it.absoluteValue < .02 }
 
         // MARK: correcting code
-        var tolorance = 3
-        var degs = RobotContainer.gyro.roll.absoluteValue.degrees
-        val defaultLeft = default * min((degs*(1.0/tolorance))+1, 1)
-        val defaultRight = default * max((degs*(1.0/tolorance))-1), -1
+        val tolorance = 3
+        val degs = RobotContainer.gyro.roll.absoluteValue
+        val rightSync = degs*-1.0/tolorance
+        val leftSync = degs*1.0/tolorance
 
-        Climber.rightWinch.percent = defaultRight
+        Climber.rightWinch.percent = default + rightSync
         if(SmartDashboard.getBoolean("sync climb", true)) {
-            Climber.leftWinch.percent = defaultLeft
+            Climber.leftWinch.percent = default + leftSync
         } else {
             Climber.leftWinch.percent = -RobotContainer.controller.leftY.raw().zeroIf {
                 it.absoluteValue < .02
-            }
+            } + leftSync
         }
 //        Climber.rightExtendable.percent = RobotContainer.controller.rightX.raw()
 
