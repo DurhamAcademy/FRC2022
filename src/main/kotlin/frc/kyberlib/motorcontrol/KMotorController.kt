@@ -74,7 +74,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     /**
      * The max angular velocity the motor can have
      */
-    var maxVelocity: AngularVelocity = 0.rpm
+    var maxVelocity: AngularVelocity = 10000.rpm
         set(value) {
             field = value
             PID.setConstraints(TrapezoidProfile.Constraints(maxVelocity.value, maxAcceleration.value))
@@ -82,7 +82,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     /**
      * The max angular acceleration the motor can have
      */
-    var maxAcceleration: AngularVelocity = 0.rpm
+    var maxAcceleration: AngularVelocity = 10000.rpm
         set(value) {
             field = value
             PID.setConstraints(TrapezoidProfile.Constraints(maxVelocity.value, maxAcceleration.value))
@@ -201,7 +201,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var nativeControl = false  // todo
         set(value) {
             field = value
-            if(real && value) implementNativeControls()
+//            if(real && value) implementNativeControls()
         }
     /**
      * Builtin control that will combine feedforward with the PID.
@@ -338,7 +338,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         kI = other.kI
         kD = other.kD
 
-        customControl = other.customControl
+//        customControl = other.customControl
         reversed = other.reversed
         currentLimit = other.currentLimit
         gearRatio = other.gearRatio

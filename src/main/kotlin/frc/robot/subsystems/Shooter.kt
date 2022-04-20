@@ -45,8 +45,10 @@ object Shooter : SubsystemBase(), Debug {
         motorType = DCMotor.getFalcon500(2)
         currentLimit = 50
         brakeMode = false
+        nativeControl = true
+        talon.config_kP(0, 0.02569)
+//        kP = 0.05//20569
         addFeedforward(ff)
-        kP = 0.20569
         setupSim()
 //        setupSim(flywheelSystem(Constants.FLYWHEEL_MOMENT_OF_INERTIA))
     }

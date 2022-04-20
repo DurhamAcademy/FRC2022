@@ -49,16 +49,17 @@ object Drivetrain : DifferentialDriveTrain() {
     val rightMaster = KSparkMax(13).apply {
         identifier = "rightMaster"
         copyConfig(leftMaster)
+        reversed = false
         addFeedforward(rightFF)
         setupSim()
 //        setupSim(rightFF)
     }
     val leftFollower = KSparkMax(15).apply {
-        copyConfig(leftMaster)
+//        copyConfig(leftMaster)
         follow(leftMaster)
     }
     val rightFollower = KSparkMax(10).apply {
-        copyConfig(rightMaster)
+//        copyConfig(rightMaster)
         follow(rightMaster)  // follow(rightMaster)
     }
 
