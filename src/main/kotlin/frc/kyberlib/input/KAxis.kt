@@ -1,6 +1,7 @@
 package frc.kyberlib.input
 
 import edu.wpi.first.wpilibj.Joystick
+import edu.wpi.first.wpilibj2.command.button.Button
 import frc.kyberlib.command.Debug
 
 /**
@@ -50,9 +51,9 @@ class KAxis(val raw: () -> Double) : Debug {
     val value: Double
         get() = if(KController.sim) simVal else modify(raw.invoke())
 
-    fun activateAt(value: Double = 0.5) = KButton { this.raw() > value }
-    fun activateBefore(value: Double = 0.5) = KButton {this.raw() < value }
-    fun activateBetween(low: Double, high: Double) = KButton {low < this.raw()  && this.raw() < high}
+    fun activateAt(value: Double = 0.5) = Button { this.raw() > value }
+    fun activateBefore(value: Double = 0.5) = Button {this.raw() < value }
+    fun activateBetween(low: Double, high: Double) = Button {low < this.raw()  && this.raw() < high}
 
     override fun debugValues(): Map<String, Any?> {
         return mapOf(

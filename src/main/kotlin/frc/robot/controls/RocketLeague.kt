@@ -32,14 +32,14 @@ object RocketLeague : ControlSchema2022() {
         get() = xbox.leftTrigger.value + xbox.rightTrigger.value
     override val DRIVE_TURN: Double
         get() = xbox.leftX.value.invertIf { DRIVE_FORWARD < 0.0 }
-    override val INTAKE: KButton = xbox.aButton
-    override val SHOOT: KButton = xbox.bButton
-    override val FORCE_SHOT: KButton = xbox.yButton
+    override val INTAKE: KButton = xbox.a
+    override val SHOOT: KButton = xbox.b
+    override val FORCE_SHOT: KButton = xbox.y
     override val EJECT: KButton = xbox.leftMenu
     override val FLUSH: KButton = xbox.rightMenu
     override val LOCK_TURRET: KButton = xbox.downDPad
     override val ZERO_TURRET: KButton = xbox.upDPad
-    override val DISPOSE: KButton = xbox.xButton
+    override val DISPOSE: KButton = xbox.x
 
     override val CLIMB_MODE: KButton = xbox.pressedLeftStick.and(xbox.pressedRightStick).k
     override val EMOTE: KButton = xbox.leftDPad

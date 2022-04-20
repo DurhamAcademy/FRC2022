@@ -68,7 +68,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      *
      * product of (output teeth / input teeth) for each gear stage
      */
-    var gearRatio: GearRatio = 1.0
+    var gearRatio: GearRatio = 1.0  // todo: add support for shift gearbox
 
     // ----- constraints ---- //
     /**
@@ -174,6 +174,25 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Builtin PID controller for motor
      */
     var PID = ProfiledPIDController(0.0, 0.0, 0.0, TrapezoidProfile.Constraints(Double.MAX_VALUE, Double.MAX_VALUE))
+    private inline val pidVal get() = when (controlMode) {
+        ControlMode.VELOCITY -> {
+            if (!linearConfigured)
+                PID.calculate(
+                    velocity.radiansPerSecond,
+                    velocitySetpoint.radiansPerSecond
+                )
+            else
+                PID.calculate(
+                    linearVelocity.metersPerSecond,
+                    linearVelocitySetpoint.metersPerSecond
+                )
+        }
+        ControlMode.POSITION -> {
+            if (!linearConfigured) PID.calculate(position.radians, positionSetpoint.radians)
+            else PID.calculate(linearPosition.meters, linearPositionSetpoint.meters)
+        }
+        else -> 0.0
+    }
 
     /**
      * Whether to flash the PID loop onto the intergrated controller. Might allow for better performace but harder to debug and mess with.
@@ -195,15 +214,10 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
                     val ff =
                         if (linearConfigured) feedforward.calculate(linearVelocitySetpoint.metersPerSecond)///, linearVelocitySetpoint.metersPerSecond, updateRate.seconds)
                         else feedforward.calculate(velocitySetpoint.radiansPerSecond)//, velocitySetpoint.radiansPerSecond, updateRate.seconds)
-                    val pid = PID.calculate(
-                        velocity.radiansPerSecond,
-                        velocitySetpoint.radiansPerSecond
-                    )
-                    ff + pid
+                    ff + pidVal
                 }
                 ControlMode.POSITION -> {
-                    val pid = PID.calculate(position.radians, positionSetpoint.radians)
-                    pid
+                    pidVal + feedforward.calculate(PID.goal.velocity)
                 }
                 else -> 0.0
             }
@@ -219,14 +233,13 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
                 ControlMode.POSITION -> {
                     val ff = feedforward.calculate(
                         position.radians,
-                        PID.calculate(position.radians, positionSetpoint.radians)
+                        0.0
                     )
-                    ff
+                    ff + pidVal
                 }
                 ControlMode.VELOCITY -> {
                     val ff = feedforward.calculate(position.radians, velocity.radiansPerSecond)
-                    val pid = PID.calculate(velocity.radiansPerSecond, velocitySetpoint.radiansPerSecond)
-                    ff + pid
+                    ff + pidVal
                 }
                 else -> 0.0
             }
@@ -242,13 +255,11 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
             when (controlMode) {
                 ControlMode.POSITION -> {
                     val ff = feedforward.calculate(0.0)
-                    val pid = PID.calculate(linearPosition.meters, linearPositionSetpoint.meters)
-                    ff + pid
+                    ff + pidVal
                 }
                 ControlMode.VELOCITY -> {
                     val ff = feedforward.calculate(linearVelocity.metersPerSecond)
-                    val pid = PID.calculate(linearVelocity.metersPerSecond, linearVelocitySetpoint.metersPerSecond)
-                    ff + pid
+                    ff + pidVal
                 }
                 else -> 0.0
             }
@@ -306,7 +317,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Uses the motor state to determine what voltage should be applied.
      * Can be set to null to use in-built motor control system
      */
-    var customControl: ((motor: KMotorController) -> Voltage)? = null  // todo: implement better default
+    var customControl: ((motor: KMotorController) -> Voltage)? = { pidVal}
 
     /**
      * The base voltage to apply to the motor when using native controls (before pid correction)
@@ -426,7 +437,8 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var positionSetpoint: Angle = 0.rotations
         private set(value) {
             field = value.coerceIn(minPosition, maxPosition)
-            if(!customControlLock) updateVoltage()        }
+            if(!customControlLock) updateVoltage()
+        }
 
     /**
      * Sets the velocity to which the motor should go
@@ -484,7 +496,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Updates the voltage after changing position / velocity setpoint
      */
     fun updateVoltage() {
-        acceleration = accelerationCalculator.calculate(velocity.value).radiansPerSecond
+        acceleration = accelerationCalculator.calculate(velocity.value).radiansPerSecond  // this may slow the code down
         if(nativeControl) {
             if(controlMode == ControlMode.VELOCITY) rawVelocity = velocitySetpoint * gearRatio.invertIf { reversed }
             else if(controlMode == ControlMode.POSITION) rawPosition = positionSetpoint * gearRatio.invertIf { reversed }
@@ -501,14 +513,14 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Does the motor controller have a rotational to linear motion conversion defined? (i.e. wheel radius)
      * Allows for linear units to be used.
      */
-    val linearConfigured
-        inline get() = radius != null
+    inline val linearConfigured
+        get() = radius != null
 
     /**
      * Whether the type of DC motor has been set. Relevant for some Statespace and sim stuff
      */
-    val motorConfigured
-        inline get() = motorType != null
+    inline val motorConfigured
+        get() = motorType != null
 
     // ----- natives ----- //
     /**
@@ -880,9 +892,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      */
     var force: Double
         get() = torque * radius!!.value
-        set(value) {
-            torque = value / radius!!.value
-        }
+        set(value) { torque = value / radius!!.value }
 
     /**
      * Sets a control system based around a velocity control loop
@@ -969,7 +979,9 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
 
     @JvmName("dualStateSpaceControl")
     fun stateSpaceControl(plant: LinearSystem<N2, N1, N2>, modelDeviation: Angle, positionTolerance: Angle, velocityTolerance: AngularVelocity, inputCost: Double = 12.0, timeDelay: Time = 0.02.seconds) {
-        stateSpaceControl(Statespace.systemLoop(plant,
+        stateSpaceControl(
+            Statespace.systemLoop(
+                plant,
                 modelDeviation,
                 roughPositionAccuracy,
                 positionTolerance,
@@ -988,10 +1000,10 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
 
     // rough guestimates for how accurate your encoder should be for Kalman filter values
     // these values have not been tuned at all
-    private val roughPositionAccuracy
-        inline get() = .01.radians / gearRatio
-    private val roughVelocityAccuracy
-        inline get() = 0.1.radiansPerSecond / gearRatio
+    private inline val roughPositionAccuracy
+        get() = .01.radians / gearRatio
+    private inline val roughVelocityAccuracy
+        get() = 0.1.radiansPerSecond / gearRatio
 }
 
 object LinearUnconfigured : Exception("You must set the wheel radius before using linear values")
