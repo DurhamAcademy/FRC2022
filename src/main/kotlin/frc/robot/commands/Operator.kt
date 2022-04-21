@@ -6,6 +6,9 @@ import frc.robot.RobotContainer
 import frc.robot.subsystems.Drivetrain
 
 object Operator: CommandBase() {
+    init {
+        addRequirements(Drivetrain)
+    }
     override fun execute() {
         val linearmotion = RobotContainer.controller.leftY.value
         val angularmotion = RobotContainer.controller.leftX.value
