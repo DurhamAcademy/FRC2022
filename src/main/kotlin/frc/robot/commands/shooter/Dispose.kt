@@ -40,8 +40,7 @@ object Dispose : CommandBase() {
     override fun execute() {
         Turret.fieldRelativeAngle = RobotContainer.navigation.position.towards(disposalTarget).k
         val distance = RobotContainer.navigation.position.getDistance(disposalTarget).meters * 0.5
-        Shooter.flywheelUpdate(distance)
-        Shooter.hoodUpdate(distance)
+        Shooter.update(distance)
         if (timer.hasElapsed(0.3))
             Conveyor.feed()
     }

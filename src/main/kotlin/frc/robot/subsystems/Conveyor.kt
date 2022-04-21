@@ -5,6 +5,7 @@ import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.robot.commands.conveyor.Idle
+import frc.robot.commands.intake.Flush
 
 /**
  * Controls all aspects of the hopper.
@@ -13,14 +14,14 @@ import frc.robot.commands.conveyor.Idle
 object Conveyor : SubsystemBase(), Debug {
     override val priority: DebugFilter = DebugFilter.Low
 
-    val conveyor = KSparkMax(21).apply {
+    private val conveyor = KSparkMax(21).apply {
         identifier = "conveyor"
         reversed = true
         currentLimit = 20
         gearRatio = 1 / 5.0
     }
 
-    val feeder = KSparkMax(30).apply {
+    private val feeder = KSparkMax(30).apply {
         identifier = "feeder"
         gearRatio = 1 / 5.0
         currentLimit = 20
@@ -44,6 +45,20 @@ object Conveyor : SubsystemBase(), Debug {
     fun stop() {
         conveyor.stop()
         feeder.stop()
+    }
+
+    fun autoManage() {
+        conveyor.percent = 0.1
+        feeder.percent = -0.1
+    }
+
+    fun flush() {
+        conveyor.percent = -1.0
+    }
+
+    fun custom(conveyorPercent: Double = 0.0, feederPercent: Double = 0.0) {
+        conveyor.percent = conveyorPercent
+        feeder.percent = feederPercent
     }
 
     init {

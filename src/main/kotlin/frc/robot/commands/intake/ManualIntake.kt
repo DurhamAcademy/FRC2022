@@ -15,10 +15,10 @@ object ManualIntake : CommandBase() {
 
     override fun execute() {
         Intaker.deployed = SmartDashboard.getBoolean(deploymentString, Intaker.deployed)
-        Intaker.intakeMotor.percent = SmartDashboard.getNumber(intakeString, 0.0)
+        Intaker.intake(SmartDashboard.getNumber(intakeString, 0.0))
     }
 
     override fun end(interrupted: Boolean) {
-        Intaker.intakeMotor.stop()
+        Intaker.stop()
     }
 }

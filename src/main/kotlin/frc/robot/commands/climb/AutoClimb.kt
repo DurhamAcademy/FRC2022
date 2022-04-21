@@ -20,7 +20,7 @@ object AutoClimb : CommandBase() {
      */
     override fun initialize() {
         Debug.log("Climb Command", "init", level = DebugFilter.Low)
-        Turret.turret.position = 0.degrees
+        Turret.position = 0.degrees
         Climber.armsLifted = true
     }
 

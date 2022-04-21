@@ -15,12 +15,6 @@ object Eject : CommandBase() {
         Conveyor.feed()
     }
 
-
-    override fun execute() {
-        Shooter.flywheel.percent = 0.33
-//        Shooter.update()
-    }
-
     override fun end(interrupted: Boolean) {
         Shooter.stop()
         Conveyor.stop()

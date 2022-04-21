@@ -23,8 +23,7 @@ class Robot : KRobot() {
     override fun robotInit() {
         RobotContainer  // initializes object
 
-        Climber.leftWinch.resetPosition(0.degrees)
-        Climber.rightWinch.resetPosition(0.degrees)
+        Climber.reset()
     }
 
     override fun robotPeriodic() {
@@ -50,22 +49,15 @@ class Robot : KRobot() {
         Turret.zeroTurret()
         // prepare to pick up balls
         Intaker.deployed = true
-        Conveyor.conveyor.percent = 0.05
-        Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
-        // get auto commadn
+//        Conveyor.conveyor.percent = 0.05
+        Intaker.intake()
+        // get auto command
         val auto = loadRoutine(RobotContainer.autoChooser.selected)//RobotContainer.autoChooser.selected!!)
         auto.schedule()
         autoCommand = auto
     }
 
     private fun reset(pose: Pose2d) {
-        // reset navigation to a specific pose
-        if (Game.real) {
-            Drivetrain.leftMaster.resetPosition(0.meters)
-            Drivetrain.rightMaster.resetPosition(0.meters)
-        } else {
-//            RobotContainer.gyro.heading = pose.rotation.k
-        }
         RobotContainer.navigation.pose = pose
     }
 
@@ -97,6 +89,6 @@ class Robot : KRobot() {
         KField2d.trajectory = null
         autoCommand?.cancel()
         Intaker.deployed = false
-        Intaker.intakeMotor.stop()
+        Intaker.stop()
     }
 }

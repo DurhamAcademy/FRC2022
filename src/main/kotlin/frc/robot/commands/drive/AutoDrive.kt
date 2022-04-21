@@ -53,7 +53,7 @@ class AutoDrive(var targetPose: Pose2d, private val intaking: Boolean = true) : 
 //            else Pathfinder.pathTo(Navigator.instance!!.pose, targetPose)
             KField2d.trajectory = trajectory
         if (intaking) {
-            Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
+            Intaker.intake()
             Intaker.deployed = true
         }
         timer.start()
@@ -87,7 +87,7 @@ class AutoDrive(var targetPose: Pose2d, private val intaking: Boolean = true) : 
 
     override fun end(interrupted: Boolean) {
         if (intaking) {
-            Intaker.intakeMotor.stop()
+            Intaker.stop()
             Intaker.deployed = false
         }
         Drivetrain.stop()

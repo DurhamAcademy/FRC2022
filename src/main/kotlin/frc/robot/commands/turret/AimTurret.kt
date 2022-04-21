@@ -18,21 +18,17 @@ object AimTurret : CommandBase() {
         addRequirements(Turret)
     }
 
-    override fun initialize() {
-        Turret.reset()
-    }
-
     override fun execute() {
         Debug.log("Aim", "execute", level = DebugFilter.Low)
 
         // if the limelight is a target
         if (Limelight.targetVisible) {
-            val curveCorrection = (RobotContainer.op.curveComp * Turret.turret.position.sin).degrees
+            val curveCorrection = (RobotContainer.op.curveComp * Turret.position.sin).degrees
             val visionOffset = Limelight.visionOffset!!
             val correction = visionOffset + Limelight.movementAngleOffset + curveCorrection
-            Turret.turret.position = Turret.turret.position + correction * 0.7
+            Turret.position = Turret.position + correction * 0.7
         } else {
-            Turret.turret.position = Turret.turret.position
+            Turret.update()
         }
     }
 

@@ -1,5 +1,6 @@
 package frc.robot.commands.drive
 
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.subsystems.Drivetrain
@@ -15,13 +16,9 @@ object ManualDrive : CommandBase() {
     }
 
     override fun execute() {
-//        if(Drivetrain.driveInversion) {
-//            Drivetrain.leftFollower.percent = SmartDashboard.getNumber(leftString, 0.0)
-//            Drivetrain.rightFollower.percent = SmartDashboard.getNumber(rightString, 0.0)
-//        } else {
-            Drivetrain.leftMaster.percent = SmartDashboard.getNumber(leftString, 0.0)
-            Drivetrain.rightMaster.percent = SmartDashboard.getNumber(rightString, 0.0)
-//        }
+        val left = SmartDashboard.getNumber(leftString, 0.0)
+        val right = SmartDashboard.getNumber(rightString, 0.0)
+        Drivetrain.drive(DifferentialDriveWheelSpeeds(left, right))
     }
 
     override fun end(interrupted: Boolean) {

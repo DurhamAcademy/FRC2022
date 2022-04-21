@@ -14,8 +14,10 @@ object ManualConveyor : CommandBase() {
     }
 
     override fun execute() {
-        Conveyor.conveyor.percent = SmartDashboard.getNumber(conveyorString, 0.0)
-        Conveyor.feeder.percent = SmartDashboard.getNumber(feederString, 0.0)
+        Conveyor.custom(
+            SmartDashboard.getNumber(conveyorString, 0.0),
+            SmartDashboard.getNumber(feederString, 0.0)
+        )
     }
 
     override fun end(interrupted: Boolean) {

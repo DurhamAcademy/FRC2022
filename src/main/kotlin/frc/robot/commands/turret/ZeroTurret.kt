@@ -20,24 +20,20 @@ object ZeroTurret : CommandBase() {
     }
 
     override fun initialize() {
-        Turret.isZeroed = false
         timer.reset()
         timer.start()
     }
 
     override fun execute() {
-        if (timer.hasElapsed(0.3))
-            Turret.turret.percent = -0.2
-        else
-            Turret.turret.percent = 0.5
+        if (timer.hasElapsed(0.3)) Turret.percent = -0.2
+        else Turret.percent = 0.5
         Debug.log("turretLimit", RobotContainer.turretLimit.get().toString(), level = DebugFilter.Low)
     }
 
     override fun end(interrupted: Boolean) {
         Debug.log("turretLimit", "zeroed")
         Turret.zeroTurret()
-        Turret.isZeroed = true
-        Turret.turret.stop()
+        Turret.stop()
     }
 
     override fun isFinished() = !RobotContainer.turretLimit.get() || Game.sim

@@ -70,5 +70,14 @@ class Flywheel(  // todo: allow for gooder constructor
             motor.velocity = value
         }
 
+    fun update() {
+        motor.updateVoltage()
+    }
+
+    fun stop() {
+        velocity = 0.rpm
+        motor.stop()
+    }
+
     override fun debugValues(): Map<String, Any?> = motor.debugValues()
 }

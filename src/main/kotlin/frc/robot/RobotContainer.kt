@@ -111,8 +111,8 @@ object RobotContainer {
 
         // climb
         val climbColor = Color(255, 155, 0)
-        val upClimb = AnimationRain(climbColor, 10, .1.seconds, false) { Climber.leftWinch.percent < -kEpsilon }
-        val downClimb = AnimationRain(climbColor, 10, .1.seconds, true) { Climber.leftWinch.percent > kEpsilon }
+        val upClimb = AnimationRain(climbColor, 10, .1.seconds, false) { Climber.activeVoltage < -kEpsilon }
+        val downClimb = AnimationRain(climbColor, 10, .1.seconds, true) { Climber.activeVoltage > kEpsilon }
         val extension =
             AnimationCustom(
                 { t, l -> List<Color>(l) { index -> if (index / l.toDouble() < Climber.extension / 24.inches) climbColor else Color.BLACK } },
@@ -130,7 +130,7 @@ object RobotContainer {
         val leftSpeed = AnimationCustom({ t, l ->
             List<Color>(l) { index ->
                 val percentDis = (index / l.toDouble())
-                val percentSpeed = (Drivetrain.leftMaster.linearVelocity / maxSpeed)
+                val percentSpeed = (Drivetrain.wheelSpeeds.leftMetersPerSecond / maxSpeed.value)
                 if (percentDis + .01 < percentSpeed.absoluteValue) {
                     Color(Color.HSBtoRGB((.33 - .33 * percentDis).toFloat(), 1F, 1F))
                 } else Color.BLACK
@@ -139,7 +139,7 @@ object RobotContainer {
         val rightSpeed = AnimationCustom({ t, l ->
             List<Color>(l) { index ->
                 val percentDis = (index / l.toDouble())
-                val percentSpeed = (Drivetrain.rightMaster.linearVelocity / maxSpeed)
+                val percentSpeed = (Drivetrain.wheelSpeeds.rightMetersPerSecond / maxSpeed.value)
                 if (percentDis + .01 < percentSpeed.absoluteValue) {
                     Color(Color.HSBtoRGB((.33 - .33 * percentDis).toFloat(), 1F, 1F))
                 } else Color.BLACK

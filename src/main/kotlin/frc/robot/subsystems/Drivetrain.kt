@@ -30,7 +30,7 @@ object Drivetrain : DifferentialDriveTrain() {
     private val leftFF = SimpleMotorFeedforward(Constants.DRIVE_KS_L, Constants.DRIVE_KV_L, Constants.DRIVE_KA_L)
     private val rightFF = SimpleMotorFeedforward(Constants.DRIVE_KS_R, Constants.DRIVE_KV_R, Constants.DRIVE_KA_R)
 
-    val leftMaster = KSparkMax(12).apply {
+    private val leftMaster = KSparkMax(12).apply {
         identifier = "leftMaster"
         reversed = true
         brakeMode = true
@@ -46,7 +46,7 @@ object Drivetrain : DifferentialDriveTrain() {
         setupSim()
 //        setupSim(leftFF)
     }
-    val rightMaster = KSparkMax(13).apply {
+    private val rightMaster = KSparkMax(13).apply {
         identifier = "rightMaster"
         copyConfig(leftMaster)
         reversed = false
@@ -54,15 +54,16 @@ object Drivetrain : DifferentialDriveTrain() {
         setupSim()
 //        setupSim(rightFF)
     }
-    val leftFollower = KSparkMax(15).apply {
-//        copyConfig(leftMaster)
+    private val leftFollower = KSparkMax(15).apply {
+        copyConfig(leftMaster)
         follow(leftMaster)
     }
-    val rightFollower = KSparkMax(10).apply {
-//        copyConfig(rightMaster)
+    private val rightFollower = KSparkMax(10).apply {
+        copyConfig(rightMaster)
         follow(rightMaster)  // follow(rightMaster)
     }
 
+    // this handles all the math for how to use the motors
     override val dynamics: KDifferentialDriveDynamic = KDifferentialDriveDynamic(leftMaster, rightMaster)
 
     /**
@@ -81,22 +82,22 @@ object Drivetrain : DifferentialDriveTrain() {
                 polar.dOrientation.radiansPerSecond
             )
         }
-    var pose  // pose of the robot
-        inline get() = RobotContainer.navigation.pose
-        inline set(value) {
+    private var pose  // pose of the robot
+        get() = RobotContainer.navigation.pose
+        set(value) {
             val latency = RobotContainer.limelight.latestResult!!.latencyMillis.milli.seconds
             val detectionTime = Game.time - latency
             leftMaster.resetPosition()  // is this supposed to be resetting?
             rightMaster.resetPosition()
             RobotContainer.navigation.update(value, detectionTime)
         }
-    private var polarCoordinates  // polar coordinates relative to the Hub
-        inline get() = RobotContainer.navigation.pose.polar(Constants.HUB_POSITION)
-        inline set(value) {
+    private inline var polarCoordinates  // polar coordinates relative to the Hub
+        get() = RobotContainer.navigation.pose.polar(Constants.HUB_POSITION)
+        set(value) {
             pose = Pose2d(value.cartesian(Constants.HUB_POSITION).translation, RobotContainer.navigation.heading.w)
         }
-    val polarSpeeds
-        inline get() = chassisSpeeds.polar(RobotContainer.navigation.pose.polar(Constants.HUB_POSITION))
+    inline val polarSpeeds
+        get() = chassisSpeeds.polar(RobotContainer.navigation.pose.polar(Constants.HUB_POSITION))
 
 
     // setup motors

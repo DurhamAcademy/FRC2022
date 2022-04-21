@@ -5,13 +5,13 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.robot.subsystems.Turret
 
 object ManualTurret: CommandBase() {
-    const val turretString = "Turret percent"
+    private const val turretString = "Turret percent"
     init {
         addRequirements(Turret)
         SmartDashboard.putNumber(turretString, 0.1)
     }
 
     override fun execute() {
-        Turret.turret.percent = SmartDashboard.getNumber(turretString, 0.0)
+        Turret.percent = SmartDashboard.getNumber(turretString, 0.0)
     }
 }
