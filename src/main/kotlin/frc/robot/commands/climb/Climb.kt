@@ -27,7 +27,7 @@ object Climb : CommandBase() {
      */
     override fun initialize() {
         Debug.log("Climb Command", "init", level = DebugFilter.Low)
-        Turret.turret.position = 0.degrees
+        Turret.position = 0.degrees
     }
 
     var hasFallen = false
@@ -37,24 +37,21 @@ object Climb : CommandBase() {
      */
     override fun execute() {
         Debug.log("Climb Command", "execute", level = DebugFilter.Low)
-        Turret.turret.position = 0.degrees
-        if (Turret.turret.positionError.absoluteValue < 5.degrees) Climber.armsLifted = true
+        Turret.update()
+        if (Turret.position.absoluteValue < 3.degrees) Climber.armsLifted = true
 
 //        Climber.leftExtendable.percent = RobotContainer.controller.leftX.raw()
         val default = -RobotContainer.controller.rightY.raw().zeroIf { it.absoluteValue < .02 }
-        Climber.leftWinch.percent = default
-        if (SmartDashboard.getBoolean("sync climb", true)) {
-            Climber.rightWinch.percent = default
-        } else Climber.rightWinch.percent = -RobotContainer.controller.leftY.raw().zeroIf { it.absoluteValue < .02 }
-//        Climber.rightExtendable.percent = RobotContainer.controller.rightX.raw()
+        val leftPercent = default
+        val rightPercent = if (SmartDashboard.getBoolean("sync climb", true)) { default } else -RobotContainer.controller.leftY.raw().zeroIf { it.absoluteValue < .02 }
 
-
+        Climber.setClimbPercents(leftPercent, rightPercent)
         // set the status of the robot based on what the winches are doing
-        if (Climber.leftWinch.voltage < 0.1) {
+        if (leftPercent < 0.1) {
             hasFallen = true
         }
 
-        if (RobotContainer.op.climbStabilization != 0.0 && Climber.leftWinch.linearPosition < 15.inches && hasFallen)
+        if (RobotContainer.op.climbStabilization != 0.0 && Climber.extension < 15.inches && hasFallen)
             Climber.stabalize()
         else Drive.execute()
     }

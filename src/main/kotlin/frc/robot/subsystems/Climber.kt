@@ -1,6 +1,7 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.math.filter.Debouncer
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
@@ -10,8 +11,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.filters.Differentiator
-import frc.kyberlib.math.units.extensions.inches
-import frc.kyberlib.math.units.extensions.meters
+import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.motorcontrol.Voltage
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.robot.Constants
@@ -30,16 +31,9 @@ object Climber : SubsystemBase(), Debug {
         follow(climbLift)
     }
 
-    private val armSafety = Debouncer(1.0, Debouncer.DebounceType.kFalling)
-    var armsLifted
-        get() = armSafety.calculate(climbLift.extended)
-        set(value) {
-            armSafety.calculate(value)
-            climbLift.extended = value
-        }
 
     /** (left) winches that pull the robot up */
-    val leftWinch = KSparkMax(40).apply {
+    private val leftWinch = KSparkMax(40).apply {
         identifier = "left winch"
         radius = Constants.WINCH_RADIUS
         brakeMode = true
@@ -55,17 +49,53 @@ object Climber : SubsystemBase(), Debug {
     }
 
     /** (right) winches that pull the robot up */
-    val rightWinch = KSparkMax(41).apply {
+    private val rightWinch = KSparkMax(41).apply {
         copyConfig(leftWinch)
         identifier = "right winch"
     }
 
     var extension  // public variable to control position off both the arms
-        inline get() = leftWinch.linearPosition
-        inline set(value) {
+        get() = leftWinch.linearPosition
+        set(value) {
             leftWinch.linearPosition = value
             rightWinch.linearPosition = value
         }
+
+    fun setClimbPercents(left: Double, right: Double) {
+        leftWinch.percent = left
+        rightWinch.percent = right
+    }
+
+    private val armSafety = Debouncer(1.0, Debouncer.DebounceType.kFalling)
+    var armsLifted
+        get() = armSafety.calculate(climbLift.extended)
+        set(value) {
+            armSafety.calculate(value)
+            climbLift.extended = value
+        }
+
+    private val swing = Differentiator()
+
+    /**
+     * Fun reaction wheel stuff. Optional, but cool if done
+     */
+    fun stabalize() {
+        // *** Note this is actually controlling Shooter and Drivetrain subsystems, so they must be required before calling this
+        if (leftWinch.linearPosition < 5.inches) return
+        val dTheta = -swing.calculate(RobotContainer.gyro.pitch)  // note: pitch may be wrong
+        val dampeningConstant = RobotContainer.op.climbStabilization
+        val targetTorque = dTheta.value * dampeningConstant
+        Drivetrain.drive(ChassisSpeeds(targetTorque, 0.0, 0.0))
+        Shooter.targetVelocity = targetTorque.radiansPerSecond
+    }
+
+    fun reset(position: Angle = 0.degrees) {
+        leftWinch.resetPosition(position)
+        rightWinch.resetPosition(position)
+    }
+
+    val activeVoltage
+        get() = leftWinch.voltage
 
     /**
      * In progress simulation of the climb
@@ -91,22 +121,6 @@ object Climber : SubsystemBase(), Debug {
     override fun simulationPeriodic() {
         extendable.length = (35.inches.value + leftWinch.position.value)
         extendable.angle = if (climbLift.extended) 90.0 else 22.0
-    }
-
-
-    private val swing = Differentiator()
-
-    /**
-     * Fun reaction wheel stuff. Optional, but cool if done
-     */
-    fun stabalize() {
-        if (leftWinch.linearPosition < 5.inches) return
-        val dTheta = -swing.calculate(RobotContainer.gyro.pitch)  // note: pitch may be wrong
-        val dampeningConstant = RobotContainer.op.climbStabilization
-        val targetTorque = dTheta.value * dampeningConstant
-        Drivetrain.leftMaster.torque = targetTorque
-        Drivetrain.rightMaster.torque = targetTorque
-        Shooter.flywheel.torque = dTheta.value * dampeningConstant
     }
 
     override fun debugValues(): Map<String, Any?> {

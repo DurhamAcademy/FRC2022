@@ -10,7 +10,7 @@ object FreezeTurret : CommandBase() {
     }
 
     override fun initialize() {
-        Turret.turret.stop()
+        Turret.stop()
         Turret.status = TurretStatus.FROZEN
     }
 }

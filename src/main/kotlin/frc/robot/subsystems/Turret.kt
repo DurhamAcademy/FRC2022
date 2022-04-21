@@ -42,11 +42,8 @@ enum class TurretStatus {
 object Turret : SubsystemBase(), Debug {
     var status = TurretStatus.LOST
 
-    //    override val priority: DebugFilter = DebugFilter.Max
-    var isZeroed = false
-
     // characterization of the turret
-    private val feedforward = SimpleMotorFeedforward(
+    private val feedforward = SimpleMotorFeedforward(  // fixme
         0.080522, 1.1453, 0.13704
     ) // 0.22832
 
@@ -54,7 +51,7 @@ object Turret : SubsystemBase(), Debug {
     private val controller = ProfiledPIDController(40.0, 3.0, 0.0, TrapezoidProfile.Constraints(1.0, 1.0)).apply {
         setIntegratorRange(-2.0, 2.0)
     }  // these constraints are not tested on real
-    val turret = KSparkMax(11).apply {
+    private val turret = KSparkMax(11).apply {
         identifier = "turret"
         gearRatio = Constants.TURRET_GEAR_RATIO
         motorType = DCMotor.getNeo550(1)
@@ -83,6 +80,24 @@ object Turret : SubsystemBase(), Debug {
         set(value) {
             turret.position = value - RobotContainer.navigation.heading
         }
+    var position: Angle
+        get() = turret.position
+        set(value) { turret.position = value }
+
+    var percent
+        get() = turret.percent
+        set(value) { turret.percent = value }
+
+    /**
+     * Allows the turret to know its position relative to everything else
+     */
+    fun zeroTurret() {  // zeros the robot position to looking straight aheead
+        turret.resetPosition()
+        isZeroed = true
+    }
+
+    fun update() = turret.updateVoltage()
+    fun stop() = turret.stop()
 
     init {
         defaultCommand = SeekTurret
@@ -95,21 +110,10 @@ object Turret : SubsystemBase(), Debug {
         return (angle + 30.degrees).normalized - 30.degrees
     }
 
-    /**
-     * Allows the turret to know its position relative to everything else
-     */
-    fun zeroTurret() {  // zeros the robot position to looking straight aheead
-        turret.resetPosition()
-        isZeroed = true
-    }
-
+    var isZeroed = false
+        private set
     val ready: Boolean  // is the Turret prepared to shoot
         get() = (Limelight.targetVisible && turret.positionError.absoluteValue < Constants.TURRET_TOLERANCE) || status == TurretStatus.FROZEN
-
-    fun reset() {  // clear stuff to remove weird things happening when switching between commands
-        controller.reset(turret.position.rotations, turret.velocity.rotationsPerSecond)
-    }
-
     // smooths out how fast we switch between lost and found
     private val lostDebouncer = Debouncer(0.2, Debouncer.DebounceType.kBoth)  // *** this was changed from .5
     var lost = false

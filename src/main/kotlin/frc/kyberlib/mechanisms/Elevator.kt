@@ -2,10 +2,7 @@ package frc.kyberlib.mechanisms
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.math.units.extensions.Length
-import frc.kyberlib.math.units.extensions.feet
-import frc.kyberlib.math.units.extensions.inches
-import frc.kyberlib.math.units.extensions.metersPerSecond
+import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 
 /**
@@ -16,7 +13,7 @@ import frc.kyberlib.motorcontrol.KMotorController
  */
 class Elevator(leadMotor: KMotorController, initialPosition: Length = 0.feet, mass: Double) : SubsystemBase(),
     Debug {
-    private val master = leadMotor.apply {
+    private val motor = leadMotor.apply {
         resetPosition(initialPosition)
         val system = elevatorSystem(mass)
         setupSim(system)
@@ -29,12 +26,20 @@ class Elevator(leadMotor: KMotorController, initialPosition: Length = 0.feet, ma
      * The linear Position of where the elevator should be
      */
     var position: Length
-        get() = master.linearPosition
+        get() = motor.linearPosition
         set(value) {
-            master.linearPosition = value
+            motor.linearPosition = value
         }
 
+    fun update() {
+        motor.updateVoltage()
+    }
+
+    fun stop() {
+        motor.stop()
+    }
+
     override fun debugValues(): Map<String, Any?> {
-        return master.debugValues()
+        return motor.debugValues()
     }
 }

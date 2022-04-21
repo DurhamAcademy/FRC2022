@@ -20,17 +20,17 @@ object Flush : CommandBase() {
         timer.reset()
         timer.start()
         Intaker.deployed = true
-        Intaker.intakeMotor.percent = -Constants.INTAKE_PERCENT
+        Intaker.intake(-Constants.INTAKE_PERCENT)
     }
 
     override fun execute() {
-        Conveyor.conveyor.percent = if(timer.hasElapsed(.1)) -.9 else .2
+        Conveyor.flush()
     }
 
     override fun end(interrupted: Boolean) {
         Debug.log("Intake", "end", level= DebugFilter.Low)
         Intaker.deployed = false
-        Intaker.intakeMotor.stop()
+        Intaker.stop()
         Conveyor.stop()
     }
 

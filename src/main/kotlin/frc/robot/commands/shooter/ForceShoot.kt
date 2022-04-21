@@ -29,11 +29,7 @@ object ForceShoot : CommandBase() {
     override fun execute() {
         Debug.log("Force Shoot", "execute", level = DebugFilter.Low)
 
-        if (false && Shooter.ready) {
-            Shooter.update()
-        } else {
-            Shooter.flywheel.percent = SmartDashboard.getNumber("zoom", 0.5)//0.5
-        }
+        Shooter.update()
     }
 
     override fun end(interrupted: Boolean) {

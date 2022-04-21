@@ -20,13 +20,14 @@ object ManualClimb : CommandBase() {
     }
 
     override fun execute() {
-        Climber.leftWinch.voltage = SmartDashboard.getNumber(leftWinchString, 0.0)
-        Climber.rightWinch.voltage = SmartDashboard.getNumber(rightWinchString, 0.0)
+        Climber.setClimbPercents(
+            SmartDashboard.getNumber(leftWinchString, 0.0) / 12.0,
+            SmartDashboard.getNumber(rightWinchString, 0.0) / 12.0
+        )
         Climber.armsLifted = SmartDashboard.getBoolean(staticString, false)
     }
 
     override fun end(interrupted: Boolean) {
-        Climber.leftWinch.voltage = 0.0
-        Climber.rightWinch.voltage = 0.0
+        Climber.setClimbPercents(0.0, 0.0)
     }
 }

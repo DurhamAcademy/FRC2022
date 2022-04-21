@@ -22,7 +22,6 @@ object SeekTurret : CommandBase() {
      * Update status to indicated turret is lost
      */
     override fun initialize() {
-        Turret.reset()
         Turret.status = TurretStatus.LOST
     }
 

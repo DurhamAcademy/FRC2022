@@ -136,7 +136,7 @@ class KSparkMax(
     /**
      * How quickly the spark send updates on voltage and errors
      */
-    var errorRefreshRate = 10.milliseconds
+    private var errorRefreshRate = 10.milliseconds
         set(value) {
             field = value
             if (real) spark.setPeriodicFramePeriod(
@@ -148,7 +148,7 @@ class KSparkMax(
     /**
      * How quickly the spark send update on velocity and some other stuff
      */
-    var velocityRefreshRate = 20.milliseconds
+    private var velocityRefreshRate = 20.milliseconds
         set(value) {
             field = value
             if (real) spark.setPeriodicFramePeriod(
@@ -160,7 +160,7 @@ class KSparkMax(
     /**
      * How quickly the spark sends updates on position
      */
-    var positionRefreshRate = 20.milliseconds
+    private var positionRefreshRate = 20.milliseconds
         set(value) {
             field = value
             if (real) spark.setPeriodicFramePeriod(
