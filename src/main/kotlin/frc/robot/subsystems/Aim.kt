@@ -9,7 +9,7 @@ import frc.kyberlib.motorcontrol.servo.KLinearServo
 
 
 object Aim : SubsystemBase() {
-    private val aimMotor = KSparkMax(1)
+    private val aimMotor = KSparkMax(1, fake = true)
     private val act1 = KLinearServo(2, 100.millimeters, 20.millimetersPerSecond)
     private val act2 = KLinearServo(3, 100.millimeters, 20.millimetersPerSecond)
 
