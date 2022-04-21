@@ -6,7 +6,7 @@ package frc.robot
 class Main() {
     companion object {
         /**
-         * Main initialization function. Do not perform any initialization here.
+         * Main initialization function. Do not perform any initialization here. hehe
          */
         @JvmStatic
         fun main(args: Array<String>) {
