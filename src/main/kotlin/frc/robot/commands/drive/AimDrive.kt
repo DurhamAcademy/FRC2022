@@ -17,17 +17,12 @@ object AimDrive : CommandBase() {
     }
     val corrector = PIDController(10.0, 0.0, 0.0)
     override fun execute() {
-        var vx = 0.0
-        var vy = 0.0
-        if(RobotContainer.op.shootWhileMoving) {
-            vx = RobotContainer.controlScheme.FORWARD
-            vy = RobotContainer.controlScheme.STRAFE
-        }
-
+        val vx = 0.0
+        val vy = 0.0
         val offset = if(Limelight.targetVisible) Limelight.visionOffset + Limelight.movementAngleOffset else Limelight.estimatedOffset
         val vO = corrector.calculate(-offset.radians)
         Drivetrain.drive(ChassisSpeeds(vx, vy, vO))
     }
 
-    override fun isFinished(): Boolean = (Game.OPERATED && !RobotContainer.controlScheme.SHOOT.get()) || (Limelight.visionOffset.absoluteValue < 2.degrees && Drivetrain.chassisSpeeds.omegaRadiansPerSecond.absoluteValue < 0.1)
+    override fun isFinished(): Boolean = Limelight.visionOffset.absoluteValue < 2.degrees && Drivetrain.chassisSpeeds.omegaRadiansPerSecond.absoluteValue < 0.1
 }

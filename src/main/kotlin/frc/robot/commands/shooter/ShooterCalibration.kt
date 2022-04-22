@@ -2,6 +2,7 @@ package frc.robot.commands.shooter
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
+import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.millimeters
 import frc.kyberlib.math.units.extensions.rpm
 import frc.kyberlib.pneumatics.KSolenoid
@@ -18,17 +19,11 @@ object ShooterCalibration : CommandBase() {
         SmartDashboard.putNumber(hoodString, 5.0)
     }
 
-    private var reenableCompressor = true
-    override fun initialize() {
-        reenableCompressor = KSolenoid.compressor.enabled()
-        KSolenoid.compressor.disable()
-    }
-
     override fun execute() {
         // 0 - 3000 rpm limits
 //        Shooter.update()
         Shooter.targetVelocity = SmartDashboard.getNumber(rpmString, 0.0).rpm
-        Shooter.hoodDistance = SmartDashboard.getNumber(hoodString, 0.0).millimeters
+        Shooter.hoodAngle = SmartDashboard.getNumber(hoodString, 0.0).degrees
 
         if (Shooter.ready) {
 //            Feed.schedule()
@@ -40,7 +35,6 @@ object ShooterCalibration : CommandBase() {
     override fun end(interrupted: Boolean) {
         Shooter.stop()
         Conveyor.stop()
-        if (reenableCompressor) KSolenoid.compressor.enableDigital()
     }
 
     override fun isFinished(): Boolean = false

@@ -18,10 +18,7 @@ class Shoot : CommandBase() {
         addRequirements(Shooter, Conveyor)
     }
 
-    private var reenableCompressor = true
     override fun initialize() {
-        reenableCompressor = KSolenoid.compressor.enabled()
-        KSolenoid.compressor.disable()
         AimDrive.schedule()
     }
 
@@ -30,7 +27,7 @@ class Shoot : CommandBase() {
         // check if shooter should spin up
         Shooter.update()
         // if the turret is on target
-        if (Limelight.targetVisible && Limelight.visionOffset!!.absoluteValue < 3.degrees && Shooter.ready) {
+        if (Limelight.targetVisible && Limelight.visionOffset.absoluteValue < 3.degrees && Shooter.ready) {
             Shooter.status = ShooterStatus.SHOT
             Conveyor.feed()
             RobotContainer.controller.rumble = 0.0
@@ -45,8 +42,8 @@ class Shoot : CommandBase() {
         Debug.log("Shoot", "idle", level = DebugFilter.Low)
         Shooter.stop()
         Conveyor.stop()
+        AimDrive.cancel()
         RobotContainer.controller.rumble = 0.0
-        if (reenableCompressor) KSolenoid.compressor.enableDigital()
 
     }
 }

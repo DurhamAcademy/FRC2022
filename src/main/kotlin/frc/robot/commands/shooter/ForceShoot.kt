@@ -18,10 +18,7 @@ object ForceShoot : CommandBase() {
         SmartDashboard.putNumber("zoom", 0.8)
     }
 
-    private var reenableCompressor = true
     override fun initialize() {
-//        reenableCompressor = KSolenoid.compressor.enabled()
-        KSolenoid.compressor.disable()
         Conveyor.feed()
         Shooter.status = ShooterStatus.FORCE_SHOT
     }
@@ -34,7 +31,6 @@ object ForceShoot : CommandBase() {
     override fun end(interrupted: Boolean) {
         Shooter.stop()
         Conveyor.stop()
-        KSolenoid.compressor.enableDigital()
     }
 
 }

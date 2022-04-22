@@ -18,7 +18,7 @@ import kotlin.math.absoluteValue
  */
 object Climb : CommandBase() {
     init {
-        addRequirements(Climber, Drivetrain, Shooter)
+        addRequirements(Climber)
         SmartDashboard.putBoolean("sync climb", true)
     }
 
@@ -27,11 +27,7 @@ object Climb : CommandBase() {
      */
     override fun initialize() {
         Debug.log("Climb Command", "init", level = DebugFilter.Low)
-        Climber.armsLifted = true
     }
-
-    var hasFallen = false
-
     /**
      * Set the winch percentage based on left/right joysticks
      */
@@ -44,17 +40,10 @@ object Climb : CommandBase() {
         if (SmartDashboard.getBoolean("sync climb", true)) {
             Climber.rightWinch.percent = default
         } else Climber.rightWinch.percent = -RobotContainer.controller.leftY.raw().zeroIf { it.absoluteValue < .02 }
-//        Climber.rightExtendable.percent = RobotContainer.controller.rightX.raw()
 
-
-        // set the status of the robot based on what the winches are doing
-        if (Climber.leftWinch.voltage < 0.1) {
-            hasFallen = true
-        }
-
-        if (RobotContainer.op.climbStabilization != 0.0 && Climber.leftWinch.linearPosition < 15.inches && hasFallen)
-            Climber.stabalize()
-        else Drive.execute()
+        if(RobotContainer.controller.leftDPad.get()) Climber.highGrab.percent = 0.2
+        else if(RobotContainer.controller.rightDPad.get()) Climber.highGrab.percent = -0.2
+        else Climber.highGrab.stop()
     }
 
     override fun isFinished(): Boolean = false

@@ -29,12 +29,11 @@ enum class ShooterStatus {
 /**
  * Encapsulates all the things relevant to shooting the ball
  */
-object Shooter : SubsystemBase(), Debug {
+object Shooter : SubsystemBase() {
     var inRange: Boolean = false
         private set
 
     var status = ShooterStatus.IDLE
-    override val priority: DebugFilter = DebugFilter.Max
     private val ff = SimpleMotorFeedforward(0.81436, 0.01918, 0.0045666)
     var time = Game.time
 
@@ -45,7 +44,7 @@ object Shooter : SubsystemBase(), Debug {
         motorType = DCMotor.getFalcon500(2)
         currentLimit = 50
         brakeMode = false
-        addFeedforward(ff)
+        addFeedforward(ff) // todo
         kP = 0.20569
         setupSim()
 //        setupSim(flywheelSystem(Constants.FLYWHEEL_MOMENT_OF_INERTIA))
@@ -54,8 +53,8 @@ object Shooter : SubsystemBase(), Debug {
     // smooth out when shooter up to speed
     private val readyDebouncer = Debouncer(0.2, DebounceType.kBoth)
     private val shortReady
-        inline get() = hood.atSetpoint &&
-                    flywheel.velocityError.absoluteValue < (if (RobotContainer.op.shootWhileMoving) 50.rpm else Constants.SHOOTER_VELOCITY_TOLERANCE)
+        inline get() = hood.positionError.absoluteValue < 2.degrees &&
+                    flywheel.velocityError.absoluteValue < Constants.SHOOTER_VELOCITY_TOLERANCE
                     && flywheel.velocitySetpoint > 1.radiansPerSecond
     val ready: Boolean  // whether ready to shoot
         get() = readyDebouncer.calculate(shortReady)
@@ -77,44 +76,24 @@ object Shooter : SubsystemBase(), Debug {
     }
 
     // Servo that sets the hood angle
-    private val hood = KLinearServo(5, 100.millimeters, 18.0.millimetersPerSecond)
-    private val hood2 = KLinearServo(6, 100.millimeters, 18.0.millimetersPerSecond)
+    val hood = KTalon(-1)
 
-    var hoodDistance: Length  // public accessor var. Makes them move in sync
+    var hoodAngle: Angle  // public accessor var. Makes them move in sync
         get() = hood.position
         set(value) {
-            SmartDashboard.putNumber("hood dis", value.millimeters)
             hood.position = value
-            hood2.position = value
-        }
-
-    //https://www.mathsisfun.com/algebra/trig-cosine-law.html
-    // c2 = a2 + b2 − 2ab cos(C)
-    private const val A = 6.085  // flywheel axis to servo axis
-    private const val A2 = A * A
-    private const val B = 10.016  // flywheel axis to servo end
-    private const val B2 = B * B
-    private const val D = 2 * A * B
-    private val theta = 24.258.degrees.radians
-    private val startLength = 6.61.inches
-    var hoodAngle: Angle  // set the angle of the hood. Not applied through most of the code because only got working later
-        get() = acos((-hoodDistance.inches * hoodDistance.inches + A2 + B2) / D).radians
-        set(value) {
-            hoodDistance = sqrt(A2 + B2 - D * cos(theta + value.radians)).inches - startLength
         }
 
     // update shooter stuff
-    fun update() {
+    fun update() {  // todo
         flywheelUpdate(Limelight.effectiveDistance)
         hoodUpdate(Limelight.effectiveDistance)
     }
 
-    private val hoodPoly = Polynomial(-.85458, 5.64695, 3.87906, -1.29395, domain = 1.7..5.5)  // poly fitted through our data
-
     fun hoodUpdate(dis: Length) {  // update the hood angle with a certain distance
         val hood = Constants.HOODANGLE_INTERPOLATOR.calculate(dis.meters)// hoodPoly.eval(dis.value)
         inRange = dis < 5.8.meters
-        hoodDistance = hood.millimeters
+        hoodAngle = hood.degrees
     }
 
     fun flywheelUpdate(dis: Length) {  // update flywheel speed to shoot certain distance
@@ -129,17 +108,9 @@ object Shooter : SubsystemBase(), Debug {
     }
 
     override fun periodic() {
-        debugDashboard()
         // log stuff
         SmartDashboard.putNumber("fly error", flywheel.velocityError.rpm)
         SmartDashboard.putNumber("rpm", flywheel.velocity.rpm)
         if (currentCommand != ShooterCalibration) hoodUpdate(Limelight.effectiveDistance)
-    }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "flywheel" to flywheel,
-            "hood" to hood
-        )
     }
 }

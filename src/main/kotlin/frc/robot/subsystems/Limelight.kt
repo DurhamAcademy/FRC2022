@@ -47,27 +47,10 @@ object Limelight : SubsystemBase() {
 
 
     override fun periodic() {
-        if (RobotContainer.op.shootWhileMoving) {
-            // update shooting while moving values
-            var r = distance
-            val hubSpeeds = Drivetrain.hubRelativeSpeeds
-            val parallel = hubSpeeds.vxMetersPerSecond
-            val perp = hubSpeeds.vyMetersPerSecond
-            for (i in 0 until moveIterations) {
-                val time = timeOfFlight(r) * SmartDashboard.getNumber("time mult", 1.0)
-                val a = r.meters - parallel * time
-                val b = perp * time
-                r = sqrt(a.pow(2) + b.pow(2)).meters.absoluteValue
-                movementAngleOffset = atan(b / a).radians
-            }
-            effectiveDistance = r
-        }
-        else {
-            effectiveDistance = distance
-            movementAngleOffset = 0.degrees
-        }
+        effectiveDistance = distance
+        movementAngleOffset = 0.degrees
 
-        if (false && Game.sim) {  // simulate vision
+        if (Game.sim) {  // simulate vision
             val boundRect = listOf(TargetCorner(100.0, 100.0), TargetCorner(200.0, 100.0), TargetCorner(200.0, 200.0), TargetCorner(100.0, 200.0))
             val off = estimatedOffset
             val target = if (off.absoluteValue < 25.degrees) listOf(PhotonTrackedTarget(

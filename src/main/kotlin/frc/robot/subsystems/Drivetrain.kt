@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.wpilibj.Encoder
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
@@ -33,36 +34,30 @@ object Drivetrain : SwerveDrive() {
     override val priority: DebugFilter = DebugFilter.Max
 
     // ff for each part of the drivetrain
-    private val driveFF = SimpleMotorFeedforward(0.01, 2.0, .12)
-    private val turnFF = SimpleMotorFeedforward(0.01, 2.0, 0.25)
+    private val driveFF = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
+    private val turnFF = SimpleMotorFeedforward(Constants.TURN_KS, Constants.TURN_KV, Constants.TURN_KA)
     override val maxVelocity: LinearVelocity = 5.metersPerSecond//(12/driveFF.kv - 0.5).metersPerSecond
-    private val turnMOI = 0.01
-    private val driveMOI = 0.05
-    init {
-        println(estimateFF(DCMotor.getFalcon500(1), 1.0, driveMOI))
-        println(estimateFF(DCMotor.getFalcon500(1), 1.0, turnMOI))
-    }
 
     val FLdrive = KTalon(0).apply {
         radius = 2.inches
         brakeMode = true
         gearRatio = Constants.DRIVE_GEAR_RATIO
         motorType = DCMotor.getFalcon500(1)
-        addFeedforward(driveFF)
-        kP = 3.0
+        addFeedforward(driveFF)  // todo
+        kP = Constants.DRIVE_P
 //        setupSim(flywheelSystem(driveMOI))
         setupSim()
 
     }
     val FLturn = KTalon(1).apply {
         kP = 3.0
-        maxVelocity = 1.radiansPerSecond
+        maxVelocity = 1.radiansPerSecond  // todo
         maxAcceleration = 1.radiansPerSecond
 //        kD = 0.1
         motorType = DCMotor.getFalcon500(1)
-        gearRatio = Constants.TURRET_GEAR_RATIO
+        gearRatio = Constants.TURN_GEAR_RATIO
         brakeMode = true
-        addFeedforward(turnFF)
+        addFeedforward(turnFF)  // todo
         setupSim()
 //        setupSim(flywheelSystem(turnMOI))
     }
@@ -103,57 +98,23 @@ object Drivetrain : SwerveDrive() {
 
     override val dynamics = KSwerveDynamics(frontLeft, frontRight, backLeft, backRight)
 
-    /**
-     * Get speeds relative to the hub.
-     *
-     * vx = speed towards the hub.
-     *
-     * vy = speed parallel to the hub.
-     */
-    val hubRelativeSpeeds: ChassisSpeeds
-        inline get() {
-            val polar = polarSpeeds
-            return ChassisSpeeds(
-                polar.dr.value,
-                polar.dTheta.toTangentialVelocity(Limelight.distance).value,
-                polar.dOrientation.radiansPerSecond
-            )
-        }
-    var pose  // pose of the robot
-        inline get() = RobotContainer.navigation.pose
-        inline set(value) {
-            val latency = RobotContainer.limelight.latency
-            val detectionTime = Game.time - latency
-            RobotContainer.navigation.update(value, detectionTime)
-        }
-    private var polarCoordinates  // polar coordinates relative to the Hub
-        inline get() = RobotContainer.navigation.pose.polar(Constants.HUB_POSITION)
-        inline set(value) {
-            pose = Pose2d(value.cartesian(Constants.HUB_POSITION).translation, RobotContainer.navigation.heading.w)
-        }
-    val polarSpeeds
-        inline get() = chassisSpeeds.polar(RobotContainer.navigation.pose.polar(Constants.HUB_POSITION))
+    // todo
+    val flEncoder = Encoder(0, 0)
+    val frEncoder = Encoder(0, 0)
+    val blEncoder = Encoder(0, 0)
+    val brEncoder = Encoder(0, 0)
+    init {
+        FLturn.resetPosition(flEncoder.distance.rotations)
+        FRturn.resetPosition(frEncoder.distance.rotations)
+        BLturn.resetPosition(blEncoder.distance.rotations)
+        BRturn.resetPosition(brEncoder.distance.rotations)
+    }
 
 
     // setup motors
     init {
         defaultCommand = Drive
         Navigator.instance!!.applyMovementRestrictions(3.metersPerSecond, 2.metersPerSecond)
-    }
-
-    /**
-     * Update navigation
-     */
-    override fun periodic() {
-        super.periodic()
-        debugDashboard()
-        if (RobotContainer.op.smartNav && Game.OPERATED && Limelight.targetVisible) {
-            // do global position updates based on limelight data
-            val distance = Limelight.visionDistance
-            val offset = Limelight.visionOffset
-            val angle = offset + 180.degrees
-            polarCoordinates = PolarPose(distance, angle, offset)
-        }
     }
 
 }

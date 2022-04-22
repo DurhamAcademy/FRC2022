@@ -1,36 +1,36 @@
 package frc.robot.subsystems
 
-import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.kyberlib.command.Debug
+import frc.kyberlib.math.units.extensions.inches
 import frc.kyberlib.motorcontrol.rev.KSparkMax
-import frc.kyberlib.pneumatics.KSolenoid
+import frc.robot.Constants
 
 /**
  * Controls the intake mechanism of the robot
  */
-object Intaker : SubsystemBase(), Debug {
-    // deployment solenoids
-    private val deployer = KSolenoid(4, 5, fake = false)
-    private val deployFolower = KSolenoid(2, 3, fake = false).apply { follow(deployer) }
-
-    var deployed
-        get() = deployer.extended
-        set(value) { deployer.extended = value}
-
+object Intaker : SubsystemBase() {
+    val deployWinch = KSparkMax(-1).apply {  // todo
+        radius = .25.inches
+    }
     // motor controlling the intake speed
     val intakeMotor = KSparkMax(20).apply {
         identifier = "intake"
         currentLimit = 40
+        gearRatio = 15.0
         brakeMode = false
     }
 
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "deployed" to deployer.extended,
-            "intake" to intakeMotor
-        )
+    var deployed = false
+        set(value) {
+            field = value || true
+            if(value|| true) deployWinch.linearPosition = 6.inches else deployWinch.linearPosition = 0.inches
+        }
+
+    fun intake(percent: Double = Constants.INTAKE_PERCENT) {
+        intakeMotor.percent = percent
     }
 
-
+    override fun periodic() {
+        deployWinch.updateVoltage()
+    }
 }

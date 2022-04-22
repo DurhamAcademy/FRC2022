@@ -12,7 +12,6 @@ import frc.kyberlib.math.units.extensions.meters
 import frc.kyberlib.math.units.string
 import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.simulation.field.KField2d
-import frc.robot.commands.drive.AutoDrive
 import frc.robot.commands.shooter.Shoot
 import frc.robot.subsystems.*
 import java.io.File
@@ -43,12 +42,6 @@ class Robot : KRobot() {
     }
 
     override fun autonomousInit() {
-        RobotContainer.startTime = Game.time
-        // prepare to pick up balls
-        Intaker.deployed = true
-        Conveyor.conveyor.percent = 0.05
-        Intaker.intakeMotor.percent = Constants.INTAKE_PERCENT
-        // get auto commadn
         val auto = loadRoutine(RobotContainer.autoChooser.selected)//RobotContainer.autoChooser.selected!!)
         auto.schedule()
         autoCommand = auto
@@ -65,10 +58,10 @@ class Robot : KRobot() {
         TrajectoryManager.routines
         val f = File("${TrajectoryManager.AUTO_PATH}/$routine")
         f.readLines().forEach {
-            when (it) {
-                "Shot" -> command.addCommands(Shoot())
-                else -> command.addCommands(AutoDrive(TrajectoryManager[it]!!))
-            }
+//            when (it) {
+//                "Shot" -> command.addCommands(Shoot())
+//                else -> command.addCommands(AutoDrive(TrajectoryManager[it]!!))
+//            }
         }
 
         // resets our position assuming we are in the right spot
