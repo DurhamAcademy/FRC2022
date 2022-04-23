@@ -38,7 +38,7 @@ object Drivetrain : SwerveDrive() {
     private val turnFF = SimpleMotorFeedforward(Constants.TURN_KS, Constants.TURN_KV, Constants.TURN_KA)
     override val maxVelocity: LinearVelocity = 5.metersPerSecond//(12/driveFF.kv - 0.5).metersPerSecond
 
-    val FLdrive = KTalon(0).apply {
+    val FLdrive = KTalon(21).apply {
         radius = 2.inches
         brakeMode = true
         gearRatio = Constants.DRIVE_GEAR_RATIO
@@ -51,7 +51,7 @@ object Drivetrain : SwerveDrive() {
         setupSim()
 
     }
-    val FLturn = KTalon(1).apply {
+    val FLturn = KTalon(22).apply {
         maxVelocity = 1.radiansPerSecond  // todo
         maxAcceleration = 1.radiansPerSecond
 //        kD = 0.1
@@ -64,36 +64,36 @@ object Drivetrain : SwerveDrive() {
         setupSim()
 //        setupSim(flywheelSystem(turnMOI))
     }
-    val FRdrive = KTalon(2).apply {
+    val FRdrive = KTalon(31).apply {
         copyConfig(FLdrive)
         setupSim()
 //        setupSim(flywheelSystem(driveMOI))
     }
-    val FRturn = KTalon(3).apply {
+    val FRturn = KTalon(32).apply {
         copyConfig(FLturn)
         nativeControl = true
         talon.config_kP(0, 0.3)
         setupSim()
 //        setupSim(flywheelSystem(turnMOI))
     }
-    val BLdrive = KTalon(4).apply {
+    val BLdrive = KTalon(41).apply {
         copyConfig(FLdrive)
         setupSim()
 //        setupSim(flywheelSystem(driveMOI))
     }
-    val BLturn = KTalon(5).apply {
+    val BLturn = KTalon(42).apply {
         copyConfig(FLturn)
         nativeControl = true
         talon.config_kP(0, 0.3)
         setupSim()
 //        setupSim(flywheelSystem(turnMOI))
     }
-    val BRdrive = KTalon(6).apply {
+    val BRdrive = KTalon(51).apply {
         copyConfig(FLdrive)
         setupSim()
 //        setupSim(flywheelSystem(driveMOI))
     }
-    val BRturn = KTalon(7).apply {
+    val BRturn = KTalon(52).apply {
         copyConfig(FLturn)
         nativeControl = true
         talon.config_kP(0, 0.3)
