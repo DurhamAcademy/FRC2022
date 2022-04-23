@@ -9,18 +9,18 @@ import frc.robot.Constants
  * Controls the intake mechanism of the robot
  */
 object Intaker : SubsystemBase() {
-    val deployWinch = KSparkMax(-1).apply {  // todo
+    val deployWinch = KSparkMax(-1, fake=Constants.DRIVE_ONLY).apply {  // todo
         radius = .25.inches
     }
     // motor controlling the intake speed
-    val intakeMotor = KSparkMax(20).apply {
+    val intakeMotor = KSparkMax(20, fake=Constants.DRIVE_ONLY).apply {
         identifier = "intake"
         currentLimit = 40
         gearRatio = 15.0
         brakeMode = false
     }
 
-    var deployed = false
+    var deployed = false  // fixme
         set(value) {
             field = value || true
             if(value|| true) deployWinch.linearPosition = 6.inches else deployWinch.linearPosition = 0.inches

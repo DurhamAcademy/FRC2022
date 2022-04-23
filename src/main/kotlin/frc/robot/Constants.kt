@@ -10,9 +10,11 @@ import frc.kyberlib.math.units.extensions.*
  * This file holds all important constants throughout the project
  */
 object Constants {  // todo
+    // basically check every electrical compenent is accounted for and update gear ratios of closed loop motors
+    const val DRIVE_ONLY = true
     // ------ Climb ------ //
     val WINCH_RADIUS: Length = 0.39.inches
-    const val WINCH_GEAR_RATIO = (10.0 / 1.0) * (54.0 / 18.0)
+    const val WINCH_GEAR_RATIO = (10.0 / 1.0) * (54.0 / 18.0)  // fixme
 
     // ------ Drivetrain ------ //
     // pids
@@ -25,13 +27,12 @@ object Constants {  // todo
     const val DRIVE_KS = 0.16983
     const val DRIVE_KV = 2.472
     const val DRIVE_KA = 0.14531
-    const val TURN_KS = 0.14531
-    const val TURN_KV = 0.14531
-    const val TURN_KA = 0.14531
+
+    const val TURN_KS = 0.0
+    const val TURN_KV = 0.0
+    const val TURN_KA = 0.0
 
     // drivetrain setup
-    const val TRACK_WIDTH = 0.68
-    val WHEEL_RADIUS = 2.inches
     const val DRIVE_GEAR_RATIO = 62.0 / 10.0
     const val TURN_GEAR_RATIO = 1.0
 
@@ -42,6 +43,7 @@ object Constants {  // todo
     val LIMELIGHT_HEIGHT: Length = 25.inches
     val LIMELIGHT_ANGLE: Angle = 40.degrees
 
+    // fixme
     val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(
         mapOf(
             1.84 to 1300.0,

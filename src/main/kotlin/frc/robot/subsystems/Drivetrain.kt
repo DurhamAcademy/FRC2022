@@ -43,21 +43,24 @@ object Drivetrain : SwerveDrive() {
         brakeMode = true
         gearRatio = Constants.DRIVE_GEAR_RATIO
         motorType = DCMotor.getFalcon500(1)
-        addFeedforward(driveFF)  // todo
+//        addFeedforward(driveFF)  // todo
         kP = Constants.DRIVE_P
+        nativeControl = true
+        talon.config_kP(0, 0.3)
 //        setupSim(flywheelSystem(driveMOI))
         setupSim()
 
     }
     val FLturn = KTalon(1).apply {
-        kP = 3.0
         maxVelocity = 1.radiansPerSecond  // todo
         maxAcceleration = 1.radiansPerSecond
 //        kD = 0.1
         motorType = DCMotor.getFalcon500(1)
         gearRatio = Constants.TURN_GEAR_RATIO
         brakeMode = true
-        addFeedforward(turnFF)  // todo
+//        addFeedforward(turnFF)  // todo
+        nativeControl = true
+        talon.config_kP(0, 0.3)
         setupSim()
 //        setupSim(flywheelSystem(turnMOI))
     }
@@ -68,6 +71,8 @@ object Drivetrain : SwerveDrive() {
     }
     val FRturn = KTalon(3).apply {
         copyConfig(FLturn)
+        nativeControl = true
+        talon.config_kP(0, 0.3)
         setupSim()
 //        setupSim(flywheelSystem(turnMOI))
     }
@@ -78,6 +83,8 @@ object Drivetrain : SwerveDrive() {
     }
     val BLturn = KTalon(5).apply {
         copyConfig(FLturn)
+        nativeControl = true
+        talon.config_kP(0, 0.3)
         setupSim()
 //        setupSim(flywheelSystem(turnMOI))
     }
@@ -88,27 +95,37 @@ object Drivetrain : SwerveDrive() {
     }
     val BRturn = KTalon(7).apply {
         copyConfig(FLturn)
+        nativeControl = true
+        talon.config_kP(0, 0.3)
         setupSim()
 //        setupSim(flywheelSystem(turnMOI))
     }
-    val frontLeft = StandardSwerveModule(Translation2d(-0.5, 0.5), FLdrive, FLturn)
-    val frontRight = StandardSwerveModule(Translation2d(0.5, 0.5), FRdrive, FRturn)
-    val backLeft = StandardSwerveModule(Translation2d(-0.5, -0.5), BLdrive, BLturn)
-    val backRight = StandardSwerveModule(Translation2d(0.5, -0.5), BRdrive, BRturn)
+
+    // todo - check positions
+    val frontLeft = StandardSwerveModule(Translation2d(-0.3, 0.3), FLdrive, FLturn)
+    val frontRight = StandardSwerveModule(Translation2d(0.3, 0.3), FRdrive, FRturn)
+    val backLeft = StandardSwerveModule(Translation2d(-0.3, -0.3), BLdrive, BLturn)
+    val backRight = StandardSwerveModule(Translation2d(0.3, -0.3), BRdrive, BRturn)
 
     override val dynamics = KSwerveDynamics(frontLeft, frontRight, backLeft, backRight)
 
-    // todo
+    // todo - figure out how encoders work
     val flEncoder = Encoder(0, 0)
     val frEncoder = Encoder(0, 0)
     val blEncoder = Encoder(0, 0)
     val brEncoder = Encoder(0, 0)
     init {
-        FLturn.resetPosition(flEncoder.distance.rotations)
-        FRturn.resetPosition(frEncoder.distance.rotations)
-        BLturn.resetPosition(blEncoder.distance.rotations)
-        BRturn.resetPosition(brEncoder.distance.rotations)
+        FLturn.resetPosition()
+        FRturn.resetPosition()
+        BLturn.resetPosition()
+        BRturn.resetPosition()
+//        FLturn.resetPosition(flEncoder.distance.rotations)
+//        FRturn.resetPosition(frEncoder.distance.rotations)
+//        BLturn.resetPosition(blEncoder.distance.rotations)
+//        BRturn.resetPosition(brEncoder.distance.rotations)
     }
+
+    fun robotDrive(chassisSpeeds: ChassisSpeeds) = dynamics.driveRobotRelative(chassisSpeeds)
 
 
     // setup motors

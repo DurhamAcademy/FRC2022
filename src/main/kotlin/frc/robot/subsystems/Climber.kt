@@ -13,7 +13,7 @@ import frc.robot.Constants
 object Climber : SubsystemBase() {
 
     /** (left) winches that pull the robot up */
-    val leftWinch = KSparkMax(40).apply {
+    val leftWinch = KSparkMax(40, fake=Constants.DRIVE_ONLY).apply {
         identifier = "left winch"
         radius = Constants.WINCH_RADIUS
         brakeMode = true
@@ -23,19 +23,16 @@ object Climber : SubsystemBase() {
         maxLinearPosition = 24.inches
         currentLimit = 30
 
-        // todo
-        kP = 15.0
-        kD = 5.0
-        setupSim(elevatorSystem(Constants.ROBOT_WEIGHT))
+//        setupSim(elevatorSystem(Constants.ROBOT_WEIGHT))
     }
 
     /** (right) winches that pull the robot up */
-    val rightWinch = KSparkMax(41).apply {
+    val rightWinch = KSparkMax(41, fake=Constants.DRIVE_ONLY).apply {
         copyConfig(leftWinch)
         identifier = "right winch"
     }
 
-    val highGrab = KSparkMax(-1)  // todo
+    val highGrab = KSparkMax(-1, fake=Constants.DRIVE_ONLY)  // todo
 
     inline var extension  // public variable to control position off both the arms
         get() = leftWinch.linearPosition

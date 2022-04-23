@@ -19,7 +19,7 @@ object AimDrive : CommandBase() {
     override fun execute() {
         val vx = 0.0
         val vy = 0.0
-        val offset = if(Limelight.targetVisible) Limelight.visionOffset + Limelight.movementAngleOffset else Limelight.estimatedOffset
+        val offset = if(Limelight.targetVisible) Limelight.visionOffset else Limelight.estimatedOffset
         val vO = corrector.calculate(-offset.radians)
         Drivetrain.drive(ChassisSpeeds(vx, vy, vO))
     }

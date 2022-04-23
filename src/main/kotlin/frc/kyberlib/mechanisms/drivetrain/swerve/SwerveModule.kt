@@ -14,7 +14,7 @@ abstract class SwerveModule(val location: Translation2d) : Debug {
     /**
      * The rotation that the wheel is facing
      */
-    abstract var rotation: Angle  // fixme: this needs to be profiled
+    abstract var rotation: Angle
 
     /**
      * The speed that the motor should drive

@@ -37,7 +37,8 @@ object Drive : CommandBase() {
         val turn = RobotContainer.controller.leftX.value.radiansPerSecond
         val speeds = ChassisSpeeds(fwd.metersPerSecond, strafe.metersPerSecond, turn.radiansPerSecond)
         Debug.log("Default Drive", "fwd: $fwd, turn: $turn", level = DebugFilter.Low)
-        Drivetrain.drive(speeds)
+//        Drivetrain.drive(speeds)
+        Drivetrain.robotDrive(speeds)
     }
 
     override fun end(interrupted: Boolean) {

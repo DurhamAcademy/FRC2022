@@ -22,8 +22,8 @@ object Limelight : SubsystemBase() {
     private val visionFilter: LinearFilter = LinearFilter.singlePoleIIR(.07, .02)
 
     // latest data from limelight
-    var targetVisible: Boolean = false  // currently has target
-        private set
+    val targetVisible: Boolean
+        get() = RobotContainer.limelight.targetFound
     val visionOffset: Angle  // how far to side turret is from target
         get() = RobotContainer.limelight.yaw.degrees.let { visionFilter.calculate(-it).degrees }
     private val visionPitch: Angle  // how far up the target is
@@ -36,31 +36,20 @@ object Limelight : SubsystemBase() {
     val distance
         inline get() = visionDistance ?: RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters
 
-    private const val moveIterations = 1  // how many times to optimize the shoot while move target
-    var movementAngleOffset: Angle = 0.degrees  // how much robot movement should cause turret to turn to compensate
-    var effectiveDistance: Length = 0.meters  // how far shoooter should behave to compensate for movement
-
     private fun timeOfFlight(dis: Length) = Constants.TIME_OF_FLIGHT_INTERPOLATOR.calculate(dis.meters)
 
     val estimatedOffset
         inline get() = (RobotContainer.navigation.position.towards(Constants.HUB_POSITION).k - RobotContainer.navigation.heading).normalized.let { if (it > 0.5.rotations) it - 1.rotations else it }
 
 
-    override fun periodic() {
-        effectiveDistance = distance
-        movementAngleOffset = 0.degrees
-
-        if (Game.sim) {  // simulate vision
-            val boundRect = listOf(TargetCorner(100.0, 100.0), TargetCorner(200.0, 100.0), TargetCorner(200.0, 200.0), TargetCorner(100.0, 200.0))
-            val off = estimatedOffset
-            val target = if (off.absoluteValue < 25.degrees) listOf(PhotonTrackedTarget(
-                -off.degrees,
-                atan((Constants.UPPER_HUB_HEIGHT - Constants.LIMELIGHT_HEIGHT - 1.inches) / (RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters - 2.feet)).radians.degrees,
-                1.0, 1.0, zeroPose.transform, boundRect
-            )) else listOf()
-            RobotContainer.limelight.submitProcessedFrame(20.0, target)
-        }
-        // update vars with vision data
-        targetVisible = RobotContainer.limelight.targetFound
+    override fun simulationPeriodic() {
+        val boundRect = listOf(TargetCorner(100.0, 100.0), TargetCorner(200.0, 100.0), TargetCorner(200.0, 200.0), TargetCorner(100.0, 200.0))
+        val off = estimatedOffset
+        val target = if (off.absoluteValue < 25.degrees) listOf(PhotonTrackedTarget(
+            -off.degrees,
+            atan((Constants.UPPER_HUB_HEIGHT - Constants.LIMELIGHT_HEIGHT - 1.inches) / (RobotContainer.navigation.position.getDistance(Constants.HUB_POSITION).meters - 2.feet)).radians.degrees,
+            1.0, 1.0, zeroPose.transform, boundRect
+        )) else listOf()
+        RobotContainer.limelight.submitProcessedFrame(20.0, target)
     }
 }

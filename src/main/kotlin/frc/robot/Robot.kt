@@ -52,7 +52,6 @@ class Robot : KRobot() {
         RobotContainer.navigation.pose = pose
     }
 
-    // todo: separate intake system
     private fun loadRoutine(routine: String): SequentialCommandGroup {
         val command = SequentialCommandGroup()
         TrajectoryManager.routines

@@ -182,7 +182,6 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var nativeControl = false  // todo
         set(value) {
             field = value
-            if(real && value) implementNativeControls()
         }
     /**
      * Builtin control that will combine feedforward with the PID.

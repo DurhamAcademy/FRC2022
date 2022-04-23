@@ -38,7 +38,7 @@ object Shooter : SubsystemBase() {
     var time = Game.time
 
     // main motor attached to the flywheel
-    val flywheel = KTalon(32).apply {
+    val flywheel = KTalon(32, fake=Constants.DRIVE_ONLY).apply {
         // configs
         identifier = "flywheel"
         motorType = DCMotor.getFalcon500(2)
@@ -67,7 +67,7 @@ object Shooter : SubsystemBase() {
         }
 
     // additional motors that copy the main
-    private val flywheel2 = KTalon(31).apply {
+    private val flywheel2 = KTalon(31, fake=Constants.DRIVE_ONLY).apply {
         identifier = "flywheel2"
         reversed = true
         brakeMode = false
@@ -76,7 +76,7 @@ object Shooter : SubsystemBase() {
     }
 
     // Servo that sets the hood angle
-    val hood = KTalon(-1)
+    val hood = KTalon(-1, fake=Constants.DRIVE_ONLY)
 
     var hoodAngle: Angle  // public accessor var. Makes them move in sync
         get() = hood.position
@@ -86,8 +86,8 @@ object Shooter : SubsystemBase() {
 
     // update shooter stuff
     fun update() {  // todo
-        flywheelUpdate(Limelight.effectiveDistance)
-        hoodUpdate(Limelight.effectiveDistance)
+        flywheelUpdate(Limelight.distance)
+        hoodUpdate(Limelight.distance)
     }
 
     fun hoodUpdate(dis: Length) {  // update the hood angle with a certain distance
@@ -111,6 +111,6 @@ object Shooter : SubsystemBase() {
         // log stuff
         SmartDashboard.putNumber("fly error", flywheel.velocityError.rpm)
         SmartDashboard.putNumber("rpm", flywheel.velocity.rpm)
-        if (currentCommand != ShooterCalibration) hoodUpdate(Limelight.effectiveDistance)
+        if (currentCommand != ShooterCalibration) hoodUpdate(Limelight.distance)
     }
 }

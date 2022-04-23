@@ -122,7 +122,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
         get() = (talon.selectedSensorPosition / unitsPerRotation.toDouble()).rotations
         set(value) {
             talon.set(
-                ControlMode.MotionMagic,
+                ControlMode.Position,
                 value.rotations / unitsPerRotation,
                 DemandType.ArbitraryFeedForward,
                 arbFFVolts/vbus)
