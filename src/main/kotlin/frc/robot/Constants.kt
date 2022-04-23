@@ -11,10 +11,6 @@ import frc.kyberlib.math.units.extensions.*
  */
 object Constants {  // todo
     // basically check every electrical compenent is accounted for and update gear ratios of closed loop motors
-    const val DRIVE_ONLY = true
-    // ------ Climb ------ //
-    val WINCH_RADIUS: Length = 0.39.inches
-    const val WINCH_GEAR_RATIO = (10.0 / 1.0) * (54.0 / 18.0)  // fixme
 
     // ------ Drivetrain ------ //
     // pids
@@ -33,7 +29,7 @@ object Constants {  // todo
     const val TURN_KA = 0.0
 
     // drivetrain setup
-    const val DRIVE_GEAR_RATIO = 62.0 / 10.0
+    const val DRIVE_GEAR_RATIO = 8.14
     const val TURN_GEAR_RATIO = 1.0
 
     // ------ Intake ------ //
