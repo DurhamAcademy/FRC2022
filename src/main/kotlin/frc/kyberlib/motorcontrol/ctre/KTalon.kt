@@ -87,7 +87,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
         }
     }
 
-    val talon = TalonFX(port)
+    val talon = TalonFX(port, "FastCAN")
     override var identifier: String = "$model ($port)"
 
     init {
@@ -101,12 +101,12 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             orchestra.addInstrument(talon)
             val kTimeoutMs = 100
 //            talon.configVoltageCompSaturation(12.0, 100)
-            talon.enableVoltageCompensation(false)
+//            talon.enableVoltageCompensation(false)
 
-            talon.clearMotionProfileHasUnderrun(kTimeoutMs)
-            talon.clearMotionProfileTrajectories()
+//            talon.clearMotionProfileHasUnderrun()
+//            talon.clearMotionProfileTrajectories()
 
-            talon.clearStickyFaults(kTimeoutMs)
+//            talon.clearStickyFaults(kTimeoutMs)
             talon.inverted = false
 
             talon.selectProfileSlot(0, 0)

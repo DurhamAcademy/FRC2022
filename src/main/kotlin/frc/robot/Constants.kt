@@ -20,9 +20,9 @@ object Constants {  // todo
 
 
     // feed forwards  // fixme
-    const val DRIVE_KS = 0.16983
-    const val DRIVE_KV = 2.472
-    const val DRIVE_KA = 0.14531
+    const val DRIVE_KS = 0.0//0.16983
+    const val DRIVE_KV = 0.0//2.472
+    const val DRIVE_KA = 0.0//0.14531
 
     const val TURN_KS = 0.0
     const val TURN_KV = 0.0
@@ -30,7 +30,7 @@ object Constants {  // todo
 
     // drivetrain setup
     const val DRIVE_GEAR_RATIO = 8.14
-    const val TURN_GEAR_RATIO = 1.0
+    const val TURN_GEAR_RATIO = 12.8
 
     // ------ Intake ------ //
     const val INTAKE_PERCENT = 0.8

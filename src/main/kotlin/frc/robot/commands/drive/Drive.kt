@@ -8,10 +8,8 @@ import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.math.units.extensions.feetPerSecond
 import frc.kyberlib.math.units.extensions.metersPerSecond
 import frc.kyberlib.math.units.extensions.radiansPerSecond
-import frc.kyberlib.math.units.extensions.rpm
 import frc.robot.RobotContainer
 import frc.robot.subsystems.Drivetrain
-import frc.robot.subsystems.Shooter
 
 /**
  * The default drive commands. Arcade drive based on xbox controller inputs

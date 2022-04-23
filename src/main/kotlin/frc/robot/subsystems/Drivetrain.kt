@@ -38,15 +38,14 @@ object Drivetrain : SwerveDrive() {
     private val turnFF = SimpleMotorFeedforward(Constants.TURN_KS, Constants.TURN_KV, Constants.TURN_KA)
     override val maxVelocity: LinearVelocity = 5.metersPerSecond//(12/driveFF.kv - 0.5).metersPerSecond
 
+    val turnP = 10.0
     val FLdrive = KTalon(21).apply {
         radius = 2.inches
         brakeMode = true
         gearRatio = Constants.DRIVE_GEAR_RATIO
         motorType = DCMotor.getFalcon500(1)
-//        addFeedforward(driveFF)  // todo
-        kP = Constants.DRIVE_P
-        nativeControl = true
-        talon.config_kP(0, 0.3)
+        addFeedforward(driveFF)  // todo
+//        kP = Constants.DRIVE_P
 //        setupSim(flywheelSystem(driveMOI))
         setupSim()
 
@@ -59,44 +58,71 @@ object Drivetrain : SwerveDrive() {
         gearRatio = Constants.TURN_GEAR_RATIO
         brakeMode = true
 //        addFeedforward(turnFF)  // todo
-        nativeControl = true
-        talon.config_kP(0, 0.3)
+//        nativeControl = true
+//        talon.config_kP(0, 0.3)
+        addFeedforward(turnFF)
+        kP = turnP
         setupSim()
 //        setupSim(flywheelSystem(turnMOI))
     }
     val FRdrive = KTalon(31).apply {
-        copyConfig(FLdrive)
+        radius = 2.inches
+        brakeMode = true
+        gearRatio = Constants.DRIVE_GEAR_RATIO
+        motorType = DCMotor.getFalcon500(1)
+        addFeedforward(driveFF)  // todo
+//        kP = Constants.DRIVE_P
+//        setupSim(flywheelSystem(driveMOI))
         setupSim()
 //        setupSim(flywheelSystem(driveMOI))
     }
     val FRturn = KTalon(32).apply {
         copyConfig(FLturn)
-        nativeControl = true
-        talon.config_kP(0, 0.3)
+        addFeedforward(turnFF)
+        kP = turnP
+//        nativeControl = true
+//        talon.config_kP(0, 0.3)
         setupSim()
 //        setupSim(flywheelSystem(turnMOI))
     }
     val BLdrive = KTalon(41).apply {
         copyConfig(FLdrive)
+        radius = 2.inches
+        brakeMode = true
+        gearRatio = Constants.DRIVE_GEAR_RATIO
+        motorType = DCMotor.getFalcon500(1)
+        addFeedforward(driveFF)  // todo
+//        kP = Constants.DRIVE_P
+//        setupSim(flywheelSystem(driveMOI))
         setupSim()
 //        setupSim(flywheelSystem(driveMOI))
     }
     val BLturn = KTalon(42).apply {
         copyConfig(FLturn)
-        nativeControl = true
-        talon.config_kP(0, 0.3)
+        addFeedforward(turnFF)
+        kP = turnP
+//        nativeControl = true
+//        talon.config_kP(0, 0.3)
         setupSim()
 //        setupSim(flywheelSystem(turnMOI))
     }
     val BRdrive = KTalon(51).apply {
-        copyConfig(FLdrive)
+        radius = 2.inches
+        brakeMode = true
+        gearRatio = Constants.DRIVE_GEAR_RATIO
+        motorType = DCMotor.getFalcon500(1)
+        addFeedforward(driveFF)  // todo
+//        kP = Constants.DRIVE_P
+//        setupSim(flywheelSystem(driveMOI))
         setupSim()
 //        setupSim(flywheelSystem(driveMOI))
     }
     val BRturn = KTalon(52).apply {
         copyConfig(FLturn)
-        nativeControl = true
-        talon.config_kP(0, 0.3)
+        addFeedforward(turnFF)
+        kP = turnP
+//        nativeControl = true
+//        talon.config_kP(0, 0.3)
         setupSim()
 //        setupSim(flywheelSystem(turnMOI))
     }
@@ -109,20 +135,11 @@ object Drivetrain : SwerveDrive() {
 
     override val dynamics = KSwerveDynamics(frontLeft, frontRight, backLeft, backRight)
 
-    // todo - figure out how encoders work
-    val flEncoder = Encoder(0, 0)
-    val frEncoder = Encoder(0, 0)
-    val blEncoder = Encoder(0, 0)
-    val brEncoder = Encoder(0, 0)
     init {
         FLturn.resetPosition()
         FRturn.resetPosition()
         BLturn.resetPosition()
         BRturn.resetPosition()
-//        FLturn.resetPosition(flEncoder.distance.rotations)
-//        FRturn.resetPosition(frEncoder.distance.rotations)
-//        BLturn.resetPosition(blEncoder.distance.rotations)
-//        BRturn.resetPosition(brEncoder.distance.rotations)
     }
 
     fun robotDrive(chassisSpeeds: ChassisSpeeds) = dynamics.driveRobotRelative(chassisSpeeds)
