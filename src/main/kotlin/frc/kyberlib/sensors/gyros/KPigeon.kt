@@ -17,7 +17,7 @@ class KPigeon(port: Int) :  KGyro {
             else field = value
         }
 
-    private val pitchYawRoll: DoubleArray
+    inline val pitchYawRoll: DoubleArray
         get() {
             val store = DoubleArray(3)
             internal?.getYawPitchRoll(store)
@@ -27,15 +27,15 @@ class KPigeon(port: Int) :  KGyro {
     /**
      * How far leaned forward or back the robot is leaning
      */
-    val pitch get() = pitchYawRoll[1].degrees
+    inline val pitch get() = pitchYawRoll[1].degrees
 
     /**
      * Turn angle
      */
-    val yaw get() = heading
+    inline val yaw get() = heading
 
     /**
      * How far on the side the robot is
      */
-    val roll get() = pitchYawRoll[2].degrees
+    inline val roll get() = pitchYawRoll[2].degrees
 }

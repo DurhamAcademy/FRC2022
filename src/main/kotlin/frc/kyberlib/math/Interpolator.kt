@@ -1,13 +1,34 @@
 package frc.kyberlib.math
 
-import frc.kyberlib.command.Debug
-import frc.kyberlib.command.DebugFilter
-import frc.kyberlib.command.LogMode
-
 /**
  * Linear Interpolator that will use a series of points to approximate a value
  */
 class Interpolator(private val data: Map<Double, Double>) {
+    private val keys = data.keys.toTypedArray()
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            val test = Interpolator(
+                mapOf(
+                    0.0 to 1000.0,
+                    1.0 to 1500.0,
+                    2.0 to 2500.0,
+                    3.0 to 5000.0,
+                    4.0 to 6000.0
+                )
+            )
+            check(-1.0, test)
+            check(0.0, test)
+            check(1.0, test)
+            check(1.2, test)
+            check(3.2, test)
+            check(5.2, test)
+        }
+
+        private fun check(dis: Double, interpolator: Interpolator) {
+            println("dis: $dis, val: ${interpolator.calculate(dis)}")
+        }
+    }
 
     operator fun get(x: Double) = calculate(x)
     /**
@@ -16,55 +37,21 @@ class Interpolator(private val data: Map<Double, Double>) {
      * @return an estimated y output
      */
     fun calculate(x: Double): Double {
+        val i = index(x)
+        if(i == -1) return data[keys.first()]!!  // datum below table
+        if(i == -2) return data[keys.last()]!!  // datum above table
+        val lowVal = data[keys[i]]!!
+        val highVal = data[keys[i+1]]!!
 
-        val nextHighest = getNext(x)
-        val nextLowest = getPrevious(x)
-
-        if(nextHighest == null || nextLowest == null) { // if outside range
-            Debug.log("Interpolator", "Calculated value: $x is outside of range", LogMode.WARN, DebugFilter.Low)
-            return nextHighest?.value ?: nextLowest!!.value
-        }
-        else if(nextHighest.value == nextLowest.value) return nextLowest.value
-
-        val alpha = (x - nextLowest.key) / (nextHighest.key - nextLowest.key)
-
-        return nextLowest.value + alpha * (nextHighest.value - nextLowest.value)
-
+        val alpha = (x-keys[i]) / (keys[i+1] - keys[i])  // percent distance from low to high
+        return lowVal + alpha * (highVal - lowVal)  // weighted average
     }
 
-    /**
-     * Get the next stored value after x
-     * @param x the value to index from
-     */
-    private fun getNext(x: Double): Map.Entry<Double, Double>? {
-
-        var nextHighest: Map.Entry<Double, Double>? = null
-
-        for(k in data) {
-            if(k.key >= x && ((nextHighest == null) || (k.key < nextHighest.key)))
-                nextHighest = k
+    private fun index(x: Double): Int {
+        keys.forEachIndexed { index, d ->
+            if(x<d) return index - 1
         }
-
-        return nextHighest
-
-    }
-
-    /**
-     * Get the nearest stored value before x
-     * @param x the value to index from
-     */
-    private fun getPrevious(x: Double): Map.Entry<Double, Double>? {
-
-        var nextLowest: Map.Entry<Double, Double>? = null
-
-        for(k in data){
-            if(k.key <= x && ((nextLowest == null) || (k.key > nextLowest.key))) {
-                nextLowest = k
-            }
-        }
-
-        return nextLowest
-
+        return -2  // the condition if x is greater than all values
     }
 
 }

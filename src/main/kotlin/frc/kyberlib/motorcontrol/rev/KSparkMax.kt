@@ -12,8 +12,11 @@ import frc.kyberlib.motorcontrol.EncoderType
 
 /**
  * Represents a REV Robotics Spark MAX motor controller. Recommend using .apply to setup move configs
- * [canId] is the controller's ID on the CAN bus
- * [brushType] is the type of motor being driven. WARNING: If set incorrectly this can seriously damage hardware. You've been warned.
+ * @param canId the id for this motor in the CAN bus (green/yellow wires). You can set this in the REV hardware client
+ * @param brushedMotor whether this is a brushed motor. NEO & NEO 550 are brushless. Be careful, getting this wrong can damage the motors
+ * @param type the encoder attached to the motor. NEOs and NEO 550 have NEO_Hall
+ * @param cpr a config about how the ticks on the encoder works
+ * @param fake whether the motor should be simulated. Useful if you want to prevent things from moving without breaking the rest of the code
  */
 class KSparkMax(
     private val canId: Int,
@@ -31,7 +34,7 @@ class KSparkMax(
         if (real) spark.restoreFactoryDefaults()
     }
 
-    private var encoder: RelativeEncoder = when {
+    var encoder: RelativeEncoder = when {
         type == EncoderType.NEO_HALL && !brushedMotor -> {
             spark.encoder
         }
@@ -40,7 +43,7 @@ class KSparkMax(
         }
         else -> throw NotImplementedError("idk how to set your encoder values")
     }
-    private val _pid = spark.pidController
+    val _pid = spark.pidController
 
     override var minPosition: Angle = super.minPosition
         set(value) {
@@ -70,13 +73,13 @@ class KSparkMax(
         }
 
     override var rawPercent
-        get() = spark.appliedOutput
-        set(value) {
+        inline get() = spark.appliedOutput
+        inline set(value) {
             spark.set(value)
         }
 
     //    private val velCalc = Differentiator()
-    override var rawVelocity: AngularVelocity
+    inline override var rawVelocity: AngularVelocity
         get() = encoder.velocity.rpm//velCalc.calculate(rawPosition.radians).radiansPerSecond//encoder!!.velocity.rpm
         set(value) {
             _pid.setReference(
@@ -88,7 +91,7 @@ class KSparkMax(
             )
         }
 
-    override var rawPosition: Angle
+    inline override var rawPosition: Angle
         get() = encoder.position.rotations
         set(value) {
             _pid?.setReference(
@@ -100,13 +103,13 @@ class KSparkMax(
             )
         }
 
-    override fun implementNativeControls() {
-        _pid.p = kP * toNative
-        _pid.i = kP * toNative
-        _pid.d = kP * toNative
+    override fun implementNativeControls(slot: Int) {
+        _pid.setP(kP * toNative, slot)
+        _pid.setI(kI * toNative, slot)
+        _pid.setD(kD * toNative, slot)
         _pid.iZone = kIRange * toNative
-        _pid.setSmartMotionMaxAccel(maxAcceleration.rpm * toNative, 0)
-        _pid.setSmartMotionMaxVelocity(maxVelocity.rpm * toNative, 0)
+        _pid.setSmartMotionMaxAccel(maxAcceleration.rpm * toNative, slot)
+        _pid.setSmartMotionMaxVelocity(maxVelocity.rpm * toNative, slot)
     }
 
     override var currentLimit: Int = 100

@@ -54,11 +54,4 @@ class KAxis(val raw: () -> Double) : Debug {
     fun activateAt(value: Double = 0.5) = Button { this.raw() > value }
     fun activateBefore(value: Double = 0.5) = Button {this.raw() < value }
     fun activateBetween(low: Double, high: Double) = Button {low < this.raw()  && this.raw() < high}
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "raw" to raw.invoke(),
-            "value" to value
-        )
-    }
 }

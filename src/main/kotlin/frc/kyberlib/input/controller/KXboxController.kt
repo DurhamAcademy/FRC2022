@@ -44,28 +44,4 @@ class KXboxController(port: Int) : KController(port), Debug {
     val leftDPad = KButton { DPad > 180 }  // 270
     val upDPad = KButton { DPad != -1 && (DPad < 90 || DPad > 270) }  // 0
     val downDPad = KButton { DPad in 91..269 }  // 180
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "leftX" to leftX,
-            "leftY" to leftY,
-
-            "rightX" to rightX,
-            "rightY" to rightY,
-
-            "left trigger" to leftTrigger,
-            "right trigger" to rightTrigger,
-
-            "left bumper" to leftBumper.get(),
-            "right bumper" to rightBumper.get(),
-
-            "A" to a.get(),
-            "B" to b.get(),
-            "X" to x.get(),
-            "Y" to y.get(),
-
-            "DPAD" to DPad,
-            "rumble" to rumble
-        )
-    }
 }

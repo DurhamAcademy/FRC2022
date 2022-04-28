@@ -64,11 +64,4 @@ object Conveyor : SubsystemBase(), Debug {
     init {
         defaultCommand = Idle
     }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "indexer" to conveyor,
-            "feeder" to feeder
-        )
-    }
 }

@@ -55,8 +55,4 @@ class KLinearServo(
      */
     val atSetpoint: Boolean
         get() = error.absoluteValue.millimeters < 2.0
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf("position" to position.millimeters, "setpoint" to setpoint.millimeters)
-    }
 }

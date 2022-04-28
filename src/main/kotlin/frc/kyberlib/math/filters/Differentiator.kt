@@ -1,17 +1,18 @@
 package frc.kyberlib.math.filters
 
+import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.*
 
 /**
  * Gets the rate of change of a stream of values
  */
-class Differentiator : Filter() {
+class Differentiator : Filter {
     private var lastValue: Double? = null
     private var value = 0.0
 
     private var prevTime = 0.0
     private val dt: Double
-        inline get() = time - prevTime
+        inline get() = Game.time.seconds - prevTime
 
     /**
      * Return the rate of change of value in units per second
@@ -19,7 +20,7 @@ class Differentiator : Filter() {
     override fun calculate(d: Double): Double {
         value = if (lastValue != null) (d - lastValue!!) / dt else 0.0
         lastValue = d
-        prevTime = time
+        prevTime = Game.time.seconds
         return value
     }
 

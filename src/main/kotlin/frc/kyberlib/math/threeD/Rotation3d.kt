@@ -33,5 +33,4 @@ data class Rotation3d(val pitch: Angle, val yaw: Angle, val roll: Angle) {
     operator fun minus(other: Rotation3d): Rotation3d {
         return Rotation3d(matrix.times(other.matrix.inv()))
     }
-
 }

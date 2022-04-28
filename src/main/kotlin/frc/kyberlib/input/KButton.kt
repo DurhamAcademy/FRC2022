@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.button.Button
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import java.util.function.BooleanSupplier
 
-open class KButton(index: Int, condition: BooleanSupplier) : Button({
+class KButton(index: Int, condition: BooleanSupplier) : Button({
     if (KController.sim) simValues[index]
     else condition.asBoolean
 }) {
@@ -18,6 +18,7 @@ open class KButton(index: Int, condition: BooleanSupplier) : Button({
         all.add(this)
         simValues.add(false)
     }
+
 
     var simValue = false
         set(value) {

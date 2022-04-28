@@ -20,7 +20,7 @@ import frc.kyberlib.mechanisms.drivetrain.dynamics.KDriveDynamics
 abstract class KDrivetrain : SubsystemBase(), Debug {
     abstract val dynamics: KDriveDynamics
 
-    fun drive(chassisSpeeds: ChassisSpeeds) {
+    open fun drive(chassisSpeeds: ChassisSpeeds) {
         dynamics.drive(chassisSpeeds)
     }
 

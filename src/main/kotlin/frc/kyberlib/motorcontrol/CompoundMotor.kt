@@ -9,9 +9,11 @@ import frc.kyberlib.math.units.extensions.*
 class CompoundMotor(val basic: KBasicMotorController, val encoder: Encoder) : KMotorController() {
 
     private var offset = 0.degrees
-    override fun implementNativeControls() {
+    override fun implementNativeControls(slot: Int) {
         throw IllegalCallerException("This doesn't have a integrated controller")
     }
+
+    override var currentLimit: Int = 100
 
     override fun resetPosition(position: Angle) {
         offset = position

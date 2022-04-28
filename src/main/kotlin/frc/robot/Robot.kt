@@ -27,7 +27,7 @@ class Robot : KRobot() {
     }
 
     override fun robotPeriodic() {
-        RobotContainer.leds.update()
+//        RobotContainer.leds.update()
         if (Game.real) {
             // log relevant stuff
             SmartDashboard.putNumber("gyro", RobotContainer.gyro.heading.degrees)

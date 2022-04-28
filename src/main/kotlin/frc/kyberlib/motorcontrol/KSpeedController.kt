@@ -6,15 +6,8 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorController
  * Wraps a WPI SpeedController to use the KBasicMotorController API
  */
 class KSpeedController(private val m_speedController: MotorController, fake: Boolean = false) : KBasicMotorController(fake) {
-    private companion object{
-        var id = 1
-    }
-
-    private val myId = id
-    init { id += 1 }
-
     override var brakeMode: BrakeMode = false  // this doesn't work
-    override var identifier: String = "KSpeedController #$myId"
+    override var identifier: String = "KSpeedController"
     override var rawPercent: Double
         get() = m_speedController.get()
         set(value) {m_speedController.set(value)}

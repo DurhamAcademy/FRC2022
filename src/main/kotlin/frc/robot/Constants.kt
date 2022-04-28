@@ -41,7 +41,7 @@ object Constants {
     // ------ Shooter ------ //
     val LIMELIGHT_HEIGHT: Length = 25.inches
     val LIMELIGHT_ANGLE: Angle = 40.degrees
-    const val MOVEMENT_CORRECTION = true
+
 
     val FLYWHEEL_INTERPOLATOR: Interpolator = Interpolator(
         mapOf(

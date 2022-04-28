@@ -111,14 +111,14 @@ object Drivetrain : DifferentialDriveTrain() {
      */
     override fun periodic() {
         super.periodic()
-        debugDashboard()
-        if (RobotContainer.op.smartNav && Game.OPERATED && Turret.isZeroed) {
-            // do global position updates based on limelight data
-            val distance = Limelight.visionDistance ?: return
-            val offset = Limelight.visionOffset ?: return
-            val angle = offset + Turret.fieldRelativeAngle + 180.degrees
-            polarCoordinates = PolarPose(distance, angle, offset)
-        }
+//        debugDashboard()
+//        if (RobotContainer.op.smartNav && Game.OPERATED && Turret.isZeroed) {
+//             do global position updates based on limelight data - fixme: i think polar math is slow
+//            val distance = Limelight.visionDistance ?: return
+//            val offset = Limelight.visionOffset ?: return
+//            val angle = offset + Turret.fieldRelativeAngle + 180.degrees
+//            polarCoordinates = PolarPose(distance, angle, offset)
+//        }
     }
 
 }

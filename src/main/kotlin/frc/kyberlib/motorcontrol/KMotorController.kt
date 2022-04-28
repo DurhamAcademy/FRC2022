@@ -29,6 +29,7 @@ import kotlin.math.absoluteValue
 
 typealias GearRatio = Double
 typealias BrakeMode = Boolean
+typealias MotorControl = ((motor: KMotorController) -> Voltage)
 
 /**
  * Types of encoders that may be used
@@ -70,11 +71,24 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      */
     var gearRatio: GearRatio = 1.0  // todo: add support for shift gearbox
 
+    fun shiftGearbox(newGearRatio: GearRatio, newCustomControl: MotorControl?=null) {
+        if(newCustomControl != null) {
+            gearRatio = newGearRatio
+            customControl = newCustomControl
+        } else {
+            val change = gearRatio / newGearRatio
+            gearRatio = newGearRatio
+            kP *= change
+            kI *= change
+            kD *= change
+        }
+    }
+
     // ----- constraints ---- //
     /**
      * The max angular velocity the motor can have
      */
-    var maxVelocity: AngularVelocity = 10000.rpm
+    var maxVelocity: AngularVelocity = 100000.rpm
         set(value) {
             field = value
             PID.setConstraints(TrapezoidProfile.Constraints(maxVelocity.value, maxAcceleration.value))
@@ -82,7 +96,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     /**
      * The max angular acceleration the motor can have
      */
-    var maxAcceleration: AngularVelocity = 10000.rpm
+    var maxAcceleration: AngularVelocity = 100000.rpm
         set(value) {
             field = value
             PID.setConstraints(TrapezoidProfile.Constraints(maxVelocity.value, maxAcceleration.value))
@@ -125,6 +139,8 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         set(value) {
             maxAcceleration = linearToRotation(value)
         }
+
+    abstract var currentLimit: Int
     // ----- control schemes ---- //
     /**
      * Proportional gain of the customControl controller.
@@ -159,7 +175,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     protected val toNative
         inline get() = if(linearConfigured) radius!!.meters * gearRatio else gearRatio
 
-    protected abstract fun implementNativeControls()
+    protected abstract fun implementNativeControls(slot: Int=0)
 
     /**
      * Max integration value
@@ -201,7 +217,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var nativeControl = false  // todo
         set(value) {
             field = value
-//            if(real && value) implementNativeControls()
+            if(real && value) implementNativeControls()
         }
     /**
      * Builtin control that will combine feedforward with the PID.
@@ -401,34 +417,26 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
             velocity = linearToRotation(value)
         }
 
-    // calculator for the acceleration of the motor
-    private val accelerationCalculator = Differentiator()
-    var acceleration = 0.rpm
-        protected set
-    val linearAcceleration
-        get() = rotationToLinear(acceleration)
-
-
     // ----- error ---- //
     /**
      * Angle between where it is and where it wants to be
      */
-    inline val positionError inline get() = position - positionSetpoint
+    inline val positionError get() = position - positionSetpoint
 
     /**
      * Distance between where it is and where it wants to be
      */
-    inline val linearPositionError inline get() = linearPosition - linearPositionSetpoint
+    inline val linearPositionError get() = linearPosition - linearPositionSetpoint
 
     /**
      * Velocity difference between where it is and where it wants to be
      */
-    inline val velocityError inline get() = velocity - velocitySetpoint
+    inline val velocityError get() = velocity - velocitySetpoint
 
     /**
      * Linear Velocity difference between where it is and where it wants to be
      */
-    inline val linearVelocityError inline get() = linearVelocity - linearVelocitySetpoint
+    inline val linearVelocityError get() = linearVelocity - linearVelocitySetpoint
 
     // ----- setpoints ---- //
     /**
@@ -496,7 +504,6 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Updates the voltage after changing position / velocity setpoint
      */
     fun updateVoltage() {
-        acceleration = accelerationCalculator.calculate(velocity.value).radiansPerSecond  // this may slow the code down
         if(nativeControl) {
             if(controlMode == ControlMode.VELOCITY) rawVelocity = velocitySetpoint * gearRatio.invertIf { reversed }
             else if(controlMode == ControlMode.POSITION) rawPosition = positionSetpoint * gearRatio.invertIf { reversed }
@@ -582,61 +589,8 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         }
     }
 
-    override fun debugValues(): Map<String, Any?> {
-        val map = super.debugValues().toMutableMap()
-        if (linearConfigured)
-            map.putAll(
-                mapOf(
-                    "Linear Position" to linearPosition,
-                    "Linear Velocity" to linearVelocity,
-                    // "Linear Acceleration (m per s per s)" to linearAcceleration.metersPerSecond
-                )
-            )
-        else
-            map.putAll(
-                mapOf(
-                    "Angular Position" to position,
-                    "Angular Velocity" to velocity,
-                    // "Angular Acceleration (rad per s^2)" to acceleration.radiansPerSecond  // temporary (here for testing)
-                )
-            )
-        if (controlMode == ControlMode.POSITION) {
-            if (linearConfigured)
-                map.putAll(
-                    mapOf(
-                        "setpoint" to linearPositionSetpoint,
-                        "error" to linearPositionError
-                    )
-                )
-            else
-                map.putAll(
-                    mapOf(
-                        "setpoint" to positionSetpoint,
-                        "error" to positionError
-                    )
-                )
-        } else {
-            if (linearConfigured)
-                map.putAll(
-                    mapOf(
-                        "setpoint" to linearVelocitySetpoint.metersPerSecond,
-                        "error" to linearVelocityError.metersPerSecond
-                    )
-                )
-            else
-                map.putAll(
-                    mapOf(
-                        "setpoint" to velocitySetpoint.radiansPerSecond,
-                        "error" to velocityError.radiansPerSecond
-                    )
-                )
-        }
-//        map["PID"] = PID
-        return map.toMap()
-    }
-
     // ----- sim ---- //
-    // you should never really need to touch these values unless you are making a custom sim  // todo: maybe make private
+    // you should never really need to touch these values unless you are making a custom sim
     /**
      * Settable variable describing velocity according to whatever simulation
      */
@@ -644,7 +598,6 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         set(value) {
             assert(!real) { "This value should only be set from a simulation" }
             field = value
-            acceleration = accelerationCalculator.calculate(value.radiansPerSecond).radiansPerSecond
         }
 
     /**
@@ -943,7 +896,6 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Sets a control system based around a system and control parameters
      * @param plant the system that models this motor
      * @param modelDeviation how much to trust the system math should me
-     * @param measurementDeviation how much to trust the encoder values
      * @param errorCost the tolerance on how far off from the target the motor can be. Higher cost means more agressive correction.
      * @param inputCost the tolerance on the amount of voltage. Defaults to battery voltage (12.0). Higher cost will mean more hesitant to use a lot of power.
      * @param timeDelay the time between each loop. Defaults to robot periodic but other values will create a notifier for faster updates.

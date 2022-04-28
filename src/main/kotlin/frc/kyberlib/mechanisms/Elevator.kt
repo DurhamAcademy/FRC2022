@@ -7,9 +7,9 @@ import frc.kyberlib.motorcontrol.KMotorController
 
 /**
  * Simple pre-made system that will control an elevator. Control by setting the position.
- * @param motors a series of motors to move the elevator. Subsequent motors will follow the first
- * @param radius the radius of the wheel that moves the elevator. Alternatively rotationToVelocityConversionFactor/2π
+ * @param leadMotor the motor driving the elevator. Other motors in the mechanism should follow this
  * @param initialPosition optional value of where the elevator starts
+ * @param mass how heavy (in kg) the system is lifting
  */
 class Elevator(leadMotor: KMotorController, initialPosition: Length = 0.feet, mass: Double) : SubsystemBase(),
     Debug {
@@ -37,9 +37,5 @@ class Elevator(leadMotor: KMotorController, initialPosition: Length = 0.feet, ma
 
     fun stop() {
         motor.stop()
-    }
-
-    override fun debugValues(): Map<String, Any?> {
-        return motor.debugValues()
     }
 }

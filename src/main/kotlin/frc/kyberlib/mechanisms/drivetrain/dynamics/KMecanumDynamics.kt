@@ -19,7 +19,6 @@ class KMecanumDynamics(
     val locations: Array<Translation2d>, fieldRelativeOffset: Angle = 0.degrees
 ) : KHolonomicDriveDynamics(fieldRelativeOffset) {
 
-    val motors = arrayOf(leftFront, leftBack, rightFront, rightBack)
     private val kinematics = MecanumDriveKinematics(locations[0], locations[1], locations[2], locations[3])
     init {
         Navigator.instance!!.applyKinematics(kinematics)
@@ -58,7 +57,10 @@ class KMecanumDynamics(
     }
 
     override fun stop() {
-        motors.forEach { it.stop() }
+        leftFront.stop()
+        rightFront.stop()
+        leftBack.stop()
+        rightBack.stop()
     }
 
     override val chassisSpeeds: ChassisSpeeds
@@ -67,6 +69,6 @@ class KMecanumDynamics(
     val wheelSpeeds: MecanumDriveWheelSpeeds
         get() = MecanumDriveWheelSpeeds(leftFront.linearVelocity.value, rightFront.linearVelocity.value, leftBack.linearVelocity.value, rightBack.linearVelocity.value)
 
-    val characterizationRoutine
-        get() = CharacterizationRoutine(*motors)
+    inline val characterizationRoutine
+        get() = CharacterizationRoutine(leftFront, rightFront, leftBack, rightBack)
 }

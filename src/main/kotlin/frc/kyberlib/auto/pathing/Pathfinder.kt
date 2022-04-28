@@ -87,6 +87,9 @@ object Pathfinder : Debug {
         return KTrajectory("Pathfinder path", startPose2d, smooth, endPose2d)  // test edit
     }
 
+    /**
+     * Convert generated distance tree to trajectory
+     */
     private fun treeToTrajectory(startPose2d: Pose2d, endPosition: Translation2d): KTrajectory {
         if (!pathFound)
             return KTrajectory(
@@ -103,6 +106,9 @@ object Pathfinder : Debug {
         return KTrajectory("Pathfinder path", startPose2d, smooth, Pose2d(endPosition, endRotation))  // test edit
     }
 
+    /**
+     * Smooths the path out removing unnecesary points
+     */
     private fun smoothPath(): ArrayList<Translation2d> {
         val points = path!!.map { it.position }.reversed()
         var improvement = true
@@ -211,17 +217,6 @@ object Pathfinder : Debug {
     private fun reset() {
         tree.vertices.clear()
         path?.clear()
-    }
-
-    override fun debugValues(): Map<String, Any?> {
-        val map = mutableMapOf<String, Any?>(
-            "explored nodes" to tree.nodeCount,
-            "path" to path.toString()
-        )
-        if (this::information.isInitialized) {
-            map.putAll(information.debugValues())
-        }
-        return map.toMap()
     }
 }
 

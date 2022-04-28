@@ -142,12 +142,4 @@ class KTrajectory(private val name: String, trajectory: Trajectory) : Trajectory
     override fun equals(other: Any?): Boolean {
         return hash == other.hashCode()
     }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "start Pose" to states.first().poseMeters,
-            "end Pose" to states.last().poseMeters,
-            "time" to states.last().timeSeconds
-        )
-    }
 }

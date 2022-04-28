@@ -29,7 +29,7 @@ abstract class KDriveDynamics : Debug {
     }
 
     open fun updateNavigation() {
-        Navigator.instance!!.update(chassisSpeeds)
+        Navigator.instance!!.update(this)
     }
 
     var activeTrajectory: KTrajectory? = null
@@ -71,8 +71,4 @@ abstract class KDriveDynamics : Debug {
      * remove the active trajectory data
      */
     fun clearTrajectory() {activeTrajectory = null}
-
-    override fun debugValues(): Map<String, Any?> {
-        TODO("Not yet implemented")
-    }
 }

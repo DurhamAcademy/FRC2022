@@ -59,16 +59,12 @@ class KServo(
     /**
      * Guess of how far off the servo is from setpoint
      */
-    val error: Angle
+    inline val error: Angle
         get() = position - setpoint
 
     /**
      * True if the actuator's estimated position has converged on the target position.
      */
-    val atSetpoint: Boolean
+    inline val atSetpoint: Boolean
         get() = error.absoluteValue.degrees < 2.0
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf("position" to position.degrees, "setpoint" to setpoint.degrees)
-    }
 }

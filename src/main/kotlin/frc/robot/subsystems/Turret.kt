@@ -60,8 +60,7 @@ object Turret : SubsystemBase(), Debug {
 
         val classic = { _: KMotorController ->
             val polarSpeeds = Drivetrain.polarSpeeds
-            val rot =
-                polarSpeeds.dTheta * 0.1.seconds//-headingDiff.calculate(RobotContainer.gyro.heading.value).radiansPerSecond * 0.1.seconds
+            val rot = polarSpeeds.dTheta * 0.1.seconds
             val mov = polarSpeeds.dOrientation * 0.0.seconds
             position = clampSafePosition(positionSetpoint + rot + mov)
 
@@ -120,20 +119,10 @@ object Turret : SubsystemBase(), Debug {
     // update limelight data
     override fun periodic() {
         SmartDashboard.putString("turret cmd", this.currentCommand?.name ?: "none")
-        debugDashboard()
         lost = lostDebouncer.calculate(!Limelight.targetVisible)
     }
 
     override fun simulationPeriodic() {
         KField2d.getObject("turret").pose = Pose2d(RobotContainer.navigation.position, fieldRelativeAngle.w)
-    }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "turret" to turret,
-            "turret error" to Limelight.visionOffset,
-            "field Heading" to fieldRelativeAngle.radians,
-            "target detected" to Limelight.targetVisible
-        )
     }
 }

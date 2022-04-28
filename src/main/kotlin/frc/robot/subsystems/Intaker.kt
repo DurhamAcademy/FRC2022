@@ -33,11 +33,4 @@ object Intaker : SubsystemBase(), Debug {
     fun stop() {
         intakeMotor.stop()
     }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "deployed" to deployer.extended,
-            "intake" to intakeMotor
-        )
-    }
 }

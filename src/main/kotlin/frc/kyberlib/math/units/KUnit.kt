@@ -1,5 +1,6 @@
 package frc.kyberlib.math.units
 
+import frc.kyberlib.math.Stopwatch
 import frc.kyberlib.math.epsilonEquals
 import frc.kyberlib.math.units.extensions.*
 import kotlin.math.absoluteValue
@@ -62,20 +63,34 @@ inline fun <reified T : KUnitKey, reified U : KUnitKey> KUnit<Mul<T, U>>.units()
 inline fun <reified T : KUnitKey> KUnit<T>.units(): String = "${T::class.java.simpleName}s"
 
 
-fun main(args: Array<String>) {
-    val map = mapOf<String, Any?>(
-        "position" to 5.meters,
-        "velocity" to 10.metersPerSecond
-    )
-    map.forEach {
-        println(it.value)
-        println(it.key)
+fun main() {
+    // conversions
+//    println(45.degrees.string())
+//    println(45.radiansPerSecond.units())
+//    println((5.seconds * 10.seconds).units())
+//    println(180.degrees.toCircumference(1.meters))
+//    println(1.meters.toAngle(1.meters))
+//    println(1.metersPerSecond.toAngularVelocity(1.meters))
+//    println(1.radiansPerSecond)
+
+    // speed
+    println("\nspeed")
+    val testCases = 1000000000
+    val s = Stopwatch()
+    s.loop()
+    for(i in 0 until testCases) {
+        accept(0.rpm)
     }
-    println(45.degrees.string())
-    println(45.radiansPerSecond.units())
-    println((5.seconds * 10.seconds).units())
-    println(180.degrees.toCircumference(1.meters))
-    println(1.meters.toAngle(1.meters))
-    println(1.metersPerSecond.toAngularVelocity(1.meters))
-    println(1.radiansPerSecond)
+    println(s.loop())
+    for(j in 0 until testCases) {
+        accept(0.0)
+    }
+    println(s.loop())
+    for(k in 0 until testCases) {
+        accept(0.radians)
+    }
+    println(s.loop())
 }
+
+fun accept(x: Double) = x*x
+fun accept(x: KUnit<*>) = x.value * x.value

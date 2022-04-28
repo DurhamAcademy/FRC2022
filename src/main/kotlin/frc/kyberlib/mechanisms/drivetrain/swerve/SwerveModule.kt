@@ -49,11 +49,4 @@ abstract class SwerveModule(val location: Translation2d) : Debug {
      */
     inline val brakeState: SwerveModuleState
         get() = SwerveModuleState(0.0, Rotation2d(location.x, location.y).rotateBy(90.degrees.w))
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "Rotation (rad)" to rotation.radians,
-            "Speed (m per s)" to speed.metersPerSecond
-        )
-    }
 }

@@ -4,15 +4,25 @@ import frc.kyberlib.lighting.animations.LEDAnimation
 import frc.kyberlib.math.units.extensions.Time
 import java.awt.Color
 
+/**
+ * Represents a physical section of the LEDs
+ * @param start the index of the first LED in this section
+ * @param end the index of the last LED in this section
+ * @param animations list of animations run in this section
+ * @param reversed whether to invert the LEDs in this section
+ */
 class KLEDRegion(val start: Int, val end: Int, vararg val animations: LEDAnimation, val reversed: Boolean = false) {
     val length = end - start
     var transparent = true
     companion object {
+        /**
+         * Blend multiple things
+         */
         fun composite(length: Int, time: Time, regions: List<KLEDRegion>): Array<Color> {
             val mutableBuffer = Array<Color>(length) { Color.BLACK }
 
             for (region in regions) {
-                val b = region.getBuffer(time) ?: continue
+                val b = region.getBuffer(time)
                 for (i in b.indices) {
                     if (b[i].alpha < 255 && region.transparent) {
                         mutableBuffer[region.start + i] = Color(
@@ -29,6 +39,9 @@ class KLEDRegion(val start: Int, val end: Int, vararg val animations: LEDAnimati
         }
     }
 
+    /**
+     * Gets the colors to apply to this section of the LEDs
+     */
     fun getBuffer(time: Time): List<Color> {
         val mutableBuffer = Array<Color>(length) { Color.BLACK }
         animations.reversed().forEach { animation: LEDAnimation ->

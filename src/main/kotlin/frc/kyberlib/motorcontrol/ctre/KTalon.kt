@@ -158,14 +158,14 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             )
         }
 
-    override fun implementNativeControls()  {
+    override fun implementNativeControls(slot: Int)  {
         val nativeLoopTime = 0.001  // 1 ms  // todo: this could be wrong - only really relevant if trying to do dimensional analysis
         val fullOutput = 1023.0
         val ticksPerRadian = toNative / TAU * unitsPerRotation
-        talon.config_kP(0, kP * ticksPerRadian * fullOutput / 12.0)
-        talon.config_kI(0, kI * ticksPerRadian * fullOutput / 12.0)
-        talon.config_kD(0, kD * ticksPerRadian * fullOutput / 12.0)
-        talon.config_IntegralZone(0, kIRange * toNative)
+        talon.config_kP(slot, kP * ticksPerRadian * fullOutput / 12.0)
+        talon.config_kI(slot, kI * ticksPerRadian * fullOutput / 12.0 * nativeLoopTime)
+        talon.config_kD(slot, kD * ticksPerRadian * fullOutput / 12.0)
+        talon.config_IntegralZone(slot, kIRange * toNative)
         talon.configMotionCruiseVelocity(maxVelocity.falconSpeed)
         talon.configMotionAcceleration(maxAcceleration.falconSpeed)
     }

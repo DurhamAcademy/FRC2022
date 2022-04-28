@@ -120,17 +120,9 @@ object Shooter : SubsystemBase(), Debug {
         private set
 
     override fun periodic() {
-        debugDashboard()
-        // log stuff
+//        debugDashboard()
         SmartDashboard.putNumber("fly error", flywheel.velocityError.rpm)
         SmartDashboard.putNumber("rpm", flywheel.velocity.rpm)
         if (currentCommand != ShooterCalibration) hoodUpdate(Limelight.effectiveDistance)
-    }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "flywheel" to flywheel,
-            "hood" to hood
-        )
     }
 }

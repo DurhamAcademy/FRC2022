@@ -11,21 +11,17 @@ import frc.kyberlib.command.Game
 
 class KSolenoid(back: Int?, vararg fwd: Int, fake: Boolean = false) : Debug, NTSendable {
     companion object {
-        val allSolenoids = mutableListOf<KSolenoid>()
         val hub: PneumaticsBase = PneumaticsControlModule(1)  // represents a PCM
         val compressor: Compressor = hub.makeCompressor().apply {  // represents a compressor
             enableDigital()
         }
     }
-    private val followers = mutableListOf<KSolenoid>()
-    private val real = !fake && Game.real
+    private val followers = mutableListOf<KSolenoid>()  // other solenoid meant to copy this
+    private val real = !fake && Game.real  // allow for motor simulation if you don't want things going whoosh
 
-    init {
-        allSolenoids.add(this)
-    }
+    override var identifier: String = "Pneumatic"
 
-    override var identifier: String = "Pneumatic$fwd"
-
+    // hardware interfaces
     private val backSolenoid = if(back != null) hub.makeSolenoid(back) else null
     private val fwdSoleniods = fwd.map { hub.makeSolenoid(it) }
 
@@ -57,12 +53,6 @@ class KSolenoid(back: Int?, vararg fwd: Int, fake: Boolean = false) : Debug, NTS
         }
 
     fun follow(other: KSolenoid) {other.followers.add(this)}
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "extended" to extended
-        )
-    }
 
     override fun initSendable(builder: NTSendableBuilder?) {
         builder!!.addBooleanProperty("extended", { extended }, { extended = it })

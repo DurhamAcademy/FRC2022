@@ -49,10 +49,10 @@ object RobotContainer {
     val limelight = SimPhotonCamera("gloworm")
 
     init {
-        if (Game.real) {
-            val video = CameraServer.startAutomaticCapture()
-            video.videoMode = VideoMode(video.videoMode.pixelFormat, 640, 480, 30)
-        }
+//        if (Game.real) {
+//            val video = CameraServer.startAutomaticCapture()
+//            video.videoMode = VideoMode(video.videoMode.pixelFormat, 640, 480, 30)
+//        }
     }
 
     var startTime = 0.seconds

@@ -36,7 +36,7 @@ internal class PathingInformation(val startPosition: Translation2d, val endPosit
 
     /**
      * Update the information with a new path
-     * @param currentPathLength the shortest distance found to path between the two points
+     * @param bestPathLength the shortest distance found to path between the two points
      */
     fun update(bestPathLength: Double) {
         println("pathLen: $bestPathLength, ($dis)")
@@ -55,17 +55,5 @@ internal class PathingInformation(val startPosition: Translation2d, val endPosit
         val y = sin(theta) * height/2 * rho
         val rotated = Translation2d(x, y).rotateBy(rotation)
         return rotated.plus(center)
-    }
-
-    /**
-     * Print all the values for debugging purposes.
-     * Should not be used during competition
-     */
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "start" to startPosition,
-            "end" to endPosition,
-            "best path" to currentPathLength
-        )
     }
 }

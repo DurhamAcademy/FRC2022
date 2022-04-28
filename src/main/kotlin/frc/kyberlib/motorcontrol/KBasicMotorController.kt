@@ -13,18 +13,6 @@ typealias Voltage = Double
  * A basic motor controller. No closed-loop control
  */
 abstract class KBasicMotorController(fake: Boolean = false) : NTSendable, Debug {
-    companion object {
-        val allMotors = mutableListOf<KBasicMotorController>()
-    }
-
-    init {
-        addReferences()
-    }
-
-    private fun addReferences() {
-        allMotors.add(this)
-    }
-
     protected val followPeriodic = 0.1.seconds
     var controlMode = ControlMode.NULL
     // ------ configs ----- //
@@ -100,9 +88,6 @@ abstract class KBasicMotorController(fake: Boolean = false) : NTSendable, Debug 
             field = value.coerceIn(0.0, vbus)
         }
 
-    // unused var that can be overriden by various implementations of KBasicMotor
-    open var currentLimit = 100
-
     /**
      * True if this motor is following another.
      */
@@ -145,12 +130,6 @@ abstract class KBasicMotorController(fake: Boolean = false) : NTSendable, Debug 
         builder.setSafeState(this::stop)
         builder.addStringProperty("Control Type", { controlMode.name }, null)
         builder.addDoubleProperty("Voltage", this::voltage) { if (it != voltage) this.voltage = it }
-    }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "Voltage" to voltage
-        )
     }
 
     override fun toString(): String {

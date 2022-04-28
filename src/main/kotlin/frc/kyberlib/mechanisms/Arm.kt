@@ -20,7 +20,6 @@ class Arm(motor: KMotorController, moi: Double) {
             motor.position = value
         }
 
-
     fun update() {
         motor.updateVoltage()
     }

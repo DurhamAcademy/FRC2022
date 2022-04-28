@@ -122,12 +122,4 @@ object Climber : SubsystemBase(), Debug {
         extendable.length = (35.inches.value + leftWinch.position.value)
         extendable.angle = if (climbLift.extended) 90.0 else 22.0
     }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "Left Winch" to leftWinch,
-            "Right Winch" to rightWinch,
-            "Arms Raised" to climbLift.extended
-        )
-    }
 }

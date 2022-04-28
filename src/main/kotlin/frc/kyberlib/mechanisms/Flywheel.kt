@@ -15,7 +15,6 @@ import frc.kyberlib.simulation.Simulatable
 
 /**
  * Pre-made Flywheel Subsystem. Also a demo of StateSpace control from WPILIB. Control using velocity variable.
- * @param motor the controlling motor of the flywheel. If other motors are involves, make them follow this
  */
 class Flywheel(  // todo: allow for gooder constructor
     leadMotor: KMotorController,
@@ -38,7 +37,6 @@ class Flywheel(  // todo: allow for gooder constructor
      * Inputs (what we can "put in"): [voltage], in volts.
      * Outputs (what we can measure): [velocity], in radians per second.
      */
-
     private val observer: KalmanFilter<N1, N1, N1> = KalmanFilter(
         N1.instance, N1.instance,
         plant,
@@ -78,6 +76,4 @@ class Flywheel(  // todo: allow for gooder constructor
         velocity = 0.rpm
         motor.stop()
     }
-
-    override fun debugValues(): Map<String, Any?> = motor.debugValues()
 }

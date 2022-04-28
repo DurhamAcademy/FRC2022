@@ -34,21 +34,21 @@ class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaste
                                 val angularFF: SimpleMotorFeedforward= SimpleMotorFeedforward(0.0, 0.0), val angularDrag: Double = 0.0) : KDriveDynamics() {
 
     companion object {
-        fun toWheelSpeeds(chassisSpeeds: ChassisSpeeds, trackWidth: Length): DifferentialDriveWheelSpeeds {
+        fun toWheelSpeeds(chassisSpeeds: ChassisSpeeds, trackWidth: Length= TRACK_WIDTH): DifferentialDriveWheelSpeeds {
             return DifferentialDriveWheelSpeeds(
                 chassisSpeeds.vxMetersPerSecond - trackWidth.meters / 2 * chassisSpeeds.omegaRadiansPerSecond,
-                chassisSpeeds.vxMetersPerSecond + trackWidth.meters / 2 * chassisSpeeds.omegaRadiansPerSecond);
+                chassisSpeeds.vxMetersPerSecond + trackWidth.meters / 2 * chassisSpeeds.omegaRadiansPerSecond)
         }
 
-        fun toChassisSpeed(wheelSpeeds: DifferentialDriveWheelSpeeds, trackWidth: Length): ChassisSpeeds {
+        fun toChassisSpeed(wheelSpeeds: DifferentialDriveWheelSpeeds, trackWidth: Length = TRACK_WIDTH): ChassisSpeeds {
             return ChassisSpeeds(
                 (wheelSpeeds.leftMetersPerSecond + wheelSpeeds.rightMetersPerSecond) / 2,
                 0.0,
-                (wheelSpeeds.rightMetersPerSecond - wheelSpeeds.leftMetersPerSecond) / trackWidth.meters);
+                (wheelSpeeds.rightMetersPerSecond - wheelSpeeds.leftMetersPerSecond) / trackWidth.meters)
         }
     }
 
-    val wheelSpeeds
+    inline val wheelSpeeds
         get() = DifferentialDriveWheelSpeeds(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond)
     override val chassisSpeeds: ChassisSpeeds
         get() {
@@ -56,16 +56,6 @@ class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaste
             val fwd = averageSpeed
             val turn = averageSpeed * TRACK_WIDTH.meters
             return ChassisSpeeds(fwd, 0.0,  turn)
-        }
-
-    val wheelAcceleration: DifferentialDriveWheelSpeeds
-        get() = DifferentialDriveWheelSpeeds(leftMaster.linearAcceleration.value, rightMaster.linearAcceleration.value)
-    val chassisAcceleration: ChassisSpeeds
-        get() {
-            val averageSpeed = (leftMaster.linearAcceleration.value + rightMaster.linearAcceleration.value) / 2.0
-            val fwd = averageSpeed
-            val turn = averageSpeed * TRACK_WIDTH.meters
-            return ChassisSpeeds(fwd, 0.0, turn)
         }
 
     val curvature
@@ -140,13 +130,6 @@ class KDifferentialDriveDynamic(val leftMaster: KMotorController, val rightMaste
         val dt = Game.time - startTime
         if (dt > activeTrajectory!!.totalTimeSeconds.seconds)
             drive(controller.calculate(Navigator.instance!!.pose, activeTrajectory!!.sample(dt.seconds)))
-    }
-
-    /**
-     * Update the Navigator class with the current wheel motion
-     */
-    override fun updateNavigation() {
-        Navigator.instance!!.update(wheelSpeeds, leftMaster.linearPosition, rightMaster.linearPosition)
     }
 
     /**

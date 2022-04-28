@@ -17,6 +17,7 @@ import frc.kyberlib.command.KRobot
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.mechanisms.drivetrain.dynamics.KDifferentialDriveDynamic
+import frc.kyberlib.mechanisms.drivetrain.dynamics.KDriveDynamics
 import frc.kyberlib.sensors.gyros.KGyro
 import frc.kyberlib.simulation.field.KField2d
 
@@ -73,8 +74,8 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
 
     // ----- public variables ----- //
     // location
-    val heading: Angle  // what direction the robot is facing
-        inline get() = pose.rotation.k
+    inline val heading: Angle  // what direction the robot is facing
+        get() = pose.rotation.k
     var pose: Pose2d  // the location and direction of the robot
         get() = if(differentialDrive) difPoseEstimator.estimatedPosition else holonomicPoseEstimator.estimatedPosition
         set(value) {
@@ -83,8 +84,8 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
 
             if (Game.sim) KField2d.robotPose = value
         }
-    val position: Translation2d  // the estimated location of the robot
-        inline get() = pose.translation
+    inline val position: Translation2d  // the estimated location of the robot
+        get() = pose.translation
 
     /**
      * Update position based on estimated motion
@@ -92,6 +93,13 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
     fun update(speeds: DifferentialDriveWheelSpeeds, leftPosition: Length, rightPosition: Length) {  // estimate motion
         difPoseEstimator.update(gyro.heading.w, speeds, leftPosition.meters, rightPosition.meters)
         simUpdate(KDifferentialDriveDynamic.toChassisSpeed(speeds, TRACK_WIDTH).omegaRadiansPerSecond.radiansPerSecond)
+    }
+
+    fun update(dynamics: KDriveDynamics) {
+        val chassis = dynamics.chassisSpeeds
+        if(dynamics is KDifferentialDriveDynamic) difPoseEstimator.update(gyro.heading.w, dynamics.wheelSpeeds, dynamics.leftMaster.linearPosition.meters, dynamics.rightMaster.linearPosition.meters)
+        else holonomicPoseEstimator.update(gyro.heading.w, chassis)
+        simUpdate(chassis.omegaRadiansPerSecond.radiansPerSecond)
     }
 
     fun update(speeds: ChassisSpeeds) {
@@ -117,11 +125,5 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
         if(Game.sim) {
             KField2d.robotPose = pose
         }
-    }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "pose" to pose
-        )
     }
 }

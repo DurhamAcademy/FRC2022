@@ -47,5 +47,5 @@ object Game {
 //    val matchName
 //        inline get() = DriverStation.getEventName() + DriverStation.getLocation() + DriverStation.getMatchNumber()
 
-    val game: String = DriverStation.getGameSpecificMessage()
+    inline val message: String get() = DriverStation.getGameSpecificMessage()
 }
