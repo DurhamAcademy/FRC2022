@@ -14,6 +14,7 @@ import frc.robot.subsystems.*
 import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.withSign
 
 
 /**
@@ -58,18 +59,22 @@ object Climb : CommandBase() {
         val default = -RobotContainer.controller.rightY.raw().zeroIf { it.absoluteValue < .02 }
 
         // MARK: correcting code
-        val tolorance = 3
-        val degs = RobotContainer.gyro.roll.absoluteValue
-        val rightSync = degs*-1.0/tolorance
-        val leftSync = degs*1.0/tolorance
-
-        Climber.rightWinch.percent = default + rightSync
+        var tolorance = 3
+        var degs = RobotContainer.gyro.pitch.degrees
+        SmartDashboard.putNumber("degs", degs)
+        var effect = (((degs*(1.0/tolorance))).coerceIn(-1.0, 1.0))
+        effect = effect.withSign(degs)
+        val defaultLeft = default * effect
+        val defaultRight = default * effect
+        SmartDashboard.putNumber("leftArm", defaultLeft)
+        SmartDashboard.putNumber("rightArm", defaultRight)
+        Climber.rightWinch.percent = default//Right
         if(SmartDashboard.getBoolean("sync climb", true)) {
-            Climber.leftWinch.percent = default + leftSync
+            Climber.leftWinch.percent = default//Left
         } else {
             Climber.leftWinch.percent = -RobotContainer.controller.leftY.raw().zeroIf {
                 it.absoluteValue < .02
-            } + leftSync
+            }
         }
 //        Climber.rightExtendable.percent = RobotContainer.controller.rightX.raw()
 
