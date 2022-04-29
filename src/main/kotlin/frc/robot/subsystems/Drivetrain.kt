@@ -3,15 +3,15 @@ package frc.robot.subsystems
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.Game
-import frc.kyberlib.math.PolarPose
 import frc.kyberlib.math.polar
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.milli
-import frc.kyberlib.mechanisms.drivetrain.DifferentialDriveTrain
+import frc.kyberlib.mechanisms.drivetrain.KDrivetrain
 import frc.kyberlib.mechanisms.drivetrain.dynamics.KDifferentialDriveDynamic
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.robot.Constants
@@ -22,7 +22,7 @@ import frc.robot.commands.drive.Drive
 /**
  * Mechanism that controls how the robot drives
  */
-object Drivetrain : DifferentialDriveTrain() {
+object Drivetrain : KDrivetrain() {
     // motors
     override val priority: DebugFilter = DebugFilter.Max
 
@@ -54,18 +54,13 @@ object Drivetrain : DifferentialDriveTrain() {
         setupSim()
 //        setupSim(rightFF)
     }
-    private val leftFollower = KSparkMax(15).apply {
-//        copyConfig(leftMaster)
-        follow(leftMaster)
-    }
-    private val rightFollower = KSparkMax(10).apply {
-//        copyConfig(rightMaster)
-        follow(rightMaster)  // follow(rightMaster)
-    }
+    private val leftFollower = KSparkMax(15).apply { follow(leftMaster) }
+    private val rightFollower = KSparkMax(10).apply { follow(rightMaster) }
 
     // this handles all the math for how to use the motors
     override val dynamics: KDifferentialDriveDynamic = KDifferentialDriveDynamic(leftMaster, rightMaster)
 
+    fun drive(wheelSpeeds: DifferentialDriveWheelSpeeds) = dynamics.drive(wheelSpeeds)
     /**
      * Get speeds relative to the hub.
      *
@@ -99,6 +94,8 @@ object Drivetrain : DifferentialDriveTrain() {
     inline val polarSpeeds
         get() = chassisSpeeds.polar(RobotContainer.navigation.pose.polar(Constants.HUB_POSITION))
 
+    val wheelSpeeds
+        get() = DifferentialDriveWheelSpeeds(leftMaster.linearVelocity.metersPerSecond, rightMaster.linearVelocity.metersPerSecond)
 
     // setup motors
     init {

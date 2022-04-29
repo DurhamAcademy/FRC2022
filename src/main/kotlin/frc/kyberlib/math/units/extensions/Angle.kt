@@ -1,5 +1,6 @@
 package frc.kyberlib.math.units.extensions
 
+import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.geometry.Rotation2d
 import frc.kyberlib.math.units.*
 import kotlin.math.PI
@@ -11,7 +12,7 @@ typealias Angle = KUnit<Radian>
 val Angle.rotations inline get() = value / AngleConversions.rotationsToRadians
 val Angle.degrees inline get() = value / AngleConversions.degreesToRadians
 val Angle.radians inline get() = value
-val Angle.normalized inline get() = if (value >= 0.0) rotations.rem(1.0).rotations else (rotations.rem(1.0) + 1.0).rotations
+val Angle.normalized inline get() = MathUtil.inputModulus(value, -PI, PI).radians
 
 val Angle.w inline get() = Rotation2d(value)
 
@@ -49,7 +50,6 @@ fun Number.encoderAngle(cpr: Int) = (this.toDouble() / (cpr * 4.0)).rotations
 
 
 fun main() {
-    for (i in 0..1000) println(i.radians.normalized.string())
     println(45.degrees == 405.degrees)
     println(45.degrees)
     println(405.degrees - 45.degrees)

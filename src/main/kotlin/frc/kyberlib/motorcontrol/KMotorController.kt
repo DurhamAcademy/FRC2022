@@ -970,6 +970,26 @@ internal fun estimateFF(motorType: DCMotor, gearRatio: Double, momentOfInertia: 
     println("kv: $kv, ka: $ka")
 }
 
+class MotorReader(private val motor: KMotorController) : BasicMotorReader(motor) {
+    val position get() = motor.position
+    val positionError get() = motor.positionError
+    val posisitionSetpoint get() = motor.positionSetpoint
+    val linearPosition get() = motor.linearPosition
+    val linearPositionError get() = motor.linearPositionError
+    val linearPositionSetpoint get() = motor.linearPositionSetpoint
+
+    val velocity get() = motor.velocity
+    val velcoityError get() = motor.velocityError
+    val velocitySetpoint get() = motor.velocitySetpoint
+    val linearVelocity get() = motor.linearVelocity
+    val linearVelocityError get() = motor.linearVelocityError
+    val linearVelocitySetpoint get() = motor.linearVelocitySetpoint
+
+    val motorType = motor.motorType
+    val gearRatio = motor.gearRatio
+    val motorConfigured = motor.motorConfigured
+    val linearConfigured = motor.linearConfigured
+}
 
 fun main() {
     estimateFF(DCMotor.getNeo550(1), 10.0 * (215.0 / 18.0), 0.123787)

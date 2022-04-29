@@ -41,9 +41,9 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
      * A probability calculator to guess where the robot is from odometer and vision updates
      */
     private val difPoseEstimator = DifferentialDrivePoseEstimator(gyro.heading.w, startPose,
-        MatBuilder(N5.instance, N1.instance).fill(0.02, 0.02, 0.01, 0.02, 0.02),
-        MatBuilder(N3.instance, N1.instance).fill(0.02, 0.01, 0.01),
-        MatBuilder(N3.instance, N1.instance).fill(0.1, 0.1, 0.01)
+        MatBuilder(N5.instance, N1.instance).fill(0.02, 0.02, 0.01, 0.02, 0.02),  // model std
+        MatBuilder(N3.instance, N1.instance).fill(0.02, 0.01, 0.01),  // measurement std
+        MatBuilder(N3.instance, N1.instance).fill(0.1, 0.1, 0.01)  // vision std
     )
 
     private val holonomicPoseEstimator = DrivePoseEstimator(
@@ -76,14 +76,8 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
     // location
     inline val heading: Angle  // what direction the robot is facing
         get() = pose.rotation.k
-    var pose: Pose2d  // the location and direction of the robot
+    val pose: Pose2d  // the location and direction of the robot
         get() = if(differentialDrive) difPoseEstimator.estimatedPosition else holonomicPoseEstimator.estimatedPosition
-        set(value) {
-            if (!differentialDrive) holonomicPoseEstimator.resetPosition(value, gyro.heading.w)
-            else difPoseEstimator.resetPosition(value, gyro.heading.w)
-
-            if (Game.sim) KField2d.robotPose = value
-        }
     inline val position: Translation2d  // the estimated location of the robot
         get() = pose.translation
 
@@ -121,7 +115,7 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
     }
 
     private fun simUpdate(spin: AngularVelocity=0.radiansPerSecond) {
-        gyro.heading += spin * KRobot.period.seconds
+        gyro.reset(spin * KRobot.period.seconds)
         if(Game.sim) {
             KField2d.robotPose = pose
         }

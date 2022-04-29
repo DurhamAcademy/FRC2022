@@ -1,8 +1,8 @@
 package frc.kyberlib.mechanisms.drivetrain.swerve
 
 import edu.wpi.first.math.geometry.Translation2d
-import frc.kyberlib.math.units.extensions.Angle
-import frc.kyberlib.math.units.extensions.normalized
+import edu.wpi.first.math.kinematics.SwerveModuleState
+import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 import kotlin.math.PI
 
@@ -22,16 +22,17 @@ open class StandardSwerveModule(
         turnMotor.PID.enableContinuousInput(-PI, PI)
     }
     // turn controls
-    override var rotation: Angle
+    override val rotation: Angle
         get() = turnMotor.position
-        set(value) {
-            turnMotor.position = value
-        }
 
     // drive info
-    override var speed
+    override val speed
         get() = driveMotor.linearVelocity
+
+    override var optimizedState: SwerveModuleState
+        get() = SwerveModuleState(speed.metersPerSecond, rotation.w)
         set(value) {
-            driveMotor.linearVelocity = value
+            driveMotor.linearVelocity = value.speedMetersPerSecond.metersPerSecond
+            turnMotor.position = value.angle.k
         }
 }

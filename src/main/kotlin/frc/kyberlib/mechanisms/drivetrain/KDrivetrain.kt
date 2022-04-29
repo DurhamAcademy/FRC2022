@@ -24,6 +24,9 @@ abstract class KDrivetrain : SubsystemBase(), Debug {
         dynamics.drive(chassisSpeeds)
     }
 
+    /**
+     * Drive following a trajectory
+     */
     fun drive(trajectory: KTrajectory) = dynamics.drive(trajectory)
 
     /**

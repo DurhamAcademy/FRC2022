@@ -136,3 +136,11 @@ abstract class KBasicMotorController(fake: Boolean = false) : NTSendable, Debug 
         return "Motor($identifier)"
     }
 }
+
+open class BasicMotorReader(private val motor: KBasicMotorController) {
+    val percent get() = motor.percent
+    val voltage get() = motor.voltage
+    val real get() = motor.real
+    val brakeMode get() = motor.brakeMode
+    val reversed get() = motor.reversed
+}

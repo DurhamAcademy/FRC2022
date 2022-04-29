@@ -14,28 +14,30 @@ abstract class SwerveModule(val location: Translation2d) : Debug {
     /**
      * The rotation that the wheel is facing
      */
-    abstract var rotation: Angle  // fixme: this needs to be profiled
-        protected set
+    abstract val rotation: Angle  // fixme: this needs to be profiled
 
     /**
      * The speed that the motor should drive
      */
-    abstract var speed: LinearVelocity
-        protected set
+    abstract val speed: LinearVelocity
 
     /**
      * Stores the swerveModule state.
      * Optimizes to the nearest angle and normalized speed
      */
     var state: SwerveModuleState
-        get() = SwerveModuleState(speed.metersPerSecond, rotation.w)
+        get() = optimizedState
         set(value) {
-            val optimized = SwerveModuleState.optimize(value, rotation.w)
-            stateSetpoint = optimized
-            speed = optimized.speedMetersPerSecond.metersPerSecond
-            rotation = if(optimized.speedMetersPerSecond == 0.0) rotation
-                        else optimized.angle.k
+            optimizedState = optimize(value)
         }
+
+    protected abstract var optimizedState: SwerveModuleState
+
+    private fun optimize(state: SwerveModuleState): SwerveModuleState {
+        val opt = SwerveModuleState.optimize(state, rotation.w)
+        if(opt.speedMetersPerSecond == 0.0) opt.angle = Rotation2d()
+        return opt
+    }
 
     /**
      * The state that the module is going for

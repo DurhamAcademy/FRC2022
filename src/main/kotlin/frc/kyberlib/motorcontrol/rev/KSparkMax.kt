@@ -73,13 +73,13 @@ class KSparkMax(
         }
 
     override var rawPercent
-        inline get() = spark.appliedOutput
-        inline set(value) {
+        get() = spark.appliedOutput
+        set(value) {
             spark.set(value)
         }
 
     //    private val velCalc = Differentiator()
-    inline override var rawVelocity: AngularVelocity
+    override var rawVelocity: AngularVelocity
         get() = encoder.velocity.rpm//velCalc.calculate(rawPosition.radians).radiansPerSecond//encoder!!.velocity.rpm
         set(value) {
             _pid.setReference(
@@ -91,7 +91,7 @@ class KSparkMax(
             )
         }
 
-    inline override var rawPosition: Angle
+    override var rawPosition: Angle
         get() = encoder.position.rotations
         set(value) {
             _pid?.setReference(
