@@ -97,9 +97,7 @@ object Turret : SubsystemBase(), Debug {
 
     fun update() = turret.updateVoltage()
     fun stop() = turret.stop()
-
-    init {
-        defaultCommand = SeekTurret
+    init { defaultCommand = SeekTurret
     }
 
     /**

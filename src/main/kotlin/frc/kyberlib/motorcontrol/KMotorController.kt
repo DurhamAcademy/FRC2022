@@ -833,7 +833,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var torque: Double
         get() {
             if (!motorConfigured) throw MotorUnconfigured
-            return motorType!!.KtNMPerAmp * motorType!!.getCurrent(velocity.radiansPerSecond, voltage) * gearRatio
+            return motorType!!.KtNMPerAmp * current * gearRatio
         }
         set(value) {
             if (!motorConfigured) throw MotorUnconfigured
@@ -846,6 +846,10 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var force: Double
         get() = torque * radius!!.value
         set(value) { torque = value / radius!!.value }
+
+    abstract var current: Double
+    val resistance
+        get() = voltage / current
 
     /**
      * Sets a control system based around a velocity control loop

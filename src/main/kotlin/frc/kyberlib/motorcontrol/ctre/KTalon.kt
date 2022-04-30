@@ -143,7 +143,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             talon.set(ControlMode.PercentOutput, value)
         }
 
-    var current
+    override var current
         get() = talon.supplyCurrent
         set(value) {
             talon.set(ControlMode.Current, value)

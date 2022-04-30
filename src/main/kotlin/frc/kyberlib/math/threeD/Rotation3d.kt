@@ -5,6 +5,7 @@ import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.numbers.N3
 import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.string
 import kotlin.math.atan
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -33,4 +34,6 @@ data class Rotation3d(val pitch: Angle, val yaw: Angle, val roll: Angle) {
     operator fun minus(other: Rotation3d): Rotation3d {
         return Rotation3d(matrix.times(other.matrix.inv()))
     }
+
+    override fun toString(): String = "(${pitch.string()}, ${yaw.string()}, ${roll.string()},)"
 }

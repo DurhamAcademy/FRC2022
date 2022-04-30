@@ -118,8 +118,11 @@ class KSparkMax(
             field = value
         }
 
-    val current
+    override var current: Double
         get() = spark.outputCurrent
+        set(value) {
+            _pid.setReference(value, CANSparkMax.ControlType.kCurrent)
+        }
 
     override fun followTarget(kmc: KBasicMotorController) {
 //        velocityRefreshRate = 100.milliseconds

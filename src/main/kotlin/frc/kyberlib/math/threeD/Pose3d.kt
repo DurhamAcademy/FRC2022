@@ -23,10 +23,12 @@ data class Pose3d(val translation3d: Translation3d, val orientation: Rotation3d)
         Rotation3d(poseMatrix.block(3, 3,0, 0))
         )
 
-    fun transform(other: Pose3d): Pose3d {
-        return Pose3d(matrix.times(other.matrix))
-    }
+    operator fun plus(other: Pose3d) = Pose3d(matrix.times(other.matrix))
+    operator fun minus(other: Pose3d) = Pose3d(matrix.times(other.matrix.inv()))
+    operator fun unaryMinus() = Pose3d(matrix.inv())
 
+    fun transform(other: Pose3d): Pose3d = this + other
+    fun relativeTo(other: Pose3d) = this - other
 }
 
 

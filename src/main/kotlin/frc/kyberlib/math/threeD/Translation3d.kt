@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.numbers.*
 import frc.kyberlib.math.units.extensions.Length
 import frc.kyberlib.math.units.extensions.meters
+import frc.kyberlib.math.units.string
 
 typealias TranslationVector = Matrix<N1, N3>
 
@@ -32,4 +33,6 @@ data class Translation3d(val x: Length, val y: Length, val z: Length) {
     operator fun plus(other: Translation3d): Translation3d = Translation3d(x+other.x, y+other.y, z+other.z)
     operator fun minus(other: Translation3d): Translation3d = Translation3d(x-other.x, y-other.y, z-other.z)
     operator fun unaryMinus(): Translation3d = Translation3d(-x, -y, -z)
+
+    override fun toString(): String = "(${x.string()}, ${y.string()}, ${z.string()})"
 }

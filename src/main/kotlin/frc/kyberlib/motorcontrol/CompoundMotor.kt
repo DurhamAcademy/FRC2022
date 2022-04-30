@@ -46,6 +46,14 @@ class CompoundMotor(val basic: KBasicMotorController, val encoder: Encoder) : KM
             basic.percent = value
         }
 
+    override var current: Double
+        get() = if(motorConfigured) motorType!!.getCurrent(rawVelocity.value, voltage) else throw IllegalCallerException("This doesn't have a integrated controller")
+        set(value) {
+            // I = -1.0 / KvRadPerSecPerVolt / rOhms * speedRadiansPerSec + 1.0 / rOhms * voltageInputVolts;
+            // I + speedRadiansPerSec/(KvRadPerSecPerVolt * rOhms) = voltage / rOmhs
+            voltage = motorType!!.rOhms*(value + rawVelocity.value/(motorType!!.KvRadPerSecPerVolt * motorType!!.rOhms))
+        }
+
     override fun followTarget(kmc: KBasicMotorController) {
         basic.follow(kmc)
     }
