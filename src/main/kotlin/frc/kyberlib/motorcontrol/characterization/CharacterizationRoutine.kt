@@ -59,14 +59,14 @@ class CharacterizationRoutine(private vararg val motors: KMotorController, priva
             leftMotor.voltage = primaryVoltage
             rightMotor.voltage = primaryVoltage
             data += "${Game.matchTime.seconds},$primaryVoltage,$secondaryVoltage," +
-                    "${leftMotor.linearPosition.meters},${rightMotor.linearPosition.meters}," +
+                    "${leftMotor.distance.meters},${rightMotor.distance.meters}," +
                     "${leftMotor.linearVelocity.metersPerSecond}, ${rightMotor.linearVelocity.metersPerSecond}," +
                     "${Navigator.instance!!.heading.radians},${headingDiff.calculate(Navigator.instance!!.heading.radians)},"
         } else {
             motors.forEach { it.voltage = primaryVoltage }
             val definingMotor = motors.first()
-            data += if(definingMotor.linearConfigured) "${Game.matchTime.seconds},$primaryVoltage,${definingMotor.linearPosition.meters},${definingMotor.linearVelocity.metersPerSecond},"
-                    else "${Game.matchTime.seconds},$primaryVoltage,${definingMotor.position.rotations},${definingMotor.velocity.rotationsPerSecond},"
+            data += if(definingMotor.linearConfigured) "${Game.matchTime.seconds},$primaryVoltage,${definingMotor.distance.meters},${definingMotor.linearVelocity.metersPerSecond},"
+                    else "${Game.matchTime.seconds},$primaryVoltage,${definingMotor.angle.rotations},${definingMotor.angularVelocity.rotationsPerSecond},"
         }
     }
 
@@ -89,7 +89,7 @@ class CharacterizationRoutine(private vararg val motors: KMotorController, priva
     // Returns true when the command should end.
     override fun isFinished(): Boolean {
         motors.forEach {
-            if(it.position > it.maxPosition || it.position < it.minPosition) return true
+            if(it.angle > it.maxAngle || it.angle < it.minAngle) return true
         }
         return false
     }

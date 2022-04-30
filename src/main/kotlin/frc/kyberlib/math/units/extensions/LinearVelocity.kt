@@ -3,7 +3,7 @@ package frc.kyberlib.math.units.extensions
 import frc.kyberlib.math.units.*
 
 /**
- * KUnit representing linear velocity.
+ * KUnit representing linear angularVelocity.
  * Should not be created directly. Use the number extensions instead.
  */
 typealias LinearVelocity = KUnit<Div<Meter, Second>>

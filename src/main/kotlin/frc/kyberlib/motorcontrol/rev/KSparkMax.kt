@@ -2,8 +2,6 @@ package frc.kyberlib.motorcontrol.rev
 
 import com.revrobotics.*
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
-import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.wpilibj.simulation.EncoderSim
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.*
@@ -43,9 +41,9 @@ class KSparkMax(
         }
         else -> throw NotImplementedError("idk how to set your encoder values")
     }
-    val _pid = spark.pidController
+    val _pid: SparkMaxPIDController = spark.pidController
 
-    override var minPosition: Angle = super.minPosition
+    override var minAngle: Angle = super.minAngle
         set(value) {
             field = value
             if (real) {
@@ -55,7 +53,7 @@ class KSparkMax(
             }
         }
 
-    override var maxPosition: Angle = super.maxPosition
+    override var maxAngle: Angle = super.maxAngle
         set(value) {
             field = value
             if (real) {
@@ -79,8 +77,8 @@ class KSparkMax(
         }
 
     //    private val velCalc = Differentiator()
-    override var rawVelocity: AngularVelocity
-        get() = encoder.velocity.rpm//velCalc.calculate(rawPosition.radians).radiansPerSecond//encoder!!.velocity.rpm
+    override var rawAngularVelocity: AngularVelocity
+        get() = encoder.velocity.rpm//velCalc.calculate(rawAngle.radians).radiansPerSecond//encoder!!.angularVelocity.rpm
         set(value) {
             _pid.setReference(
                 value.rpm,
@@ -91,7 +89,7 @@ class KSparkMax(
             )
         }
 
-    override var rawPosition: Angle
+    override var rawAngle: Angle
         get() = encoder.position.rotations
         set(value) {
             _pid?.setReference(
@@ -135,8 +133,8 @@ class KSparkMax(
         }
     }
 
-    override fun resetPosition(position: Angle) {
-        encoder.position = position.rotations
+    override fun resetPosition(angle: Angle) {
+        encoder.position = angle.rotations
     }
 
     /**
@@ -152,7 +150,7 @@ class KSparkMax(
         }
 
     /**
-     * How quickly the spark send update on velocity and some other stuff
+     * How quickly the spark send update on angularVelocity and some other stuff
      */
     private var velocityRefreshRate = 20.milliseconds
         set(value) {
@@ -164,7 +162,7 @@ class KSparkMax(
         }
 
     /**
-     * How quickly the spark sends updates on position
+     * How quickly the spark sends updates on angle
      */
     private var positionRefreshRate = 20.milliseconds
         set(value) {

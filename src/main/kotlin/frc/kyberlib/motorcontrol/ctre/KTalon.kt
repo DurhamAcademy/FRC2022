@@ -7,7 +7,6 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration
 import com.ctre.phoenix.motorcontrol.can.TalonFXPIDSetConfiguration
 import com.ctre.phoenix.music.Orchestra
 import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.BrakeMode
@@ -31,7 +30,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             nominalOutputReverse = 0.0
             neutralDeadband = 0.04
 //            voltageCompSaturation = 12.0  // note: check that this could have issues with the way voltage works in KMotorController
-            // position limits
+            // angle limits
             forwardSoftLimitThreshold = 1000.0
             reverseSoftLimitThreshold = 1000.0
             forwardSoftLimitEnable = false
@@ -114,11 +113,11 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
         }
     }
 
-    override fun resetPosition(position: Angle) {
-        talon.selectedSensorPosition = position.rotations * unitsPerRotation
+    override fun resetPosition(angle: Angle) {
+        talon.selectedSensorPosition = angle.rotations * unitsPerRotation
     }
 
-    override var rawPosition: Angle
+    override var rawAngle: Angle
         get() = (talon.selectedSensorPosition / unitsPerRotation.toDouble()).rotations
         set(value) {
             talon.set(
@@ -127,7 +126,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
                 DemandType.ArbitraryFeedForward,
                 arbFFVolts/vbus)
         }
-    override var rawVelocity: AngularVelocity
+    override var rawAngularVelocity: AngularVelocity
         get() = talon.selectedSensorVelocity.falconSpeed
         set(value) {
             talon.set(ControlMode.Velocity, value.falconSpeed, DemandType.ArbitraryFeedForward, arbFFVolts/vbus)

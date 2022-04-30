@@ -3,30 +3,19 @@ package frc.robot.subsystems
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.Debouncer
-import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
-import frc.kyberlib.command.Game
-import frc.kyberlib.math.filters.Differentiator
-import frc.kyberlib.math.randomizer
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.math.units.towards
-import frc.kyberlib.math.units.transform
-import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.simulation.field.KField2d
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.commands.turret.SeekTurret
-import org.photonvision.targeting.PhotonPipelineResult
-import org.photonvision.targeting.PhotonTrackedTarget
-import org.photonvision.targeting.TargetCorner
-import kotlin.math.atan
 
 
 /**
@@ -62,9 +51,9 @@ object Turret : SubsystemBase(), Debug {
             val polarSpeeds = Drivetrain.polarSpeeds
             val rot = polarSpeeds.dTheta * 0.1.seconds
             val mov = polarSpeeds.dOrientation * 0.0.seconds
-            position = clampSafePosition(positionSetpoint + rot + mov)
+            angle = clampSafePosition(angleSetpoint + rot + mov)
 
-            val offsetCorrection = controller.calculate(position.rotations, positionSetpoint.rotations)
+            val offsetCorrection = controller.calculate(angle.rotations, angleSetpoint.rotations)
             val ff = feedforward.calculate(controller.setpoint.velocity.rotationsPerSecond.radiansPerSecond)
             if (isZeroed) (ff + offsetCorrection) else 0.0//.coerceIn(-4.0, 4.0)
         }
@@ -75,22 +64,22 @@ object Turret : SubsystemBase(), Debug {
 
     // angle of the turret from top view
     var fieldRelativeAngle: Angle
-        get() = (turret.position + RobotContainer.navigation.heading).normalized
+        get() = (turret.angle + RobotContainer.navigation.heading).normalized
         set(value) {
-            turret.position = value - RobotContainer.navigation.heading
+            turret.angle = value - RobotContainer.navigation.heading
         }
     var position: Angle
-        get() = turret.position
-        set(value) { turret.position = value }
+        get() = turret.angle
+        set(value) { turret.angle = value }
 
     var percent
         get() = turret.percent
         set(value) { turret.percent = value }
 
     /**
-     * Allows the turret to know its position relative to everything else
+     * Allows the turret to know its angle relative to everything else
      */
-    fun zeroTurret() {  // zeros the robot position to looking straight aheead
+    fun zeroTurret() {  // zeros the robot angle to looking straight aheead
         turret.resetPosition()
         isZeroed = true
     }
@@ -110,7 +99,7 @@ object Turret : SubsystemBase(), Debug {
     var isZeroed = false
         private set
     val ready: Boolean  // is the Turret prepared to shoot
-        get() = (Limelight.targetVisible && turret.positionError.absoluteValue < Constants.TURRET_TOLERANCE) || status == TurretStatus.FROZEN
+        get() = (Limelight.targetVisible && turret.angleError.absoluteValue < Constants.TURRET_TOLERANCE) || status == TurretStatus.FROZEN
     // smooths out how fast we switch between lost and found
     private val lostDebouncer = Debouncer(0.2, Debouncer.DebounceType.kBoth)  // *** this was changed from .5
     var lost = false

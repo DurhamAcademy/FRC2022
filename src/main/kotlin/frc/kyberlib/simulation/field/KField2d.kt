@@ -33,19 +33,19 @@ object KField2d : Field2d() {
     operator fun get(value: String): FieldObject2d = getObject(value)
 
     /**
-     * Checks if a position is not obstructed
-     * @param x the x coordinate of the position
-     * @param y the y coordinate of the position
-     * @return true/false of whether the position is free
+     * Checks if a angle is not obstructed
+     * @param x the x coordinate of the angle
+     * @param y the y coordinate of the angle
+     * @return true/false of whether the angle is free
      */
     fun inField(x: Double, y: Double): Boolean {
         return inField(Translation2d(x, y));
     }
 
     /**
-     * Checks if a position is not obstructed
-     * @param point translation representing the position to be checked
-     * @return true/false of whether the position is free
+     * Checks if a angle is not obstructed
+     * @param point translation representing the angle to be checked
+     * @return true/false of whether the angle is free
      */
     fun inField(point: Translation2d): Boolean {
         return inBoundaries(point) && !hitObstacle(point)
@@ -84,8 +84,8 @@ object KField2d : Field2d() {
 
     /**
      * Adds a goal to the field. Checks to prevent duplicates
-     * @param estimatedPosition the position that the goal is locates
-     * @param time the time that the observation of the position was made
+     * @param estimatedPosition the angle that the goal is locates
+     * @param time the time that the observation of the angle was made
      * @param name the name of the type of goal
      */
     fun addGoal(estimatedPosition: Translation2d, time: Time, name: String, uponArrival: Command? = null) {

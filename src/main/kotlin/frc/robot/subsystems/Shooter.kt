@@ -8,8 +8,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
-import frc.kyberlib.command.Game
-import frc.kyberlib.math.Polynomial
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.ctre.KTalon
 import frc.kyberlib.motorcontrol.servo.KLinearServo
@@ -64,10 +62,10 @@ object Shooter : SubsystemBase(), Debug {
     private val hood2 = KLinearServo(6, 100.millimeters, 18.0.millimetersPerSecond)
 
     var targetVelocity  // public accesser for setting flywheel speed
-        get() = flywheel.velocitySetpoint
+        get() = flywheel.angularVelocitySetpoint
         set(value) {
             SmartDashboard.putNumber("flywheel target", value.rpm)
-            flywheel.velocity = value * SmartDashboard.getNumber("shooterMult", 1.0)
+            flywheel.angularVelocity = value * SmartDashboard.getNumber("shooterMult", 1.0)
         }
 
     var hoodDistance: Length  // public accessor var. Makes them move in sync
@@ -112,8 +110,8 @@ object Shooter : SubsystemBase(), Debug {
     private val readyDebouncer = Debouncer(0.2, DebounceType.kBoth)
     private val shortReady
         inline get() = hood.atSetpoint &&
-                flywheel.velocityError.absoluteValue < (if (RobotContainer.op.shootWhileMoving) 50.rpm else Constants.SHOOTER_VELOCITY_TOLERANCE)
-                && flywheel.velocitySetpoint > 1.radiansPerSecond
+                flywheel.angularVelocityError.absoluteValue < (if (RobotContainer.op.shootWhileMoving) 50.rpm else Constants.SHOOTER_VELOCITY_TOLERANCE)
+                && flywheel.angularVelocitySetpoint > 1.radiansPerSecond
     val ready: Boolean  // whether ready to shoot
         get() = readyDebouncer.calculate(shortReady)
     var inRange = false
@@ -121,8 +119,8 @@ object Shooter : SubsystemBase(), Debug {
 
     override fun periodic() {
 //        debugDashboard()
-        SmartDashboard.putNumber("fly error", flywheel.velocityError.rpm)
-        SmartDashboard.putNumber("rpm", flywheel.velocity.rpm)
+        SmartDashboard.putNumber("fly error", flywheel.angularVelocityError.rpm)
+        SmartDashboard.putNumber("rpm", flywheel.angularVelocity.rpm)
         if (currentCommand != ShooterCalibration) hoodUpdate(Limelight.effectiveDistance)
     }
 }

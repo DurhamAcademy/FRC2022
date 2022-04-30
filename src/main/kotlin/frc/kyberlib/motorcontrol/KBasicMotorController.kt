@@ -91,7 +91,7 @@ abstract class KBasicMotorController(fake: Boolean = false) : NTSendable, Debug 
     /**
      * True if this motor is following another.
      */
-    protected var isFollower = false
+    private var isFollower = false
 
     operator fun plusAssign(kmc: KBasicMotorController) {
         kmc.follow(this)

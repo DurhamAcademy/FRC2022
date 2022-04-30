@@ -52,7 +52,7 @@ abstract class KDriveDynamics : Debug {
     }
     /**
      * Drive to a pose
-     * @param goal the position to drive to
+     * @param goal the angle to drive to
      * @param direct whether to drive straight to goal or do pathplanning for obstacle avoidance
      */
     fun driveTo(goal: Translation2d, direct: Boolean = true) {

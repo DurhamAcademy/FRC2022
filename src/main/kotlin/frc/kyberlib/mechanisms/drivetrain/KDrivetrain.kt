@@ -37,7 +37,7 @@ abstract class KDrivetrain : SubsystemBase(), Debug {
     fun driveTo(goal: Pose2d, direct: Boolean = true) = dynamics.driveTo(goal, direct)
     /**
      * Drive to a pose
-     * @param goal the position to drive to
+     * @param goal the angle to drive to
      * @param direct whether to drive straight to goal or do pathplanning for obstacle avoidance
      */
     fun driveTo(goal: Translation2d, direct: Boolean = true) = dynamics.driveTo(goal, direct)

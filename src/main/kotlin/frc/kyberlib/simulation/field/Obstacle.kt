@@ -10,7 +10,7 @@ import java.awt.geom.Rectangle2D
 /**
  * A rectangular obstacle on the field
  *
- * @param pose the position and orientation of the obstacle
+ * @param pose the angle and orientation of the obstacle
  * @param width horizontal distance from the center to the side (meters)
  * @param height vertical distance from center to top/bottom (meters)
  */

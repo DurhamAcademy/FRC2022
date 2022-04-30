@@ -74,7 +74,7 @@ class Robot : KRobot() {
             }
         }
 
-        // resets our position assuming we are in the right spot
+        // resets our angle assuming we are in the right spot
         var pose = zeroPose
         for (it in f.readLines()) {
             if (it != "Shot") pose = TrajectoryManager[it]!!.initialPose

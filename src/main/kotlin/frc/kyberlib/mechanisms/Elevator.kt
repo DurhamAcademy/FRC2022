@@ -6,7 +6,7 @@ import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
 
 /**
- * Simple pre-made system that will control an elevator. Control by setting the position.
+ * Simple pre-made system that will control an elevator. Control by setting the angle.
  * @param leadMotor the motor driving the elevator. Other motors in the mechanism should follow this
  * @param initialPosition optional value of where the elevator starts
  * @param mass how heavy (in kg) the system is lifting
@@ -26,9 +26,9 @@ class Elevator(leadMotor: KMotorController, initialPosition: Length = 0.feet, ma
      * The linear Position of where the elevator should be
      */
     var position: Length
-        get() = motor.linearPosition
+        get() = motor.distance
         set(value) {
-            motor.linearPosition = value
+            motor.distance = value
         }
 
     fun update() {

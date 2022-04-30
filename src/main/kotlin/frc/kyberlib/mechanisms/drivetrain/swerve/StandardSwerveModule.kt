@@ -19,11 +19,11 @@ open class StandardSwerveModule(
 ) : SwerveModule(location) {
 
     init {
-        turnMotor.PID.enableContinuousInput(-PI, PI)
+        turnMotor.pid.enableContinuousInput(-PI, PI)
     }
     // turn controls
     override val rotation: Angle
-        get() = turnMotor.position
+        get() = turnMotor.angle
 
     // drive info
     override val speed
@@ -33,6 +33,6 @@ open class StandardSwerveModule(
         get() = SwerveModuleState(speed.metersPerSecond, rotation.w)
         set(value) {
             driveMotor.linearVelocity = value.speedMetersPerSecond.metersPerSecond
-            turnMotor.position = value.angle.k
+            turnMotor.angle = value.angle.k
         }
 }

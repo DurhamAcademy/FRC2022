@@ -2,6 +2,7 @@ package frc.kyberlib.motorcontrol
 
 import edu.wpi.first.wpilibj.Encoder
 import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.string
 
 /**
  * Allows for encoded controls using a motor and a seperate encoder
@@ -15,20 +16,20 @@ class CompoundMotor(val basic: KBasicMotorController, val encoder: Encoder) : KM
 
     override var currentLimit: Int = 100
 
-    override fun resetPosition(position: Angle) {
-        offset = position
+    override fun resetPosition(angle: Angle) {
+        offset = angle
         encoder.reset()
     }
 
-    override var rawPosition: Angle
+    override var rawAngle: Angle
         get() = encoder.distance.radians + offset
         set(value) {
-            throw IllegalCallerException("This doesn't have a integrated controller")
+            throw IllegalCallerException("This doesn't have a integrated controller. Can't set angle to ${value.string()}")
         }
-    override var rawVelocity: AngularVelocity
+    override var rawAngularVelocity: AngularVelocity
         get() = encoder.rate.radiansPerSecond
         set(value) {
-            throw IllegalCallerException("This doesn't have a integrated controller")
+            throw IllegalCallerException("This doesn't have a integrated controller. Can't set spin to ${value.string()}")
         }
     override var brakeMode: BrakeMode
         get() = basic.brakeMode
@@ -47,11 +48,11 @@ class CompoundMotor(val basic: KBasicMotorController, val encoder: Encoder) : KM
         }
 
     override var current: Double
-        get() = if(motorConfigured) motorType!!.getCurrent(rawVelocity.value, voltage) else throw IllegalCallerException("This doesn't have a integrated controller")
+        get() = if(motorConfigured) motorType!!.getCurrent(rawAngularVelocity.value, voltage) else throw IllegalCallerException("This doesn't have a integrated controller")
         set(value) {
             // I = -1.0 / KvRadPerSecPerVolt / rOhms * speedRadiansPerSec + 1.0 / rOhms * voltageInputVolts;
             // I + speedRadiansPerSec/(KvRadPerSecPerVolt * rOhms) = voltage / rOmhs
-            voltage = motorType!!.rOhms*(value + rawVelocity.value/(motorType!!.KvRadPerSecPerVolt * motorType!!.rOhms))
+            voltage = motorType!!.rOhms*(value + rawAngularVelocity.value/(motorType!!.KvRadPerSecPerVolt * motorType!!.rOhms))
         }
 
     override fun followTarget(kmc: KBasicMotorController) {

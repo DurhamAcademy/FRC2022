@@ -9,7 +9,6 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.estimator.KalmanFilter
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N2
 import edu.wpi.first.math.numbers.N3
 import edu.wpi.first.math.system.LinearSystem
@@ -26,7 +25,7 @@ import frc.kyberlib.simulation.Simulatable
 typealias DifferentialModel = LinearSystem<N3, N2, N3>
 /**
  * Wrapper class for a differential swerve module using LQR as the controller for azimuth angle
- * and wheel velocity of the module.
+ * and wheel angularVelocity of the module.
  *
  * link: https://www.chiefdelphi.com/t/paper-a-state-space-model-for-a-differential-swerve/396496
  * @author Dennis Slobodzian - original (10/11/20) & TateStaples - Kotlin/Kyberlib (4/29/22)
@@ -38,7 +37,7 @@ class DifferentialSwerveModule(location: Translation2d,
 
     /**
      * FF based constructor
-     * @param location the position of the module relative to the center of rotation
+     * @param location the angle of the module relative to the center of rotation
      * @param topMotor the motor controlling the top gear of the differential
      * @param bottomMotor the motor controlling the bottom gear of the differential
      * @param moduleGearing the gear ratio between the differential gears and the module output
@@ -55,7 +54,7 @@ class DifferentialSwerveModule(location: Translation2d,
 
     /**
      * FF based constructor
-     * @param location the position of the module relative to the center of rotation
+     * @param location the angle of the module relative to the center of rotation
      * @param topMotor the motor controlling the top gear of the differential
      * @param bottomMotor the motor controlling the bottom gear of the differential
      * @param moduleGearing the gear ratio between the differential gears and the module output
@@ -113,7 +112,7 @@ class DifferentialSwerveModule(location: Translation2d,
         optimizedState = optimizedState
     }
 
-    // use custom predict() function for as absolute encoder azimuth angle and the angular velocity of the module need to be continuous.
+    // use custom predict() function for as absolute encoder azimuth angle and the angular angularVelocity of the module need to be continuous.
     private fun predict() {
         // creates our input of voltage to our motors of u = K(r-x) but need to wrap angle to be continuous
         // see wrapAngle().
@@ -127,16 +126,16 @@ class DifferentialSwerveModule(location: Translation2d,
     }
 
     override val rotation: Angle
-        get() = if(real) (topMotor.position - bottomMotor.position) / moduleGearing else simRot  // todo: replace with absolute encoder if included
+        get() = if(real) (topMotor.angle - bottomMotor.angle) / moduleGearing else simRot  // todo: replace with absolute encoder if included
 
     private val wheelAngularVelocity: AngularVelocity
-        inline get() = (topMotor.velocity + bottomMotor.velocity) / moduleGearing
+        inline get() = (topMotor.angularVelocity + bottomMotor.angularVelocity) / moduleGearing
     // Meters per sec.
     override val speed: LinearVelocity
         get() = if(real) wheelAngularVelocity * wheelRadius else simVel
 
     private val moduleVelocity: AngularVelocity
-        inline get() = (topMotor.velocity - bottomMotor.velocity) / moduleGearing
+        inline get() = (topMotor.angularVelocity - bottomMotor.angularVelocity) / moduleGearing
 
     private var reference = VecBuilder.fill(0.0, 0.0, 0.0)
 
@@ -162,13 +161,13 @@ class DifferentialSwerveModule(location: Translation2d,
         simulation.setInput(topMotor.voltage, bottomMotor.voltage)
         simulation.update(dt.seconds)
         val o = simulation.output
-        simRot = o[0, 0].radians  // position
-        simVel = o[1, 0].radiansPerSecond * wheelRadius  // velocity
+        simRot = o[0, 0].radians  // angle
+        simVel = o[1, 0].radiansPerSecond * wheelRadius  // angularVelocity
     }
 
-    // states: module rotation, module rotation rate, wheel angular velocity
+    // states: module rotation, module rotation rate, wheel angular angularVelocity
     // input: left volt, right volt
-    // output: module rotation, wheel angular velocity
+    // output: module rotation, wheel angular angularVelocity
     companion object {   // check directionality of these modules
         /**
          * Creates a StateSpace model of a differential swerve module.

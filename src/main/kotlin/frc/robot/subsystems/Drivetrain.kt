@@ -110,7 +110,7 @@ object Drivetrain : KDrivetrain() {
         super.periodic()
 //        debugDashboard()
 //        if (RobotContainer.op.smartNav && Game.OPERATED && Turret.isZeroed) {
-//             do global position updates based on limelight data - fixme: i think polar math is slow
+//             do global angle updates based on limelight data - fixme: i think polar math is slow
 //            val distance = Limelight.visionDistance ?: return
 //            val offset = Limelight.visionOffset ?: return
 //            val angle = offset + Turret.fieldRelativeAngle + 180.degrees

@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj.simulation.LinearSystemSim
 import frc.kyberlib.command.DebugFilter
 import frc.kyberlib.command.KRobot
 import frc.kyberlib.command.LogMode
-import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.sign
 import frc.kyberlib.math.units.extensions.*
@@ -69,7 +68,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      *
      * product of (output teeth / input teeth) for each gear stage
      */
-    var gearRatio: GearRatio = 1.0  // todo: add support for shift gearbox
+    var gearRatio: GearRatio = 1.0
 
     fun shiftGearbox(newGearRatio: GearRatio, newCustomControl: MotorControl?=null) {
         if(newCustomControl != null) {
@@ -86,12 +85,12 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
 
     // ----- constraints ---- //
     /**
-     * The max angular velocity the motor can have
+     * The max angular angularVelocity the motor can have
      */
     var maxVelocity: AngularVelocity = 100000.rpm
         set(value) {
             field = value
-            PID.setConstraints(TrapezoidProfile.Constraints(maxVelocity.value, maxAcceleration.value))
+            pid.setConstraints(TrapezoidProfile.Constraints(maxVelocity.value, maxAcceleration.value))
         }
     /**
      * The max angular acceleration the motor can have
@@ -99,31 +98,31 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var maxAcceleration: AngularVelocity = 100000.rpm
         set(value) {
             field = value
-            PID.setConstraints(TrapezoidProfile.Constraints(maxVelocity.value, maxAcceleration.value))
+            pid.setConstraints(TrapezoidProfile.Constraints(maxVelocity.value, maxAcceleration.value))
         }
 
     /**
-     * Max position setpoint
+     * Max angle setpoint
      */
-    open var maxPosition: Angle = Angle(Double.POSITIVE_INFINITY)
-    var maxLinearPosition: Length
-        get() = rotationToLinear(maxPosition)
+    open var maxAngle: Angle = Angle(Double.POSITIVE_INFINITY)
+    var maxDistance: Length
+        get() = rotationToLinear(maxAngle)
         set(value) {
-            maxPosition = linearToRotation(value)
+            maxAngle = linearToRotation(value)
         }
 
     /**
-     * Min position setpoint
+     * Min angle setpoint
      */
-    open var minPosition: Angle = Angle(Double.NEGATIVE_INFINITY)
-    var minLinearPosition: Length
-        get() = rotationToLinear(minPosition)
+    open var minAngle: Angle = Angle(Double.NEGATIVE_INFINITY)
+    var minDistance: Length
+        get() = rotationToLinear(minAngle)
         set(value) {
-            minPosition = linearToRotation(value)
+            minAngle = linearToRotation(value)
         }
 
     /**
-     * The max linear velocity the motor can have
+     * The max linear angularVelocity the motor can have
      */
     var maxLinearVelocity: LinearVelocity
         get() = rotationToLinear(maxVelocity)
@@ -146,31 +145,31 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Proportional gain of the customControl controller.
      */
     inline var kP: Double
-        get() = PID.p
+        get() = pid.p
         set(value) {
-            PID.p = value
+            pid.p = value
         }
 
     /**
      * Integral gain of the customControl controller.
      */
     inline var kI: Double
-        get() = PID.i
+        get() = pid.i
         set(value) {
-            PID.i = value
+            pid.i = value
         }
 
     /**
      * Derivative gain of the customControl controller.
      */
     inline var kD: Double
-        inline get() = PID.d
+        inline get() = pid.d
         set(value) {
-            PID.d = value
+            pid.d = value
         }
 
     /**
-     * The multiplier to get from high level units (geared) to native units (ungeared)
+     * The multiplier to get from high level units (geared) to native units (un-geared)
      */
     protected val toNative
         inline get() = if(linearConfigured) radius!!.meters * gearRatio else gearRatio
@@ -183,36 +182,36 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     var kIRange = 0.0
         set(value) {
             field = value
-            PID.setIntegratorRange(-value, value)
+            pid.setIntegratorRange(-value, value)
         }
 
     /**
-     * Builtin PID controller for motor
+     * Builtin pid controller for motor
      */
-    var PID = ProfiledPIDController(0.0, 0.0, 0.0, TrapezoidProfile.Constraints(Double.MAX_VALUE, Double.MAX_VALUE))
+    var pid = ProfiledPIDController(0.0, 0.0, 0.0, TrapezoidProfile.Constraints(Double.MAX_VALUE, Double.MAX_VALUE))
     private inline val pidVal get() = when (controlMode) {
         ControlMode.VELOCITY -> {
             if (!linearConfigured)
-                PID.calculate(
-                    velocity.radiansPerSecond,
-                    velocitySetpoint.radiansPerSecond
+                pid.calculate(
+                    angularVelocity.radiansPerSecond,
+                    angularVelocitySetpoint.radiansPerSecond
                 )
             else
-                PID.calculate(
+                pid.calculate(
                     linearVelocity.metersPerSecond,
                     linearVelocitySetpoint.metersPerSecond
                 )
         }
         ControlMode.POSITION -> {
-            if (!linearConfigured) PID.calculate(position.radians, positionSetpoint.radians)
-            else PID.calculate(linearPosition.meters, linearPositionSetpoint.meters)
+            if (!linearConfigured) pid.calculate(angle.radians, angleSetpoint.radians)
+            else pid.calculate(distance.meters, distanceSetpoint.meters)
         }
         else -> 0.0
     }
 
     /**
-     * Whether to flash the PID loop onto the intergrated controller. Might allow for better performace but harder to debug and mess with.
-     * ***This should only be set after configuring your PID values***
+     * Whether to flash the pid loop onto the integrated controller. Might allow for better performance but harder to debug and mess with.
+     * ***This should only be set after configuring your pid values***
      */
     var nativeControl = false  // todo
         set(value) {
@@ -220,20 +219,20 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
             if(real && value) implementNativeControls()
         }
     /**
-     * Builtin control that will combine feedforward with the PID.
-     * Useful in both position and velocity control
+     * Builtin control that will combine feedforward with the pid.
+     * Useful in both angle and angularVelocity control
      */
     fun addFeedforward(feedforward: SimpleMotorFeedforward) {
         customControl = {
             when (controlMode) {
                 ControlMode.VELOCITY -> {
                     val ff =
-                        if (linearConfigured) feedforward.calculate(linearVelocitySetpoint.metersPerSecond)///, linearVelocitySetpoint.metersPerSecond, updateRate.seconds)
-                        else feedforward.calculate(velocitySetpoint.radiansPerSecond)//, velocitySetpoint.radiansPerSecond, updateRate.seconds)
+                        if (linearConfigured) feedforward.calculate(linearVelocitySetpoint.metersPerSecond)
+                        else feedforward.calculate(angularVelocitySetpoint.radiansPerSecond)
                     ff + pidVal
                 }
                 ControlMode.POSITION -> {
-                    pidVal + feedforward.calculate(PID.goal.velocity)
+                    pidVal + feedforward.calculate(pid.goal.velocity)
                 }
                 else -> 0.0
             }
@@ -241,20 +240,20 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     }
 
     /**
-     * Used to create builtin functions for angular position sheet.
+     * Used to create builtin functions for angular angle sheet.
      */
     fun addFeedforward(feedforward: ArmFeedforward) {
         customControl = {
             when (controlMode) {
                 ControlMode.POSITION -> {
                     val ff = feedforward.calculate(
-                        position.radians,
+                        angle.radians,
                         0.0
                     )
                     ff + pidVal
                 }
                 ControlMode.VELOCITY -> {
-                    val ff = feedforward.calculate(position.radians, velocity.radiansPerSecond)
+                    val ff = feedforward.calculate(angle.radians, angularVelocity.radiansPerSecond)
                     ff + pidVal
                 }
                 else -> 0.0
@@ -292,8 +291,8 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         timer.start()
         customControl = {
             val state = profile.calculate(timer.get())
-            velocity = state.velocity.radiansPerSecond
-            position = state.position.radians
+            angularVelocity = state.velocity.radiansPerSecond
+            angle = state.position.radians
             if (profile.isFinished(timer.get())) {
                 timer.stop()
                 customControl = prevControl
@@ -310,12 +309,12 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         assert(!brakeMode) {"dont use brake mode in Bang bang"}
         customControl =  {
             if(controlMode == ControlMode.POSITION) {
-                if(positionTolerance > positionError.absoluteValue) 0.0
-                else if(positionError.value < 0) effort
+                if(positionTolerance > angleError.absoluteValue) 0.0
+                else if(angleError.value < 0) effort
                 else -effort
             } else {
-                if(velocityTolerance > velocityError.absoluteValue) 0.0
-                else if(velocityError.value < 0) effort
+                if(velocityTolerance > angularVelocityError.absoluteValue) 0.0
+                else if(angularVelocityError.value < 0) effort
                 else -effort
             }
         }
@@ -362,8 +361,8 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         motorType = other.motorType
         brakeMode = other.brakeMode
 
-        maxPosition = other.maxPosition
-        minPosition = other.minPosition
+        maxAngle = other.maxAngle
+        minAngle = other.minAngle
         maxVelocity = other.maxVelocity
         maxAcceleration = other.maxAcceleration
     }
@@ -374,64 +373,64 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     fun shareConfig(other: KMotorController) {other.copyConfig(this)}
 
     /**
-     * Locks recursive calls to customControl from inside customControl when setting position/velocity
+     * Locks recursive calls to customControl from inside customControl when setting angle/angularVelocity
      */
-    private var customControlLock = false  // this could brake but I don't think its been an issue so far
+    private var customControlLock = false  // this could break, but I don't think it's been an issue so far
 
     // ----- motor state information ----- //
     /**
      * Angle that the motor is at / should be at
      */
-    var position: Angle
-        get() = if (real) (rawPosition / gearRatio.invertIf { reversed }) else simPosition
+    var angle: Angle
+        get() = if (real) (rawAngle / gearRatio.invertIf { reversed }) else simAngle
         set(value) {
             controlMode = ControlMode.POSITION
-            positionSetpoint = value
+            angleSetpoint = value
         }
 
     /**
      * Distance the motor has traveled
      */
-    var linearPosition: Length
-        get() = rotationToLinear(position)
+    var distance: Length
+        get() = rotationToLinear(angle)
         set(value) {
-            position = linearToRotation(value)
+            angle = linearToRotation(value)
         }
 
     /**
      * Spin rate of motor system
      */
-    var velocity: AngularVelocity
-        get() = if (real) rawVelocity / gearRatio.invertIf { reversed } else simVelocity
+    var angularVelocity: AngularVelocity
+        get() = if (real) rawAngularVelocity / gearRatio.invertIf { reversed } else simAngularVelocity
         set(value) {
             controlMode = ControlMode.VELOCITY
-            velocitySetpoint = value
+            angularVelocitySetpoint = value
         }
 
     /**
      * Linear velocity of the motor system
      */
     var linearVelocity: LinearVelocity
-        get() = rotationToLinear(velocity)
+        get() = rotationToLinear(angularVelocity)
         set(value) {
-            velocity = linearToRotation(value)
+            angularVelocity = linearToRotation(value)
         }
 
     // ----- error ---- //
     /**
      * Angle between where it is and where it wants to be
      */
-    inline val positionError get() = position - positionSetpoint
+    inline val angleError get() = angle - angleSetpoint
 
     /**
      * Distance between where it is and where it wants to be
      */
-    inline val linearPositionError get() = linearPosition - linearPositionSetpoint
+    inline val distanceError get() = distance - distanceSetpoint
 
     /**
      * Velocity difference between where it is and where it wants to be
      */
-    inline val velocityError get() = velocity - velocitySetpoint
+    inline val angularVelocityError get() = angularVelocity - angularVelocitySetpoint
 
     /**
      * Linear Velocity difference between where it is and where it wants to be
@@ -442,32 +441,32 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     /**
      * Sets the angle to which the motor should go
      */
-    var positionSetpoint: Angle = 0.rotations
+    var angleSetpoint: Angle = 0.rotations
         private set(value) {
-            field = value.coerceIn(minPosition, maxPosition)
+            field = value.coerceIn(minAngle, maxAngle)
             if(!customControlLock) updateVoltage()
         }
 
     /**
-     * Sets the velocity to which the motor should go
+     * Sets the angularVelocity to which the motor should go
      */
-    var velocitySetpoint: AngularVelocity = 0.rpm
+    var angularVelocitySetpoint: AngularVelocity = 0.rpm
         private set(value) {
             field = value//.coerceIn(-maxVelocity, maxVelocity)
             if(!customControlLock) updateVoltage()
         }
 
     /**
-     * Sets the linear position to which the motor should go
+     * Sets the linear angle to which the motor should go
      */
-    val linearPositionSetpoint: Length
-        get() = rotationToLinear(positionSetpoint)
+    val distanceSetpoint: Length
+        get() = rotationToLinear(angleSetpoint)
 
     /**
-     * Sets the linear velocity to which the motor should go
+     * Sets the linear angularVelocity to which the motor should go
      */
     val linearVelocitySetpoint: LinearVelocity
-        get() = rotationToLinear(velocitySetpoint)
+        get() = rotationToLinear(angularVelocitySetpoint)
 
     // ----- util functions -----//
     /**
@@ -501,12 +500,12 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     }
 
     /**
-     * Updates the voltage after changing position / velocity setpoint
+     * Updates the voltage after changing angle / angularVelocity setpoint
      */
     fun updateVoltage() {
         if(nativeControl) {
-            if(controlMode == ControlMode.VELOCITY) rawVelocity = velocitySetpoint * gearRatio.invertIf { reversed }
-            else if(controlMode == ControlMode.POSITION) rawPosition = positionSetpoint * gearRatio.invertIf { reversed }
+            if(controlMode == ControlMode.VELOCITY) rawAngularVelocity = angularVelocitySetpoint * gearRatio.invertIf { reversed }
+            else if(controlMode == ControlMode.POSITION) rawAngle = angleSetpoint * gearRatio.invertIf { reversed }
         }
         else if (controlMode != ControlMode.VOLTAGE) {
             customControlLock = true
@@ -534,29 +533,29 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Resets motor to a certain positions
      * Does *not* move to angle, just changes the variable
      */
-    abstract fun resetPosition(position: Angle = 0.rotations)
+    abstract fun resetPosition(angle: Angle = 0.rotations)
 
     /**
      * Resets where the encoder thinks it is.
      * Does *not* move motor to that spot, just internal variable.
      */
     @JvmName("resetPosition1")
-    fun resetPosition(position: Length) {
-        resetPosition(linearToRotation(position))
+    fun resetPosition(distance: Length) {
+        resetPosition(linearToRotation(distance))
     }
 
     /**
-     * The native motors get and set methods for position.
+     * The native motors get and set methods for angle.
      * Recommend using Position instead because it is safer.
      */
-    abstract var rawPosition: Angle
+    abstract var rawAngle: Angle
         protected set
 
     /**
-     * Native motor get and set for angular velocity.
+     * Native motor get and set for angular angularVelocity.
      * Recommend using Velocity instead because it is safer
      */
-    abstract var rawVelocity: AngularVelocity
+    abstract var rawAngularVelocity: AngularVelocity
         protected set
 
     /**
@@ -565,58 +564,58 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     override fun initSendable(builder: NTSendableBuilder) {
         super.initSendable(builder)
         if (linearConfigured) {
-            builder.addDoubleProperty("Linear Position (m)", { linearPosition.meters }, null)
+            builder.addDoubleProperty("Distance (m)", { distance.meters }, null)
             builder.addDoubleProperty(
-                "Linear Position Setpoint (m)",
-                { linearPositionSetpoint.meters },
-                { if (it.meters != linearPosition) linearPosition = it.meters })
+                "Distance Setpoint (m)",
+                { distanceSetpoint.meters },
+                { if (it.meters != distance) distance = it.meters })
             builder.addDoubleProperty("Linear Velocity (m per s)", { linearVelocity.metersPerSecond }, null)
             builder.addDoubleProperty(
                 "Linear Setpoint Velocity (m per s)",
                 { linearVelocitySetpoint.metersPerSecond },
                 { if (it.metersPerSecond != linearVelocity) linearVelocity = it.metersPerSecond })
         } else {
-            builder.addDoubleProperty("Angular Position (degrees)", { position.degrees }, null)
+            builder.addDoubleProperty("Angle (degrees)", { angle.degrees }, null)
             builder.addDoubleProperty(
-                "Angular Position Setpoint (degrees)",
-                { positionSetpoint.degrees },
-                { if (it.degrees != position) position = it.degrees })
-            builder.addDoubleProperty("Angular Velocity (rad per s)", { velocity.radiansPerSecond }, null)
+                "Angle Setpoint (degrees)",
+                { angleSetpoint.degrees },
+                { if (it.degrees != angle) angle = it.degrees })
+            builder.addDoubleProperty("Angular Velocity (rad per s)", { angularVelocity.radiansPerSecond }, null)
             builder.addDoubleProperty(
                 "Angular Velocity Setpoint (rad per s)",
-                { velocitySetpoint.radiansPerSecond },
-                { if (it.radiansPerSecond != velocity) velocity = it.radiansPerSecond })
+                { angularVelocitySetpoint.radiansPerSecond },
+                { if (it.radiansPerSecond != angularVelocity) angularVelocity = it.radiansPerSecond })
         }
     }
 
     // ----- sim ---- //
     // you should never really need to touch these values unless you are making a custom sim
     /**
-     * Settable variable describing velocity according to whatever simulation
+     * Settable variable describing angularVelocity according to whatever simulation
      */
-    private var simVelocity: AngularVelocity = 0.rpm
+    private var simAngularVelocity: AngularVelocity = 0.rpm
         set(value) {
             assert(!real) { "This value should only be set from a simulation" }
             field = value
         }
 
     /**
-     * Settable variable describing velocity according to whatever simulation
+     * Settable variable describing angularVelocity according to whatever simulation
      */
-    private var simPosition: Angle = 0.degrees
+    private var simAngle: Angle = 0.degrees
         set(value) {
             assert(!real) { "This value should only be set from a simulation" }
             field = value
         }
     private var simLinearVelocity
-        get() = rotationToLinear(simVelocity)
+        get() = rotationToLinear(simAngularVelocity)
         set(value) {
-            simVelocity = linearToRotation(value)
+            simAngularVelocity = linearToRotation(value)
         }
-    private var simLinearPosition
-        get() = rotationToLinear(simPosition)
+    private var simDistance
+        get() = rotationToLinear(simAngle)
         set(value) {
-            simPosition = linearToRotation(value)
+            simAngle = linearToRotation(value)
         }
 
     /**
@@ -633,7 +632,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         if (!real) Simulation.include(this)
         simUpdater = { dt: Time ->
             feedforwardUpdate(
-                feedforward.ks + feedforward.kcos * position.cos,
+                feedforward.ks + feedforward.kcos * angle.cos,
                 feedforward.kv,
                 feedforward.ka,
                 dt
@@ -657,28 +656,28 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     /**
      * Private math to estimate how the feedforward would predict
      */
-    private fun feedforwardUpdate(staticVolt: Voltage, kV: Double, kA: Double, dt: Time) {
+    private fun feedforwardUpdate(staticVolt: Voltage, kV: Double, kA: Double, dt: Time) {  // todO: maybe remove and just use linear systems
         if (voltage.absoluteValue < staticVolt) {
-            simVelocity = 0.radiansPerSecond
+            simAngularVelocity = 0.radiansPerSecond
             // kinda assuming brakeMode
         } else {
             val applicableVolt = (voltage.absoluteValue - staticVolt).invertIf { voltage < 0.0 }
-            val vel = velocity.radiansPerSecond
+            val vel = angularVelocity.radiansPerSecond
             val accVolt = applicableVolt - kV * vel
             val acceleration = accVolt / kA
             if (brakeMode) {
-                val velMaintananceVolt = staticVolt + kV * velocity.radiansPerSecond.absoluteValue
-                if (velMaintananceVolt.sign != velocity.radiansPerSecond.sign && vel != 0.0)
-                    simVelocity = 0.radiansPerSecond
-                else if (velMaintananceVolt < voltage.absoluteValue)
-                    simVelocity = (applicableVolt / kV).radiansPerSecond
+                val velMaintenanceVolt = staticVolt + kV * angularVelocity.radiansPerSecond.absoluteValue
+                if (velMaintenanceVolt.sign != angularVelocity.radiansPerSecond.sign && vel != 0.0)
+                    simAngularVelocity = 0.radiansPerSecond
+                else if (velMaintenanceVolt < voltage.absoluteValue)
+                    simAngularVelocity = (applicableVolt / kV).radiansPerSecond
                 else
-                    simVelocity += acceleration.radiansPerSecond * dt.seconds
+                    simAngularVelocity += acceleration.radiansPerSecond * dt.seconds
             } else {
-                simVelocity += acceleration.radiansPerSecond * dt.seconds
+                simAngularVelocity += acceleration.radiansPerSecond * dt.seconds
             }
         }
-        simPosition += velocity * dt
+        simAngle += angularVelocity * dt
     }
 
     /**
@@ -690,8 +689,8 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         simUpdater = { dt: Time ->
             sim.setInput(voltage)
             sim.update(dt.seconds)
-            simVelocity = sim.getOutput(0).radiansPerSecond
-            simPosition += simVelocity * dt
+            simAngularVelocity = sim.getOutput(0).radiansPerSecond
+            simAngle += simAngularVelocity * dt
         }
     }
 
@@ -703,8 +702,8 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
             sim.setInput(voltage)
             sim.update(dt.seconds)
             val newPosition = sim.getOutput(0).radians
-            simVelocity = (newPosition - simPosition) / dt
-            simPosition = newPosition
+            simAngularVelocity = (newPosition - simAngle) / dt
+            simAngle = newPosition
         }
     }
 
@@ -715,8 +714,8 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         simUpdater = { dt: Time ->
             sim.setInput(voltage)
             sim.update(dt.seconds)
-            simPosition = sim.getOutput(0).radians
-            simVelocity = sim.getOutput(1).radiansPerSecond
+            simAngle = sim.getOutput(0).radians
+            simAngularVelocity = sim.getOutput(1).radiansPerSecond
         }
     }
 
@@ -725,11 +724,11 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     }
     var simUpdater = { dt: Time ->
         if(controlMode == ControlMode.POSITION) {
-            simVelocity = (positionSetpoint - simPosition) / dt
-            simPosition = positionSetpoint
+            simAngularVelocity = (angleSetpoint - simAngle) / dt
+            simAngle = angleSetpoint
         } else if (controlMode == ControlMode.VELOCITY) {
-            simVelocity = velocitySetpoint
-            simPosition += simVelocity * dt
+            simAngularVelocity = angularVelocitySetpoint
+            simAngle += simAngularVelocity * dt
         }
     }
     override fun simUpdate(dt: Time) {
@@ -745,13 +744,13 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      *
      * the second input is the number of outputs in the system. There is typically one output, voltage.
      *
-     * the final input is the number of inputs to the system. These are the things you are trying to control like position
+     * the final input is the number of inputs to the system. These are the things you are trying to control like angle
      *
-     * @see positionSystem - this has 2 states (position and velocity), 1 output (voltage), and 1 input (position setpoint)
+     * @see positionSystem - this has 2 states (angle and angularVelocity), 1 output (voltage), and 1 input (angle setpoint)
      */
 
     /**
-     * Creates a plant that model how velocity for a motor evolves
+     * Creates a plant that model how angularVelocity for a motor evolves
      */
     fun velocitySystem(ff: SimpleMotorFeedforward): LinearSystem<N1, N1, N1> {
         if(linearConfigured) return LinearSystemId.identifyVelocitySystem(ff.kv * radius!!.meters, ff.ka * radius!!.meters)
@@ -759,7 +758,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     }
 
     /**
-     * Creates a plant that model how position for a motor evolves
+     * Creates a plant that model how angle for a motor evolves
      */
     fun positionSystem(ff: SimpleMotorFeedforward): LinearSystem<N2, N1, N1> {
         if(linearConfigured) return LinearSystemId.identifyPositionSystem(ff.kv * radius!!.meters, ff.ka * radius!!.meters)
@@ -767,7 +766,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     }
 
     /**
-     * Creates a plant that model how position and velocity for a motor evolves
+     * Creates a plant that model how angle and angularVelocity for a motor evolves
      */
     fun dcSystem(momentOfInertia: Double): LinearSystem<N2, N1, N2> {
         if (!motorConfigured) throw MotorUnconfigured
@@ -775,7 +774,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     }
 
     /**
-     * Creates a plant that model how velocity for a flywheel evolves based off its moment of inertia
+     * Creates a plant that model how angularVelocity for a flywheel evolves based off its moment of inertia
      */
     fun flywheelSystem(momentOfInertia: Double): LinearSystem<N1, N1, N1> {
         if (!motorConfigured) throw MotorUnconfigured
@@ -783,7 +782,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     }
 
     /**
-     * Creates a plant that model how position for an elevator system of a given mass
+     * Creates a plant that model how angle for an elevator system of a given mass
      */
     fun elevatorSystem(mass: Double): LinearSystem<N2, N1, N1> {
         if (!motorConfigured) throw MotorUnconfigured
@@ -791,7 +790,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     }
 
     /**
-     * Creates a model of the position of an arm system given the moment of interia around the joint
+     * Creates a model of the angle of an arm system given the moment of inertia around the joint
      */
     fun armSystem(momentOfInertia: Double): LinearSystem<N2, N1, N1> {
         if (!motorConfigured) throw MotorUnconfigured
@@ -799,7 +798,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     }
 
     /**
-     * Creates model of the position of an arm system for its characterization values
+     * Creates model of the angle of an arm system for its characterization values
      */
     fun armSystem(armFeedforward: ArmFeedforward): LinearSystem<N2, N1, N1> {
         return LinearSystem(
@@ -837,13 +836,13 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         }
         set(value) {
             if (!motorConfigured) throw MotorUnconfigured
-            voltage = motorType!!.rOhms / (value / motorType!!.KtNMPerAmp + 1.0 / motorType!!.KvRadPerSecPerVolt / motorType!!.rOhms * velocity.radiansPerSecond) / gearRatio
+            voltage = motorType!!.rOhms / (value / motorType!!.KtNMPerAmp + 1.0 / motorType!!.KvRadPerSecPerVolt / motorType!!.rOhms * angularVelocity.radiansPerSecond) / gearRatio
         }
 
     /**
      * The linear force (in newtons) applied by the motor
      */
-    var force: Double
+    var force: Double  // fixme
         get() = torque * radius!!.value
         set(value) { torque = value / radius!!.value }
 
@@ -852,13 +851,13 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
         get() = voltage / current
 
     /**
-     * Sets a control system based around a velocity control loop
+     * Sets a control system based around a angularVelocity control loop
      */
     @JvmName("velocityStateSpaceControl")
     private fun stateSpaceControl(loop: LinearSystemLoop<N1, N1, N1>, timeDelay: Time = 0.02.seconds) {
         customControl = {
-            loop.nextR = VecBuilder.fill(it.velocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
-            loop.correct(VecBuilder.fill(it.velocity.radiansPerSecond))  // update with empirical
+            loop.nextR = VecBuilder.fill(it.angularVelocitySetpoint.radiansPerSecond)  // r = reference (setpoint)
+            loop.correct(VecBuilder.fill(it.angularVelocity.radiansPerSecond))  // update with empirical
             loop.predict(timeDelay.seconds)  // math
             val nextVoltage = loop.getU(0)  // input
             nextVoltage
@@ -867,13 +866,13 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     }
 
     /**
-     * Sets a control system based around a position control loop
+     * Sets a control system based around an angle control loop
      */
     @JvmName("positionStateSpaceControl")
     private fun stateSpaceControl(loop: LinearSystemLoop<N2, N1, N1>, timeDelay: Time = 0.02.seconds) {
         customControl = {
-            loop.nextR = VecBuilder.fill(positionSetpoint.radians, velocitySetpoint.radiansPerSecond)
-            loop.correct(VecBuilder.fill(position.radians))
+            loop.nextR = VecBuilder.fill(angleSetpoint.radians, angularVelocitySetpoint.radiansPerSecond)
+            loop.correct(VecBuilder.fill(angle.radians))
             loop.predict(timeDelay.seconds)  // math
             val nextVoltage = loop.getU(0)  // input
             nextVoltage
@@ -887,8 +886,8 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     @JvmName("dualStateSpaceControl")
     private fun stateSpaceControl(loop: LinearSystemLoop<N2, N1, N2>, timeDelay: Time = 0.02.seconds) {
         customControl = {
-            loop.nextR = VecBuilder.fill(positionSetpoint.value, velocitySetpoint.value)
-            loop.correct(VecBuilder.fill(position.value, velocity.value))
+            loop.nextR = VecBuilder.fill(angleSetpoint.value, angularVelocitySetpoint.value)
+            loop.correct(VecBuilder.fill(angle.value, angularVelocity.value))
             loop.predict(timeDelay.seconds)  // math
             val nextVoltage = loop.getU(0)  // input
             nextVoltage
@@ -900,7 +899,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
      * Sets a control system based around a system and control parameters
      * @param plant the system that models this motor
      * @param modelDeviation how much to trust the system math should me
-     * @param errorCost the tolerance on how far off from the target the motor can be. Higher cost means more agressive correction.
+     * @param errorCost the tolerance on how far off from the target the motor can be. Higher cost means more aggressive correction.
      * @param inputCost the tolerance on the amount of voltage. Defaults to battery voltage (12.0). Higher cost will mean more hesitant to use a lot of power.
      * @param timeDelay the time between each loop. Defaults to robot periodic but other values will create a notifier for faster updates.
      */
@@ -954,7 +953,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
     @JvmName("dualControlL")
     fun stateSpaceControl(plant: LinearSystem<N2, N1, N2>, modelDeviation: Length, positionTolerance: Length, velocityTolerance: LinearVelocity, inputCost: Voltage = 12.0, timeDelay: Time = 0.02.seconds) { stateSpaceControl(plant, linearToRotation(modelDeviation), linearToRotation(positionTolerance), linearToRotation(velocityTolerance), inputCost, timeDelay) }
 
-    // rough guestimates for how accurate your encoder should be for Kalman filter values
+    // rough guesstimates for how accurate your encoder should be for Kalman filter values
     // these values have not been tuned at all
     private inline val roughPositionAccuracy
         get() = .01.radians / gearRatio
@@ -963,10 +962,10 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
 }
 
 object LinearUnconfigured : Exception("You must set the wheel radius before using linear values")
-object MotorUnconfigured : Exception("You must set motor type before using linear sytems")
+object MotorUnconfigured : Exception("You must set motor type before using linear systems")
 
 /**
- * Takes a moment of intertia and estimates the ff values that would be generated
+ * Takes a moment of inertia and estimates the ff values that would be generated
  */
 internal fun estimateFF(motorType: DCMotor, gearRatio: Double, momentOfInertia: Double) {
     val ka = (motorType.rOhms * momentOfInertia) / (gearRatio * motorType.KtNMPerAmp)
@@ -975,16 +974,16 @@ internal fun estimateFF(motorType: DCMotor, gearRatio: Double, momentOfInertia: 
 }
 
 class MotorReader(private val motor: KMotorController) : BasicMotorReader(motor) {
-    val position get() = motor.position
-    val positionError get() = motor.positionError
-    val posisitionSetpoint get() = motor.positionSetpoint
-    val linearPosition get() = motor.linearPosition
-    val linearPositionError get() = motor.linearPositionError
-    val linearPositionSetpoint get() = motor.linearPositionSetpoint
+    val angle get() = motor.angle
+    val angleError get() = motor.angleError
+    val angleSetpoint get() = motor.angleSetpoint
+    val distance get() = motor.distance
+    val distanceError get() = motor.distanceError
+    val distanceSetpoint get() = motor.distanceSetpoint
 
-    val velocity get() = motor.velocity
-    val velcoityError get() = motor.velocityError
-    val velocitySetpoint get() = motor.velocitySetpoint
+    val angularVelocity get() = motor.angularVelocity
+    val angularVelocityError get() = motor.angularVelocityError
+    val angularVelocitySetpoint get() = motor.angularVelocitySetpoint
     val linearVelocity get() = motor.linearVelocity
     val linearVelocityError get() = motor.linearVelocityError
     val linearVelocitySetpoint get() = motor.linearVelocitySetpoint

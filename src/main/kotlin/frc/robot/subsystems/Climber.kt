@@ -12,7 +12,6 @@ import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.filters.Differentiator
 import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.motorcontrol.Voltage
 import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.kyberlib.pneumatics.KSolenoid
 import frc.robot.Constants
@@ -39,8 +38,8 @@ object Climber : SubsystemBase(), Debug {
         brakeMode = true
         gearRatio = Constants.WINCH_GEAR_RATIO
         motorType = DCMotor.getNeo550(1)
-        minLinearPosition = 0.inches
-        maxLinearPosition = 24.inches
+        minDistance = 0.inches
+        maxDistance = 24.inches
         currentLimit = 30
 
         kP = 15.0
@@ -54,11 +53,11 @@ object Climber : SubsystemBase(), Debug {
         identifier = "right winch"
     }
 
-    var extension  // public variable to control position off both the arms
-        get() = leftWinch.linearPosition
+    var extension  // public variable to control angle off both the arms
+        get() = leftWinch.distance
         set(value) {
-            leftWinch.linearPosition = value
-            rightWinch.linearPosition = value
+            leftWinch.distance = value
+            rightWinch.distance = value
         }
 
     fun setClimbPercents(left: Double, right: Double) {
@@ -81,7 +80,7 @@ object Climber : SubsystemBase(), Debug {
      */
     fun stabalize() {
         // *** Note this is actually controlling Shooter and Drivetrain subsystems, so they must be required before calling this
-        if (leftWinch.linearPosition < 5.inches) return
+        if (leftWinch.distance < 5.inches) return
         val dTheta = -swing.calculate(RobotContainer.gyro.pitch)  // note: pitch may be wrong
         val dampeningConstant = RobotContainer.op.climbStabilization
         val targetTorque = dTheta.value * dampeningConstant
@@ -105,7 +104,7 @@ object Climber : SubsystemBase(), Debug {
     private val extendable = extendPivot.append(
         MechanismLigament2d(
             "extenable",
-            35.inches.value + leftWinch.position.value,
+            35.inches.value + leftWinch.angle.value,
             22.5,
             1.0,
             Color8Bit(255, 0, 0)
@@ -119,7 +118,7 @@ object Climber : SubsystemBase(), Debug {
     }
 
     override fun simulationPeriodic() {
-        extendable.length = (35.inches.value + leftWinch.position.value)
+        extendable.length = (35.inches.value + leftWinch.angle.value)
         extendable.angle = if (climbLift.extended) 90.0 else 22.0
     }
 }

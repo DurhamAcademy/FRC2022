@@ -47,7 +47,7 @@ internal class PathingInformation(val startPosition: Translation2d, val endPosit
      * Converts the polar coordinates of the oval into Cartesian
      * @param rho the radius of the polar coordinates
      * @param theta the angle of the polar coordinates
-     * @return a position representing the Cartesian Coordinates in the field
+     * @return a angle representing the Cartesian Coordinates in the field
      */
     fun get(rho: Double, theta: Double): Translation2d {
         assert(pathFound) {"You should not sample from information until pathLength is set"}

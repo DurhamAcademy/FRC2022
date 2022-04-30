@@ -76,13 +76,14 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
     // location
     inline val heading: Angle  // what direction the robot is facing
         get() = pose.rotation.k
-    val pose: Pose2d  // the location and direction of the robot
+    var pose: Pose2d  // the location and direction of the robot
         get() = if(differentialDrive) difPoseEstimator.estimatedPosition else holonomicPoseEstimator.estimatedPosition
+        set(value) {if(differentialDrive) difPoseEstimator.resetPosition(value, gyro.heading.w) else holonomicPoseEstimator.resetPosition(value, gyro.heading.w)}
     inline val position: Translation2d  // the estimated location of the robot
         get() = pose.translation
 
     /**
-     * Update position based on estimated motion
+     * Update angle based on estimated motion
      */
     fun update(speeds: DifferentialDriveWheelSpeeds, leftPosition: Length, rightPosition: Length) {  // estimate motion
         difPoseEstimator.update(gyro.heading.w, speeds, leftPosition.meters, rightPosition.meters)
@@ -91,7 +92,7 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
 
     fun update(dynamics: KDriveDynamics) {
         val chassis = dynamics.chassisSpeeds
-        if(dynamics is KDifferentialDriveDynamic) difPoseEstimator.update(gyro.heading.w, dynamics.wheelSpeeds, dynamics.leftMaster.linearPosition.meters, dynamics.rightMaster.linearPosition.meters)
+        if(dynamics is KDifferentialDriveDynamic) difPoseEstimator.update(gyro.heading.w, dynamics.wheelSpeeds, dynamics.leftMaster.distance.meters, dynamics.rightMaster.distance.meters)
         else holonomicPoseEstimator.update(gyro.heading.w, chassis)
         simUpdate(chassis.omegaRadiansPerSecond.radiansPerSecond)
     }
@@ -103,12 +104,12 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
 
 
     /**
-     * Update position based on a different position guess
+     * Update angle based on a different angle guess
      *
      * @param globalPosition the detected pose of the Robot
      * @param time the time of the detection
      */
-    fun update(globalPosition: Pose2d, time: Time) {  // apply global position update
+    fun update(globalPosition: Pose2d, time: Time) {  // apply global angle update
         if(differentialDrive) difPoseEstimator.addVisionMeasurement(globalPosition, time.milliseconds)
         else holonomicPoseEstimator.addVisionMeasurement(globalPosition, time.milliseconds)
         simUpdate()

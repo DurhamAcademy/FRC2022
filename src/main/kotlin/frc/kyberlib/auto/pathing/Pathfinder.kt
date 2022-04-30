@@ -27,8 +27,8 @@ object Pathfinder : Debug {
     var pathFound = false  // whether the Planner currently has a working path
         private set
     private var endNode: Node? =
-        null  // the node the represents the end goal [robot position] (think about changing to growing 2 seperate trees)
-    val path: ArrayList<Node>?   // the working path of points to get from robot position to target goal
+        null  // the node the represents the end goal [robot angle] (think about changing to growing 2 seperate trees)
+    val path: ArrayList<Node>?   // the working path of points to get from robot angle to target goal
         get() = endNode?.let { tree.trace(it) }
 
     /** how many nodes to create before giving up finding target */
@@ -182,7 +182,7 @@ object Pathfinder : Debug {
 
     /**
      * Generates random point in the field
-     * @return a valid position in the field
+     * @return a valid angle in the field
      */
     internal fun randomPoint(): Translation2d {
         var x: Double
@@ -250,7 +250,7 @@ object PathingTest {
 //        println(_root_ide_package_.frc.kyberlib.auto.pathing.Pathfinder.path!!.size)
         Pathfinder.drawTreePath()
         println(Pathfinder.path)
-//        println(Pathfinder.path!!.map { Pathfinder.field.inField(it.position) })
+//        println(Pathfinder.path!!.map { Pathfinder.field.inField(it.angle) })
 //        println(Pathfinder.field.obstacles)
     }
 }

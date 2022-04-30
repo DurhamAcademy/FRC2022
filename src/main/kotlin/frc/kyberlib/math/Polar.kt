@@ -67,6 +67,7 @@ fun ChassisSpeeds.polar(position: PolarPose): PolarVelocity {
     )
 }
 
+@SuppressWarnings
 fun main() {
     // unit tests //
     // pose
@@ -77,7 +78,7 @@ fun main() {
     val otherTest = Pose2d(1.0, 1.0, 45.degrees.w)
     println(otherTest.polar(origin))  // should be √2/2 radians, √2 meters, 180º - correct
 
-    // velocity
+    // angularVelocity
     println("\nvel test")
     val exampleMoveLoc = PolarPose(1.meters, 0.degrees, 0.degrees)
     val polarVel = PolarVelocity(-1.metersPerSecond, 2.radiansPerSecond, 10.radiansPerSecond)
@@ -92,29 +93,29 @@ fun main() {
     s.loop()
     println("pos")
     for(i in 0 until testAmount) {
-        val t = Translation2d(1.0, 2.0)
+        val blanks = Translation2d(1.0, 2.0)
     }
     println(s.loop())
     for(i in 0 until testAmount) {
-        val t = Translation2d(1.0, 2.0).polar(origin)  // x7 time
+        val blanks = Translation2d(1.0, 2.0).polar(origin)  // x7 time
     }
     println(s.loop())
     println("pose")
     for(i in 0 until testAmount) {
-        val t = Pose2d(1.0, 2.0, Rotation2d(2.0))
+        val blanks = Pose2d(1.0, 2.0, Rotation2d(2.0))
     }
     println(s.loop())
     for(i in 0 until testAmount) {
-        val t = Pose2d(1.0, 2.0, Rotation2d(2.0)).polar(origin)  // x7 time
+        val blanks = Pose2d(1.0, 2.0, Rotation2d(2.0)).polar(origin)  // x7 time
     }
     println(s.loop())
     println("vel")
     for(i in 0 until testAmount) {
-        val t = ChassisSpeeds(1.0, 1.0, 1.0)
+        val blanks = ChassisSpeeds(1.0, 1.0, 1.0)
     }
     println(s.loop())
     for(i in 0 until testAmount) {
-        val t = ChassisSpeeds(1.0, 1.0, 1.0).polar(PolarPose(1.meters, 2.radians, 2.radians))  // x7 time
+        val blanks = ChassisSpeeds(1.0, 1.0, 1.0).polar(PolarPose(1.meters, 2.radians, 2.radians))  // x7 time
     }
     println(s.loop())
 }

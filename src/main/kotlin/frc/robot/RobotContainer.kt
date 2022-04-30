@@ -113,21 +113,21 @@ object RobotContainer {
         val climbColor = Color(255, 155, 0)
         val upClimb = AnimationRain(climbColor, 10, .1.seconds, false) { Climber.activeVoltage < -kEpsilon }
         val downClimb = AnimationRain(climbColor, 10, .1.seconds, true) { Climber.activeVoltage > kEpsilon }
-        val extension =
-            AnimationCustom(
-                { t, l -> List<Color>(l) { index -> if (index / l.toDouble() < Climber.extension / 24.inches) climbColor else Color.BLACK } },
-                { Climber.armsLifted },
-                false
-            )
+//        val extension =
+//            AnimationCustom(
+//                { t, l -> List<Color>(l) { index -> if (index / l.toDouble() < Climber.extension / 24.inches) climbColor else Color.BLACK } },
+//                { Climber.armsLifted },
+//                false
+//            )
         val prepare = AnimationRain(climbColor, 3, 1.seconds) { Climber.currentCommand == PrepareClimb }
         val postMatch = AnimationPulse(allianceColor, 2.seconds) { Game.disabled && Game.COMPETITION && startTime != 0.seconds }
 
         // other random animations
-        val leftTurn = AnimationBlink(Color.YELLOW, .5.seconds) { Drivetrain.chassisSpeeds.omegaRadiansPerSecond > 0.1 }
-        val rightTurn = AnimationBlink(Color.YELLOW, .5.seconds) { Drivetrain.chassisSpeeds.omegaRadiansPerSecond < -0.1 }
+//        val leftTurn = AnimationBlink(Color.YELLOW, .5.seconds) { Drivetrain.chassisSpeeds.omegaRadiansPerSecond > 0.1 }
+//        val rightTurn = AnimationBlink(Color.YELLOW, .5.seconds) { Drivetrain.chassisSpeeds.omegaRadiansPerSecond < -0.1 }
 
         val maxSpeed = 12.feetPerSecond
-        val leftSpeed = AnimationCustom({ t, l ->
+        val leftSpeed = AnimationCustom({ _, l ->
             List<Color>(l) { index ->
                 val percentDis = (index / l.toDouble())
                 val percentSpeed = (Drivetrain.wheelSpeeds.leftMetersPerSecond / maxSpeed.value)
@@ -136,7 +136,7 @@ object RobotContainer {
                 } else Color.BLACK
             }
         }, { Game.enabled })
-        val rightSpeed = AnimationCustom({ t, l ->
+        val rightSpeed = AnimationCustom({ _, l ->
             List<Color>(l) { index ->
                 val percentDis = (index / l.toDouble())
                 val percentSpeed = (Drivetrain.wheelSpeeds.rightMetersPerSecond / maxSpeed.value)

@@ -45,7 +45,7 @@ class DrivePoseEstimator(
     }
 
     /**
-     * Resets the robot's position on the field.
+     * Resets the robot's angle on the field.
      *
      *
      * You NEED to reset your encoders (to zero) when calling this method.
@@ -54,7 +54,7 @@ class DrivePoseEstimator(
      * The gyroscope angle does not need to be reset in the user's robot code. The library
      * automatically takes care of offsetting the gyro angle.
      *
-     * @param poseMeters The position on the field that your robot is at.
+     * @param poseMeters The angle on the field that your robot is at.
      * @param gyroAngle The angle reported by the gyroscope.
      */
     fun resetPosition(poseMeters: Pose2d, gyroAngle: Rotation2d) {
