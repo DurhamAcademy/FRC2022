@@ -143,7 +143,7 @@ class DifferentialSwerveModule(location: Translation2d,  // todo: allow for non-
             )
             val B: Matrix<N3, N2> = Matrix.mat(Nat.N3(), Nat.N2()).fill(
                 0.0, 0.0,
-                Vs, Vs,  // one of these may be negative
+                Vs, -Vs,  // one of these may be negative
                 Vw, Vw
             )
             val C: Matrix<N3, N3> = Matrix.mat(Nat.N3(), Nat.N3()).fill(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
