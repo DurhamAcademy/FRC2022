@@ -1,11 +1,8 @@
 package frc.robot
 
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.Navigator
-import frc.kyberlib.auto.trajectory.TrajectoryManager
 import frc.kyberlib.input.controller.KXboxController
-import frc.kyberlib.sensors.gyros.KNavX
+import frc.kyberlib.sensors.gyros.KPigeon
 import frc.robot.subsystems.Drivetrain
 
 /**
@@ -13,7 +10,7 @@ import frc.robot.subsystems.Drivetrain
  */
 object RobotContainer {
     // initialize sensors and inputs here
-    val gyro = KNavX()
+    val gyro = KPigeon(0)
     val navigation = Navigator(gyro, Constants.START_POSE)
 
     // controllers

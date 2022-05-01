@@ -1,42 +1,33 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
-import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.wpilibj.Encoder
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.auto.Navigator
 import frc.kyberlib.command.DebugFilter
-import frc.kyberlib.command.Game
-import frc.kyberlib.math.PolarPose
-import frc.kyberlib.math.polar
-import frc.kyberlib.math.units.extensions.*
-import frc.kyberlib.math.units.milli
-import frc.kyberlib.mechanisms.drivetrain.DifferentialDriveTrain
-import frc.kyberlib.mechanisms.drivetrain.dynamics.KDifferentialDriveDynamic
+import frc.kyberlib.math.units.extensions.inches
+import frc.kyberlib.math.units.extensions.metersPerSecond
+import frc.kyberlib.math.units.extensions.radiansPerSecond
+import frc.kyberlib.mechanisms.drivetrain.HolonomicDrivetrain
 import frc.kyberlib.mechanisms.drivetrain.dynamics.KSwerveDynamics
 import frc.kyberlib.mechanisms.drivetrain.swerve.StandardSwerveModule
-import frc.kyberlib.mechanisms.drivetrain.swerve.SwerveDrive
 import frc.kyberlib.motorcontrol.ctre.KTalon
-import frc.kyberlib.motorcontrol.estimateFF
-import frc.kyberlib.motorcontrol.rev.KSparkMax
 import frc.robot.Constants
-import frc.robot.RobotContainer
 import frc.robot.commands.drive.Drive
 
 
 /**
  * Mechanism that controls how the robot drives
  */
-object Drivetrain : SwerveDrive() {
+object Drivetrain : HolonomicDrivetrain() {
     // motors
     override val priority: DebugFilter = DebugFilter.Max
 
     // ff for each part of the drivetrain
     private val driveFF = SimpleMotorFeedforward(Constants.DRIVE_KS, Constants.DRIVE_KV, Constants.DRIVE_KA)
     private val turnFF = SimpleMotorFeedforward(Constants.TURN_KS, Constants.TURN_KV, Constants.TURN_KA)
-    override val maxVelocity: LinearVelocity = 5.metersPerSecond//(12/driveFF.kv - 0.5).metersPerSecond
 
     val turnP = 10.0
     val FLdrive = KTalon(21).apply {
@@ -144,6 +135,11 @@ object Drivetrain : SwerveDrive() {
 
     fun robotDrive(chassisSpeeds: ChassisSpeeds) = dynamics.driveRobotRelative(chassisSpeeds)
 
+    override fun periodic() {
+        super.periodic()
+
+        SmartDashboard.putString("chassis", chassisSpeeds.toString())
+    }
 
     // setup motors
     init {

@@ -30,13 +30,13 @@ object Drive : CommandBase() {
         // todo: filter inputs for smoother drive
 //        val fwd = velFilter.calculate(RobotContainer.controlScheme.DRIVE_FORWARD).feetPerSecond
 //        val turn = rotFilter.calculate(RobotContainer.controlScheme.DRIVE_TURN).radiansPerSecond
-        val fwd = RobotContainer.controller.rightY.value.feetPerSecond
-        val strafe = RobotContainer.controller.rightX.value.feetPerSecond
+        val fwd = RobotContainer.controller.rightY.value.metersPerSecond
+        val strafe = RobotContainer.controller.rightX.value.metersPerSecond
         val turn = RobotContainer.controller.leftX.value.radiansPerSecond
         val speeds = ChassisSpeeds(fwd.metersPerSecond, strafe.metersPerSecond, turn.radiansPerSecond)
         Debug.log("Default Drive", "fwd: $fwd, turn: $turn", level = DebugFilter.Low)
-//        Drivetrain.drive(speeds)
-        Drivetrain.robotDrive(speeds)
+        Drivetrain.drive(speeds, true)
+//        Drivetrain.robotDrive(speeds)
     }
 
     override fun end(interrupted: Boolean) {

@@ -6,6 +6,7 @@ import frc.kyberlib.math.units.extensions.Angle
 import frc.kyberlib.math.units.extensions.AngularVelocity
 import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.degreesPerSecond
+import frc.kyberlib.math.units.string
 
 class KPigeon(port: Int) : KGyro() {
     val internal = if (Game.real) PigeonIMU(port) else null
@@ -32,7 +33,7 @@ class KPigeon(port: Int) : KGyro() {
     /**
      * Turn angle
      */
-    override val yaw get() = heading
+    override val yaw get() = if(real) internal!!.fusedHeading.degrees else sim
 
     /**
      * How far on the side the robot is
@@ -43,7 +44,10 @@ class KPigeon(port: Int) : KGyro() {
     override val yawRate: AngularVelocity get() = fullRate[1].degreesPerSecond
     override val rollRate: AngularVelocity get() = fullRate[2].degreesPerSecond
 
+    private var sim = 0.degrees
     override fun reset(angle: Angle) {
+//        println("reset to ${angle.string()}")
+        sim = angle
         internal?.fusedHeading = angle.degrees
     }
 }

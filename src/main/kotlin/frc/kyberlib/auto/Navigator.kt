@@ -15,6 +15,7 @@ import frc.kyberlib.command.Debug
 import frc.kyberlib.command.Game
 import frc.kyberlib.command.KRobot
 import frc.kyberlib.math.units.extensions.*
+import frc.kyberlib.math.units.string
 import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.mechanisms.drivetrain.dynamics.KDifferentialDriveDynamic
 import frc.kyberlib.mechanisms.drivetrain.dynamics.KDriveDynamics
@@ -116,8 +117,9 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
     }
 
     private fun simUpdate(spin: AngularVelocity=0.radiansPerSecond) {
-        gyro.reset(spin * KRobot.period.seconds)
+//        println("Spin: ${spin.string()}")
         if(Game.sim) {
+            gyro.reset(gyro.heading + spin * KRobot.period.seconds)
             KField2d.robotPose = pose
         }
     }
