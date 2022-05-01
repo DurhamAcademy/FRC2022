@@ -40,7 +40,7 @@ object Drivetrain : HolonomicDrivetrain() {
         brakeMode = true
         gearRatio = Constants.DRIVE_GEAR_RATIO
         motorType = DCMotor.getFalcon500(1)
-        addFeedforward(driveFF)  // todo
+        addFeedforward(driveFF)
     }
     val FLturn = KTalon(22).apply {
         motorType = DCMotor.getFalcon500(1)
@@ -56,7 +56,6 @@ object Drivetrain : HolonomicDrivetrain() {
     val FRturn = KTalon(32).apply {
         copyConfig(FLturn)
         addFeedforward(turnFF)
-        kP = turnP
     }
     val BLdrive = KTalon(41).apply {
         copyConfig(FLdrive)
@@ -65,7 +64,6 @@ object Drivetrain : HolonomicDrivetrain() {
     val BLturn = KTalon(42).apply {
         copyConfig(FLturn)
         addFeedforward(turnFF)
-        kP = turnP
     }
     val BRdrive = KTalon(51).apply {
         copyConfig(FLdrive)
@@ -74,13 +72,12 @@ object Drivetrain : HolonomicDrivetrain() {
     val BRturn = KTalon(52).apply {
         copyConfig(FLturn)
         addFeedforward(turnFF)
-        kP = turnP
     }
 
     // todo - check positions
     val model = DifferentialSwerveModule.model(DCMotor.getFalcon500(2), 0.00058, Constants.ROBOT_WEIGHT/4 * 2.inches.meters.pow(2), 1.0, 1.0)
     val gs = .1
-    val gw = 1.0
+    val gw = .1
     val otherModel = DifferentialSwerveModule.model(
         SimpleMotorFeedforward(0.0, 3.0, 0.2),
         SimpleMotorFeedforward(0.0, 3.0, 0.2), gs, gw)

@@ -12,7 +12,7 @@ typealias Angle = KUnit<Radian>
 val Angle.rotations inline get() = value / AngleConversions.rotationsToRadians
 val Angle.degrees inline get() = value / AngleConversions.degreesToRadians
 val Angle.radians inline get() = value
-val Angle.normalized inline get() = MathUtil.inputModulus(value, -PI, PI).radians
+val Angle.normalized inline get() = MathUtil.angleModulus(value).radians
 
 val Angle.w inline get() = Rotation2d(value)
 
