@@ -197,6 +197,9 @@
           "open": true
         }
       },
+      "Field": {
+        "open": true
+      },
       "Intaker": {
         "intake": {
           "open": true

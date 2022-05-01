@@ -10,7 +10,7 @@ val PATHWEAVER_PATH: Path = Filesystem.getDeployDirectory().toPath().resolve("Pa
 
 val FIELD_SIZE = Translation2d(648.inches, 324.inches)   // for KField  // fixme
 val TRACK_WIDTH = 1.meters  // for diff drive stuff
-val MAX_WHEEL_SPEEDS = 5.metersPerSecond
+val MAX_WHEEL_SPEEDS = 500.metersPerSecond
 
 val autoTime = 15.seconds
 val matchTime = 0.seconds // fixme
