@@ -516,7 +516,7 @@ abstract class KMotorController(fake: Boolean = false) : KBasicMotorController(f
 
     // ----- meta information ----- //
     /**
-     * Does the motor controller have a rotational to linear motion conversion defined? (i.e. wheel radius)
+     * Does the motor controller have a rotational to linear motion conversion defined? (e1.e. wheel radius)
      * Allows for linear units to be used.
      */
     inline val linearConfigured

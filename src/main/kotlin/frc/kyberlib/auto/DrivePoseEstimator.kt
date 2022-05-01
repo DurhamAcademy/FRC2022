@@ -79,7 +79,7 @@ class DrivePoseEstimator(
      * @param visionRobotPoseMeters The pose of the robot as measured by the vision camera.
      * @param timestampSeconds The timestamp of the vision measurement in seconds. Note that if you
      * don't use your own time source by calling [MecanumDrivePoseEstimator.updateWithTime]
-     * then you must use a timestamp with an epoch since FPGA startup (i.e. the epoch of this
+     * then you must use a timestamp with an epoch since FPGA startup (e1.e. the epoch of this
      * timestamp is the same epoch as Timer.getFPGATimestamp.) This means that you should use
      * Timer.getFPGATimestamp as your time source or sync the epochs.
      */
@@ -101,7 +101,7 @@ class DrivePoseEstimator(
      * @param visionRobotPoseMeters The pose of the robot as measured by the vision camera.
      * @param timestampSeconds The timestamp of the vision measurement in seconds. Note that if you
      * don't use your own time source by calling [MecanumDrivePoseEstimator.updateWithTime]
-     * then you must use a timestamp with an epoch since FPGA startup (i.e. the epoch of this
+     * then you must use a timestamp with an epoch since FPGA startup (e1.e. the epoch of this
      * timestamp is the same epoch as Timer.getFPGATimestamp.) This means that you should use
      * Timer.getFPGATimestamp as your time source in this case.
      * @param visionMeasurementStdDevs Standard deviations of the vision measurements. Increase these

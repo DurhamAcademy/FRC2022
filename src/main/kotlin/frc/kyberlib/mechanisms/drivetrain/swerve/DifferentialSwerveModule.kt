@@ -14,6 +14,7 @@ import edu.wpi.first.math.numbers.N3
 import edu.wpi.first.math.system.LinearSystem
 import edu.wpi.first.math.system.LinearSystemLoop
 import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.math.system.plant.LinearSystemId
 import edu.wpi.first.wpilibj.simulation.LinearSystemSim
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.math.units.extensions.*
@@ -30,56 +31,17 @@ typealias DifferentialModel = LinearSystem<N3, N2, N3>
  * link: https://www.chiefdelphi.com/t/paper-a-state-space-model-for-a-differential-swerve/396496
  * @author Dennis Slobodzian - original (10/11/20) & TateStaples - Kotlin/Kyberlib (4/29/22)
  */
-class DifferentialSwerveModule(location: Translation2d,
+class DifferentialSwerveModule(location: Translation2d,  // todo: allow for non-statespace control option
                                val topMotor: KMotorController, val bottomMotor: KMotorController,
                                val moduleGearing: GearRatio, val moduleToWheel: GearRatio, val wheelRadius: Length,
-                               private val model: DifferentialModel): SwerveModule(location), Simulatable {
-
-    /**
-     * FF based constructor
-     * @param location the angle of the module relative to the center of rotation
-     * @param topMotor the motor controlling the top gear of the differential
-     * @param bottomMotor the motor controlling the bottom gear of the differential
-     * @param moduleGearing the gear ratio between the differential gears and the module output
-     * @param moduleToWheel any additional gear ratio between the module and the spinning of the wheel
-     * @param wheelRadius the radius of your wheel
-     * @throws MotorUnconfigure if you have not set the motorType before use
-     *
-     * @param moduleFF the ff value of rotating the module
-     * @param linearFF the ff values on driving the module forward
-     */
-    constructor(location: Translation2d, topMotor: KMotorController, bottomMotor: KMotorController, moduleGearing: GearRatio, moduleToWheel: GearRatio, wheelRadius: Length,
-                moduleFF: SimpleMotorFeedforward, linearFF: SimpleMotorFeedforward
-                ) : this(location, topMotor, bottomMotor, moduleGearing, moduleToWheel, wheelRadius, model(moduleFF, linearFF, moduleGearing, moduleGearing * moduleToWheel))
-
-    /**
-     * FF based constructor
-     * @param location the angle of the module relative to the center of rotation
-     * @param topMotor the motor controlling the top gear of the differential
-     * @param bottomMotor the motor controlling the bottom gear of the differential
-     * @param moduleGearing the gear ratio between the differential gears and the module output
-     * @param moduleToWheel any additional gear ratio between the module and the spinning of the wheel
-     * @param wheelRadius the radius of your wheel
-     * @throws MotorUnconfigure if you have not set the motorType before use
-     *
-     * @param systemMotors DCMotor represent both of the motors. Important for physics calcs
-     * @param Js moment of inertia of the module
-     * @param Jw moment of inertia of the wheel // todo: check how this relates to mass (check drivetrain id)
-     */
-    constructor(location: Translation2d, topMotor: KMotorController, bottomMotor: KMotorController, moduleGearing: GearRatio, moduleToWheel: GearRatio, wheelRadius: Length,
-                systemMotors: DCMotor, Js: Double, Jw: Double
-                ) : this(location, topMotor, bottomMotor, moduleGearing, moduleToWheel, wheelRadius, model(systemMotors, Js, Jw, moduleGearing, moduleGearing * moduleToWheel))
+                               model: DifferentialModel): SwerveModule(location), Simulatable {
     private val FEED_FORWARD = 12.0 / (topMotor.motorType!!.freeSpeedRadPerSec / (topMotor.gearRatio * moduleGearing * moduleToWheel))
 
     // Creates a Kalman Filter as our Observer for our module. Works since system is linear.
     private val observer: KalmanFilter<N3, N2, N3> = KalmanFilter(
         Nat.N3(), Nat.N3(), model,
-        Matrix.mat(Nat.N3(), Nat.N1()).fill(
-                .1,
-                5.0,
-                5.0
-            ),
-        Matrix.mat(Nat.N3(), Nat.N1()).fill(
+        Matrix.mat(Nat.N3(), Nat.N1()).fill(.1, 5.0, 5.0), // model standard errors
+        Matrix.mat(Nat.N3(), Nat.N1()).fill(// measurement standard errors
                 .01 / (topMotor.gearRatio * moduleGearing),
                 .1 / (topMotor.gearRatio * moduleGearing),
                 .1 / (topMotor.gearRatio * moduleGearing * moduleToWheel),
@@ -88,24 +50,14 @@ class DifferentialSwerveModule(location: Translation2d,
     )
     // Creates an LQR controller for our Swerve Module.
     private val optimizer = LinearQuadraticRegulator(
-        model,  // Q Vector/Matrix Maximum error tolerance
-        VecBuilder.fill(
-            0.08,
-            1.1,
-            5.0
-        ),  // R Vector/Matrix Maximum control effort.
-        VecBuilder.fill(12.0,12.0),
+        model,
+        VecBuilder.fill(0.08, 1.1, 5.0), // Q Vector/Matrix Maximum error tolerance
+        VecBuilder.fill(12.0,12.0),  // R Vector/Matrix Maximum control effort.
         0.02
     )
 
     // Creates a LinearSystemLoop that contains the Model, Controller, Observer, Max Volts, Update Rate.
-    private val loop = LinearSystemLoop(
-        model,
-        optimizer,
-        observer,
-        12.0,
-        0.02
-    )
+    private val loop = LinearSystemLoop(model, optimizer, observer, 12.0, 0.02)
 
     // periodic loop runs at 5ms.  // todo: implement notifier
     fun update() {
@@ -184,9 +136,16 @@ class DifferentialSwerveModule(location: Translation2d,
             val Cw: Double = -((Gw * motor.KtNMPerAmp) / (motor.KvRadPerSecPerVolt * motor.rOhms * Jw))
             val Vs: Double = 0.5 * ((Gs * motor.KtNMPerAmp) / (motor.rOhms * Js))
             val Vw: Double = 0.5 * ((Gw * motor.KtNMPerAmp) / (motor.rOhms * Jw))
-            val A: Matrix<N3, N3> = Matrix.mat(Nat.N3(), Nat.N3())
-                .fill(0.0, 1.0, 0.0, 0.0, Gs * Cs, 0.0, 0.0, 0.0, Gw * Cw)
-            val B: Matrix<N3, N2> = Matrix.mat(Nat.N3(), Nat.N2()).fill(0.0, 0.0, Vs, Vs, Vw, -Vw)
+            val A: Matrix<N3, N3> = Matrix.mat(Nat.N3(), Nat.N3()).fill(
+                0.0, 1.0, 0.0,
+                0.0, Gs * Cs, 0.0,
+                0.0, 0.0, Gw * Cw
+            )
+            val B: Matrix<N3, N2> = Matrix.mat(Nat.N3(), Nat.N2()).fill(
+                0.0, 0.0,
+                Vs, Vs,  // one of these may be negative
+                Vw, Vw
+            )
             val C: Matrix<N3, N3> = Matrix.mat(Nat.N3(), Nat.N3()).fill(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
             val D: Matrix<N3, N2> = Matrix.mat(Nat.N3(), Nat.N2())
                 .fill(
@@ -197,8 +156,7 @@ class DifferentialSwerveModule(location: Translation2d,
             return LinearSystem(A, B, C, D)
         }
         fun model(moduleFF: SimpleMotorFeedforward, linearFF: SimpleMotorFeedforward, Gs: Double, Gw: Double): LinearSystem<N3, N2, N3> {
-            //-G * G * motor.KtNMPerAmp / (motor.KvRadPerSecPerVolt * motor.rOhms * jKgMetersSquared)),
-            // -kV / kA
+            //-G * G * motor.KtNMPerAmp / (motor.KvRadPerSecPerVolt * motor.rOhms * jKgMetersSquared)) = -kV / kA
             // todo: check if this will work
             val A: Matrix<N3, N3> = Matrix.mat(Nat.N3(), Nat.N3()).fill(// deriv of state = state x this
                 0.0, 1.0, 0.0,
@@ -223,4 +181,40 @@ class DifferentialSwerveModule(location: Translation2d,
             return LinearSystem(A, B, C, D)
         }
     }
+
+
+    /**
+     * FF based constructor
+     * @param location the angle of the module relative to the center of rotation
+     * @param topMotor the motor controlling the top gear of the differential
+     * @param bottomMotor the motor controlling the bottom gear of the differential
+     * @param moduleGearing the gear ratio between the differential gears and the module output
+     * @param moduleToWheel any additional gear ratio between the module and the spinning of the wheel
+     * @param wheelRadius the radius of your wheel
+     * @throws MotorUnconfigure if you have not set the motorType before use
+     *
+     * @param moduleFF the ff value of rotating the module
+     * @param linearFF the ff values on driving the module forward
+     */
+    constructor(location: Translation2d, topMotor: KMotorController, bottomMotor: KMotorController, moduleGearing: GearRatio, moduleToWheel: GearRatio, wheelRadius: Length,
+                moduleFF: SimpleMotorFeedforward, linearFF: SimpleMotorFeedforward
+    ) : this(location, topMotor, bottomMotor, moduleGearing, moduleToWheel, wheelRadius, model(moduleFF, linearFF, moduleGearing, moduleGearing * moduleToWheel))
+
+    /**
+     * FF based constructor
+     * @param location the angle of the module relative to the center of rotation
+     * @param topMotor the motor controlling the top gear of the differential
+     * @param bottomMotor the motor controlling the bottom gear of the differential
+     * @param moduleGearing the gear ratio between the differential gears and the module output
+     * @param moduleToWheel any additional gear ratio between the module and the spinning of the wheel
+     * @param wheelRadius the radius of your wheel
+     * @throws MotorUnconfigure if you have not set the motorType before use
+     *
+     * @param systemMotors DCMotor represent both of the motors. Important for physics calcs
+     * @param Js moment of inertia of the module
+     * @param Jw moment of inertia of the wheel // todo: check how this relates to mass (check drivetrain id)
+     */
+    constructor(location: Translation2d, topMotor: KMotorController, bottomMotor: KMotorController, moduleGearing: GearRatio, moduleToWheel: GearRatio, wheelRadius: Length,
+                systemMotors: DCMotor, Js: Double, Jw: Double
+    ) : this(location, topMotor, bottomMotor, moduleGearing, moduleToWheel, wheelRadius, model(systemMotors, Js, Jw, moduleGearing, moduleGearing * moduleToWheel))
 }

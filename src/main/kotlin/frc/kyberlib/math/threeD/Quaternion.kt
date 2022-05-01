@@ -92,5 +92,5 @@ data class Quaternion(val w: Double=0.0, val x: Double=0.0, val y: Double=0.0, v
     /**
      * Returns a string representation of this quaternion.
      */
-    override fun toString(): String = "($w + $x i + $y j + $z k)"
+    override fun toString(): String = "($w + $x e1 + $y e2 + $z k)"
 }

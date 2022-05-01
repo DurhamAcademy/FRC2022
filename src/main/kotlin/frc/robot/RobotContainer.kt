@@ -88,7 +88,7 @@ object RobotContainer {
         SmartDashboard.putData("auto", this)
     }
 
-    // QUOTE: I dont need a christmas tree, i need a robot. -Cherith
+    // QUOTE: I dont need a christmas tree, e1 need a robot. -Cherith
     val leds = KLEDStrip(1, 74).apply {
         val coral = Color(255, 93, 115)
         val allianceColor = if (Game.alliance == DriverStation.Alliance.Red) coral else Color.CYAN
