@@ -1,6 +1,7 @@
 package frc.kyberlib.mechanisms.drivetrain.swerve
 
 import com.ctre.phoenix.motorcontrol.*
+import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.Nat
 import edu.wpi.first.math.VecBuilder
@@ -9,18 +10,19 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.estimator.KalmanFilter
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N2
 import edu.wpi.first.math.numbers.N3
 import edu.wpi.first.math.system.LinearSystem
 import edu.wpi.first.math.system.LinearSystemLoop
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.math.system.plant.LinearSystemId
 import edu.wpi.first.wpilibj.simulation.LinearSystemSim
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.GearRatio
 import frc.kyberlib.motorcontrol.KMotorController
 import frc.kyberlib.simulation.Simulatable
+import kotlin.math.PI
 
 
 typealias DifferentialModel = LinearSystem<N3, N2, N3>
@@ -35,23 +37,24 @@ class DifferentialSwerveModule(location: Translation2d,  // todo: allow for non-
                                val topMotor: KMotorController, val bottomMotor: KMotorController,
                                val moduleGearing: GearRatio, val moduleToWheel: GearRatio, val wheelRadius: Length,
                                model: DifferentialModel): SwerveModule(location), Simulatable {
-    private val FEED_FORWARD = 12.0 / (topMotor.motorType!!.freeSpeedRadPerSec / (topMotor.gearRatio * moduleGearing * moduleToWheel))
+    private val FEED_FORWARD = 0.0//12.0 / (topMotor.motorType!!.freeSpeedRadPerSec / (topMotor.gearRatio * moduleGearing * moduleToWheel))
 
     // Creates a Kalman Filter as our Observer for our module. Works since system is linear.
     private val observer: KalmanFilter<N3, N2, N3> = KalmanFilter(
         Nat.N3(), Nat.N3(), model,
         Matrix.mat(Nat.N3(), Nat.N1()).fill(.1, 5.0, 5.0), // model standard errors
-        Matrix.mat(Nat.N3(), Nat.N1()).fill(// measurement standard errors
-                .01 / (topMotor.gearRatio * moduleGearing),
-                .1 / (topMotor.gearRatio * moduleGearing),
-                .1 / (topMotor.gearRatio * moduleGearing * moduleToWheel),
-            ),
+        Matrix.mat(Nat.N3(), Nat.N1()).fill(
+// measurement standard errors
+            .01 / (topMotor.gearRatio * moduleGearing),
+            .1 / (topMotor.gearRatio * moduleGearing),
+            .1 / (topMotor.gearRatio * moduleGearing * moduleToWheel),
+        ),
         0.02
     )
     // Creates an LQR controller for our Swerve Module.
     private val optimizer = LinearQuadraticRegulator(
         model,
-        VecBuilder.fill(0.08, 1.1, 5.0), // Q Vector/Matrix Maximum error tolerance
+        VecBuilder.fill(0.08, 11.1, 5.0), // Q Vector/Matrix Maximum error tolerance
         VecBuilder.fill(12.0,12.0),  // R Vector/Matrix Maximum control effort.
         0.02
     )
@@ -61,60 +64,64 @@ class DifferentialSwerveModule(location: Translation2d,  // todo: allow for non-
 
     // periodic loop runs at 5ms.  // todo: implement notifier
     fun update() {
-        optimizedState = optimizedState
+        optimizedState = stateSetpoint
+    }
+    private fun error(): Matrix<N3?, N1?>? {
+        val angleError: Double = reference[0, 0] - rotation.value
+        val positionError: Double = MathUtil.angleModulus(angleError)
+        val error = reference.minus(loop.xHat)
+        return VecBuilder.fill(positionError, error[1, 0], error[2, 0])
     }
 
     // use custom predict() function for as absolute encoder azimuth angle and the angular angularVelocity of the module need to be continuous.
     private fun predict() {
-        // creates our input of voltage to our motors of u = K(r-x) but need to wrap angle to be continuous
-        // see wrapAngle().
+        // creates our input of voltage to our motors of u = K(r-x) but need to wrap angle to be continuous see wrapAngle().
         val ff = VecBuilder.fill(FEED_FORWARD * reference.get(2, 0), FEED_FORWARD * reference.get(2, 0))
-        val error = loop.nextR - loop.xHat
-        val normalizedError = VecBuilder.fill((error[0, 0].radians - rotation).normalized.value, error[1, 0], error[2, 0])
-        val u = loop.clampInput(loop.controller.k.times(normalizedError).plus(ff))
+        val u = loop.clampInput(loop.controller.k.times(error()).plus(ff))
         loop.observer.predict(u, 0.02)
+//        loop.predict(0.02)
+//        val u = loop.u
         topMotor.voltage = u[0,0]
         bottomMotor.voltage = u[1,0]
     }
 
-    override val rotation: Angle
-        get() = if(real) (topMotor.angle - bottomMotor.angle) / moduleGearing else simRot  // todo: replace with absolute encoder if included
-
-    private val wheelAngularVelocity: AngularVelocity
-        inline get() = (topMotor.angularVelocity + bottomMotor.angularVelocity) / moduleGearing
-    // Meters per sec.
-    override val speed: LinearVelocity
-        get() = if(real) wheelAngularVelocity * wheelRadius else simVel
-
-    private val moduleVelocity: AngularVelocity
-        inline get() = (topMotor.angularVelocity - bottomMotor.angularVelocity) / moduleGearing
+    override val rotation: Angle get() = if(real) (topMotor.angle + bottomMotor.angle) / moduleGearing else simRot  // todo: replace with absolute encoder if included
+    private val wheelAngularVelocity: AngularVelocity inline get() = if(real) (topMotor.angularVelocity - bottomMotor.angularVelocity) / moduleGearing else simVel
+    override val speed: LinearVelocity get() = wheelAngularVelocity * wheelRadius
+    private val moduleVelocity: AngularVelocity get() = if(real) (topMotor.angularVelocity - bottomMotor.angularVelocity) / moduleGearing else simVel
 
     private var reference = VecBuilder.fill(0.0, 0.0, 0.0)
-
     override var optimizedState: SwerveModuleState
         get() = SwerveModuleState(speed.value, rotation.w)
         set(value) {
-            SmartDashboard.putNumber("new state angle", state.angle.radians)
-            VecBuilder.fill(state.angle.radians, loop.getXHat(1), state.speedMetersPerSecond / wheelRadius.meters)
+//            VecBuilder.fill(state.angle.radians, loop.getXHat(1), state.speedMetersPerSecond / wheelRadius.meters)
             // sets the next reference
-            reference = VecBuilder.fill(value.angle.radians, loop.getXHat(1), value.speedMetersPerSecond / wheelRadius.meters)
+            reference = VecBuilder.fill(value.angle.radians, moduleVelocity.value, value.speedMetersPerSecond / wheelRadius.meters)
             loop.nextR = reference
             // updates the kalman filter with new data points.
             loop.correct(VecBuilder.fill(rotation.value, moduleVelocity.value, wheelAngularVelocity.value))
             // predict step of kalman filter.
-            predict();
+            predict()
         }
 
+    fun debug() {
+        SmartDashboard.putNumber("$identifier/rot", rotation.value)
+        SmartDashboard.putNumber("$identifier/spin", moduleVelocity.value)
+        SmartDashboard.putNumber("$identifier/speed", speed.value)
+    }
+
     private val real = topMotor.real
-    private var simVel = 0.metersPerSecond
+    private var simVel = 0.radiansPerSecond
     private var simRot = 0.degrees
+    private var simSpin = 0.radiansPerSecond
     private val simulation = LinearSystemSim(model)
     override fun simUpdate(dt: Time) {
         simulation.setInput(topMotor.voltage, bottomMotor.voltage)
         simulation.update(dt.seconds)
         val o = simulation.output
         simRot = o[0, 0].radians  // angle
-        simVel = o[1, 0].radiansPerSecond * wheelRadius  // angularVelocity
+        simSpin = o[1, 0].radiansPerSecond
+        simVel = o[2, 0].radiansPerSecond  // angularVelocity
     }
 
     // states: module rotation, module rotation rate, wheel angular angularVelocity
@@ -132,10 +139,10 @@ class DifferentialSwerveModule(location: Translation2d,  // todo: allow for non-
          * @return LinearSystem of state space model.
          */
         fun model(motor: DCMotor, Js: Double, Jw: Double, Gs: Double, Gw: Double): LinearSystem<N3, N2, N3> {
-            val Cs: Double = -((Gs * motor.KtNMPerAmp) / (motor.KvRadPerSecPerVolt * motor.rOhms * Js))
-            val Cw: Double = -((Gw * motor.KtNMPerAmp) / (motor.KvRadPerSecPerVolt * motor.rOhms * Jw))
-            val Vs: Double = 0.5 * ((Gs * motor.KtNMPerAmp) / (motor.rOhms * Js))
-            val Vw: Double = 0.5 * ((Gw * motor.KtNMPerAmp) / (motor.rOhms * Jw))
+            val Cs = -((Gs * motor.KtNMPerAmp) / (motor.KvRadPerSecPerVolt * motor.rOhms * Js));
+            val Cw = -((Gw * motor.KtNMPerAmp) / (motor.KvRadPerSecPerVolt * motor.rOhms * Jw));
+            val Vs = 0.5 * ((Gs * motor.KtNMPerAmp) / (motor.rOhms * Js));
+            val Vw = 0.5 * ((Gw * motor.KtNMPerAmp) / (motor.rOhms * Jw));
             val A: Matrix<N3, N3> = Matrix.mat(Nat.N3(), Nat.N3()).fill(
                 0.0, 1.0, 0.0,
                 0.0, Gs * Cs, 0.0,
@@ -143,16 +150,11 @@ class DifferentialSwerveModule(location: Translation2d,  // todo: allow for non-
             )
             val B: Matrix<N3, N2> = Matrix.mat(Nat.N3(), Nat.N2()).fill(
                 0.0, 0.0,
-                Vs, -Vs,  // one of these may be negative
-                Vw, Vw
+                Vs, Vs,
+                Vw, -Vw
             )
-            val C: Matrix<N3, N3> = Matrix.mat(Nat.N3(), Nat.N3()).fill(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
-            val D: Matrix<N3, N2> = Matrix.mat(Nat.N3(), Nat.N2())
-                .fill(
-                    0.0, 0.0,
-                    0.0, 0.0,
-                    0.0, 0.0
-                )
+            val C: Matrix<N3, N3> = Matrix.mat(Nat.N3(), Nat.N3()).fill(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)  // identity matrix
+            val D: Matrix<N3, N2> = Matrix.mat(Nat.N3(), Nat.N2()).fill(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
             return LinearSystem(A, B, C, D)
         }
         fun model(moduleFF: SimpleMotorFeedforward, linearFF: SimpleMotorFeedforward, Gs: Double, Gw: Double): LinearSystem<N3, N2, N3> {
@@ -181,7 +183,6 @@ class DifferentialSwerveModule(location: Translation2d,  // todo: allow for non-
             return LinearSystem(A, B, C, D)
         }
     }
-
 
     /**
      * FF based constructor

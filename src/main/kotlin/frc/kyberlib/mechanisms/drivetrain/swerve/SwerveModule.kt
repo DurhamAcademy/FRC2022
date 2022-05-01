@@ -14,7 +14,7 @@ abstract class SwerveModule(val location: Translation2d) : Debug {
     /**
      * The rotation that the wheel is facing
      */
-    abstract val rotation: Angle  // fixme: this needs to be profiled
+    abstract val rotation: Angle
 
     /**
      * The speed that the motor should drive
@@ -28,27 +28,27 @@ abstract class SwerveModule(val location: Translation2d) : Debug {
     var state: SwerveModuleState
         get() = optimizedState
         set(value) {
-            optimizedState = optimize(value)
+            stateSetpoint = optimize(value)
+            optimizedState = stateSetpoint
         }
 
     protected abstract var optimizedState: SwerveModuleState
 
     private fun optimize(state: SwerveModuleState): SwerveModuleState {
         val opt = SwerveModuleState.optimize(state, rotation.w)
-        if(opt.speedMetersPerSecond == 0.0) opt.angle = Rotation2d()
+        if(state.speedMetersPerSecond == 0.0) opt.angle = rotation.w
         return opt
     }
 
     /**
      * The state that the module is going for
      */
-    var stateSetpoint: SwerveModuleState = brakeState
+    var stateSetpoint: SwerveModuleState = SwerveModuleState()
         protected set
 
     /**
      * Gets the state that the module should go to in order to lock the robot in place.
      * (Normal to the line between location and center of rotation)
      */
-    inline val brakeState: SwerveModuleState
-        get() = SwerveModuleState(0.0, Rotation2d(location.x, location.y).rotateBy(90.degrees.w))
+    val brakeState: SwerveModuleState = SwerveModuleState(0.0, Rotation2d(location.x, location.y).rotateBy(90.degrees.w))
 }

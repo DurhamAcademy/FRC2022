@@ -99,6 +99,13 @@
           "weight": 0.0
         },
         "units": "inches",
+        "wheel": {
+          "arrowSize": 100,
+          "arrowWeight": 3.0,
+          "length": 0.07620000094175339,
+          "weight": 0.0,
+          "width": 0.07620000094175339
+        },
         "window": {
           "visible": true
         }
@@ -163,6 +170,9 @@
         "Left Winch": {
           "open": true
         }
+      },
+      "DifferentialSwerveModule": {
+        "open": true
       },
       "Drivetrain": {
         "dynamics": {
@@ -291,24 +301,6 @@
           "series": [
             {
               "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/speed"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/angle"
-            },
-            {
-              "color": [
                 0.3333333432674408,
                 0.658823549747467,
                 0.4078431725502014,
@@ -324,6 +316,33 @@
                 1.0
               ],
               "id": "NT:/SmartDashboard/set angle"
+            },
+            {
+              "color": [
+                0.863677978515625,
+                0.970588207244873,
+                0.06185119226574898,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/DifferentialSwerveModule/rot"
+            },
+            {
+              "color": [
+                0.14451172947883606,
+                0.2393903136253357,
+                0.9509803652763367,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/DifferentialSwerveModule/speed"
+            },
+            {
+              "color": [
+                0.5058823823928833,
+                0.44705885648727417,
+                0.7019608020782471,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/DifferentialSwerveModule/spin"
             }
           ]
         }

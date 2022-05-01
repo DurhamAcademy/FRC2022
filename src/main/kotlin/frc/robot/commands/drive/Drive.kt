@@ -2,6 +2,7 @@ package frc.robot.commands.drive
 
 import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.kyberlib.command.Debug
 import frc.kyberlib.command.DebugFilter
@@ -34,7 +35,7 @@ object Drive : CommandBase() {
         val strafe = RobotContainer.controller.rightX.value.metersPerSecond
         val turn = RobotContainer.controller.leftX.value.radiansPerSecond
         val speeds = ChassisSpeeds(fwd.metersPerSecond, strafe.metersPerSecond, turn.radiansPerSecond)
-        Debug.log("Default Drive", "fwd: $fwd, turn: $turn", level = DebugFilter.Low)
+        SmartDashboard.putString("target sped", speeds.toString())
         Drivetrain.drive(speeds, true)
 //        Drivetrain.robotDrive(speeds)
     }
