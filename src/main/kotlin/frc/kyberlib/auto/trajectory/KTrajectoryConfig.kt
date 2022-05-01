@@ -50,23 +50,11 @@ class KTrajectoryConfig(maxVelocity: LinearVelocity, maxAcceleration: LinearVelo
             return KTrajectoryConfig(data.maxVelocity.metersPerSecond, data.maxAcceleration.metersPerSecond, listOf(), data.initialVelocity.metersPerSecond, data.finalVelocity.metersPerSecond, data.reversed)
         }
     }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "max Vel" to data.maxVelocity.metersPerSecond,
-            "max Acc" to data.maxAcceleration.metersPerSecond,
-            "constraints" to constraints,
-            "init vel" to data.initialVelocity.metersPerSecond,
-            "final vel" to data.finalVelocity.metersPerSecond,
-            "reversed" to data.reversed
-        )
-    }
 }
 
 /**
  * Internal Config Data that allows for Serialization (writing to JSON)
  */
-@Serializable
 internal data class TrajectoryConfigData(val maxVelocity: Double, val maxAcceleration: Double,
                                          val initialVelocity: Double, val finalVelocity: Double,
                                          val reversed: Boolean)

@@ -2,52 +2,50 @@ package frc.kyberlib.command
 
 import edu.wpi.first.wpilibj.*
 import frc.kyberlib.math.units.extensions.seconds
-import frc.kyberlib.math.units.micro
 
 object Game {
     val real = RobotBase.isReal()
     val sim = RobotBase.isSimulation()
 
-    val enabled
-        inline get() = RobotState.isEnabled()
-    val disabled
-        inline get() = RobotState.isDisabled()
-    val AUTO
-        inline get() = RobotState.isAutonomous()
-    val OPERATED
-        inline get() = RobotState.isTeleop()
-    val TEST
-        inline get() = RobotState.isTest()
-    val STOPPED
-        inline get() = RobotState.isEStopped()
-    val COMPETITION
-        inline get() = DriverStation.isFMSAttached()
-    val PRACTICE
-        inline get() = DriverStation.getMatchType() == DriverStation.MatchType.Practice
-    val QUALIFICATION
-        inline get() = DriverStation.getMatchType() == DriverStation.MatchType.Qualification
-    val ELIMINATION
-        inline get() = DriverStation.getMatchType() == DriverStation.MatchType.Elimination
+    inline val enabled
+        get() = RobotState.isEnabled()
+    inline val disabled
+        get() = RobotState.isDisabled()
+    inline val AUTO
+        get() = RobotState.isAutonomous()
+    inline val OPERATED
+        get() = RobotState.isTeleop()
+    inline val TEST
+        get() = RobotState.isTest()
+    inline val STOPPED
+        get() = RobotState.isEStopped()
+    inline val COMPETITION
+        get() = DriverStation.isFMSAttached()
+    inline val PRACTICE
+        get() = DriverStation.getMatchType() == DriverStation.MatchType.Practice
+    inline val QUALIFICATION
+        get() = DriverStation.getMatchType() == DriverStation.MatchType.Qualification
+    inline val ELIMINATION
+        get() = DriverStation.getMatchType() == DriverStation.MatchType.Elimination
 
-    val brownedOut
-        inline get() = RobotController.isBrownedOut()
+    inline val brownedOut
+        get() = RobotController.isBrownedOut()
 
-    val CAN
-        inline get() = RobotController.getCANStatus()
-    val batteryVoltage
-        inline get() = RobotController.getBatteryVoltage()
+    inline val CAN
+        get() = RobotController.getCANStatus()
+    inline val batteryVoltage
+        get() = RobotController.getBatteryVoltage()
 
-    val time
-        inline get() = Timer.getFPGATimestamp().seconds
-    val bootTime = time
-    var startTime = bootTime
-    val matchTime
-        inline get() = time - startTime
+    inline val time
+        get() = Timer.getFPGATimestamp().seconds
+    var startTime = time
+    inline val matchTime
+        get() = time - startTime//DriverStation.getMatchTime().seconds
 
     val alliance: DriverStation.Alliance = DriverStation.getAlliance()
 
 //    val matchName
 //        inline get() = DriverStation.getEventName() + DriverStation.getLocation() + DriverStation.getMatchNumber()
 
-    val game: String = DriverStation.getGameSpecificMessage()
+    inline val message: String get() = DriverStation.getGameSpecificMessage()
 }

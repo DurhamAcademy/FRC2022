@@ -24,7 +24,6 @@ object CommandManager : Command, Debug {
      * Also check if the command is done.
      */
     override fun execute() {
-        debugDashboard()
         if (activeCommand == null && queue.isEmpty()) {
             return
         }
@@ -130,14 +129,6 @@ object CommandManager : Command, Debug {
      */
     override fun getRequirements(): MutableSet<Subsystem> {
         return mutableSetOf()  // skuff
-    }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "commandName" to describe(activeCommand),
-            "activeCommand" to activeCommand,
-            "queue" to queue
-        )
     }
 }
 

@@ -27,8 +27,8 @@ object Pathfinder : Debug {
     var pathFound = false  // whether the Planner currently has a working path
         private set
     private var endNode: Node? =
-        null  // the node the represents the end goal [robot position] (think about changing to growing 2 seperate trees)
-    val path: ArrayList<Node>?   // the working path of points to get from robot position to target goal
+        null  // the node the represents the end goal [robot angle] (think about changing to growing 2 seperate trees)
+    val path: ArrayList<Node>?   // the working path of points to get from robot angle to target goal
         get() = endNode?.let { tree.trace(it) }
 
     /** how many nodes to create before giving up finding target */
@@ -87,6 +87,9 @@ object Pathfinder : Debug {
         return KTrajectory("Pathfinder path", startPose2d, smooth, endPose2d)  // test edit
     }
 
+    /**
+     * Convert generated distance tree to trajectory
+     */
     private fun treeToTrajectory(startPose2d: Pose2d, endPosition: Translation2d): KTrajectory {
         if (!pathFound)
             return KTrajectory(
@@ -103,6 +106,9 @@ object Pathfinder : Debug {
         return KTrajectory("Pathfinder path", startPose2d, smooth, Pose2d(endPosition, endRotation))  // test edit
     }
 
+    /**
+     * Smooths the path out removing unnecesary points
+     */
     private fun smoothPath(): ArrayList<Translation2d> {
         val points = path!!.map { it.position }.reversed()
         var improvement = true
@@ -176,7 +182,7 @@ object Pathfinder : Debug {
 
     /**
      * Generates random point in the field
-     * @return a valid position in the field
+     * @return a valid angle in the field
      */
     internal fun randomPoint(): Translation2d {
         var x: Double
@@ -212,17 +218,6 @@ object Pathfinder : Debug {
         tree.vertices.clear()
         path?.clear()
     }
-
-    override fun debugValues(): Map<String, Any?> {
-        val map = mutableMapOf<String, Any?>(
-            "explored nodes" to tree.nodeCount,
-            "path" to path.toString()
-        )
-        if (this::information.isInitialized) {
-            map.putAll(information.debugValues())
-        }
-        return map.toMap()
-    }
 }
 
 
@@ -255,7 +250,7 @@ object PathingTest {
 //        println(_root_ide_package_.frc.kyberlib.auto.pathing.Pathfinder.path!!.size)
         Pathfinder.drawTreePath()
         println(Pathfinder.path)
-//        println(Pathfinder.path!!.map { Pathfinder.field.inField(it.position) })
+//        println(Pathfinder.path!!.map { Pathfinder.field.inField(it.angle) })
 //        println(Pathfinder.field.obstacles)
     }
 }

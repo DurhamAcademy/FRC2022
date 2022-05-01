@@ -7,15 +7,12 @@ import edu.wpi.first.math.estimator.KalmanFilter
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.system.LinearSystem
 import edu.wpi.first.math.system.LinearSystemLoop
-import edu.wpi.first.wpilibj.simulation.FlywheelSim
 import frc.kyberlib.command.Debug
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.KMotorController
-import frc.kyberlib.simulation.Simulatable
 
 /**
- * Pre-made Flywheel Subsystem. Also a demo of StateSpace control from WPILIB. Control using velocity variable.
- * @param motor the controlling motor of the flywheel. If other motors are involves, make them follow this
+ * Pre-made Flywheel Subsystem. Also a demo of StateSpace control from WPILIB. Control using angularVelocity variable.
  */
 class Flywheel(  // todo: allow for gooder constructor
     leadMotor: KMotorController,
@@ -38,7 +35,6 @@ class Flywheel(  // todo: allow for gooder constructor
      * Inputs (what we can "put in"): [voltage], in volts.
      * Outputs (what we can measure): [velocity], in radians per second.
      */
-
     private val observer: KalmanFilter<N1, N1, N1> = KalmanFilter(
         N1.instance, N1.instance,
         plant,
@@ -65,10 +61,17 @@ class Flywheel(  // todo: allow for gooder constructor
     private val loop = LinearSystemLoop(plant, optimizer, observer, 12.0, timeDelay)
 
     var velocity: AngularVelocity
-        get() = motor.velocity
+        get() = motor.angularVelocity
         set(value) {
-            motor.velocity = value
+            motor.angularVelocity = value
         }
 
-    override fun debugValues(): Map<String, Any?> = motor.debugValues()
+    fun update() {
+        motor.updateVoltage()
+    }
+
+    fun stop() {
+        velocity = 0.rpm
+        motor.stop()
+    }
 }

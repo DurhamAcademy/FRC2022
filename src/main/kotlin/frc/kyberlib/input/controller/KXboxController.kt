@@ -20,10 +20,10 @@ class KXboxController(port: Int) : KController(port), Debug {
     val rightX = KAxis { joystick.getRawAxis(4) }
     val rightY = KAxis { joystick.getRawAxis(5) }
 
-    val aButton = KButton(joystick, 1)
-    val bButton = KButton(joystick, 2)
-    val xButton = KButton(joystick, 3)
-    val yButton = KButton(joystick, 4)
+    val a = KButton(joystick, 1)
+    val b = KButton(joystick, 2)
+    val x = KButton(joystick, 3)
+    val y = KButton(joystick, 4)
 
     val leftBumper = KButton(joystick, 5)  // these might be the menu buttons
     val rightBumper = KButton(joystick, 6)
@@ -42,47 +42,6 @@ class KXboxController(port: Int) : KController(port), Debug {
 
     val rightDPad = KButton { DPad in 1..179 }  // 90
     val leftDPad = KButton { DPad > 180 }  // 270
-    val upDPad = KButton { DPad != 0 && (DPad < 90 || DPad > 270) }  // 0
+    val upDPad = KButton { DPad != -1 && (DPad < 90 || DPad > 270) }  // 0
     val downDPad = KButton { DPad in 91..269 }  // 180
-
-    var rumbleLeft = 0.0
-        set(value) {
-            joystick.setRumble(GenericHID.RumbleType.kLeftRumble, value)
-            field = value
-        }
-    var rumbleRight = 0.0
-        set(value) {
-            joystick.setRumble(GenericHID.RumbleType.kRightRumble, value)
-            field = value
-        }
-    var rumble: Double
-        get() = rumbleLeft.coerceAtLeast(rumbleRight)
-        set(value) {
-            rumbleLeft = value
-            rumbleRight = value
-        }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "leftX" to leftX,
-            "leftY" to leftY,
-
-            "rightX" to rightX,
-            "rightY" to rightY,
-
-            "left trigger" to leftTrigger,
-            "right trigger" to rightTrigger,
-
-            "left bumper" to leftBumper.get(),
-            "right bumper" to rightBumper.get(),
-
-            "A" to aButton.get(),
-            "B" to bButton.get(),
-            "X" to xButton.get(),
-            "Y" to yButton.get(),
-
-            "DPAD" to DPad,
-            "rumble" to rumble
-        )
-    }
 }

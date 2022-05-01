@@ -2,8 +2,6 @@ package frc.kyberlib.motorcontrol.rev
 
 import com.revrobotics.*
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
-import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.wpilibj.simulation.EncoderSim
 import frc.kyberlib.math.invertIf
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.*
@@ -12,8 +10,11 @@ import frc.kyberlib.motorcontrol.EncoderType
 
 /**
  * Represents a REV Robotics Spark MAX motor controller. Recommend using .apply to setup move configs
- * [canId] is the controller's ID on the CAN bus
- * [brushType] is the type of motor being driven. WARNING: If set incorrectly this can seriously damage hardware. You've been warned.
+ * @param canId the id for this motor in the CAN bus (green/yellow wires). You can set this in the REV hardware client
+ * @param brushedMotor whether this is a brushed motor. NEO & NEO 550 are brushless. Be careful, getting this wrong can damage the motors
+ * @param type the encoder attached to the motor. NEOs and NEO 550 have NEO_Hall
+ * @param cpr a config about how the ticks on the encoder works
+ * @param fake whether the motor should be simulated. Useful if you want to prevent things from moving without breaking the rest of the code
  */
 class KSparkMax(
     private val canId: Int,
@@ -31,7 +32,7 @@ class KSparkMax(
         if (real) spark.restoreFactoryDefaults()
     }
 
-    private var encoder: RelativeEncoder = when {
+    var encoder: RelativeEncoder = when {
         type == EncoderType.NEO_HALL && !brushedMotor -> {
             spark.encoder
         }
@@ -40,9 +41,9 @@ class KSparkMax(
         }
         else -> throw NotImplementedError("idk how to set your encoder values")
     }
-    private val _pid = spark.pidController
+    val _pid: SparkMaxPIDController = spark.pidController
 
-    override var minPosition: Angle = super.minPosition
+    override var minAngle: Angle = super.minAngle
         set(value) {
             field = value
             if (real) {
@@ -52,7 +53,7 @@ class KSparkMax(
             }
         }
 
-    override var maxPosition: Angle = super.maxPosition
+    override var maxAngle: Angle = super.maxAngle
         set(value) {
             field = value
             if (real) {
@@ -76,8 +77,8 @@ class KSparkMax(
         }
 
     //    private val velCalc = Differentiator()
-    override var rawVelocity: AngularVelocity
-        get() = encoder.velocity.rpm//velCalc.calculate(rawPosition.radians).radiansPerSecond//encoder!!.velocity.rpm
+    override var rawAngularVelocity: AngularVelocity
+        get() = encoder.velocity.rpm//velCalc.calculate(rawAngle.radians).radiansPerSecond//encoder!!.angularVelocity.rpm
         set(value) {
             _pid.setReference(
                 value.rpm,
@@ -88,7 +89,7 @@ class KSparkMax(
             )
         }
 
-    override var rawPosition: Angle
+    override var rawAngle: Angle
         get() = encoder.position.rotations
         set(value) {
             _pid?.setReference(
@@ -100,13 +101,13 @@ class KSparkMax(
             )
         }
 
-    override fun implementNativeControls() {
-        _pid.p = kP * toNative
-        _pid.i = kP * toNative
-        _pid.d = kP * toNative
+    override fun implementNativeControls(slot: Int) {
+        _pid.setP(kP * toNative, slot)
+        _pid.setI(kI * toNative, slot)
+        _pid.setD(kD * toNative, slot)
         _pid.iZone = kIRange * toNative
-        _pid.setSmartMotionMaxAccel(maxAcceleration.rpm * toNative, 0)
-        _pid.setSmartMotionMaxVelocity(maxVelocity.rpm * toNative, 0)
+        _pid.setSmartMotionMaxAccel(maxAcceleration.rpm * toNative, slot)
+        _pid.setSmartMotionMaxVelocity(maxVelocity.rpm * toNative, slot)
     }
 
     override var currentLimit: Int = 100
@@ -115,8 +116,11 @@ class KSparkMax(
             field = value
         }
 
-    val current
+    override var current: Double
         get() = spark.outputCurrent
+        set(value) {
+            _pid.setReference(value, CANSparkMax.ControlType.kCurrent)
+        }
 
     override fun followTarget(kmc: KBasicMotorController) {
 //        velocityRefreshRate = 100.milliseconds
@@ -129,14 +133,14 @@ class KSparkMax(
         }
     }
 
-    override fun resetPosition(position: Angle) {
-        encoder.position = position.rotations
+    override fun resetPosition(angle: Angle) {
+        encoder.position = angle.rotations
     }
 
     /**
      * How quickly the spark send updates on voltage and errors
      */
-    var errorRefreshRate = 10.milliseconds
+    private var errorRefreshRate = 10.milliseconds
         set(value) {
             field = value
             if (real) spark.setPeriodicFramePeriod(
@@ -146,9 +150,9 @@ class KSparkMax(
         }
 
     /**
-     * How quickly the spark send update on velocity and some other stuff
+     * How quickly the spark send update on angularVelocity and some other stuff
      */
-    var velocityRefreshRate = 20.milliseconds
+    private var velocityRefreshRate = 20.milliseconds
         set(value) {
             field = value
             if (real) spark.setPeriodicFramePeriod(
@@ -158,9 +162,9 @@ class KSparkMax(
         }
 
     /**
-     * How quickly the spark sends updates on position
+     * How quickly the spark sends updates on angle
      */
-    var positionRefreshRate = 20.milliseconds
+    private var positionRefreshRate = 20.milliseconds
         set(value) {
             field = value
             if (real) spark.setPeriodicFramePeriod(

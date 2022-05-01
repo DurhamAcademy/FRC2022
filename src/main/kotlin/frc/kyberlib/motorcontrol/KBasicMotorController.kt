@@ -13,18 +13,6 @@ typealias Voltage = Double
  * A basic motor controller. No closed-loop control
  */
 abstract class KBasicMotorController(fake: Boolean = false) : NTSendable, Debug {
-    companion object {
-        val allMotors = mutableListOf<KBasicMotorController>()
-    }
-
-    init {
-        addReferences()
-    }
-
-    private fun addReferences() {
-        allMotors.add(this)
-    }
-
     protected val followPeriodic = 0.1.seconds
     var controlMode = ControlMode.NULL
     // ------ configs ----- //
@@ -100,13 +88,10 @@ abstract class KBasicMotorController(fake: Boolean = false) : NTSendable, Debug 
             field = value.coerceIn(0.0, vbus)
         }
 
-    // unused var that can be overriden by various implementations of KBasicMotor
-    open var currentLimit = 100
-
     /**
      * True if this motor is following another.
      */
-    protected var isFollower = false
+    private var isFollower = false
 
     operator fun plusAssign(kmc: KBasicMotorController) {
         kmc.follow(this)
@@ -147,13 +132,15 @@ abstract class KBasicMotorController(fake: Boolean = false) : NTSendable, Debug 
         builder.addDoubleProperty("Voltage", this::voltage) { if (it != voltage) this.voltage = it }
     }
 
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "Voltage" to voltage
-        )
-    }
-
     override fun toString(): String {
         return "Motor($identifier)"
     }
+}
+
+open class BasicMotorReader(private val motor: KBasicMotorController) {
+    val percent get() = motor.percent
+    val voltage get() = motor.voltage
+    val real get() = motor.real
+    val brakeMode get() = motor.brakeMode
+    val reversed get() = motor.reversed
 }

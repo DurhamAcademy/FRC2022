@@ -17,6 +17,7 @@ import frc.kyberlib.command.KRobot
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.math.units.zeroPose
 import frc.kyberlib.mechanisms.drivetrain.dynamics.KDifferentialDriveDynamic
+import frc.kyberlib.mechanisms.drivetrain.dynamics.KDriveDynamics
 import frc.kyberlib.sensors.gyros.KGyro
 import frc.kyberlib.simulation.field.KField2d
 
@@ -40,9 +41,9 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
      * A probability calculator to guess where the robot is from odometer and vision updates
      */
     private val difPoseEstimator = DifferentialDrivePoseEstimator(gyro.heading.w, startPose,
-        MatBuilder(N5.instance, N1.instance).fill(0.02, 0.02, 0.01, 0.02, 0.02),
-        MatBuilder(N3.instance, N1.instance).fill(0.02, 0.01, 0.01),
-        MatBuilder(N3.instance, N1.instance).fill(0.1, 0.1, 0.01)
+        MatBuilder(N5.instance, N1.instance).fill(0.02, 0.02, 0.01, 0.02, 0.02),  // model std
+        MatBuilder(N3.instance, N1.instance).fill(0.02, 0.01, 0.01),  // measurement std
+        MatBuilder(N3.instance, N1.instance).fill(0.1, 0.1, 0.01)  // vision std
     )
 
     private val holonomicPoseEstimator = DrivePoseEstimator(
@@ -73,25 +74,27 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
 
     // ----- public variables ----- //
     // location
-    val heading: Angle  // what direction the robot is facing
-        inline get() = pose.rotation.k
+    inline val heading: Angle  // what direction the robot is facing
+        get() = pose.rotation.k
     var pose: Pose2d  // the location and direction of the robot
         get() = if(differentialDrive) difPoseEstimator.estimatedPosition else holonomicPoseEstimator.estimatedPosition
-        set(value) {
-            if (!differentialDrive) holonomicPoseEstimator.resetPosition(value, gyro.heading.w)
-            else difPoseEstimator.resetPosition(value, gyro.heading.w)
-
-            if (Game.sim) KField2d.robotPose = value
-        }
-    val position: Translation2d  // the estimated location of the robot
-        inline get() = pose.translation
+        set(value) {if(differentialDrive) difPoseEstimator.resetPosition(value, gyro.heading.w) else holonomicPoseEstimator.resetPosition(value, gyro.heading.w)}
+    inline val position: Translation2d  // the estimated location of the robot
+        get() = pose.translation
 
     /**
-     * Update position based on estimated motion
+     * Update angle based on estimated motion
      */
     fun update(speeds: DifferentialDriveWheelSpeeds, leftPosition: Length, rightPosition: Length) {  // estimate motion
         difPoseEstimator.update(gyro.heading.w, speeds, leftPosition.meters, rightPosition.meters)
         simUpdate(KDifferentialDriveDynamic.toChassisSpeed(speeds, TRACK_WIDTH).omegaRadiansPerSecond.radiansPerSecond)
+    }
+
+    fun update(dynamics: KDriveDynamics) {
+        val chassis = dynamics.chassisSpeeds
+        if(dynamics is KDifferentialDriveDynamic) difPoseEstimator.update(gyro.heading.w, dynamics.wheelSpeeds, dynamics.leftMaster.distance.meters, dynamics.rightMaster.distance.meters)
+        else holonomicPoseEstimator.update(gyro.heading.w, chassis)
+        simUpdate(chassis.omegaRadiansPerSecond.radiansPerSecond)
     }
 
     fun update(speeds: ChassisSpeeds) {
@@ -101,27 +104,21 @@ class Navigator(val gyro: KGyro, startPose: Pose2d = zeroPose) : Debug {
 
 
     /**
-     * Update position based on a different position guess
+     * Update angle based on a different angle guess
      *
      * @param globalPosition the detected pose of the Robot
      * @param time the time of the detection
      */
-    fun update(globalPosition: Pose2d, time: Time) {  // apply global position update
+    fun update(globalPosition: Pose2d, time: Time) {  // apply global angle update
         if(differentialDrive) difPoseEstimator.addVisionMeasurement(globalPosition, time.milliseconds)
         else holonomicPoseEstimator.addVisionMeasurement(globalPosition, time.milliseconds)
         simUpdate()
     }
 
     private fun simUpdate(spin: AngularVelocity=0.radiansPerSecond) {
-        gyro.heading += spin * KRobot.period.seconds
+        gyro.reset(spin * KRobot.period.seconds)
         if(Game.sim) {
             KField2d.robotPose = pose
         }
-    }
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "pose" to pose
-        )
     }
 }

@@ -1,8 +1,6 @@
 # Future
-- chief delphi post *
 - resume
 - github page
-- ask Adair 
 
 # In Sim
 - get chrp files
@@ -12,53 +10,17 @@
 # With robot
 - try Everett's climb idea
 - teach group about how kyberlib works
-  - ask about position vs linearPosition preferences
-- try replacing flywheel colsons
 - better turning in difdrive dynamics
   - skid factor mentioned in 254 code
 
-# Short-term what better
-- operator controls (2 drivers)
-- no hopper
-- less violent intake
-- inertia wheels?
-
-# longer-term what better
-- testing is valuable
-- driver practice is important
-- compact causes issues
-  - have a plan for electronics (not necesarily CAD)
-  - pnuematics take space, use with caution
-  - leave room for mistakes and future innovations
-- fundraising is a priority
-- long-term planning and time estimation
-- chairmans -> outreach
-- look into working with other teams
-  - builds connections
-  - lets us practice with other robots
-  - more fun
-- fail fast and early
-  - build before done
-- name batteries
-- build driverstation
-
-# what good
-- banging shooter
-- working climb
-- LEDs
-- awards!
-- student led team
-- no COTS
-- overcoming hurdles
-
 ## Full Auto
-- goal system (shouldn't be too hard - should update) -> moderate difficulty
-    - limelight
+- goal system -> moderate difficulty
+    - limelight on intake
 - obstacles (can work on this) -> easy, just time intensive
 - ball detection in hopper
     - figure out colors senrsors (talk to bots on wheels) -> with resourses, not that hard
     - pypico + 2 rev color sensors
-- ability to reaccesss if lost for too long -> simple
+- ability to reevaluate if lost for too long -> simple
 - robot avoidance -> hard (try installing photon on picam or something)
 - climb -> unknown, probably not bad but will need empirics
     - should add endgameInit or something (idk)

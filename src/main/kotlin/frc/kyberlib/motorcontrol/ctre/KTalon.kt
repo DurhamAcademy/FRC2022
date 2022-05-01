@@ -7,7 +7,6 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration
 import com.ctre.phoenix.motorcontrol.can.TalonFXPIDSetConfiguration
 import com.ctre.phoenix.music.Orchestra
 import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.command.Game
 import frc.kyberlib.math.units.extensions.*
 import frc.kyberlib.motorcontrol.BrakeMode
@@ -31,7 +30,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             nominalOutputReverse = 0.0
             neutralDeadband = 0.04
 //            voltageCompSaturation = 12.0  // note: check that this could have issues with the way voltage works in KMotorController
-            // position limits
+            // angle limits
             forwardSoftLimitThreshold = 1000.0
             reverseSoftLimitThreshold = 1000.0
             forwardSoftLimitEnable = false
@@ -114,11 +113,11 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
         }
     }
 
-    override fun resetPosition(position: Angle) {
-        talon.selectedSensorPosition = position.rotations * unitsPerRotation
+    override fun resetPosition(angle: Angle) {
+        talon.selectedSensorPosition = angle.rotations * unitsPerRotation
     }
 
-    override var rawPosition: Angle
+    override var rawAngle: Angle
         get() = (talon.selectedSensorPosition / unitsPerRotation.toDouble()).rotations
         set(value) {
             talon.set(
@@ -127,7 +126,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
                 DemandType.ArbitraryFeedForward,
                 arbFFVolts/vbus)
         }
-    override var rawVelocity: AngularVelocity
+    override var rawAngularVelocity: AngularVelocity
         get() = talon.selectedSensorVelocity.falconSpeed
         set(value) {
             talon.set(ControlMode.Velocity, value.falconSpeed, DemandType.ArbitraryFeedForward, arbFFVolts/vbus)
@@ -143,7 +142,7 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             talon.set(ControlMode.PercentOutput, value)
         }
 
-    var current
+    override var current
         get() = talon.supplyCurrent
         set(value) {
             talon.set(ControlMode.Current, value)
@@ -158,14 +157,14 @@ class KTalon(port: Int, model: String = "Talon FX", private val unitsPerRotation
             )
         }
 
-    override fun implementNativeControls()  {
+    override fun implementNativeControls(slot: Int)  {
         val nativeLoopTime = 0.001  // 1 ms  // todo: this could be wrong - only really relevant if trying to do dimensional analysis
         val fullOutput = 1023.0
         val ticksPerRadian = toNative / TAU * unitsPerRotation
-        talon.config_kP(0, kP * ticksPerRadian * fullOutput / 12.0)
-        talon.config_kI(0, kI * ticksPerRadian * fullOutput / 12.0)
-        talon.config_kD(0, kD * ticksPerRadian * fullOutput / 12.0)
-        talon.config_IntegralZone(0, kIRange * toNative)
+        talon.config_kP(slot, kP * ticksPerRadian * fullOutput / 12.0)
+        talon.config_kI(slot, kI * ticksPerRadian * fullOutput / 12.0 * nativeLoopTime)
+        talon.config_kD(slot, kD * ticksPerRadian * fullOutput / 12.0)
+        talon.config_IntegralZone(slot, kIRange * toNative)
         talon.configMotionCruiseVelocity(maxVelocity.falconSpeed)
         talon.configMotionAcceleration(maxAcceleration.falconSpeed)
     }

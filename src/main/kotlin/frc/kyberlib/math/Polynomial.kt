@@ -8,8 +8,7 @@ import kotlin.math.sqrt
  */
 class Polynomial(
     vararg val coeffs: Double,
-    private val variableName: Char = 'x',
-    private val domain: ClosedFloatingPointRange<Double>? = null
+    private val variableName: Char = 'x'
 ) {
 
     companion object {
@@ -66,14 +65,15 @@ class Polynomial(
     /**
      * Solve the polynomial for the given value
      */
-    fun eval(x: Double): Double? {
-        if (domain != null && x !in domain) return null
+    fun eval(x: Double): Double {
         var total = 0.0
         for (i in coeffs.indices) {
             total += coeffs[i] * x.pow(coeffs.size - i - 1)
         }
         return total
     }
+
+    operator fun get(x: Double) = eval(x)
 
     fun r(data: DoubleArray, actualResults: DoubleArray): Double {
         val n = data.size

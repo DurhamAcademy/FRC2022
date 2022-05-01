@@ -13,9 +13,16 @@ class Arm(motor: KMotorController, moi: Double) {
     }
 
     var angle
-        get() = motor.position
+        get() = motor.angle
         set(value) {
-            motor.position = value
+            motor.angle = value
         }
 
+    fun update() {
+        motor.updateVoltage()
+    }
+
+    fun stop() {
+        motor.stop()
+    }
 }

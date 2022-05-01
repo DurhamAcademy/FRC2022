@@ -9,7 +9,7 @@ import frc.kyberlib.math.units.extensions.degrees
 import frc.kyberlib.math.units.extensions.w
 
 /**
- * A custom field object that has a position and linked command
+ * A custom field object that has a angle and linked command
  */
 class Goal(val name: String, val position: Translation2d, private val uponArrival: Command? = null) {  // this is still kinda janky
     private val fieldObject: FieldObject2d
@@ -41,7 +41,7 @@ class Goal(val name: String, val position: Translation2d, private val uponArriva
      */
     val command: Command
         get() {
-//            val pathCommand = AutoDrive(position)
+//            val pathCommand = AutoDrive(angle)
 //            if (uponArrival != null) return pathCommand.andThen(uponArrival).andThen(this::remove, Drivetrain)
 //            return pathCommand.andThen(this::remove, Drivetrain)
             return InstantCommand()

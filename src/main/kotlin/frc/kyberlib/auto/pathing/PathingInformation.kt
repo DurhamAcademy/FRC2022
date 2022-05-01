@@ -36,7 +36,7 @@ internal class PathingInformation(val startPosition: Translation2d, val endPosit
 
     /**
      * Update the information with a new path
-     * @param currentPathLength the shortest distance found to path between the two points
+     * @param bestPathLength the shortest distance found to path between the two points
      */
     fun update(bestPathLength: Double) {
         println("pathLen: $bestPathLength, ($dis)")
@@ -47,7 +47,7 @@ internal class PathingInformation(val startPosition: Translation2d, val endPosit
      * Converts the polar coordinates of the oval into Cartesian
      * @param rho the radius of the polar coordinates
      * @param theta the angle of the polar coordinates
-     * @return a position representing the Cartesian Coordinates in the field
+     * @return a angle representing the Cartesian Coordinates in the field
      */
     fun get(rho: Double, theta: Double): Translation2d {
         assert(pathFound) {"You should not sample from information until pathLength is set"}
@@ -55,17 +55,5 @@ internal class PathingInformation(val startPosition: Translation2d, val endPosit
         val y = sin(theta) * height/2 * rho
         val rotated = Translation2d(x, y).rotateBy(rotation)
         return rotated.plus(center)
-    }
-
-    /**
-     * Print all the values for debugging purposes.
-     * Should not be used during competition
-     */
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "start" to startPosition,
-            "end" to endPosition,
-            "best path" to currentPathLength
-        )
     }
 }

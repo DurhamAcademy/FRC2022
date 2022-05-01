@@ -29,7 +29,7 @@ abstract class KDriveDynamics : Debug {
     }
 
     open fun updateNavigation() {
-        Navigator.instance!!.update(chassisSpeeds)
+        Navigator.instance!!.update(this)
     }
 
     var activeTrajectory: KTrajectory? = null
@@ -52,7 +52,7 @@ abstract class KDriveDynamics : Debug {
     }
     /**
      * Drive to a pose
-     * @param goal the position to drive to
+     * @param goal the angle to drive to
      * @param direct whether to drive straight to goal or do pathplanning for obstacle avoidance
      */
     fun driveTo(goal: Translation2d, direct: Boolean = true) {
@@ -71,8 +71,4 @@ abstract class KDriveDynamics : Debug {
      * remove the active trajectory data
      */
     fun clearTrajectory() {activeTrajectory = null}
-
-    override fun debugValues(): Map<String, Any?> {
-        TODO("Not yet implemented")
-    }
 }

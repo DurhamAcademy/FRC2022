@@ -14,7 +14,6 @@ import org.photonvision.targeting.PhotonTrackedTarget
  * [table] defines the network table the data will be pulled from ("limelight" by default)
  */
 class Limelight(private val table: String = "limelight") {
-
     enum class LedMode(val idx: Int) {
         PIPELINE(0),
         FORCE_OFF(1),

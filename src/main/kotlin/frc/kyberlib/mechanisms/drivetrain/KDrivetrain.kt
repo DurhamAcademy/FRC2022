@@ -20,10 +20,13 @@ import frc.kyberlib.mechanisms.drivetrain.dynamics.KDriveDynamics
 abstract class KDrivetrain : SubsystemBase(), Debug {
     abstract val dynamics: KDriveDynamics
 
-    fun drive(chassisSpeeds: ChassisSpeeds) {
+    open fun drive(chassisSpeeds: ChassisSpeeds) {
         dynamics.drive(chassisSpeeds)
     }
 
+    /**
+     * Drive following a trajectory
+     */
     fun drive(trajectory: KTrajectory) = dynamics.drive(trajectory)
 
     /**
@@ -34,7 +37,7 @@ abstract class KDrivetrain : SubsystemBase(), Debug {
     fun driveTo(goal: Pose2d, direct: Boolean = true) = dynamics.driveTo(goal, direct)
     /**
      * Drive to a pose
-     * @param goal the position to drive to
+     * @param goal the angle to drive to
      * @param direct whether to drive straight to goal or do pathplanning for obstacle avoidance
      */
     fun driveTo(goal: Translation2d, direct: Boolean = true) = dynamics.driveTo(goal, direct)

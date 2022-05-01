@@ -18,6 +18,9 @@ object TrajectoryManager {
         for (file in paths) trajectories[file] = KTrajectory(file, getPath(file))
     }
 
+    /**
+     * Deletes stored trajectories to clear memory
+     */
     fun release() {
         trajectories.clear()
     }
@@ -43,4 +46,5 @@ object TrajectoryManager {
     val paths = TRAJECTORY_PATH.toFile().list()!!.map { it.removeSuffix(".wpilib.json") }
 }
 
+// url for getting roborio storage
 // ftp://roborio-TEAM-frc.local/home/lvuser/deploy/

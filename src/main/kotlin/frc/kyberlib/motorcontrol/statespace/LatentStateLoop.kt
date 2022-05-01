@@ -65,7 +65,7 @@ class LatentStateLoop<States : Num?, Inputs : Num?, Outputs : Num?>(
      * Returns an element of the observer's state estimate x-hat.
      *
      * @param row Row of x-hat.
-     * @return the i-th element of the observer's state estimate x-hat.
+     * @return the e1-th element of the observer's state estimate x-hat.
      */
     fun getXHat(row: Int): Double {
         return observer.getXhat(row)
@@ -94,7 +94,7 @@ class LatentStateLoop<States : Num?, Inputs : Num?, Outputs : Num?>(
      * Returns an element of the controller's next reference r.
      *
      * @param row Row of r.
-     * @return the element i of the controller's next reference r.
+     * @return the element e1 of the controller's next reference r.
      */
     fun getNextR(row: Int): Double {
         return nextR[row, 0]
@@ -130,7 +130,7 @@ class LatentStateLoop<States : Num?, Inputs : Num?, Outputs : Num?>(
      * Returns an element of the controller's calculated control input u.
      *
      * @param row Row of u.
-     * @return the calculated control input u at the row i.
+     * @return the calculated control input u at the row e1.
      */
     fun getU(row: Int): Double {
         return u[row, 0]

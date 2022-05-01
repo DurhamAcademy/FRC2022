@@ -1,6 +1,5 @@
 package frc.kyberlib.math.threeD
 
-import edu.wpi.first.math.MatBuilder
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.numbers.N4
 import frc.kyberlib.math.units.extensions.degrees
@@ -24,21 +23,22 @@ data class Pose3d(val translation3d: Translation3d, val orientation: Rotation3d)
         Rotation3d(poseMatrix.block(3, 3,0, 0))
         )
 
-    fun transform(other: Pose3d): Pose3d {
-        return Pose3d(matrix.times(other.matrix))
-    }
+    operator fun plus(other: Pose3d) = Pose3d(matrix.times(other.matrix))
+    operator fun minus(other: Pose3d) = Pose3d(matrix.times(other.matrix.inv()))
+    operator fun unaryMinus() = Pose3d(matrix.inv())
 
+    fun transform(other: Pose3d): Pose3d = this + other
+    fun relativeTo(other: Pose3d) = this - other
 }
 
 
 fun main() {
     val spot = Translation3d(3.meters, 3.meters, 3.meters)
-    val rot = Rotation3d(0.degrees, 180.degrees, 0.degrees)
     val pose = Pose3d(spot, Rotation3d(90.degrees, 0.degrees, 0.degrees))
     val unitVector = Translation3d(1.meters, 0.meters, 0.meters)
     val rot2 = Rotation3d(45.degrees.w)
     println(unitVector.transform(pose))
     println(unitVector.rotate(rot2))
-//    println(spot + spot)
-//    println(spot.rotate(rot2))
+    println(spot + spot)
+    println(spot.rotate(rot2))
 }

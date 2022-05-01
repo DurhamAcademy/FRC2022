@@ -3,12 +3,17 @@ package frc.kyberlib.lighting
 import edu.wpi.first.wpilibj.AddressableLED
 import edu.wpi.first.wpilibj.AddressableLEDBuffer
 import edu.wpi.first.wpilibj.util.Color8Bit
+import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.kyberlib.command.Game
 
-class KLEDStrip(port: Int, private val length: Int) {
+class KLEDStrip(port: Int, private val length: Int) : SubsystemBase(){
 
     companion object {
         private var singleton: KLEDStrip? = null
+    }
+
+    override fun periodic() {
+        update()
     }
 
     private val addressableLED = AddressableLED(port)

@@ -14,44 +14,41 @@ abstract class SwerveModule(val location: Translation2d) : Debug {
     /**
      * The rotation that the wheel is facing
      */
-    abstract var rotation: Angle
+    abstract val rotation: Angle  // fixme: this needs to be profiled
 
     /**
      * The speed that the motor should drive
      */
-    abstract var speed: LinearVelocity
+    abstract val speed: LinearVelocity
 
     /**
      * Stores the swerveModule state.
      * Optimizes to the nearest angle and normalized speed
      */
     var state: SwerveModuleState
-        get() = SwerveModuleState(speed.metersPerSecond, rotation.w)
+        get() = optimizedState
         set(value) {
-            val optimized = SwerveModuleState.optimize(value, rotation.w)
-            stateSetpoint = optimized
-            speed = optimized.speedMetersPerSecond.metersPerSecond
-            rotation = if(optimized.speedMetersPerSecond == 0.0) rotation
-                        else optimized.angle.k
+            optimizedState = optimize(value)
         }
+
+    protected abstract var optimizedState: SwerveModuleState
+
+    private fun optimize(state: SwerveModuleState): SwerveModuleState {
+        val opt = SwerveModuleState.optimize(state, rotation.w)
+        if(opt.speedMetersPerSecond == 0.0) opt.angle = Rotation2d()
+        return opt
+    }
 
     /**
      * The state that the module is going for
      */
     var stateSetpoint: SwerveModuleState = brakeState
-        private set
+        protected set
 
     /**
      * Gets the state that the module should go to in order to lock the robot in place.
      * (Normal to the line between location and center of rotation)
      */
-    val brakeState: SwerveModuleState
+    inline val brakeState: SwerveModuleState
         get() = SwerveModuleState(0.0, Rotation2d(location.x, location.y).rotateBy(90.degrees.w))
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf(
-            "Rotation (rad)" to rotation.radians,
-            "Speed (m per s)" to speed.metersPerSecond
-        )
-    }
 }

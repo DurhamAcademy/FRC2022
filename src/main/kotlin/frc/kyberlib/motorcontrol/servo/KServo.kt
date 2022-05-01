@@ -10,11 +10,11 @@ import frc.kyberlib.math.units.extensions.radians
 
 
 /**
- * Handles a position servo
+ * Handles a angle servo
  * @param port the id the servo is plugging into the rio
  * @param length the max readable value (angle)
- * @param travelSpeed the estimated velocity that the server goes. Used for position estimatioon
- * @param initialPosition where the servo starts upon enabled. Used for position estimation
+ * @param travelSpeed the estimated angularVelocity that the server goes. Used for angle estimation
+ * @param initialPosition where the servo starts upon enabled. Used for angle estimation
  * @param minMs the minimum milliseconds that the servo reads as valid signal
  * @param maxMs the maximum milliseconds that the servo reads as valid signal
  */
@@ -35,17 +35,17 @@ class KServo(
     }
     override var identifier: String = "Servo$port"
 
-    // rate limiter for estimating current actuator position
+    // rate limiter for estimating current actuator angle
     private val rateLimit = SlewRateLimiter(travelSpeed.value, initialPosition.value)
 
     /**
-     * The position of the motor. In order for estimated to work, this should update frequently
+     * The angle of the motor. In order for estimated to work, this should update frequently
      */
     var position: Angle = initialPosition
         set(value) {
-            // command the servo to new target position
+            // command the servo to new target angle
             servo.position = value.degrees / length
-            // update the position estimate
+            // update the angle estimate
             field = rateLimit.calculate(value.value).radians
             // update backing field
             setpoint = value
@@ -59,16 +59,12 @@ class KServo(
     /**
      * Guess of how far off the servo is from setpoint
      */
-    val error: Angle
+    inline val error: Angle
         get() = position - setpoint
 
     /**
-     * True if the actuator's estimated position has converged on the target position.
+     * True if the actuator's estimated angle has converged on the target angle.
      */
-    val atSetpoint: Boolean
+    inline val atSetpoint: Boolean
         get() = error.absoluteValue.degrees < 2.0
-
-    override fun debugValues(): Map<String, Any?> {
-        return mapOf("position" to position.degrees, "setpoint" to setpoint.degrees)
-    }
 }

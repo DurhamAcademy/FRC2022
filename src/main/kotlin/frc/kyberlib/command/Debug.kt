@@ -2,6 +2,8 @@ package frc.kyberlib.command
 
 import edu.wpi.first.networktables.NTSendable
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard
+import edu.wpi.first.wpilibj.shuffleboard.WidgetType
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.kyberlib.math.units.KUnit
 
@@ -49,33 +51,20 @@ interface Debug {
         }
     }
 
-    /**
-     * Debugs all the values into a group in the SmartDashboard
-     */
-    fun debugDashboard(previousPath: String = "", id: String = identifier) {
+
+    fun send(label: String, number: Double) {
         if (!debugging || loggingLevel > priority) return
-        val map = debugValues()
-        sendMapToDashboard(map, "$previousPath/$id")
+        SmartDashboard.putNumber(label, number)
     }
 
-    /**
-     * Takes a map of values and then puts it into the SmartDashboard in the ideal format
-     * @param map the set of info to put in the Dashboard. Formatted as a string (id of data), datum
-     * @param rootPath the path (seperated by '/') to navigate in Glass. Allows for nested folders
-     */
-    private fun sendMapToDashboard(map: Map<String, Any?>, rootPath: String) {
-        for (info in map) {
-            val path = "$rootPath/${info.key}"
-            when (info.value) {  // send each datum as their own type
-                is Boolean -> SmartDashboard.putBoolean(path, info.value as Boolean)
-                is Double -> SmartDashboard.putNumber(path, info.value as Double)
-                is Debug -> sendMapToDashboard((info.value as Debug).debugValues(), path)
-                is Map<*, *> -> sendMapToDashboard(info.value as Map<String, Any?>, path)
-                is NTSendable -> SmartDashboard.putData(path, info.value as NTSendable)
-                is KUnit<*> -> SmartDashboard.putNumber(path, (info.value as KUnit<*>).value)
-                else -> SmartDashboard.putString(path, info.value.toString())
-            }
-        }
+    fun send(label: String, boolean: Boolean) {
+        if (!debugging || loggingLevel > priority) return
+        SmartDashboard.putBoolean(label, boolean)
+    }
+
+    fun send(label: String, message: String) {
+        if (!debugging || loggingLevel > priority) return
+        SmartDashboard.putString(label, message)
     }
 
 
@@ -85,26 +74,10 @@ interface Debug {
      * @param logMode the way the message should appear
      * @see LogMode
      */
-    fun log(message: String = debugString, logMode: LogMode = LogMode.PRINT, level: DebugFilter = priority) {
+    fun log(message: String, logMode: LogMode = LogMode.PRINT, level: DebugFilter = priority) {
         val isError = logMode == LogMode.ERROR
         Companion.log(identifier, message, logMode, level, stacktrace = isError)
     }
-
-    /**
-     * Formatting the debug values into an easy to read string
-     */
-    val debugString: String
-        get() {
-            val map = debugValues()
-            val stringBuilder = StringBuilder()
-            stringBuilder.append("$identifier - ")
-            for (info in map) {
-                val string =
-                    if (info.value is Debug) "(${(info.value as Debug).debugString})" else info.value.toString()
-                stringBuilder.append("${info.key}: ${string}, ")
-            }
-            return stringBuilder.toString()
-        }
 
     /**
      * The name of the group of values.
@@ -118,10 +91,4 @@ interface Debug {
      */
     val priority: DebugFilter
         get() = DebugFilter.Normal
-
-    /**
-     * Function that retrieves the values that need to be debugged
-     * @return map of string (name) to value. Numbers, Booleans, and NTSendables are displayed as such
-     */
-    fun debugValues(): Map<String, Any?>  // beware this can be really slow so shouldn't be debugging in comp
 }

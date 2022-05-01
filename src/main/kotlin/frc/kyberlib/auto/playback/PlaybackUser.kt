@@ -7,13 +7,18 @@ import frc.kyberlib.input.KController
 import frc.kyberlib.math.units.extensions.seconds
 import java.io.File
 
+/**
+ * Simulates a previously recorded series of inputs
+ */
 class PlaybackUser(file: File) {
+    // the loaded data
     val length = file.reader().readLines().size
     val times = arrayOfNulls<Double>(length)
     val buttons = arrayOfNulls<BooleanArray>(length)
     val axises = arrayOfNulls<DoubleArray>(length)
 
     init {
+        // reads the files
         var index = 0
         file.forEachLine {
             val parts = it.split(';')
@@ -32,11 +37,18 @@ class PlaybackUser(file: File) {
     }
 
     var startTime = Game.time
+
+    /**
+     * Starts the timer
+     */
     fun start() {
         startTime = Game.time
         KController.sim = true
     }
 
+    /**
+     * Updates the simulated controller with loaded data
+     */
     fun update() {
         val timeIndex = -times.binarySearch(Game.matchTime.seconds) - 1
         if (timeIndex <= 0 || timeIndex == times.size) {
@@ -51,6 +63,7 @@ class PlaybackUser(file: File) {
         }
     }
 
+    // util functions
     private fun parseBoolList(string: String): BooleanArray {
         return (string.removeSurrounding("[", "]")
                 .takeIf(String::isNotEmpty) // this handles the case of "[]"
