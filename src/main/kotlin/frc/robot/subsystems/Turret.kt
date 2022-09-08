@@ -51,7 +51,7 @@ object Turret : SubsystemBase(), Debug {
     private val controller = ProfiledPIDController(40.0, 3.0, 0.0, TrapezoidProfile.Constraints(1.0, 1.0)).apply {
         setIntegratorRange(-2.0, 2.0)
     }  // these constraints are not tested on real
-    private val turret = KSparkMax(11).apply {
+    private val turret = KSparkMax(11, fake=true).apply {
         identifier = "turret"
         gearRatio = Constants.TURRET_GEAR_RATIO
         motorType = DCMotor.getNeo550(1)

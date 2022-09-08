@@ -10,19 +10,19 @@ import kotlin.math.PI
 object RocketLeague : ControlSchema2022() {
     private val xbox = RobotContainer.controller.apply {
         leftX.apply {
-            maxVal = -PI * 3
+            maxVal = -PI * 2
             expo = 73.0
             deadband = 0.1
         }
 
         // throttle
         leftTrigger.apply {
-            maxVal = -12.0//-12.0
+            maxVal = -8.0//-12.0
             expo = 20.0
             deadband = 0.2
         }
         rightTrigger.apply {
-            maxVal = 12.0//12.0
+            maxVal = 8.0//12.0
             expo = 20.0
             deadband = 0.2
         }

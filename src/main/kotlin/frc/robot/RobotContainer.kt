@@ -94,7 +94,7 @@ object RobotContainer {
         val allianceColor = if (Game.alliance == DriverStation.Alliance.Red) coral else Color.CYAN
 
         // idle alliance animations
-        val prematchArms = AnimationRGBFade(7.seconds)//AnimationRGBWave(1.0, .1.seconds)
+        val prematchArms = AnimationRGBWave(1.0, .1.seconds)//AnimationRGBFade(7.seconds)
         val idleArms = AnimationSolid(Color.BLACK) { Game.enabled }
         val idleCylon = AnimationCylon(allianceColor, 5, 1.seconds)
 
@@ -149,17 +149,17 @@ object RobotContainer {
         // left arm
         this += KLEDRegion(
             0, 30,
-            prematchArms, idleArms, leftSpeed, upClimb, downClimb, prepare, postMatch
+            prematchArms//, idleArms, leftSpeed, upClimb, downClimb, prepare, postMatch
         )
         // right arm
         this += KLEDRegion(
             30, 60,
-            prematchArms, idleArms, rightSpeed, upClimb, downClimb, prepare, postMatch
+            prematchArms//, idleArms, rightSpeed, upClimb, downClimb, prepare, postMatch
         )
 //         turret
         this += KLEDRegion(
             60, 74,
-            idleCylon, zero, seek, aiming, turretReady, spinup, shooting, outOfRange
+            idleCylon//, zero, seek, aiming, turretReady, spinup, shooting, outOfRange
         )
     }
 

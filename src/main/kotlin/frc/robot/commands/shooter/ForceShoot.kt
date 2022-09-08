@@ -15,7 +15,7 @@ import frc.robot.subsystems.ShooterStatus
 object ForceShoot : CommandBase() {
     init {
         addRequirements(Shooter, Conveyor)
-        SmartDashboard.putNumber("zoom", 0.8)
+        SmartDashboard.putNumber("zoom", 0.5)
     }
 
     private var reenableCompressor = true
@@ -29,13 +29,14 @@ object ForceShoot : CommandBase() {
     override fun execute() {
         Debug.log("Force Shoot", "execute", level = DebugFilter.Low)
 
-        Shooter.update()
+//        Shooter.update()
+        Shooter.flywheel.percent = SmartDashboard.getNumber("zoom", 0.5)
     }
 
     override fun end(interrupted: Boolean) {
         Shooter.stop()
         Conveyor.stop()
-        KSolenoid.compressor.enableDigital()
+//        KSolenoid.compressor.enableDigital()
     }
 
 }

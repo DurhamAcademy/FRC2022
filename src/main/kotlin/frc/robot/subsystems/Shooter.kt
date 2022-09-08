@@ -35,7 +35,7 @@ object Shooter : SubsystemBase(), Debug {
     private val ff = SimpleMotorFeedforward(0.81436, 0.01918, 0.0045666)  // fixme
 
     // main motor attached to the flywheel
-    private val flywheel = KTalon(32).apply {
+    val flywheel = KTalon(32).apply {
         // configs
         identifier = "flywheel"
         motorType = DCMotor.getFalcon500(2)
@@ -85,9 +85,9 @@ object Shooter : SubsystemBase(), Debug {
     }
 
     private fun hoodUpdate(dis: Length) {  // update the hood angle with a certain distance
-        val hood = Constants.HOODANGLE_INTERPOLATOR.calculate(dis.meters)// hoodPoly.eval(dis.value)
-        inRange = dis < 5.8.meters
-        hoodDistance = hood.millimeters
+//        val hood = Constants.HOODANGLE_INTERPOLATOR.calculate(dis.meters)// hoodPoly.eval(dis.value)
+//        inRange = dis < 5.8.meters
+        hoodDistance = SmartDashboard.getNumber("hood degrees", 100.0).millimeters//hood.millimeters
     }
 
     private fun flywheelUpdate(dis: Length) {  // update flywheel speed to shoot certain distance

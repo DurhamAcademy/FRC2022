@@ -15,7 +15,7 @@ object ShooterCalibration : CommandBase() {
     init {
         addRequirements(Shooter, Conveyor)
         SmartDashboard.putNumber(rpmString, 1500.0)
-        SmartDashboard.putNumber(hoodString, 5.0)
+        SmartDashboard.putNumber(hoodString, 100.0)
     }
 
     private var reenableCompressor = true
